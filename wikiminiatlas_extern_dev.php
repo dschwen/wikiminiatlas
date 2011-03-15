@@ -351,10 +351,11 @@ function wikiminiatlasInstall()
   synopsis_filter = /http:\/\/([a-z-]+)\.wikipedia\.org\/wiki\/(.*)/;
   $('#wikiminiatlas_widget').mouseover( function(e){
     var l,t;
-    if( e.target.href && synopsis_filter.test(e.target.href) )
+    if( e.metaKey && e.target.href && synopsis_filter.test(e.target.href) )
     {
       l = RegExp.$1;
       t = RegExp.$2;
+      $('#synopsistext').show('fast');
       $('#synopsistext').load( '/~dschwen/synopsis?l=' + l + '&t=' + t );
     }
   });
@@ -651,16 +652,12 @@ function wmaZoomOut( e )
   else if (ev.button) rightclick = (ev.button == 2);
  }
 
- if( rightclick )
- {
+ if( rightclick ) {
   wikiminiatlas_zoom = wikiminiatlas_tilesets[wikiminiatlas_tileset].minzoom;
- }
- else
- {
-  if( wikiminiatlas_zoom <= wikiminiatlas_tilesets[wikiminiatlas_tileset].minzoom )
-  {
+ } else {
+  if( wikiminiatlas_zoom <= wikiminiatlas_tilesets[wikiminiatlas_tileset].minzoom ) {
    tilesetDowngrade();
-  }
+  } 
   else wikiminiatlas_zoom--;
  }
 
@@ -703,7 +700,9 @@ function wmaLinkColor(c)
 function wmaLabelSet(s)
 {
  wikiminiatlas_site = s;
- for( var n = 0; n < wikiminiatlas_nx * wikiminiatlas_ny; n++) wikiminiatlas_tile[n]='';
+ for( var n = 0; n < wikiminiatlas_nx * wikiminiatlas_ny; n++) {
+   wikiminiatlas_tile[n]='';
+ }
  moveWikiMiniAtlasMapTo();
  toggleSettings();
  return false;
@@ -725,12 +724,9 @@ function wmaUpdateScalebar()
 
 function wmaUpdateTargetButton()
 {
- if( wikiminiatlas_marker_locked )
- {
+ if( wikiminiatlas_marker_locked ) {
   wikiminiatlas_taget_button.src = wikiminiatlas_imgbase + 'button_target_locked.png';
- }
- else
- {
+ } else {
   wikiminiatlas_taget_button.src = wikiminiatlas_imgbase + 'button_target.png';
  }
 }
@@ -743,8 +739,7 @@ function wmaMoveToCoord( lat, lon )
  moveWikiMiniAtlasMapTo();
 }
 
-function wmaMoveToTarget()
-{
+function wmaMoveToTarget() {
  wmaMoveToCoord( wikiminiatlas_marker_lat, wikiminiatlas_marker_lon );
  wikiminiatlas_marker_locked = true;
  wmaUpdateTargetButton();
@@ -872,19 +867,19 @@ function wmaCommonsImageBuild()
 
 function wmaCommonsImage( name, w, h )
 {
- if( wmaci_panel == null ) wmaCommonsImageBuild();
+ if( wmaci_panel == null ) {
+   wmaCommonsImageBuild();
+ }
  var maxw = wikiminiatlas_width - 30;
  var maxh = wikiminiatlas_height - 80;
  var imgw = w;
  var imgh = h;
 
- if( imgw > maxw )
- {
+ if( imgw > maxw ) {
   imgh = Math.round( ( imgh * maxw ) / imgw );
   imgw = maxw;
  }
- if( imgh > maxh )
- {
+ if( imgh > maxh ) {
   imgw = Math.round( ( imgw * maxh ) / imgh );
   imgh = maxh;
  }
