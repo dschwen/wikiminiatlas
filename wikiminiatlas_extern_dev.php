@@ -84,13 +84,10 @@ var wikiminiatlas_tilesets = [
    me = wikiminiatlas_tilesets[0];
 
    // rotating tile severs
-   if( z >= 7 )
-   {
+   if( z >= 7 ) {
     return 'http://' + ( (x+y) % 16 ) + '.www.toolserver.org/~dschwen/wma/tiles/mapnik/' +
            z + '/' + y + '/tile_' + y + '_' + ( x % ( wikiminiatlas_zoomsize[z] * 2 ) ) + '.png';
-   }
-   else
-   {
+   } else {
     return 'http://' + ( (x+y) % 16 ) + '.www.toolserver.org/~dschwen/wma/tiles/mapnik/' +
            z + '/tile_' + y + '_' + ( x % ( wikiminiatlas_zoomsize[z] * 2 ) ) + '.png';
    }
@@ -101,8 +98,7 @@ var wikiminiatlas_tilesets = [
  },
  {
   name: "Physical",
-  getTileURL: function( y, x, z )  
-  {
+  getTileURL: function( y, x, z ) {
    return wikiminiatlas_imgbase+'relief/' + z + '/' + y + '_' + ( x % ( wikiminiatlas_zoomsize[z] * 2 ) ) + '.png'; 
   },
   linkcolor: "#2255aa",
@@ -111,8 +107,7 @@ var wikiminiatlas_tilesets = [
  },
  {
   name: "Minimal basemap (coastlines)",
-  getTileURL: function( y, x, z ) 
-  {
+  getTileURL: function(y,x,z) {
    return wikiminiatlas_imgbase + 'plain/' + z + '/tile_' + y + '_' + ( x % ( wikiminiatlas_zoomsize[z] * 2 ) ) + '.png';
   },
   linkcolor: "#2255aa",
@@ -121,8 +116,7 @@ var wikiminiatlas_tilesets = [
  },
  {
   name: "Landsat",
-  getTileURL: function(y,x,z) 
-  {
+  getTileURL: function(y,x,z) {
    var x1 = x % (wikiminiatlas_zoomsize[z]*2);
    if( x1<0 ) x1+=(wikiminiatlas_zoomsize[z]*2);
    return 'http://' + ( (x1+y) % 8 ) + '.www.toolserver.org/~dschwen/wma/tiles/mapnik/sat/' +
@@ -134,8 +128,7 @@ var wikiminiatlas_tilesets = [
  },
  {
   name: "Daily aqua",
-  getTileURL: function(y,x,z) 
-  {
+  getTileURL: function(y,x,z) {
    return wikiminiatlas_imgbase + 
     'satellite/sat2.php?x='+(x % (wikiminiatlas_zoomsize[z]*2) )+'&y='+y+'&z='+z+'&l=0'; 
   },
@@ -145,8 +138,7 @@ var wikiminiatlas_tilesets = [
  },
  {
   name: "Daily terra",
-  getTileURL: function(y,x,z) 
-  { 
+  getTileURL: function(y,x,z) { 
    return wikiminiatlas_imgbase + 
     'satellite/sat2.php?x='+(x % (wikiminiatlas_zoomsize[z]*2) )+'&y='+y+'&z='+z+'&l=1'; 
   },
@@ -757,15 +749,15 @@ function wmaMoveToTarget()
  wmaUpdateTargetButton();
 }
 
-function wmaLatLonToXY(lat,lon)
-{
- var newx = Math.floor((lon/360.0)*wikiminiatlas_zoomsize[wikiminiatlas_zoom]*256);
- if( newx < 0 ) newx+=wikiminiatlas_zoomsize[wikiminiatlas_zoom]*256;
+function wmaLatLonToXY(lat,lon) {
+ var newx = Math.floor( (lon/360.0) * wikiminiatlas_zoomsize[wikiminiatlas_zoom]*256 );
+ if( newx < 0 ) {
+  newx += wikiminiatlas_zoomsize[wikiminiatlas_zoom]*256;
+ }
  return { y:Math.floor((0.5-lat/180.0)*wikiminiatlas_zoomsize[wikiminiatlas_zoom]*128), x:newx };
 }
 
-function wmaXYToLatLon(x,y)
-{
+function wmaXYToLatLon(x,y) {
  return { lat:180.0*(0.5-y/(wikiminiatlas_zoomsize[wikiminiatlas_zoom]*128)), lon:360.0*(x/(wikiminiatlas_zoomsize[wikiminiatlas_zoom]*256)) };
 }
 
