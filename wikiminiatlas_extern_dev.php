@@ -174,7 +174,8 @@ function wikiminiatlasInstall()
 
   //document.getElementById('debugbox').innerHTML='';
 
-  var coord_params = (window.location.search).substr(1);
+  var coord_params = (window.location.search).substr(1),
+      synopsis_current = '';
 
   // parse coordinates
   var coord_filter = /([\d+-.]+)_([\d+-.]+)_([\d]+)_([\d]+)/;
@@ -335,8 +336,10 @@ function wikiminiatlasInstall()
 
   wikiminiatlas_settings = document.getElementById('wikiminiatlas_settings');
  
-  document.getElementById('button_plus').onmousedown = wmaZoomIn;
-  document.getElementById('button_minus').onmousedown = wmaZoomOut;
+  //document.getElementById('button_plus').onmousedown = wmaZoomIn;
+  //document.getElementById('button_minus').onmousedown = wmaZoomOut;
+  $('#button_plus').bind('mousedown', wmaZoomIn );
+  $('#button_minus').bind('mousedown', wmaZoomOut );
 
   document.body.oncontextmenu = function() { return false; };
   document.onkeydown = wmaKeypress;
@@ -351,14 +354,21 @@ function wikiminiatlasInstall()
   synopsis_filter = /http:\/\/([a-z-]+)\.wikipedia\.org\/wiki\/(.*)/;
   $('#wikiminiatlas_widget').mouseover( function(e){
     var l,t;
-    if( e.metaKey && e.target.href && synopsis_filter.test(e.target.href) )
-    {
-      l = RegExp.$1;
-      t = RegExp.$2;
-      $('#synopsistext').show('fast');
-      $('#synopsistext').load( '/~dschwen/synopsis?l=' + l + '&t=' + t );
+    if( e.metaKey ) {
+      if( e.target.href && synopsis_filter.test(e.target.href) ) {
+        l = RegExp.$1;
+        t = RegExp.$2;
+        $('#synopsistext').load( '/~dschwen/synopsis?l=' + l + '&t=' + t, function() { $('#synopsis').fadeIn('slow') } );
+      } else {
+        $('#synopsis').fadeOut('fast');
+      }
     }
   });
+  $('#synopsis').click( function(e) { 
+    if( e.target == this ) {
+      $('#synopsis').fadeOut('fast'); 
+    }
+  } );
  }
 }
 
