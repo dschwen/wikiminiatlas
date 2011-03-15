@@ -1679,15 +1679,25 @@ function wmaInitializeXMLHTTP()
  }
 }
 
+// return a callback function for tile i using a closure
+function wmaBuildCallback(i) {
+ return function() {
+  if( wikiminiatlas_xmlhttp[i].readyState == 4 &&
+      wikiminiatlas_xmlhttp[i].status == 200 ) { 
+    document.getElementById('wmatile'+i).innerHTML = wikiminiatlas_xmlhttp[i].responseText; 
+  }
+ }
+}
+
 // Every tile needs a callback function for its xmlhttprequest
 // Build them all
 function wmaInitializeXMLHTTPCallBacks()
 {
- var i;
- var n_total = wikiminiatlas_nx*wikiminiatlas_ny;
+ var i, n_total = wikiminiatlas_nx * wikiminiatlas_ny;
  wikiminiatlas_xmlhttp_callback = new Array(n_total);
- for(i=0; i< n_total; i++)
-  wikiminiatlas_xmlhttp_callback[i] = new Function("if (wikiminiatlas_xmlhttp["+i+"].readyState==4 && wikiminiatlas_xmlhttp["+i+"].status == 200 ) { document.getElementById('wmatile"+i+"').innerHTML = wikiminiatlas_xmlhttp["+i+"].responseText; }");
+ for(i=0; i< n_total; i++) {
+  wikiminiatlas_xmlhttp_callback[i] = wmaBuildCallback(i);
+ }
 }
 
 function wmaDebug(text)
