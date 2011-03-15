@@ -32,7 +32,7 @@ var wikiminiatlas_width = 500;
 var wikiminiatlas_height = 300;
 
 var wikiminiatlas_imgbase = 'http://toolserver.org/~dschwen/wma/tiles/';
-var wikiminiatlas_database = 'http://ortelius.toolserver.org/~dschwen/wma/label/';
+var wikiminiatlas_database = 'http://toolserver.org/~dschwen/wma/label/';
 
 // globals
 var wikiminiatlas_widget = null;
@@ -168,9 +168,8 @@ var wikiminiatlas_tileset = 0;
 //
 function wikiminiatlasInstall()
 {
- var coordinates = document.getElementById('wikiminiatlas_widget');
-
- if (coordinates !== null && wikiminiatlas_widget === null) {
+ var newcoords;
+ if( wikiminiatlas_widget === null ) {
 
   //document.getElementById('debugbox').innerHTML='';
 
@@ -188,30 +187,27 @@ function wikiminiatlasInstall()
    wikiminiatlas_height= parseInt( RegExp.$4, 10 );
 
    coord_filter = /([\d+-.]+)_([\d+-.]+)_([\d]+)_([\d]+)_([a-z]+)/;
-   if(coord_filter.test(coord_params))
-   {
+   if( coord_filter.test(coord_params) ) {
     coord_filter.exec(coord_params);
     wikiminiatlas_site = RegExp.$5;
    }
    
    coord_filter = /([\d+-.]+)_([\d+-.]+)_([\d]+)_([\d]+)_([a-z]+)_([\d]+)/;
-   if(coord_filter.test(coord_params))
-   {
+   if( coord_filter.test(coord_params) ) {
     coord_filter.exec(coord_params);
     wikiminiatlas_defaultzoom = parseInt( RegExp.$6, 10 );
     wikiminiatlas_zoom = wikiminiatlas_defaultzoom;
    }
 
    coord_filter = /([\d+-.]+)_([\d+-.]+)_([\d]+)_([\d]+)_([a-z]+)_([\d]+)_([a-z]+)/;
-   if(coord_filter.test(coord_params))
-   {
+   if(coord_filter.test(coord_params)) {
     coord_filter.exec(coord_params);
     wikiminiatlas_language = RegExp.$7;
    }
-   else
+   else {
     wikiminiatlas_language = wikiminiatlas_site;
+   }
 
-   var newcoords;
    coord_filter = /([\d+-.]+)_([\d+-.]+)_([\d]+)_([\d]+)_([a-z]+)_([\d]+)_([a-z]+)_([\d+-.]+)_([\d+-.]+)/;
    if(coord_filter.test(coord_params))
    {
@@ -323,21 +319,15 @@ function wikiminiatlasInstall()
    '</div>' +
    '</div>';
 
-  coordinates.innerHTML = coordinates.innerHTML + WikiMiniAtlasHTML ;
   wikiminiatlas_widget  = document.getElementById('wikiminiatlas_widget');
+  wikiminiatlas_widget.innerHTML += WikiMiniAtlasHTML;
 
   scalelabel = document.getElementById('scalelabel');
   scalebar = document.getElementById('scalebar');
 
-  //synopsis = document.getElementById('synopsis');
-  //synopsistext = document.getElementById('synopsistext');
-
   wikiminiatlas_taget_button = document.getElementById('button_target');
-
   wikiminiatlas_settings = document.getElementById('wikiminiatlas_settings');
  
-  //document.getElementById('button_plus').onmousedown = wmaZoomIn;
-  //document.getElementById('button_minus').onmousedown = wmaZoomOut;
   $('#button_plus').bind('mousedown', wmaZoomIn );
   $('#button_minus').bind('mousedown', wmaZoomOut );
 
@@ -374,27 +364,26 @@ function wikiminiatlasInstall()
 
 function toggleWikiMiniAtlas()
 {
- if(wikiminiatlas_widget.style.visibility != "visible")
+ if(wikiminiatlas_widget.style.visibility != "visible") {
    wikiminiatlas_widget.style.visibility="visible";
- else
+ } else {
    wikiminiatlas_widget.style.visibility="hidden";
-
+ }
  return false;
 }
 
 function toggleSettings()
 {
- if( wmaci_panel && wmaci_panel.style.visibility == 'visible' )
- {
+ if( wmaci_panel && wmaci_panel.style.visibility == 'visible' ) {
   wmaCommonsImageClose();
   return false; 
  }
 
- if( wikiminiatlas_settings.style.visibility != "visible" )
+ if( wikiminiatlas_settings.style.visibility != "visible" ) {
   wikiminiatlas_settings.style.visibility="visible";
- else
+ } else {
   wikiminiatlas_settings.style.visibility="hidden";
-
+ }
  return false;
 }
 
