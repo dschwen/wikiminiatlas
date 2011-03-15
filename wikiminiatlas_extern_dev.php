@@ -25,6 +25,7 @@
 // include minified jquery
 <? require( 'jquery-1.4.4.min.js' ); ?>
 
+$(function(){
 // defaults
 var wikiminiatlas_coordinate_region = '';
 var wikiminiatlas_width = 500;
@@ -927,3 +928,6 @@ function wmaFullscreen()
    wikiminiatlas_site + '_' + wikiminiatlas_zoom + '_' + wikiminiatlas_language + '_' + mapcenter.lat + '_' + mapcenter.lon;
 }
 
+// call installation routine
+wikiminiatlasInstall();
+});
