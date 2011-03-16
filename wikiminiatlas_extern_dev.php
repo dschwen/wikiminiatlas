@@ -404,11 +404,9 @@ function initializeWikiMiniAtlasMap()
 {
  if(wikiminiatlas_map === null)
  {
+  $(document).mousemove(mouseMoveWikiMiniAtlasMap).mouseup(mouseUpWikiMiniAtlasMap);
+  $('#wikiminiatlas_map').dblclick(wmaDblclick).mousedown(mouseDownWikiMiniAtlasMap);
   wikiminiatlas_map = document.getElementById('wikiminiatlas_map');
-  wikiminiatlas_map.onmousedown = mouseDownWikiMiniAtlasMap;
-  document.onmousemove = mouseMoveWikiMiniAtlasMap;
-  document.onmouseup = mouseUpWikiMiniAtlasMap;
-  wikiminiatlas_map.ondblclick = wmaDblclick;
 
   wikiminiatlas_nx = Math.floor(wikiminiatlas_width/128)+2;
   wikiminiatlas_ny = Math.floor(wikiminiatlas_height/128)+2;
@@ -548,6 +546,7 @@ function wmaDblclick(ev)
  }
 
  moveWikiMiniAtlasMapTo();
+ return false;
 }
 
 function wmaKeypress(ev)
