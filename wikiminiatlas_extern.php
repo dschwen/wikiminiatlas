@@ -58,6 +58,7 @@ var wikiminiatlas_xmlhttp = false;
 var wikiminiatlas_xmlhttp_callback = false;
 var wikiminiatlas_language = 'de';
 var wikiminiatlas_site = '';
+var UILang = 'en';
 
 var circ_eq = 40075.0; // equatorial circumfence in km
 var scalelabel = null;
@@ -225,7 +226,7 @@ function wikiminiatlasInstall()
   }
 
   var WikiMiniAtlasHTML;
-  var UILang = wikiminiatlas_language;
+  UILang = wikiminiatlas_language;
   if( UILang == 'co' || UILang == 'commons' ) UILang = 'en';
 
   // Fill missing i18n items
@@ -485,7 +486,7 @@ function moveWikiMiniAtlasMapTo()
     }
 
     wikiminiatlas_xmlhttp[n].open("GET", dataurl,true);
-    thistile.innerHTML='loading';
+    thistile.innerHTML='<span class="loading">' + strings.labelLoading[UILang] + '</span>';
     wikiminiatlas_xmlhttp[n].onreadystatechange=wikiminiatlas_xmlhttp_callback[n];
     wikiminiatlas_xmlhttp[n].send(null);
    }
