@@ -250,6 +250,14 @@ function wikiminiatlasInstall()
     strings.settings[UILang] + 
     '" style="z-index:50; position:absolute; right:40px; top: 8px; width:18px; cursor:pointer" onclick="toggleSettings()">';
 
+  /*
+    $('<img>').attr({ 
+      src: wikiminiatlas_imgbase+'button_menu.png', 
+    } ).css( {
+      right: '40px', top: '8px', z-index: '50'
+    } ).click(toggleSettings);
+  */
+
   if( wikiminiatlas_own_close )
   {
    WikiMiniAtlasHTML += '<img src="'+wikiminiatlas_imgbase+'button_hide.png" title="' + 
@@ -321,6 +329,11 @@ function wikiminiatlasInstall()
   wikiminiatlas_widget  = document.getElementById('wikiminiatlas_widget');
   wikiminiatlas_widget.innerHTML += WikiMiniAtlasHTML;
 
+  var news = $('<div></div>').html('<b>New:</b> hold Ctrl or &#x2318; and hover over a link to read an article summary.').addClass('news');
+  $('#wikiminiatlas_widget').append(news);
+  news.click( function() { news.fadeOut(); } )
+  setTimeout(  function() { news.fadeOut(); }, 20*1000 );
+
   scalelabel = document.getElementById('scalelabel');
   scalebar = document.getElementById('scalebar');
 
@@ -348,7 +361,7 @@ function wikiminiatlasInstall()
       if( e.target.href && synopsis_filter.test(e.target.href) ) {
         l = RegExp.$1;
         t = RegExp.$2;
-        $('#synopsistext').load( '/~dschwen/synopsis?l=' + l + '&t=' + t, function() { $('#synopsis').fadeIn('slow') } );
+        $('#synopsistext').load( '/~dschwen/synopsis/?l=' + l + '&t=' + t, function() { $('#synopsis').fadeIn('slow') } );
       } else {
         $('#synopsis').fadeOut('fast');
       }

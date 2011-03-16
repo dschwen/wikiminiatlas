@@ -356,7 +356,7 @@ function wikiminiatlasInstall()
       if( e.target.href && synopsis_filter.test(e.target.href) ) {
         l = RegExp.$1;
         t = RegExp.$2;
-        $('#synopsistext').load( '/~dschwen/synopsis?l=' + l + '&t=' + t, function() { $('#synopsis').fadeIn('slow') } );
+        $('#synopsistext').load( '/~dschwen/synopsis/?l=' + l + '&t=' + t, function() { $('#synopsis').fadeIn('slow') } );
       } else {
         $('#synopsis').fadeOut('fast');
       }
