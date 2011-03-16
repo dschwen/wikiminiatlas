@@ -329,6 +329,11 @@ function wikiminiatlasInstall()
   wikiminiatlas_widget  = document.getElementById('wikiminiatlas_widget');
   wikiminiatlas_widget.innerHTML += WikiMiniAtlasHTML;
 
+  var news = $('<div></div>').html('<b>New:</b> hold Ctrl or &#x2318; and hover over a link to read an article summary.').addClass('news');
+  $('#wikiminiatlas_widget').append(news);
+  news.click( function() { news.fadeOut(); } )
+  setTimeout(  function() { news.fadeOut(); }, 20*1000 );
+
   scalelabel = document.getElementById('scalelabel');
   scalebar = document.getElementById('scalebar');
 
