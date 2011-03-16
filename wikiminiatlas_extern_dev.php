@@ -361,7 +361,14 @@ function wikiminiatlasInstall()
       if( e.target.href && synopsis_filter.test(e.target.href) ) {
         l = RegExp.$1;
         t = RegExp.$2;
-        $('#synopsistext').load( '/~dschwen/synopsis/?l=' + l + '&t=' + t, function() { $('#synopsis').fadeIn('slow') } );
+        $('#synopsistext').load( '/~dschwen/synopsis/?l=' + l + '&t=' + t, function() { 
+          $('#synopsis').fadeIn('slow');
+          setTimeout( function() { 
+            var h = $('#synopsistext').outerHeight(true),
+                mh = wikiminiatlas_height/2;
+            $('#synopsis').animate( { height: h<mh ? h : mh } ); 
+          }, 500 );
+        } );
       } else {
         $('#synopsis').fadeOut('fast');
       }
