@@ -25,7 +25,6 @@
 // include minified jquery
 <? require( 'jquery-1.4.4.min.js' ); ?>
 
-$(function(){
 // defaults
 var wikiminiatlas_coordinate_region = '';
 var wikiminiatlas_width = 500;
@@ -924,5 +923,6 @@ function wmaFullscreen()
 }
 
 // call installation routine
-wikiminiatlasInstall();
+$(function(){
+  wikiminiatlasInstall();
 });

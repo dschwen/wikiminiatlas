@@ -25,7 +25,6 @@
 // include minified jquery
 <? require( 'jquery-1.4.4.min.js' ); ?>
 
-$(function(){
 // defaults
 var wikiminiatlas_coordinate_region = '';
 var wikiminiatlas_width = 500;
@@ -250,6 +249,14 @@ function wikiminiatlasInstall()
    '<img src="'+wikiminiatlas_imgbase+'button_menu.png" title="' + 
     strings.settings[UILang] + 
     '" style="z-index:50; position:absolute; right:40px; top: 8px; width:18px; cursor:pointer" onclick="toggleSettings()">';
+
+  /*
+    $('<img>').attr({ 
+      src: wikiminiatlas_imgbase+'button_menu.png', 
+    } ).css( {
+      right: '40px', top: '8px', z-index: '50'
+    } ).click(toggleSettings);
+  */
 
   if( wikiminiatlas_own_close )
   {
@@ -924,5 +931,6 @@ function wmaFullscreen()
 }
 
 // call installation routine
-wikiminiatlasInstall();
+$(function(){
+  wikiminiatlasInstall();
 });
