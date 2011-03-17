@@ -380,6 +380,18 @@ function wikiminiatlasInstall()
       $('#synopsis').fadeOut('fast'); 
     }
   } );
+
+  // initialize message passing 
+  if( window.postMessage ) {
+    $(window).bind( 'message', wmaReceiveMessage );
+    if( window != window.top ) {
+      try {
+        window.parent.postMessage("request","http://toolserver.org");
+      } catch(err) {
+        // an error occurred, never mind, this is an optional feature
+      }
+    }
+  }
  }
 }
 
@@ -922,8 +934,7 @@ function wmaCommonsImage( name, w, h )
  wmaci_panel.style.visibility = 'visible';
 }
 
-function wmaFullscreen()
-{
+function wmaFullscreen() {
  var fs = window.open('', 'showwin', 'left=0,top=0,width=' + screen.width + ',height=' + screen.height + ',toolbar=0,resizable=0,fullscreen=1');
  var w, h;
 
@@ -940,6 +951,11 @@ function wmaFullscreen()
 
  fs.document.location = 'iframe.html' + '?' + wikiminiatlas_marker_lat + '_' + wikiminiatlas_marker_lon + '_' + w + '_' + h + '_' + 
    wikiminiatlas_site + '_' + wikiminiatlas_zoom + '_' + wikiminiatlas_language + '_' + mapcenter.lat + '_' + mapcenter.lon;
+}
+
+function wmaReceiveMessage(e) {
+ e = e.originalEvent;
+ alert(e.data);
 }
 
 // call installation routine
