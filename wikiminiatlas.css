@@ -282,3 +282,20 @@ span.loading {
   -moz-opacity: 0.25; 
   opacity: 0.25;
 }
+
+#wmamarker { 
+  z-index:22; 
+  position:absolute; 
+  width:11px; 
+  height:11px; 
+  background-image:url('tiles/red_dot.png'); 
+  background-repeat: no-repeat;
+}
+div.emarker { 
+  z-index:21; 
+  position:absolute; 
+  width:11px; 
+  height:11px; 
+  background-image:url('tiles/blue_dot.png'); 
+  background-repeat: no-repeat;
+}
