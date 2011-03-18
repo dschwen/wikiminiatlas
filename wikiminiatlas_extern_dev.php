@@ -362,6 +362,7 @@ function wikiminiatlasInstall()
         l = RegExp.$1;
         t = RegExp.$2;
         $('#synopsistext').load( '/~dschwen/synopsis/?l=' + l + '&t=' + t, function() { 
+          $('#synopsistext').find('a').attr('target','_top');
           $('#synopsis').fadeIn('slow');
           setTimeout( function() { 
             var h = $('#synopsistext').outerHeight(true),
@@ -385,7 +386,7 @@ function wikiminiatlasInstall()
     $(window).bind( 'message', wmaReceiveMessage );
     if( window != window.top ) {
       try {
-        window.parent.postMessage("request","http://toolserver.org");
+        window.parent.postMessage( 'request', '*' );
       } catch(err) {
         // an error occurred, never mind, this is an optional feature
       }

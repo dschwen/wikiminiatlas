@@ -362,6 +362,7 @@ function wikiminiatlasInstall()
         l = RegExp.$1;
         t = RegExp.$2;
         $('#synopsistext').load( '/~dschwen/synopsis/?l=' + l + '&t=' + t, function() { 
+          $('#synopsistext').find('a').attr('target','_top');
           $('#synopsis').fadeIn('slow');
           setTimeout( function() { 
             var h = $('#synopsistext').outerHeight(true),
