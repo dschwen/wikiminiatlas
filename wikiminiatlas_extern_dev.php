@@ -977,9 +977,10 @@ function wmaReceiveMessage(e) {
      i;
 
  if( Math.abs(m.lat-marker.lat) > 0.0001 || Math.abs(m.lon-marker.lon) > 0.0001 ) {
-  i = $('<div class="emarker"></div>');
-  i.mouseover(extraMarkerHover(parseInt(d[2]),'highlight'));
-  i.click(extraMarkerHover(parseInt(d[2]),'scroll'));
+  i = $('<div class="emarker"></div>').attr('title',title);
+  i.mouseover(extraMarkerMessage(parseInt(d[2]),'highlight'));
+  i.mouseout(extraMarkerMessage(parseInt(d[2]),'unhighlight'));
+  i.click(extraMarkerMessage(parseInt(d[2]),'scroll'));
   m.obj = i[0];
   $(wikiminiatlas_map).append(i);
   updateMarker(m);

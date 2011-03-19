@@ -962,14 +962,25 @@ function wmaFullscreen() {
    wikiminiatlas_site + '_' + wikiminiatlas_zoom + '_' + wikiminiatlas_language + '_' + mapcenter.lat + '_' + mapcenter.lon;
 }
 
+// mouse over handler for extra markers
+function extraMarkerMessage(index,cmd) {
+ return function(e) {
+  window.parent.postMessage( cmd + ',' + index, '*' );
+ }
+}
+
 function wmaReceiveMessage(e) {
  e = e.originalEvent;
  var d = e.data.split(','),
+     title = d.splice(3).join(','),
      m = { obj: null, lat: parseFloat(d[0]), lon: parseFloat(d[1]) },
      i;
 
  if( Math.abs(m.lat-marker.lat) > 0.0001 || Math.abs(m.lon-marker.lon) > 0.0001 ) {
-  i = $('<div class="emarker"></div>');
+  i = $('<div class="emarker"></div>').attr('title',title);
+  i.mouseover(extraMarkerMessage(parseInt(d[2]),'highlight'));
+  i.mouseout(extraMarkerMessage(parseInt(d[2]),'unhighlight'));
+  i.click(extraMarkerMessage(parseInt(d[2]),'scroll'));
   m.obj = i[0];
   $(wikiminiatlas_map).append(i);
   updateMarker(m);
