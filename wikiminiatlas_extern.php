@@ -972,7 +972,7 @@ function extraMarkerMessage(index,cmd) {
 function wmaReceiveMessage(e) {
  e = e.originalEvent;
  var d = e.data.split(','),
-     title = decodeURIComponent( d.splice(3).join(',') ),
+     title = decodeURIComponent( d.splice(3).join(',') ).replace(/\+/g,' '),
      m = { obj: null, lat: parseFloat(d[0]), lon: parseFloat(d[1]) },
      i;
 
