@@ -32,6 +32,7 @@ var wikiminiatlas_height = 300;
 
 var wikiminiatlas_imgbase = 'http://toolserver.org/~dschwen/wma/tiles/';
 var wikiminiatlas_database = 'http://toolserver.org/~dschwen/wma/label/';
+var wikiminiatlas_tilebase = '.www.toolserver.org/~dschwen/wma/tiles/';
 
 // globals
 var wikiminiatlas_widget = null;
@@ -85,10 +86,10 @@ var wikiminiatlas_tilesets = [
 
    // rotating tile severs
    if( z >= 7 ) {
-    return 'http://' + ( (x+y) % 16 ) + '.www.toolserver.org/~dschwen/wma/tiles/mapnik/' +
+    return 'http://' + ( (x+y) % 16 ) + wikiminiatlas_tilebase + '/mapnik/' +
            z + '/' + y + '/tile_' + y + '_' + ( x % ( wikiminiatlas_zoomsize[z] * 2 ) ) + '.png';
    } else {
-    return 'http://' + ( (x+y) % 16 ) + '.www.toolserver.org/~dschwen/wma/tiles/mapnik/' +
+    return 'http://' + ( (x+y) % 16 ) + wikiminiatlas_tilebase + '/mapnik/' +
            z + '/tile_' + y + '_' + ( x % ( wikiminiatlas_zoomsize[z] * 2 ) ) + '.png';
    }
   },
@@ -119,7 +120,7 @@ var wikiminiatlas_tilesets = [
   getTileURL: function(y,x,z) {
    var x1 = x % (wikiminiatlas_zoomsize[z]*2);
    if( x1<0 ) x1+=(wikiminiatlas_zoomsize[z]*2);
-   return 'http://' + ( (x1+y) % 8 ) + '.www.toolserver.org/~dschwen/wma/tiles/mapnik/sat/' +
+   return 'http://' + ( (x1+y) % 8 ) + wikiminiatlas_tilebase + '/mapnik/sat/' +
            z + '/' + y + '/' + y + '_' + ( x1 % ( wikiminiatlas_zoomsize[z] * 2 ) ) + '.png';
   },
   linkcolor: "white",
@@ -601,8 +602,7 @@ function wmaKeypress(ev)
  return false;
 }
 
-function wmaMouseCoords(ev)
-{
+function wmaMouseCoords(ev) {
  if(ev.pageX || ev.pageY)
  {
   return {x:ev.pageX, y:ev.pageY};
@@ -613,18 +613,13 @@ function wmaMouseCoords(ev)
  };
 }
 
-function wmaGetDataURL(y,x,z)
-{
+function wmaGetDataURL(y,x,z) {
  return wikiminiatlas_database + wikiminiatlas_site + '_' + (wikiminiatlas_zoomsize[z]-y-1) + '_' + (x % (wikiminiatlas_zoomsize[z]*2) ) + '_' + z;
- //return 'http://' +  ( ( 8*x + y ) % 16 + 16 ) + '.www.toolserver.org/wma/label/' + wikiminiatlas_site + '_' + (wikiminiatlas_zoomsize[z]-y-1) + '_' + (x % (wikiminiatlas_zoomsize[z]*2) ) + '_' + z;
 }
 
-function tilesetUpgrade()
-{
- for( var i = wikiminiatlas_tileset+1; i < wikiminiatlas_tilesets.length; i++ )
- {
-  if( wikiminiatlas_tilesets[i].maxzoom > (wikiminiatlas_zoom+1) )
-  {
+function tilesetUpgrade() {
+ for( var i = wikiminiatlas_tileset+1; i < wikiminiatlas_tilesets.length; i++ ) {
+  if( wikiminiatlas_tilesets[i].maxzoom > (wikiminiatlas_zoom+1) ) {
    wikiminiatlas_tileset = i;
    wikiminiatlas_zoom++;
    return;
@@ -632,12 +627,9 @@ function tilesetUpgrade()
  }
 }
 
-function tilesetDowngrade()
-{
- for( var i = wikiminiatlas_tileset-1; i >= 0; i-- )
- {
-  if( wikiminiatlas_tilesets[i].minzoom < (wikiminiatlas_zoom-1) )
-  {
+function tilesetDowngrade() {
+ for( var i = wikiminiatlas_tileset-1; i >= 0; i-- ) {
+  if( wikiminiatlas_tilesets[i].minzoom < (wikiminiatlas_zoom-1) ) {
    wikiminiatlas_tileset = i;
    wikiminiatlas_zoom--;
    return;
@@ -645,8 +637,7 @@ function tilesetDowngrade()
  }
 }
 
-function wmaZoomIn( ev )
-{
+function wmaZoomIn( ev ) {
  var mapcenter = wmaXYToLatLon(wikiminiatlas_gx+wikiminiatlas_width/2,wikiminiatlas_gy+wikiminiatlas_height/2);
  var rightclick = false;
 
@@ -659,8 +650,8 @@ function wmaZoomIn( ev )
  if( rightclick ) {
   wikiminiatlas_zoom = wikiminiatlas_tilesets[wikiminiatlas_tileset].maxzoom;
  }
- else  {
-  if( wikiminiatlas_zoom >= wikiminiatlas_tilesets[wikiminiatlas_tileset].maxzoom )   {
+ else {
+  if( wikiminiatlas_zoom >= wikiminiatlas_tilesets[wikiminiatlas_tileset].maxzoom ) {
    tilesetUpgrade();
   }
   else wikiminiatlas_zoom++;
@@ -680,8 +671,7 @@ function wmaZoomIn( ev )
  return false;
 }
 
-function wmaZoomOut( e )
-{
+function wmaZoomOut( e ) {
  var mapcenter = wmaXYToLatLon(wikiminiatlas_gx+wikiminiatlas_width/2,wikiminiatlas_gy+wikiminiatlas_height/2);
  var rightclick = false;
 
@@ -708,8 +698,7 @@ function wmaZoomOut( e )
  return false;
 }
 
-function wmaSelectTileset( n )
-{
+function wmaSelectTileset( n ) {
  var newz = wikiminiatlas_zoom;
 
  if( newz > wikiminiatlas_tilesets[n].maxzoom ) newz = wikiminiatlas_tilesets[n].maxzoom;
@@ -729,15 +718,13 @@ function wmaSelectTileset( n )
  toggleSettings();
 }
 
-function wmaLinkColor(c)
-{
+function wmaLinkColor(c) {
  document.styleSheets[0].cssRules[0].style.color = c;
  toggleSettings();
  return false;
 }
 
-function wmaLabelSet(s)
-{
+function wmaLabelSet(s) {
  wikiminiatlas_site = s;
  for( var n = 0; n < wikiminiatlas_nx * wikiminiatlas_ny; n++) {
    wikiminiatlas_tile[n]='';
@@ -747,8 +734,7 @@ function wmaLabelSet(s)
  return false;
 }
 
-function wmaUpdateScalebar()
-{
+function wmaUpdateScalebar() {
  var sblocation = wmaXYToLatLon(wikiminiatlas_gx+wikiminiatlas_width/2,wikiminiatlas_gy+wikiminiatlas_height/2);
  var slen1 = 50, slen2;
  var skm1,skm2;
@@ -761,8 +747,7 @@ function wmaUpdateScalebar()
  scalebar.style.width = slen2;
 }
 
-function wmaUpdateTargetButton()
-{
+function wmaUpdateTargetButton() {
  if( wikiminiatlas_marker_locked ) {
   wikiminiatlas_taget_button.src = wikiminiatlas_imgbase + 'button_target_locked.png';
  } else {
@@ -770,8 +755,7 @@ function wmaUpdateTargetButton()
  }
 }
 
-function wmaMoveToCoord( lat, lon )
-{
+function wmaMoveToCoord( lat, lon ) {
  var newcoords = wmaLatLonToXY( lat, lon );
  wikiminiatlas_gx = newcoords.x-wikiminiatlas_width/2;
  wikiminiatlas_gy = newcoords.y-wikiminiatlas_height/2;
@@ -860,8 +844,7 @@ function wmaBuildCallback(i) {
 
 // Every tile needs a callback function for its xmlhttprequest
 // Build them all
-function wmaInitializeXMLHTTPCallBacks()
-{
+function wmaInitializeXMLHTTPCallBacks() {
  var i, n_total = wikiminiatlas_nx * wikiminiatlas_ny;
  wikiminiatlas_xmlhttp_callback = new Array(n_total);
  for(i=0; i< n_total; i++) {
@@ -869,18 +852,15 @@ function wmaInitializeXMLHTTPCallBacks()
  }
 }
 
-function wmaDebug(text)
-{
+function wmaDebug(text) {
  //document.getElementById('debugbox').innerHTML+=text+'<br />';
 }
 
-function wmaCommonsImageClose()
-{
+function wmaCommonsImageClose() {
  wmaci_panel.style.visibility = 'hidden';
 }
 
-function wmaCommonsImageBuild()
-{
+function wmaCommonsImageBuild() {
  wmaci_panel = document.createElement('DIV');
  wmaci_panel.id = 'wikiminiatlas_wmaci_panel';
 
