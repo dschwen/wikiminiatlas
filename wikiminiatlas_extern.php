@@ -587,6 +587,8 @@ function wmaKeypress(ev)
   case 38 : wikiminiatlas_gy -= wikiminiatlas_height/2; break; 
   case 39 : wikiminiatlas_gx += wikiminiatlas_width/2; break; 
   case 40 : wikiminiatlas_gy += wikiminiatlas_height/2; break; 
+  case 107 : wmaZoomIn(); break;
+  case 109 : wmaZoomOut(); break;
  }
 
  if( wikiminiatlas_marker_locked )
@@ -650,18 +652,15 @@ function wmaZoomIn( ev )
 
  if(!ev) var ev = window.event;
  if(ev) {
-  if (ev.which) rightclick = (ev.which == 3);
-  else if (ev.button) rightclick = (ev.button == 2);
+  if (ev.which) { rightclick = (ev.which == 3); }
+  else if (ev.button) { rightclick = (ev.button == 2); }
  } 
 
- if( rightclick )
- {
+ if( rightclick ) {
   wikiminiatlas_zoom = wikiminiatlas_tilesets[wikiminiatlas_tileset].maxzoom;
  }
- else
- {
-  if( wikiminiatlas_zoom >= wikiminiatlas_tilesets[wikiminiatlas_tileset].maxzoom )
-  {
+ else  {
+  if( wikiminiatlas_zoom >= wikiminiatlas_tilesets[wikiminiatlas_tileset].maxzoom )   {
    tilesetUpgrade();
   }
   else wikiminiatlas_zoom++;
@@ -972,7 +971,7 @@ function extraMarkerMessage(index,cmd) {
 function wmaReceiveMessage(e) {
  e = e.originalEvent;
  var d = e.data.split(','),
-     title = decodeURIComponent( d.splice(3).join(',') ).replace(/\+/g,' '),
+     title = decodeURIComponent( d.splice(3).join(',') ).replace(/[\+_]/g,' '),
      m = { obj: null, lat: parseFloat(d[0]), lon: parseFloat(d[1]) },
      i;
 
