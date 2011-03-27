@@ -31,7 +31,7 @@ var wikiminiatlas_width = 500;
 var wikiminiatlas_height = 300;
 
 var wikiminiatlas_imgbase = 'http://toolserver.org/~dschwen/wma/tiles/';
-var wikiminiatlas_database = 'http://toolserver.org/~dschwen/wma/label/';
+var wikiminiatlas_database = 'http://toolserver.org/~dschwen/wma/label.php';
 var wikiminiatlas_tilebase = '.www.toolserver.org/~dschwen/wma/tiles/';
 
 // globals
@@ -614,7 +614,7 @@ function wmaMouseCoords(ev) {
 }
 
 function wmaGetDataURL(y,x,z) {
- return wikiminiatlas_database + wikiminiatlas_site + '_' + (wikiminiatlas_zoomsize[z]-y-1) + '_' + (x % (wikiminiatlas_zoomsize[z]*2) ) + '_' + z;
+ return wikiminiatlas_database + '?l=' + wikiminiatlas_site + '&a=' + (wikiminiatlas_zoomsize[z]-y-1) + '&b=' + (x % (wikiminiatlas_zoomsize[z]*2) ) + '&z=' + z;
 }
 
 function tilesetUpgrade() {
