@@ -86,10 +86,10 @@ var wikiminiatlas_tilesets = [
 
    // rotating tile severs
    if( z >= 7 ) {
-    return 'http://' + ( (x+y) % 16 ) + wikiminiatlas_tilebase + '/mapnik/' +
+    return 'http://' + ( (x+y) % 16 ) + wikiminiatlas_tilebase + 'mapnik/' +
            z + '/' + y + '/tile_' + y + '_' + ( x % ( wikiminiatlas_zoomsize[z] * 2 ) ) + '.png';
    } else {
-    return 'http://' + ( (x+y) % 16 ) + wikiminiatlas_tilebase + '/mapnik/' +
+    return 'http://' + ( (x+y) % 16 ) + wikiminiatlas_tilebase + 'mapnik/' +
            z + '/tile_' + y + '_' + ( x % ( wikiminiatlas_zoomsize[z] * 2 ) ) + '.png';
    }
   },
@@ -120,7 +120,7 @@ var wikiminiatlas_tilesets = [
   getTileURL: function(y,x,z) {
    var x1 = x % (wikiminiatlas_zoomsize[z]*2);
    if( x1<0 ) x1+=(wikiminiatlas_zoomsize[z]*2);
-   return 'http://' + ( (x1+y) % 8 ) + wikiminiatlas_tilebase + '/mapnik/sat/' +
+   return 'http://' + ( (x1+y) % 8 ) + wikiminiatlas_tilebase + 'mapnik/sat/' +
            z + '/' + y + '/' + y + '_' + ( x1 % ( wikiminiatlas_zoomsize[z] * 2 ) ) + '.png';
   },
   linkcolor: "white",
