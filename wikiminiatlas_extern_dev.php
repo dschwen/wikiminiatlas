@@ -581,6 +581,7 @@ function wmaDblclick(ev)
 
 function wmaKeypress(ev)
 {
+ var ret = false;
  ev = ev || window.event;
  switch( ev.keyCode || ev.which )
  {
@@ -590,6 +591,7 @@ function wmaKeypress(ev)
   case 40 : wikiminiatlas_gy += wikiminiatlas_height/2; break; 
   case 107 : wmaZoomIn(); break;
   case 109 : wmaZoomOut(); break;
+  default: ret=true;
  }
 
  if( wikiminiatlas_marker_locked )
@@ -599,7 +601,7 @@ function wmaKeypress(ev)
  }
 
  moveWikiMiniAtlasMapTo();
- return false;
+ return ret;
 }
 
 function wmaMouseCoords(ev) {

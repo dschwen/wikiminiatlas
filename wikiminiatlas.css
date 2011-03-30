@@ -298,4 +298,10 @@ div.emarker {
   height:11px; 
   background-image:url('tiles/blue_dot.png'); 
   background-repeat: no-repeat;
+  cursor: pointer;
+}
+
+body {
+  -moz-user-select:none;
+  cursor:default;
 }
