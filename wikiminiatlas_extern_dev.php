@@ -751,7 +751,7 @@ function wmaLinkColor(c) {
 function wmaLabelSet(s) {
  wikiminiatlas_site = s;
  for( var n = 0; n < wikiminiatlas_nx * wikiminiatlas_ny; n++) {
-   wikiminiatlas_tile[n]='';
+   wikiminiatlas_tile[n].url='';
  }
  moveWikiMiniAtlasMapTo();
  toggleSettings();
