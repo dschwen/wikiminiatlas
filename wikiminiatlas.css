@@ -304,4 +304,5 @@ div.emarker {
 body {
   -moz-user-select:none;
   cursor:default;
+  overflow:hidden;
 }
