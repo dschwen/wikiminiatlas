@@ -300,6 +300,11 @@ div.emarker {
   background-repeat: no-repeat;
   cursor: pointer;
 }
+div.wmatile {
+  position:absolute; 
+  width:128px; 
+  height:128px;
+}
 
 body {
   -moz-user-select:none;
