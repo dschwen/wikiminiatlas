@@ -183,8 +183,10 @@ function wikiminiatlasInstall()
    coord_filter.exec(coord_params);
    marker.lat = parseFloat( RegExp.$1 );
    marker.lon = parseFloat( RegExp.$2 );
-   wikiminiatlas_width = parseInt( RegExp.$3, 10 );
-   wikiminiatlas_height= parseInt( RegExp.$4, 10 );
+   //wikiminiatlas_width = parseInt( RegExp.$3, 10 );
+   //wikiminiatlas_height= parseInt( RegExp.$4, 10 );
+   wikiminiatlas_width = $(window).width();
+   wikiminiatlas_height= $(window).height();
 
    coord_filter = /([\d+-.]+)_([\d+-.]+)_([\d]+)_([\d]+)_([a-z]+)/;
    if( coord_filter.test(coord_params) ) {
