@@ -523,11 +523,7 @@ function moveWikiMiniAtlasMapTo()
     thistile.url = tileurl;
     thistile.div.css( 'backgroundImage', tileurl );
 
-    if( thistile.xhr !== null &&
-     ( thistile.xhr.readyState == 2 ||
-       thistile.xhr.readyState == 3 ) )
-    {
-     //wikiminiatlas_xmlhttp[n].onreadystatechange = function() {};
+    if( thistile.xhr !== null ) {
      thistile.xhr.abort();
     }
 
