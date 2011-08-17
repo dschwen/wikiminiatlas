@@ -615,7 +615,7 @@ function wmaGetDataURL(y,x,z) {
   // wma activated by default, but no labels until now: 
   // af,ar,bs,da,fa,gu,he,hr,hy,id,ka,ku,ltg,lv,mk,mr,ms,nn,nv,sh,simple,si,sk,sl,sq,sr,sw,ta,th,tl,tr,uk,vi
   if( $.inArray(wikiminiatlas_site,'af,ar,bs,da,fa,gu,he,hr,hy,id,ka,ku,ltg,lv,mk,mr,ms,nn,nv,sh,simple,si,sk,sl,sq,sr,sw,ta,th,tl,tr,uk,vi,zh,ceb,als,be,bpy,fy,ga,hy,la,lb,ml,nds,os,pam,pms,vec'.split(',')) >= 0 ) {
-    return 'http://toolserver.org/~dschwen/wma/label.php?l=' + 
+    return 'http://toolserver.org/~dschwen/wma/label.php?rev=0&l=' + 
       wikiminiatlas_site + '&a=' + (wikiminiatlas_zoomsize[z]-y-1) + '&b=' + (x % (wikiminiatlas_zoomsize[z]*2) ) + '&z=' + z;
   } else {
     return wikiminiatlas_database + wikiminiatlas_site + '_' + (wikiminiatlas_zoomsize[z]-y-1) + '_' + (x % (wikiminiatlas_zoomsize[z]*2) ) + '_' + z;

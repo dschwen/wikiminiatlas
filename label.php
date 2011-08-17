@@ -16,6 +16,10 @@ if( $l === FALSE ) {
 }
 //echo "$l $lang";
 
+// Extrawurst (beschleunigtes update)
+if( $lang == 'fa' ) $rev = 1;
+#if( $l <= 18 ) $rev = 2;
+
 $wikiminiatlas_zoomsize = array( 3.0, 6.0 ,12.0 ,24.0 ,48.0, 96.0, 192.0, 384.0, 768.0, 1536.0,  3072.0, 6144.0, 12288.0, 24576.0, 49152.0, 98304.0 );
 
 // hotspot coordinates for the map symbols

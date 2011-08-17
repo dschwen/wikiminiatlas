@@ -634,7 +634,7 @@ function wmaMouseCoords(ev) {
 }
 
 function wmaGetDataURL(y,x,z) {
- return wikiminiatlas_database + '?l=' + wikiminiatlas_site + '&a=' + (wikiminiatlas_zoomsize[z]-y-1) + '&b=' + (x % (wikiminiatlas_zoomsize[z]*2) ) + '&z=' + z;
+ return wikiminiatlas_database + '?rev=1&l=' + wikiminiatlas_site + '&a=' + (wikiminiatlas_zoomsize[z]-y-1) + '&b=' + (x % (wikiminiatlas_zoomsize[z]*2) ) + '&z=' + z;
 }
 
 function tilesetUpgrade() {
