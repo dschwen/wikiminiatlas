@@ -368,6 +368,11 @@ function wikiminiatlasInstall()
         l = RegExp.$1;
         t = RegExp.$2;
         $('#synopsistext').load( '/~dschwen/synopsis/?l=' + l + '&t=' + t, function() { 
+          if( l == 'ar' || l == 'fa' || l == 'he' ) {
+            $('#synopsistext').css('direction','rtl');
+          } else {
+            $('#synopsistext').css('direction','ltr');
+          }
           $('#synopsistext').find('a').attr('target','_top');
           $('#synopsis').fadeIn('slow');
           setTimeout( function() { 

@@ -362,6 +362,11 @@ function wikiminiatlasInstall()
       if( e.target.href && synopsis_filter.test(e.target.href) ) {
         l = RegExp.$1;
         t = RegExp.$2;
+        if( l == 'ar' || l == 'fa' || l == 'he' ) {
+          $('#synopsistext').css('direction','rtl');
+        } else {
+          $('#synopsistext').css('direction','ltr');
+        }
         $('#synopsistext').load( '/~dschwen/synopsis/?l=' + l + '&t=' + t, function() { 
           $('#synopsistext').find('a').attr('target','_top');
           $('#synopsis').fadeIn('slow');
