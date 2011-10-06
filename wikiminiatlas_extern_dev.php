@@ -30,8 +30,8 @@ var wikiminiatlas_coordinate_region = '';
 var wikiminiatlas_width = 500;
 var wikiminiatlas_height = 300;
 
-var wikiminiatlas_imgbase = 'http://toolserver.org/~dschwen/wma/tiles/';
-var wikiminiatlas_database = 'http://toolserver.org/~dschwen/wma/label.php';
+var wikiminiatlas_imgbase = '//toolserver.org/~dschwen/wma/tiles/';
+var wikiminiatlas_database = '//toolserver.org/~dschwen/wma/label.php';
 var wikiminiatlas_tilebase = '.www.toolserver.org/~dschwen/wma/tiles/';
 
 // globals
@@ -273,7 +273,7 @@ function wikiminiatlasInstall()
     '" style="z-index:50; position:absolute; right:62px; top: 8px; width:18px; cursor:pointer" onclick="wmaFullscreen()">';
   }
 
-  WikiMiniAtlasHTML += '<a href="http://meta.wikimedia.org/wiki/WikiMiniAtlas/' + wikiminiatlas_language + 
+  WikiMiniAtlasHTML += '<a href="//meta.wikimedia.org/wiki/WikiMiniAtlas/' + wikiminiatlas_language + 
    '" target="_top" style="z-index:11; position:absolute; bottom:3px; right: 10px; color:black; font-size:5pt">WikiMiniAtlas</a>';
 
   WikiMiniAtlasHTML += '<div id="wikiminiatlas_map" style="position:absolute; width:' + wikiminiatlas_width + 
@@ -326,7 +326,7 @@ function wikiminiatlasInstall()
    '<option value="white">'  + strings.white[UILang] +'</option>' + 
    '<option value="black">'  + strings.black[UILang] +'</option></select></p>' +
    //'<p class="option" style="font-size: 50%; color:gray">Debug info:<br>marker: ' + typeof(marker.lat) + ', ' + marker.lon + '<br>site:'+wikiminiatlas_site+', uilang'+wikiminiatlas_language+'</p>' +
-   '<a href="http://wiki.toolserver.org/" target="_top"><img src="http://toolserver.org/images/wikimedia-toolserver-button.png" border="0"></a>' +
+   '<a href="//wiki.toolserver.org/" target="_top"><img src="//toolserver.org/images/wikimedia-toolserver-button.png" border="0"></a>' +
    '</div>' +
    '</div>';
 
@@ -360,7 +360,7 @@ function wikiminiatlasInstall()
 
   $(window).resize(wmaResize);
   
-  synopsis_filter = /http:\/\/([a-z-]+)\.wikipedia\.org\/wiki\/(.*)/;
+  synopsis_filter = /https?:\/\/([a-z-]+)\.wikipedia\.org\/wiki\/(.*)/;
   $('#wikiminiatlas_widget').mouseover( function(e){
     var l,t;
     if( e.metaKey ) {
@@ -865,11 +865,11 @@ function wmaCommonsImage( name, w, h )
  wmaci_image_span.appendChild( wmaci_image );
 
  if( imgw < w )
-  wmaci_image.src = 'http://commons.wikimedia.org/w/thumb.php?w=' + imgw + '&f=' + name;
+  wmaci_image.src = '//commons.wikimedia.org/w/thumb.php?w=' + imgw + '&f=' + name;
  else
-  wmaci_image.src = 'http://commons.wikimedia.org/wiki/Special:FilePath/' + name;
+  wmaci_image.src = '//commons.wikimedia.org/wiki/Special:FilePath/' + name;
 
- wmaci_link.href = 'http://commons.wikimedia.org/wiki/Image:' + name;
+ wmaci_link.href = '//commons.wikimedia.org/wiki/Image:' + name;
  wmaci_link_text.nodeValue = '[[:commons:Image:' + name + ']]';
 
  wmaci_panel.style.visibility = 'visible';
