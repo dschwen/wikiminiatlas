@@ -639,6 +639,9 @@ function wmaMouseCoords(ev) {
 }
 
 function wmaGetDataURL(y,x,z) {
+ if( wikiminiatlas_site == 'commons' ) {
+  return '//toolserver.org/~dschwen/wma/label/commons_' + (wikiminiatlas_zoomsize[z]-y-1) + '_' + (x % (wikiminiatlas_zoomsize    [z]*2) ) + '_' + z;
+ }
  return wikiminiatlas_database + '?rev=1&l=' + wikiminiatlas_site + '&a=' + (wikiminiatlas_zoomsize[z]-y-1) + '&b=' + (x % (wikiminiatlas_zoomsize[z]*2) ) + '&z=' + z;
 }
 
