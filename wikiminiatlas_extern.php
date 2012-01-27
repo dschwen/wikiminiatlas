@@ -31,7 +31,7 @@ var wikiminiatlas_width = 500;
 var wikiminiatlas_height = 300;
 
 var wikiminiatlas_imgbase = '//toolserver.org/~dschwen/wma/tiles/';
-var wikiminiatlas_database = '//toolserver.org/~dschwen/wma/label/';
+var wikiminiatlas_database = '//toolserver.org/~dschwen/wma/label.php';
 var wikiminiatlas_tilebase = '.www.toolserver.org/~dschwen/wma/tiles/';
 
 // globals
@@ -41,6 +41,7 @@ var wikiminiatlas_own_close = false;
 var wikiminiatlas_nx;
 var wikiminiatlas_ny;
 var wikiminiatlas_tile;
+var wma_tileurl = [];
 var wikiminiatlas_old_onmouseup;
 var wikiminiatlas_old_onmousemove;
 var wikiminiatlas_dragging = null;
@@ -183,8 +184,8 @@ function wikiminiatlasInstall()
    coord_filter.exec(coord_params);
    marker.lat = parseFloat( RegExp.$1 );
    marker.lon = parseFloat( RegExp.$2 );
-   wikiminiatlas_width = parseInt( RegExp.$3, 10 );
-   wikiminiatlas_height= parseInt( RegExp.$4, 10 );
+   wikiminiatlas_width = $(window).width();
+   wikiminiatlas_height= $(window).height();
 
    coord_filter = /([\d+-.]+)_([\d+-.]+)_([\d]+)_([\d]+)_([a-z]+)/;
    if( coord_filter.test(coord_params) ) {
@@ -276,8 +277,10 @@ function wikiminiatlasInstall()
    '" target="_top" style="z-index:11; position:absolute; bottom:3px; right: 10px; color:black; font-size:5pt">WikiMiniAtlas</a>';
 
   WikiMiniAtlasHTML += '<div id="wikiminiatlas_map" style="position:absolute; width:' + wikiminiatlas_width + 
-   'px; height:' + wikiminiatlas_height + 'px; border: 1px solid gray; cursor: move; background-color: #aaaaaa; clip:rect(0px, ' + 
-   wikiminiatlas_width + 'px, '+wikiminiatlas_height+'px, 0px);"></div>';
+   'px; height:' + wikiminiatlas_height + 'px; border: 1px solid gray; cursor: move; background-color: #aaaaaa;"></div>';
+
+   //'px; height:' + wikiminiatlas_height + 'px; border: 1px solid gray; cursor: move; background-color: #aaaaaa; clip:rect(0px, ' + 
+   //wikiminiatlas_width + 'px, '+wikiminiatlas_height+'px, 0px);"></div>';
   
   // Scalebar
   WikiMiniAtlasHTML += 
@@ -355,6 +358,8 @@ function wikiminiatlasInstall()
   moveWikiMiniAtlasMapTo();
   wmaUpdateTargetButton();
 
+  $(window).resize(wmaResize);
+  
   synopsis_filter = /https?:\/\/([a-z-]+)\.wikipedia\.org\/wiki\/(.*)/;
   $('#wikiminiatlas_widget').mouseover( function(e){
     var l,t;
@@ -362,12 +367,12 @@ function wikiminiatlasInstall()
       if( e.target.href && synopsis_filter.test(e.target.href) ) {
         l = RegExp.$1;
         t = RegExp.$2;
-        if( l == 'ar' || l == 'fa' || l == 'he' ) {
-          $('#synopsistext').css('direction','rtl');
-        } else {
-          $('#synopsistext').css('direction','ltr');
-        }
         $('#synopsistext').load( '/~dschwen/synopsis/?l=' + l + '&t=' + t, function() { 
+          if( l == 'ar' || l == 'fa' || l == 'he' ) {
+            $('#synopsistext').css('direction','rtl');
+          } else {
+            $('#synopsistext').css('direction','ltr');
+          }
           $('#synopsistext').find('a').attr('target','_top');
           $('#synopsis').fadeIn('slow');
           setTimeout( function() { 
@@ -425,8 +430,19 @@ function toggleSettings()
  return false;
 }
 
+function wmaNewTile() {
+  var t = {
+    div : $('<div></div>').addClass('wmatile').mousedown(mouseDownWikiMiniAtlasMap),
+    url : '',
+    xhr : null
+  }
+  $(wikiminiatlas_map).append(t.div);
+  return t;
+}
+
 function initializeWikiMiniAtlasMap()
 {
+  var i, j;
   if(wikiminiatlas_map === null)
   {
     $(document).mousemove(mouseMoveWikiMiniAtlasMap).mouseup(mouseUpWikiMiniAtlasMap);
@@ -435,26 +451,44 @@ function initializeWikiMiniAtlasMap()
 
     wikiminiatlas_nx = Math.floor(wikiminiatlas_width/128)+2;
     wikiminiatlas_ny = Math.floor(wikiminiatlas_height/128)+2;
-    wikiminiatlas_tile = new Array(wikiminiatlas_nx*wikiminiatlas_ny);
+    wikiminiatlas_tile = [];
 
-  var n = 0;
-  var thistile;
+    for(var j = 0; j < wikiminiatlas_ny; j++) {
+      for(var i = 0; i < wikiminiatlas_nx; i++) {
+        wikiminiatlas_tile.push(wmaNewTile());
+      }
+    }
 
-  for(var j = 0; j < wikiminiatlas_ny; j++)
-   for(var i = 0; i < wikiminiatlas_nx; i++)
-   {
-    wikiminiatlas_map.innerHTML += '<div id="wmatile'+n+'" style="position:absolute; width:128px; height:128px;"></div>';
-    thistile = document.getElementById('wmatile'+n);
-    thistile.onmousedown = mouseDownWikiMiniAtlasMap;
-    n++;
-   }
+    marker.obj = $('<div id="wmamarker"></div>');
+    $(wikiminiatlas_map).append(marker.obj);
+  }
+}
 
-  wmaInitializeXMLHTTP();
-  wmaInitializeXMLHTTPCallBacks();
-  
-  wikiminiatlas_map.innerHTML += '<div id="wmamarker"></div>';
-  marker.obj = $('#wmamarker')[0];
- }
+function wmaResize() {
+  var nw = $(window).width(),
+      nh = $(window).height(),
+      nx = Math.floor(nw/128)+2,
+      ny =  Math.floor(nh/128)+2, i;
+  wikiminiatlas_width = nw;
+  wikiminiatlas_height = nh;
+  if( nx != wikiminiatlas_nx || ny != wikiminiatlas_ny ) {
+    wikiminiatlas_nx = nx;
+    wikiminiatlas_ny = ny;
+    // add more tiles if necessary
+    while( wikiminiatlas_tile.length < nx*ny ) {
+      wikiminiatlas_tile.push(wmaNewTile());
+    }
+    // make sure needed tiles are visible, unneded tiles are hidden
+    for( i=0; i < wikiminiatlas_tile.length; ++i ) {
+      if( i < nx*ny ) { 
+        wikiminiatlas_tile[i].div.show();
+      } else {
+        wikiminiatlas_tile[i].div.hide();
+      }
+    }
+    moveWikiMiniAtlasMapTo();
+    $(wikiminiatlas_map).width(nw).height(nh);//.css('clip','rect(0px '+nw+'px '+nh+'px 0px)');
+  }
 }
 
 // Set new map Position (to wikiminiatlas_gx, wikiminiatlas_gy)
@@ -463,14 +497,11 @@ function moveWikiMiniAtlasMapTo()
  if(wikiminiatlas_gy<0) wikiminiatlas_gy=0;
  if(wikiminiatlas_gx<0) wikiminiatlas_gx+=Math.floor(wikiminiatlas_zoomsize[wikiminiatlas_zoom]*256);
 
- var lx = Math.floor(wikiminiatlas_gx/128) % wikiminiatlas_nx;
- var ly = Math.floor(wikiminiatlas_gy/128) % wikiminiatlas_ny;
- var fx = wikiminiatlas_gx % 128;
- var fy = wikiminiatlas_gy % 128;
- var n;
- var thistile;
- var tileurl;
- var dataurl;
+ var lx = Math.floor(wikiminiatlas_gx/128) % wikiminiatlas_nx,
+   ly = Math.floor(wikiminiatlas_gy/128) % wikiminiatlas_ny,
+   fx = wikiminiatlas_gx % 128,
+   fy = wikiminiatlas_gy % 128,
+   dx, dy, n, thistile, tileurl, dataurl;
 
  wmaUpdateScalebar();
  //document.getElementById('debugbox').innerHTML='';
@@ -480,34 +511,32 @@ function moveWikiMiniAtlasMapTo()
   {
    n = ((i+lx) % wikiminiatlas_nx) + ((j+ly) % wikiminiatlas_ny)*wikiminiatlas_nx;
 
-   thistile = document.getElementById('wmatile'+n);
-   thistile.style.left = (i*128-fx) + 'px';
-   thistile.style.top  = (j*128-fy) + 'px';
-
    //thistile.innerHTML = (Math.floor(wikiminiatlas_gx/128)+i)+','+(Math.floor(wikiminiatlas_gy/128)+j);
-   tileurl = 'url("' + 
-    wikiminiatlas_tilesets[wikiminiatlas_tileset].getTileURL((Math.floor(wikiminiatlas_gy/128)+j),(Math.floor(wikiminiatlas_gx/128)+i),wikiminiatlas_zoom) + '")';
-   dataurl = wmaGetDataURL((Math.floor(wikiminiatlas_gy/128)+j),(Math.floor(wikiminiatlas_gx/128)+i),wikiminiatlas_zoom);
+   dx = (Math.floor(wikiminiatlas_gx/128)+i);
+   dy = (Math.floor(wikiminiatlas_gy/128)+j);
+   tileurl = 'url("' + wikiminiatlas_tilesets[wikiminiatlas_tileset].getTileURL( dy, dx, wikiminiatlas_zoom) + '")';
+   dataurl = wmaGetDataURL( dy, dx, wikiminiatlas_zoom );
 
-   if( wikiminiatlas_tile[n]!=tileurl )
+   thistile = wikiminiatlas_tile[n];
+   thistile.div.css( {
+     left : (i*128-fx) + 'px',
+     top  : (j*128-fy) + 'px'
+   } );
+
+   if( thistile.url != tileurl )
    {
-    wikiminiatlas_tile[n] = tileurl;
-    thistile.style.backgroundImage=tileurl;
+    thistile.url = tileurl;
+    thistile.div.css( 'backgroundImage', tileurl );
 
-    if( wikiminiatlas_xmlhttp[n] &&
-     ( wikiminiatlas_xmlhttp[n].readyState == 2 ||
-       wikiminiatlas_xmlhttp[n].readyState == 3 ) )
-    {
-     wikiminiatlas_xmlhttp[n].onreadystatechange = function() {};
-     wikiminiatlas_xmlhttp[n].abort();
+    if( thistile.xhr !== null ) {
+     thistile.xhr.abort();
     }
 
-    wikiminiatlas_xmlhttp[n].open("GET", dataurl,true);
-    thistile.innerHTML='<span class="loading">' + strings.labelLoading[UILang] + '</span>';
-    wikiminiatlas_xmlhttp[n].onreadystatechange=wikiminiatlas_xmlhttp_callback[n];
-    wikiminiatlas_xmlhttp[n].send(null);
+    thistile.div.html('<span class="loading">' + strings.labelLoading[UILang] + '</span>');
+    thistile.xhr = $.ajax( { url : dataurl, context : thistile.div } )
+      .success( function(data) { this.html(data); } )
+      .error( function() { this.text(''); } );
    }
-
   }
 
   // update markers
@@ -522,8 +551,8 @@ function updateMarker(m) {
  var newcoords = wmaLatLonToXY( m.lat, m.lon );
  var newx = ( newcoords.x - wikiminiatlas_gx );
  if( newx < -100 ) newx += ( wikiminiatlas_zoomsize[wikiminiatlas_zoom] * 256 );
- m.obj.style.left = (newx-6)+'px';
- m.obj.style.top  = (newcoords.y-wikiminiatlas_gy-6)+'px';
+ m.obj.css( 'left', (newx-6)+'px' );
+ m.obj.css( 'top',  (newcoords.y-wikiminiatlas_gy-6)+'px' );
 }
 
 // Mouse down handler (start map-drag)
@@ -606,25 +635,14 @@ function wmaKeypress(ev) {
 }
 
 function wmaMouseCoords(ev) {
- if(ev.pageX || ev.pageY)
- {
-  return {x:ev.pageX, y:ev.pageY};
- }
- return {
-  x:ev.clientX + document.body.scrollLeft - document.body.clientLeft,
-  y:ev.clientY + document.body.scrollTop  - document.body.clientTop
- };
+ return {x:ev.pageX, y:ev.pageY};
 }
 
 function wmaGetDataURL(y,x,z) {
-  // wma activated by default, but no labels until now: 
-  // af,ar,bs,da,fa,gu,he,hr,hy,id,ka,ku,ltg,lv,mk,mr,ms,nn,nv,sh,simple,si,sk,sl,sq,sr,sw,ta,th,tl,tr,uk,vi
-  if( $.inArray(wikiminiatlas_site,'af,ar,bs,da,fa,gu,he,hr,hy,id,ka,ku,ltg,lv,mk,mr,ms,nn,nv,sh,simple,si,sk,sl,sq,sr,sw,ta,th,tl,tr,uk,vi,zh,ceb,als,be,bpy,fy,ga,hy,la,lb,ml,nds,os,pam,pms,vec'.split(',')) >= 0 ) {
-    return '//toolserver.org/~dschwen/wma/label.php?rev=0&l=' + 
-      wikiminiatlas_site + '&a=' + (wikiminiatlas_zoomsize[z]-y-1) + '&b=' + (x % (wikiminiatlas_zoomsize[z]*2) ) + '&z=' + z;
-  } else {
-    return wikiminiatlas_database + wikiminiatlas_site + '_' + (wikiminiatlas_zoomsize[z]-y-1) + '_' + (x % (wikiminiatlas_zoomsize[z]*2) ) + '_' + z;
-  }
+ if( wikiminiatlas_site == 'commons' ) {
+  return '//toolserver.org/~dschwen/wma/label/commons_' + (wikiminiatlas_zoomsize[z]-y-1) + '_' + (x % (wikiminiatlas_zoomsize    [z]*2) ) + '_' + z;
+ }
+ return wikiminiatlas_database + '?rev=1&l=' + wikiminiatlas_site + '&a=' + (wikiminiatlas_zoomsize[z]-y-1) + '&b=' + (x % (wikiminiatlas_zoomsize[z]*2) ) + '&z=' + z;
 }
 
 function tilesetUpgrade() {
@@ -737,7 +755,7 @@ function wmaLinkColor(c) {
 function wmaLabelSet(s) {
  wikiminiatlas_site = s;
  for( var n = 0; n < wikiminiatlas_nx * wikiminiatlas_ny; n++) {
-   wikiminiatlas_tile[n]='';
+   wikiminiatlas_tile[n].url='';
  }
  moveWikiMiniAtlasMapTo();
  toggleSettings();
@@ -788,78 +806,6 @@ function wmaLatLonToXY(lat,lon) {
 
 function wmaXYToLatLon(x,y) {
  return { lat:180.0*(0.5-y/(wikiminiatlas_zoomsize[wikiminiatlas_zoom]*128)), lon:360.0*(x/(wikiminiatlas_zoomsize[wikiminiatlas_zoom]*256)) };
-}
-
-// Try to create an XMLHTTP request object for each tile with maximum browser compat.
-// code adapted from http://jibbering.com/2002/4/httprequest.html
-function wmaInitializeXMLHTTP()
-{
- var i;
- var n_total = wikiminiatlas_nx*wikiminiatlas_ny;
-
-
- /*@cc_on @*/
- /*@if (@_jscript_version >= 5)
- // Internet Explorer (uses Conditional compilation)
- // traps security blocked creation of the objects.
-  wmaDebug('Microsoft section');
-  try {
-   wikiminiatlas_xmlhttp = new Array(n_total);
-   for(i=0; i< n_total; i++) wikiminiatlas_xmlhttp[i] = new ActiveXObject("Msxml2.XMLHTTP");
-   wmaDebug('* Msxml2.XMLHTTP success');
-  } catch (e) {
-   try {
-    for(i=0; i< n_total; i++) wikiminiatlas_xmlhttp[i] = new ActiveXObject("Microsoft.XMLHTTP");
-    wmaDebug('* Microsoft.XMLHTTP success');
-   } catch (E) {
-    wikiminiatlas_xmlhttp = false;
-   }
-  }
- @end @*/
-
- // Firefox, Konqueror, Safari, Mozilla
- wmaDebug('Firefox/Konqueror section');
- if (!wikiminiatlas_xmlhttp && typeof XMLHttpRequest!='undefined') {
-  try {
-   wikiminiatlas_xmlhttp = new Array(n_total);
-   for(i=0; i< n_total; i++) wikiminiatlas_xmlhttp[i] = new XMLHttpRequest();
-   wmaDebug('* XMLHttpRequest success');
-  } catch (e) {
-   wikiminiatlas_xmlhttp=false;
-  }
- }
-
- // ICE browser
- wmaDebug('ICE section');
- if (!wikiminiatlas_xmlhttp && window.createRequest) {
-  try {
-   wikiminiatlas_xmlhttp = new Array(n_total);
-   for(i=0; i< n_total; i++) wikiminiatlas_xmlhttp[i] = new window.createRequest();
-   wmaDebug('* window.createRequest success');
-  } catch (e) {
-   wikiminiatlas_xmlhttp=false;
-  }
- }
-}
-
-// return a callback function for tile i using a closure
-function wmaBuildCallback(i) {
- return function() {
-  if( wikiminiatlas_xmlhttp[i].readyState == 4 &&
-      wikiminiatlas_xmlhttp[i].status == 200 ) { 
-    document.getElementById('wmatile'+i).innerHTML = wikiminiatlas_xmlhttp[i].responseText; 
-  }
- }
-}
-
-// Every tile needs a callback function for its xmlhttprequest
-// Build them all
-function wmaInitializeXMLHTTPCallBacks() {
- var i, n_total = wikiminiatlas_nx * wikiminiatlas_ny;
- wikiminiatlas_xmlhttp_callback = new Array(n_total);
- for(i=0; i< n_total; i++) {
-  wikiminiatlas_xmlhttp_callback[i] = wmaBuildCallback(i);
- }
 }
 
 function wmaDebug(text) {
@@ -966,12 +912,11 @@ function wmaReceiveMessage(e) {
       i;
 
   if( Math.abs(m.lat-marker.lat) > 0.0001 || Math.abs(m.lon-marker.lon) > 0.0001 ) {
-    i = $('<div class="emarker"></div>').attr('title',title);
-    i.mouseover(extraMarkerMessage(parseInt(d[2]),'highlight'));
-    i.mouseout(extraMarkerMessage(parseInt(d[2]),'unhighlight'));
-    i.click(extraMarkerMessage(parseInt(d[2]),'scroll'));
-    m.obj = i[0];
-    $(wikiminiatlas_map).append(i);
+    m.obj = $('<div></div>').attr('title',title).addClass('emarker')
+      .mouseover(extraMarkerMessage(parseInt(d[2]),'highlight'))
+      .mouseout(extraMarkerMessage(parseInt(d[2]),'unhighlight'))
+      .click(extraMarkerMessage(parseInt(d[2]),'scroll'));
+    $(wikiminiatlas_map).append(m.obj);
     updateMarker(m);
     extramarkers.push(m);
   }
