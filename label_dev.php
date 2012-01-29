@@ -48,12 +48,15 @@ while( $row = mysql_fetch_array( $res) )
   $tx = intval( ( ( $row["lon"] - $xmin ) * $wikiminiatlas_zoomsize[$z] * 128) / 180.0 );
   $s = $row['style'];
 
-  $items.push( 
-    "{ style: \"$s\", lang: \"$lang\", page: \"".urlencode($row["title"])."\", tx: \"$tx\", ty: \"$ty\", name: \"".($row['name'])."\" }" 
+  $items[] = array( 
+    "style" => $s,
+    "lang"  => $lang,
+    "page"  => urlencode($row["title"]),
+    "tx"    => $tx,
+    "ty"    => $ty,
+    "name"  => $row['name']
   );
-  //echo '<a class="label', $s, '" target="_top" href="http://', $lang, '.wikipedia.org/wiki/', urlencode($row["title"]), '" style="top:', $ty-$iy[$s], 'px; left:', $tx-$ix[$s], 'px;">', $row['name'], "</a><br>";
 }
-
-echo '{ label: [ ' . $items.join(', ') . ' ] }';
 mysql_close( $db );
+echo json_encode( array( "label" => $items) );
 ?>
