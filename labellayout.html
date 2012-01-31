@@ -1,0 +1,204 @@
+<html>
+  <head>
+    <script type="text/javascript" src="jquery-1.5.1.min.js"></script>
+    <style>
+      #canvas {
+        border: 1px solid black; 
+        width: 512px; 
+        height: 512px;
+        position: relative;
+      }
+      div.tile { 
+        width: 128px;
+        height: 128px;
+        position: absolute;
+      }
+      span.label {
+        /*border: 1px solid red;*/
+        background-color: rgba(100%,0%,0%,0.2);
+        position: absolute;
+        font-size:7pt;
+      }
+      div.dot {
+        width: 4px; height:4px;
+        border-radius: 2px;
+        background-color: blue;
+        opacity: 0.5;
+        position: absolute;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="canvas"></div>
+    <button>Optimize Labels</button>
+    <script>
+      var x,y,n,i,s,t=[],l=[],opt=[],
+          llist = [
+            'Town', 'New York', 'Wreck of the Hindenburg', 'Central park', 'A small thing', 
+            'Riverside Park and drive', 'American Museum of Natural History','Ford Motor Company Edgewater Assembly Plant',
+            'Studio 54','Church of St. Vincent Ferrer','CBS Broadcast Center','USS Intrepid (CV-11)','Burr-Hamilton duel',
+            'Nungessers','New York Tunnel Extension','Weehawken','Roosevelt Island'
+          ],
+          hslist = [ [0,0], [1,0], [1,1], [0,1] ]; // potential label hotspot locations
+
+      // position label
+      function positionLabel(l,hs) {
+        hs = hs || 0;
+        l.x = l.tx-hslist[hs][0]*l.w;
+        l.y = l.ty-hslist[hs][1]*l.h;
+      }
+
+      function insertLabel( l, t ) {
+        var A = null, wopt, wopt2, w, h, lh;
+        l.span = $('<span class="label"></span>').text(l.name);
+        t.append( l.span );
+        // obtain max width
+        l.w = l.span.width(); 
+
+        // find best label shape
+        w = wopt = l.w;
+        lh = l.span.height();
+        for( ; w>l.w/4; w-=4 ) {
+          l.span.css( { width: w+'px' } );
+
+          // did the height change with this resize? (word wrap occured)
+          h = l.span.height();
+          if( h != lh ) {
+            wopt = wopt2;
+            lh = h;
+          }
+
+          // calculate new weighted area
+          h = Math.pow( h, 2 );
+          if( A === null || w*w*h < A ) {
+            wopt2 = w;
+            A = w*w*h;
+          }
+        }
+        l.w = wopt;
+        l.span.css( { width: l.w+'px' } );
+        l.h = l.span.height();
+
+        positionLabel(l);
+        l.span.css( { left: l.x, top: l.y } );
+      }
+
+      function overlap(l1,l2,n,m) {
+        var n=n||0,m=m||0,
+            l2x=l2.x+128*n,
+            l2y=l2.y+128*m;
+        if( l1.x < (l2x+l2.w) && l2x < (l1.x+l1.w) && 
+            l1.y < (l2y+l2.h) && l2y < (l1.y+l1.h) ) {
+          return ( Math.min(l1.x+l1.w,l2x+l2.w) - Math.max(l1.x,l2x) ) * 
+                 ( Math.min(l1.y+l1.h,l2y+l2.h) - Math.max(l1.y,l2y) );
+        } else {
+          return 0.0;
+        }
+      }
+
+      function optimizeLabels( x,y,debug ) {
+        var o,omin = null,nc,c,cmin,tc,i,j,n,m,ll=l[x][y],l2,hsl=hslist.length;
+        if( ll.length > 4 ) return;
+
+        // loop over all combinations
+        nc = Math.pow( hsl, ll.length );
+        for( c = 0; c < nc; ++c ) {
+          // apply configuration
+          tc = c;
+          for( i=0; i< ll.length; ++i ) {
+            positionLabel(ll[i],tc%hsl);
+            tc = Math.floor(tc/hsl);
+          }
+          
+          // check within tile
+          o = 0;
+          for( i=0; i< ll.length; ++i ) {
+            for( j=i+1; j< ll.length; ++j ) {
+              o += overlap(ll[i],ll[j]);
+            }
+          }
+
+          // check initialized neighbors
+          for( n = Math.max(x-1,0); n<=Math.min(x+1,3); n++ ) {
+            for( m = Math.max(y-1,0); m<=Math.min(y+1,3); m++ ) {
+              if( opt[n][m] && ( n!=x || m!=y ) ) {
+                l2=l[n][m];
+                for( i=0; i< ll.length; ++i ) {
+                  for( j=0; j< l2.length; ++j ) {
+                    o += overlap(ll[i],l2[j],n-x,m-y);
+                  }
+                }
+              }
+            }
+          }
+
+          // overlap minimum?
+          if( omin === null || o < omin ) {
+            omin = o;
+            cmin = c;
+          }
+
+          if(debug) { console.log(c+' -> '+o); }
+        }
+
+        // apply minimum
+        tc = cmin;
+        for( i=0; i< ll.length; ++i ) {
+          positionLabel(ll[i],tc%hsl);
+          tc = Math.floor(tc/hsl);
+          ll[i].span.css( { left: ll[i].x, top: ll[i].y } );
+        }
+        if(debug) { console.log("min: "+cmin+' -> '+omin); }
+
+        opt[x][y] = true;
+      } 
+
+      $(function(){
+        var x2,y2;
+        for( x=0; x<4; x++ ) {
+          t[x]=[];
+          l[x]=[];
+          opt[x]=[];
+          for( y=0; y<4; y++ ) {
+            opt[x][y]=false;
+            l[x][y]=[];
+            t[x][y]=$('<div class="tile"></div>').css( { top: y*128, left: x*128 } );
+            $('#canvas').append(t[x][y]);
+
+            n = 0;
+            for( x2=0; x2<2; x2++ ) {
+              for( y2=0; y2<2; y2++ ) {
+                l[x][y][n] = ({ 
+                  w: 0, h: 0, hs: 0, x:0, y:0,
+                  tx: Math.floor(Math.random()*64)+64*x2, 
+                  ty: Math.floor(Math.random()*64)+64*y2, 
+                  name: llist[Math.floor(Math.random()*llist.length)]
+                });
+                insertLabel( l[x][y][n], t[x][y] );
+                t[x][y].append($('<div class="dot"></div>').css( { left: l[x][y][n].x-2, top: l[x][y][n].y-2 }));
+                n++;
+              }
+            }
+          }
+        }
+
+        $('button').click(function(){
+          var i = [],x,y,n;
+          n = 0;
+          for( x=0; x<4; x++ ) {
+            for( y=0; y<4; y++ ) {
+              i[n++] = { r: Math.random(), x:x, y:y };
+            }
+          }
+          i.sort(function(a,b){return a.r-b.r});
+          
+          console.log('optimizing');
+          while( n>0 ) {
+            n--;
+            optimizeLabels(i[n].x,i[n].y);
+          }
+        });
+      });
+    </script>
+  </body>
+</html>
