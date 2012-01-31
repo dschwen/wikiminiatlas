@@ -1,5 +1,6 @@
 <html>
   <head>
+    <title>Map Label Overlap Reduction</title>
     <script type="text/javascript" src="jquery-1.5.1.min.js"></script>
     <style>
       #canvas {
@@ -29,8 +30,10 @@
     </style>
   </head>
   <body>
+    <h1>Reducing map label overlap</h1>
     <div id="canvas"></div>
     <button>Optimize Labels</button>
+    <p>Testing a simple heuristics to layout the WikiMiniAtlas map labels client-side. Press the 'Optimize Labels' button (try more than once). The code also tries to compatify the labels into a rectangular bounding box with minimal area and pleasant aspect ratio.</p>
     <script>
       var x,y,n,i,s,t=[],l=[],opt=[],
           llist = [
