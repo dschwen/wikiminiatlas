@@ -103,8 +103,17 @@
       }
 
       function optimizeLabels( x,y,debug ) {
-        var o,omin = null,nc,c,cmin,tc,i,j,n,m,ll=l[x][y],l2,hsl=hslist.length;
+        var o,omin = null,nc,c,cmin,tc,i,j,n,m,ll=l[x][y],l2,hsl=hslist.length, nn=[];
         if( ll.length > 4 ) return;
+
+        // compile list of initialized neighbors
+        for( n = Math.max(x-1,0); n<=Math.min(x+1,3); n++ ) {
+          for( m = Math.max(y-1,0); m<=Math.min(y+1,3); m++ ) {
+            if( opt[n][m] && ( n!=x || m!=y ) ) {
+              nn.push( { l: l[n][m], dx: n-x, dy: m-y });
+            }
+          }
+        }
 
         // loop over all combinations
         nc = Math.pow( hsl, ll.length );
@@ -125,15 +134,11 @@
           }
 
           // check initialized neighbors
-          for( n = Math.max(x-1,0); n<=Math.min(x+1,3); n++ ) {
-            for( m = Math.max(y-1,0); m<=Math.min(y+1,3); m++ ) {
-              if( opt[n][m] && ( n!=x || m!=y ) ) {
-                l2=l[n][m];
-                for( i=0; i< ll.length; ++i ) {
-                  for( j=0; j< l2.length; ++j ) {
-                    o += overlap(ll[i],l2[j],n-x,m-y);
-                  }
-                }
+          for( n = 0; n < nn.length; ++n ) {
+            l2=nn[n].l;
+            for( i=0; i< ll.length; ++i ) {
+              for( j=0; j< l2.length; ++j ) {
+                o += overlap(ll[i],l2[j], nn[n].dx, nn[n].dy );
               }
             }
           }
@@ -203,7 +208,6 @@
           }
           i.sort(function(a,b){return a.r-b.r});
           
-          console.log('optimizing');
           while( n>0 ) {
             n--;
             optimizeLabels(i[n].x,i[n].y);
