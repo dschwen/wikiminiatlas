@@ -534,11 +534,14 @@ function moveWikiMiniAtlasMapTo()
     }
 
     thistile.div.html('<span class="loading">' + strings.labelLoading[UILang] + '</span>');
+
+    // TODO: instead of launching the XHR here, gather the needed coords and ...
     thistile.xhr = $.ajax( { url : dataurl, context : thistile.div } )
       .success( function(data) { this.html(data); } )
       .error( function() { this.text(''); } );
    }
   }
+  // ...request them here, all at once
 
   // update markers
   updateMarker(marker);
