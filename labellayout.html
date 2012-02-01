@@ -2,6 +2,7 @@
   <head>
     <title>Map Label Overlap Reduction</title>
     <script type="text/javascript" src="jquery-1.5.1.min.js"></script>
+    <link href="wikiminiatlas.css" rel="stylesheet" type="text/css" />
     <style>
       #canvas {
         border: 1px solid black; 
@@ -38,26 +39,56 @@
     <button id="pop">New Labels</button>
     <p>Testing a simple heuristics to layout the WikiMiniAtlas map labels client-side. Press the 'Optimize Labels' button (try more than once). The code also tries to compatify the labels into a rectangular bounding box with minimal area and pleasant aspect ratio.</p>
     <script>
-      var x,y,n,i,s,t=[],l=[],opt=[],
-          llist = [
+      var x,y,n,i,s,t=[],l=[],opt=[]
+        , llist = [
             'Town', 'New York', 'Wreck of the Hindenburg', 'Central park', 'A small thing', 
             'Riverside Park and drive', 'American Museum of Natural History','Ford Motor Company Edgewater Assembly Plant',
             'Studio 54','Church of St. Vincent Ferrer','CBS Broadcast Center','USS Intrepid (CV-11)','Burr-Hamilton duel',
             'Nungessers','New York Tunnel Extension','Weehawken','Roosevelt Island'
-          ],
-          hslist = [ [0,0], [1,0], [1,1], [0,1] ]; // potential label hotspot locations
+          ]
+        , hslist = [ [0,0], [1,0], [1,1], [0,1] ]  // potential label hotspot locations
+        , sprite = [
+            { r: 6 }, // red dot
+            { r: 6 }, // blue dot
+            { r: 2 }, // UL
+            { r: 2 }, // UR
+            { r: 2 }, // DR
+            { r: 2 }, // DL
+            { r: 2 }, // city 3
+            { r: 3 }, // city 5
+            { r: 4 }, // city 7
+            { r: 5 }, // city 9
+            { r: 6 }, // city 11
+            { r: 5 }, // summit
+            { r: 6 }  // event
+          ]
+      ;
 
       // position label
       function positionLabel(l,hs) {
         hs = hs || 0;
-        l.x = l.tx-hslist[hs][0]*l.w;
-        l.y = l.ty-hslist[hs][1]*l.h;
+        l.sprite = (l.style==0)?(hs+2):(l.style+5);
+        l.x = l.tx-hslist[hs][0]*l.w - (hslist[hs][0]-0.5)*2*sprite[l.sprite].r;
+        l.y = l.ty-hslist[hs][1]*l.h - (hslist[hs][1]-0.5)*2*sprite[l.sprite].r;
       }
 
+      function updateSprite(l) {
+        l.sym.css('background-position', (-12*l.sprite) + 'px' );
+      }
       function insertLabel( l, t ) {
         var A = null, wopt, wopt2, w, h, lh;
-        l.span = $('<span class="label"></span>').text(l.name);
-        t.append( l.span );
+        
+        // insert symbol
+        l.sym = $('<div class="sprite"></div>')
+          .css( { 
+            left: (l.tx-5) + 'px', 
+            top:  (l.ty-5) + 'px' 
+          } )
+          .appendTo(t);
+
+        // insert label text
+        l.span = $('<span class="label"></span>').text(l.name).appendTo(t);
+
         // obtain max width
         l.w = l.span.width(); 
 
@@ -87,6 +118,7 @@
 
         positionLabel(l);
         l.span.css( { left: l.x, top: l.y } );
+        updateSprite(l);
       }
 
       function overlap(l1,l2,n,m) {
@@ -158,6 +190,7 @@
           positionLabel(ll[i],tc%hsl);
           tc = Math.floor(tc/hsl);
           ll[i].span.css( { left: ll[i].x, top: ll[i].y } );
+          updateSprite(ll[i]);
         }
         if(debug) { console.log("min: "+cmin+' -> '+omin); }
 
@@ -180,14 +213,17 @@
             n = 0;
             for( x2=0; x2<2; x2++ ) {
               for( y2=0; y2<2; y2++ ) {
-                l[x][y][n] = ({ 
+                l[x][y][n] = { 
                   w: 0, h: 0, hs: 0, x:0, y:0,
                   tx: Math.floor(Math.random()*64)+64*x2, 
                   ty: Math.floor(Math.random()*64)+64*y2, 
-                  name: llist[Math.floor(Math.random()*llist.length)]
-                });
+                  name: llist[Math.floor(Math.random()*llist.length)],
+                  style: 0,//Math.floor(Math.random()*8),
+                  span: null, sym: null, sprite: null
+                };
                 insertLabel( l[x][y][n], t[x][y] );
-                t[x][y].append($('<div class="dot"></div>').css( { left: l[x][y][n].x-2, top: l[x][y][n].y-2 }));
+                positionLabel( l[x][y][n] );
+                //t[x][y].append($('<div class="dot"></div>').css( { left: l[x][y][n].x-2, top: l[x][y][n].y-2 }));
                 n++;
               }
             }

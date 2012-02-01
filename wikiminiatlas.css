@@ -15,6 +15,14 @@ a.label {
   //color: black;
 }
 
+/* new sprite-based symbols */
+div.sprite {
+  background-image: url('symbols/sprite1.png');
+  width: 11px; height: 11px;
+  background-position: 0 0;
+  position: absolute;
+}
+
 /* commons thumb */
 a.cthumb {
    font-size:7pt;
