@@ -1,0 +1,45 @@
+<html>
+  <head>
+    <title>Drawing GeoJSON</title>
+    <script type="text/javascript" src="jquery-1.5.1.min.js"></script>
+    <link href="wikiminiatlas.css" rel="stylesheet" type="text/css" />
+    <style>
+      #canvas {
+        border: 1px solid black; 
+        width: 512px; 
+        height: 512px;
+        position: relative;
+      }
+      div.tile { 
+        width: 128px;
+        height: 128px;
+        position: absolute;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Drawing GeoJSON</h1>
+    <canvas width=512 height=512 id="canvas"></canvas>
+    <p>Drawing GeoJSON data from the OSM database on a canvas overlay.</p>
+    <script>
+      var canvas,c,w,h;
+
+      // draw the data
+      function drawGeoJSON(d) {
+      }
+
+      // return path element at screen coordinates
+      function pathAt(x,y) {
+      }
+
+      $(function(){
+        canvas = $('#canvas');
+        w = c.width();
+        h = c.height();
+        c = canvas[0].getContext('2d');
+
+        drawGeoJSON( { } );
+      });
+    </script>
+  </body>
+</html>
