@@ -26,6 +26,21 @@
 
       // draw the data
       function drawGeoJSON(d) {
+        var i, j;
+        c.lineWidth = 4.0;
+        c.strokeStyle = "rgb(0,0,255)";
+        c.beginPath();
+        
+        for(i =0; i<way.length; ++i ) {
+          if( way[i].length > 0 ) {
+            c.moveTo(d.way[i][0].x,d.way[i][0].y);
+            for( j=1; j<way[i].length; ++j ) {
+              c.lineTo(d.way[i][0].x,d.way[i][0].y);
+            }
+          }
+        }
+        c.endPath();
+        c.stroke();
       }
 
       // return path element at screen coordinates
@@ -34,8 +49,8 @@
 
       $(function(){
         canvas = $('#canvas');
-        w = c.width();
-        h = c.height();
+        w = canvas[0].width;
+        h = canvas[0].height;
         c = canvas[0].getContext('2d');
 
         drawGeoJSON( { } );
