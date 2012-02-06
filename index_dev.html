@@ -12,9 +12,7 @@ a { text-decoration:none; }
   function wmaMessageHub(e) {
     e = e.originalEvent;
     if( e.data == 'request' ) {
-      e.source.postMessage('1,1','*');
-      e.source.postMessage('2,1','*');
-      e.source.postMessage('2.7,0.7','*');
+      e.source.postMessage('{"coords":[{"lat":41.88333333333333,"lon":12.483333333333333,"title":"Rome_(stad)"},{"lat":42.05,"lon":12.616666666666667,"title":"Monterotondo"},{"lat":42.02388888888889,"lon":12.401388888888889,"title":"Veii"},{"lat":42.02388888888889,"lon":12.401388888888889,"title":"Veii"},{"lat":42.02388888888889,"lon":12.401388888888889,"title":"Veii"},{"lat":41.7111111111,"lon":12.3469444444,"title":"Laurentum"}]}','*');
     }
     if( e.data == 'kml' ) {
       e.source.postMessage('1,1','*');

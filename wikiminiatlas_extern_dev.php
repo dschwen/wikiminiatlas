@@ -908,22 +908,35 @@ function extraMarkerMessage(index,cmd) {
  }
 }
 
+// todo JSON for message passing!
 function wmaReceiveMessage(e) {
   e = e.originalEvent;
-  var d = e.data.split(','),
+  var d = JSON.parse(e.data),i,m,
       title = decodeURIComponent( d.splice(3).join(',') ).replace(/[\+_]/g,' '),
-      m = { obj: null, lat: parseFloat(d[0]), lon: parseFloat(d[1]) },
       i;
 
-  if( Math.abs(m.lat-marker.lat) > 0.0001 || Math.abs(m.lon-marker.lon) > 0.0001 ) {
-    m.obj = $('<div></div>').attr('title',title).addClass('emarker')
-      .mouseover(extraMarkerMessage(parseInt(d[2]),'highlight'))
-      .mouseout(extraMarkerMessage(parseInt(d[2]),'unhighlight'))
-      .click(extraMarkerMessage(parseInt(d[2]),'scroll'));
-    $(wikiminiatlas_map).append(m.obj);
-    updateMarker(m);
-    extramarkers.push(m);
+  // process point coordinates
+  if( 'coords' in d ) {
+    for( i=0; i < d.coords.length; ++i ) {
+      m = { obj: null, lat: d.coords[i].lat, lon: d.coords[i].lon };
+      if( Math.abs(m.lat-marker.lat) > 0.0001 || Math.abs(m.lon-marker.lon) > 0.0001 ) {
+        m.obj = $('<div></div>')
+          .attr( 'title', d.coords[i].title.replace(/[\+_]/g,' ') )
+          .addClass('emarker')
+          .mouseover( extraMarkerMessage(i,'highlight') )
+          .mouseout( extraMarkerMessage(i,'unhighlight') )
+          .click( extraMarkerMessage(i,'scroll') );
+        $(wikiminiatlas_map).append(m.obj);
+        updateMarker(m);
+        extramarkers.push(m);
+      }
+    }
   }
+
+  // process line coordinates
+  if( 'ways' in d ) {
+  }
+
 }
 
 // call installation routine
