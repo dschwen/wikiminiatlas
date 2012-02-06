@@ -75,6 +75,8 @@ var wmaci_image_span = null;
 var wmaci_link = null;
 var wmaci_link_text = null;
 
+var wmakml = { canvas: null, c: null, ways: null };
+
 // include documentation strings
 <? require( 'wikiminiatlas_i18n.inc' ); ?>
 
@@ -489,7 +491,18 @@ function wmaResize() {
     }
     moveWikiMiniAtlasMapTo();
     $(wikiminiatlas_map).width(nw).height(nh);//.css('clip','rect(0px '+nw+'px '+nh+'px 0px)');
+
+    // resize kml canvas, if it exists
+    if( wmakml.canvas !== null ) {
+      wmakml.canvas.attr( { width: nw, height: nh } );
+      wmaDrawKML();
+    }
   }
+}
+
+// draw KML data
+function wmaDrawKML() {
+  
 }
 
 // Set new map Position (to wikiminiatlas_gx, wikiminiatlas_gy)
@@ -923,8 +936,8 @@ function wmaReceiveMessage(e) {
           .addClass('emarker')
           .mouseover( extraMarkerMessage(i,'highlight') )
           .mouseout( extraMarkerMessage(i,'unhighlight') )
-          .click( extraMarkerMessage(i,'scroll') );
-        $(wikiminiatlas_map).append(m.obj);
+          .click( extraMarkerMessage(i,'scroll') )
+          .appendTo( $(wikiminiatlas_map) );
         updateMarker(m);
         extramarkers.push(m);
       }
@@ -933,6 +946,14 @@ function wmaReceiveMessage(e) {
 
   // process line coordinates
   if( 'ways' in d ) {
+    // add canvas overlay
+    if( wmakml.canvas === null ) {
+      wmakml.canvas = $('<canvas class="wmakml"></canvas>')
+        .attr( { width: wikiminiatlas_width, height: wikiminiatlas_height } )
+        .appendTo( $(wikiminiatlas_map) );
+    }
+    // copy data
+    wmakml.ways = d.ways;
   }
 
 }

@@ -314,6 +314,14 @@ div.wmatile {
   height:128px;
 }
 
+canvas.wmakml {
+  position: absolute;
+  top: 0;
+  left: 0;
+  opacity: 0.5;
+  -moz-opacity: 0.5;
+}
+
 body {
   -moz-user-select:none;
   -webkit-user-select:none;
