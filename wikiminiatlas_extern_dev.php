@@ -911,9 +911,7 @@ function extraMarkerMessage(index,cmd) {
 // todo JSON for message passing!
 function wmaReceiveMessage(e) {
   e = e.originalEvent;
-  var d = JSON.parse(e.data),i,m,
-      title = decodeURIComponent( d.splice(3).join(',') ).replace(/[\+_]/g,' '),
-      i;
+  var d = JSON.parse(e.data),i,j,m;
 
   // process point coordinates
   if( 'coords' in d ) {
@@ -921,7 +919,7 @@ function wmaReceiveMessage(e) {
       m = { obj: null, lat: d.coords[i].lat, lon: d.coords[i].lon };
       if( Math.abs(m.lat-marker.lat) > 0.0001 || Math.abs(m.lon-marker.lon) > 0.0001 ) {
         m.obj = $('<div></div>')
-          .attr( 'title', d.coords[i].title.replace(/[\+_]/g,' ') )
+          .attr( 'title', d.coords[i].title )
           .addClass('emarker')
           .mouseover( extraMarkerMessage(i,'highlight') )
           .mouseout( extraMarkerMessage(i,'unhighlight') )
