@@ -1,0 +1,35 @@
+<html>
+  <head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<style type="text/css">
+<!--
+a { text-decoration:none; }
+#coordinates_3_ObenRechts { position: absolute; top:1em; right:1em; }
+-->
+</style>
+<script type="text/javascript" src="jquery-1.4.4.min.js"></script>
+<script>
+  function wmaMessageHub(e) {
+    e = e.originalEvent;
+    if( e.data == 'request' ) {
+      e.source.postMessage('1,1','*');
+      e.source.postMessage('2,1','*');
+      e.source.postMessage('2.7,0.7','*');
+    }
+    if( e.data == 'kml' ) {
+      e.source.postMessage('1,1','*');
+    }
+  }
+  $(window).bind('message',wmaMessageHub);
+</script>
+</head>
+<body>
+<h1>WikiMiniAtlas</h1>
+<iframe scrolling="no" frameborder="0" width="800" height="600" src="iframe_dev.html?40.7833_-73.966_800_600_en_12_en" style="width:800px; height:600px; border: 1px solid gray; padding: 0px; margin: 0px; resize: both">
+You need a browser that supports iframes
+</iframe>
+<p>A quasi random selection of geocoded images from wikimedia commons...</p>
+<p>...Featured pictures, Quality images, and former pictures of the day are displayed with a higher priority. Images below 1MP get smaller thumbnails</p>
+
+</body>
+</html>
