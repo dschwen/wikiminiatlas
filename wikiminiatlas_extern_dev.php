@@ -489,20 +489,42 @@ function wmaResize() {
         wikiminiatlas_tile[i].div.hide();
       }
     }
-    moveWikiMiniAtlasMapTo();
-    $(wikiminiatlas_map).width(nw).height(nh);//.css('clip','rect(0px '+nw+'px '+nh+'px 0px)');
 
     // resize kml canvas, if it exists
     if( wmakml.canvas !== null ) {
       wmakml.canvas.attr( { width: nw, height: nh } );
-      wmaDrawKML();
     }
+
+    moveWikiMiniAtlasMapTo();
+    $(wikiminiatlas_map).width(nw).height(nh);//.css('clip','rect(0px '+nw+'px '+nh+'px 0px)');
   }
 }
 
 // draw KML data
 function wmaDrawKML() {
-  
+  var i, j, c = wmakml.c, w = wmakkml.ways,p;
+  if( c !== null ) {
+    // clear canvas
+    c.clearRect( 0,0, wmakml.canvas[0].width, wmakml.canvas[0].height );
+
+    // draw ways
+    c.lineWidth = 4.0;
+    c.strokeStyle = "rgb(0,0,255)";
+    c.beginPath();
+    
+    for(i =0; i<w.length; ++i ) {
+      if( w[i].length > 0 ) {
+        p = wmaLatLongToXY( w[i][0].lat, w[i][0].lon );
+        c.moveTo(p.x,p.y);
+        for( j=1; j<way[i].length; ++j ) {
+          p = wmaLatLongToXY( w[i][j].lat, w[i][j].lon );
+          c.lineTo(p.x,p.y);
+        }
+      }
+    }
+    c.endPath();
+    c.stroke();
+  }
 }
 
 // Set new map Position (to wikiminiatlas_gx, wikiminiatlas_gy)
@@ -561,6 +583,8 @@ function moveWikiMiniAtlasMapTo()
   for( n = 0; n < extramarkers.length; ++n ) {
    updateMarker(extramarkers[n]);
   }
+
+  wmaDrawKML();
 }
 
 // position marker
@@ -951,6 +975,7 @@ function wmaReceiveMessage(e) {
       wmakml.canvas = $('<canvas class="wmakml"></canvas>')
         .attr( { width: wikiminiatlas_width, height: wikiminiatlas_height } )
         .appendTo( $(wikiminiatlas_map) );
+      wmakml.c = wmakml.canvas[0].getContext('2d');
     }
     // copy data
     wmakml.ways = d.ways;
