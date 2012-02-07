@@ -316,6 +316,8 @@ div.wmatile {
 
 canvas.wmakml {
   position: absolute;
+  z-index:25;
+  pointer-events: none;
   top: 0;
   left: 0;
   opacity: 0.5;

@@ -502,7 +502,7 @@ function wmaResize() {
 
 // draw KML data
 function wmaDrawKML() {
-  var i, j, c = wmakml.c, w = wmakkml.ways,p;
+  var i, j, c = wmakml.c, w = wmakml.ways,p;
   if( c !== null ) {
     // clear canvas
     c.clearRect( 0,0, wmakml.canvas[0].width, wmakml.canvas[0].height );
@@ -511,18 +511,16 @@ function wmaDrawKML() {
     c.lineWidth = 4.0;
     c.strokeStyle = "rgb(0,0,255)";
     c.beginPath();
-    
     for(i =0; i<w.length; ++i ) {
       if( w[i].length > 0 ) {
-        p = wmaLatLongToXY( w[i][0].lat, w[i][0].lon );
-        c.moveTo(p.x,p.y);
-        for( j=1; j<way[i].length; ++j ) {
-          p = wmaLatLongToXY( w[i][j].lat, w[i][j].lon );
-          c.lineTo(p.x,p.y);
+        p = wmaLatLonToXY( w[i][0].lat, w[i][0].lon );
+        c.moveTo( p.x-wikiminiatlas_gx, p.y-wikiminiatlas_gy );
+        for( j=1; j<w[i].length; ++j ) {
+          p = wmaLatLonToXY( w[i][j].lat, w[i][j].lon );
+          c.lineTo( p.x-wikiminiatlas_gx, p.y-wikiminiatlas_gy );
         }
       }
     }
-    c.endPath();
     c.stroke();
   }
 }
