@@ -335,8 +335,8 @@ function wikiminiatlasInstall()
   wikiminiatlas_widget  = document.getElementById('wikiminiatlas_widget');
   wikiminiatlas_widget.innerHTML += WikiMiniAtlasHTML;
 
-  //var news = $('<div></div>').html('<b>New:</b> hold Ctrl or &#x2318; and hover over a link to read an article summary.').addClass('news');
-  var news = $('<div></div>').html('<b>New:</b> More Zoom and new data by OpenStreetMap.').addClass('news');
+  var news = $('<div></div>').html('<b>New:</b> hold Ctrl or &#x2318; and hover over a link to read an article summary.').addClass('news');
+  //var news = $('<div></div>').html('<b>New:</b> More Zoom and new data by OpenStreetMap.').addClass('news');
   $('#wikiminiatlas_widget').append(news);
   news.click( function() { news.fadeOut(); } )
   setTimeout(  function() { news.fadeOut(); }, 20*1000 );
@@ -977,6 +977,7 @@ function wmaReceiveMessage(e) {
     }
     // copy data
     wmakml.ways = d.ways;
+    wmaDrawKML();
   }
 
 }

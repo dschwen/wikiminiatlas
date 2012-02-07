@@ -75,12 +75,14 @@ var wmaci_image_span = null;
 var wmaci_link = null;
 var wmaci_link_text = null;
 
+var wmakml = { canvas: null, c: null, ways: null };
+
 // include documentation strings
 <? require( 'wikiminiatlas_i18n.inc' ); ?>
 
 var wikiminiatlas_tilesets = [
  {
-  name: "Full basemap (VMAP0)",
+  name: "Full basemap (VMAP0,OSM)",
   getTileURL: function( y, x, z ) 
   { 
    me = wikiminiatlas_tilesets[0];
@@ -95,7 +97,7 @@ var wikiminiatlas_tilesets = [
    }
   },
   linkcolor: "#2255aa",
-  maxzoom: 10,
+  maxzoom: 12,
   minzoom: 0
  },
  {
@@ -334,6 +336,7 @@ function wikiminiatlasInstall()
   wikiminiatlas_widget.innerHTML += WikiMiniAtlasHTML;
 
   var news = $('<div></div>').html('<b>New:</b> hold Ctrl or &#x2318; and hover over a link to read an article summary.').addClass('news');
+  //var news = $('<div></div>').html('<b>New:</b> More Zoom and new data by OpenStreetMap.').addClass('news');
   $('#wikiminiatlas_widget').append(news);
   news.click( function() { news.fadeOut(); } )
   setTimeout(  function() { news.fadeOut(); }, 20*1000 );
@@ -486,8 +489,39 @@ function wmaResize() {
         wikiminiatlas_tile[i].div.hide();
       }
     }
+
+    // resize kml canvas, if it exists
+    if( wmakml.canvas !== null ) {
+      wmakml.canvas.attr( { width: nw, height: nh } );
+    }
+
     moveWikiMiniAtlasMapTo();
     $(wikiminiatlas_map).width(nw).height(nh);//.css('clip','rect(0px '+nw+'px '+nh+'px 0px)');
+  }
+}
+
+// draw KML data
+function wmaDrawKML() {
+  var i, j, c = wmakml.c, w = wmakml.ways,p;
+  if( c !== null ) {
+    // clear canvas
+    c.clearRect( 0,0, wmakml.canvas[0].width, wmakml.canvas[0].height );
+
+    // draw ways
+    c.lineWidth = 4.0;
+    c.strokeStyle = "rgb(0,0,255)";
+    c.beginPath();
+    for(i =0; i<w.length; ++i ) {
+      if( w[i].length > 0 ) {
+        p = wmaLatLonToXY( w[i][0].lat, w[i][0].lon );
+        c.moveTo( p.x-wikiminiatlas_gx, p.y-wikiminiatlas_gy );
+        for( j=1; j<w[i].length; ++j ) {
+          p = wmaLatLonToXY( w[i][j].lat, w[i][j].lon );
+          c.lineTo( p.x-wikiminiatlas_gx, p.y-wikiminiatlas_gy );
+        }
+      }
+    }
+    c.stroke();
   }
 }
 
@@ -533,17 +567,22 @@ function moveWikiMiniAtlasMapTo()
     }
 
     thistile.div.html('<span class="loading">' + strings.labelLoading[UILang] + '</span>');
+
+    // TODO: instead of launching the XHR here, gather the needed coords and ...
     thistile.xhr = $.ajax( { url : dataurl, context : thistile.div } )
       .success( function(data) { this.html(data); } )
       .error( function() { this.text(''); } );
    }
   }
+  // ...request them here, all at once
 
   // update markers
   updateMarker(marker);
   for( n = 0; n < extramarkers.length; ++n ) {
    updateMarker(extramarkers[n]);
   }
+
+  wmaDrawKML();
 }
 
 // position marker
@@ -904,22 +943,43 @@ function extraMarkerMessage(index,cmd) {
  }
 }
 
+// todo JSON for message passing!
 function wmaReceiveMessage(e) {
   e = e.originalEvent;
-  var d = e.data.split(','),
-      title = decodeURIComponent( d.splice(3).join(',') ).replace(/[\+_]/g,' '),
-      m = { obj: null, lat: parseFloat(d[0]), lon: parseFloat(d[1]) },
-      i;
+  var d = JSON.parse(e.data),i,j,m;
 
-  if( Math.abs(m.lat-marker.lat) > 0.0001 || Math.abs(m.lon-marker.lon) > 0.0001 ) {
-    m.obj = $('<div></div>').attr('title',title).addClass('emarker')
-      .mouseover(extraMarkerMessage(parseInt(d[2]),'highlight'))
-      .mouseout(extraMarkerMessage(parseInt(d[2]),'unhighlight'))
-      .click(extraMarkerMessage(parseInt(d[2]),'scroll'));
-    $(wikiminiatlas_map).append(m.obj);
-    updateMarker(m);
-    extramarkers.push(m);
+  // process point coordinates
+  if( 'coords' in d ) {
+    for( i=0; i < d.coords.length; ++i ) {
+      m = { obj: null, lat: d.coords[i].lat, lon: d.coords[i].lon };
+      if( Math.abs(m.lat-marker.lat) > 0.0001 || Math.abs(m.lon-marker.lon) > 0.0001 ) {
+        m.obj = $('<div></div>')
+          .attr( 'title', d.coords[i].title )
+          .addClass('emarker')
+          .mouseover( extraMarkerMessage(i,'highlight') )
+          .mouseout( extraMarkerMessage(i,'unhighlight') )
+          .click( extraMarkerMessage(i,'scroll') )
+          .appendTo( $(wikiminiatlas_map) );
+        updateMarker(m);
+        extramarkers.push(m);
+      }
+    }
   }
+
+  // process line coordinates
+  if( 'ways' in d ) {
+    // add canvas overlay
+    if( wmakml.canvas === null ) {
+      wmakml.canvas = $('<canvas class="wmakml"></canvas>')
+        .attr( { width: wikiminiatlas_width, height: wikiminiatlas_height } )
+        .appendTo( $(wikiminiatlas_map) );
+      wmakml.c = wmakml.canvas[0].getContext('2d');
+    }
+    // copy data
+    wmakml.ways = d.ways;
+    wmaDrawKML();
+  }
+
 }
 
 // call installation routine
