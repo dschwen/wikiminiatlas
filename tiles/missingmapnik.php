@@ -100,7 +100,8 @@ if( substr($url,0,strlen($base)) == $base )
     }
     else
     {
-     header( "Location: $url" );
+     header( 'Cache-Control: no-cache' );
+     header( "Location: $url?" . rand() );
      header( 'Status: 302' );
     }
    } 
