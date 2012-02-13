@@ -75,7 +75,7 @@ var wmaci_image_span = null;
 var wmaci_link = null;
 var wmaci_link_text = null;
 
-var wmakml = { canvas: null, c: null, ways: null };
+var wmakml = { canvas: null, c: null, ways: null, areas: null };
 
 // include documentation strings
 <? require( 'wikiminiatlas_i18n.inc' ); ?>
@@ -502,26 +502,56 @@ function wmaResize() {
 
 // draw KML data
 function wmaDrawKML() {
-  var i, j, c = wmakml.c, w = wmakml.ways,p;
+  var i, j, c = wmakml.c, w = wmakml.ways, a = wmakml.areas, p;
+
+  function addToPath(w) {
+    var k,p;
+    if( w.length > 0 ) {
+      p = wmaLatLonToXY( w[0].lat, w[0].lon );
+      c.moveTo( p.x-wikiminiatlas_gx, p.y-wikiminiatlas_gy );
+      for( k=1; k<w.length; ++k ) {
+        p = wmaLatLonToXY( w[k].lat, w[k].lon );
+        c.lineTo( p.x-wikiminiatlas_gx, p.y-wikiminiatlas_gy );
+      }
+    }
+  }
+
   if( c !== null ) {
     // clear canvas
     c.clearRect( 0,0, wmakml.canvas[0].width, wmakml.canvas[0].height );
 
-    // draw ways
-    c.lineWidth = 4.0;
-    c.strokeStyle = "rgb(0,0,255)";
-    c.beginPath();
-    for(i =0; i<w.length; ++i ) {
-      if( w[i].length > 0 ) {
-        p = wmaLatLonToXY( w[i][0].lat, w[i][0].lon );
-        c.moveTo( p.x-wikiminiatlas_gx, p.y-wikiminiatlas_gy );
-        for( j=1; j<w[i].length; ++j ) {
-          p = wmaLatLonToXY( w[i][j].lat, w[i][j].lon );
-          c.lineTo( p.x-wikiminiatlas_gx, p.y-wikiminiatlas_gy );
+    // areas
+    if( a !== null ) {
+      c.fillStyle = "rgb(255,0,0)";
+      for( i = 0; i<a.length; i++ ) {
+        c.globalCompositeOperation = 'source-in';
+        for( j = 0; j<a[i].outer.length; ++j ) {
+          c.beginPath();
+          addToPath(a[i].outer[j])
+          c.closePath();
+          c.fill();
+        }
+        c.globalCompositeOperation = 'destination-out';
+        for( j = 0; j<a[i].inner.length; ++j ) {
+          c.beginPath();
+          addToPath(a[i].inner[j])
+          c.closePath();
+          c.fill();
         }
       }
     }
-    c.stroke();
+
+    // draw ways
+    if( w !== null ) {
+      c.globalCompositeOperation = 'source-in';
+      c.lineWidth = 4.0;
+      c.strokeStyle = "rgb(0,0,255)";
+      c.beginPath();
+      for(i =0; i<w.length; ++i ) {
+        addToPath(w[i]) 
+      }
+      c.stroke();
+    }
   }
 }
 
@@ -967,7 +997,7 @@ function wmaReceiveMessage(e) {
   }
 
   // process line coordinates
-  if( 'ways' in d ) {
+  if( ( 'ways' in d ) || ( 'areas' in d ) ) {
     // add canvas overlay
     if( wmakml.canvas === null ) {
       wmakml.canvas = $('<canvas class="wmakml"></canvas>')
@@ -976,7 +1006,8 @@ function wmaReceiveMessage(e) {
       wmakml.c = wmakml.canvas[0].getContext('2d');
     }
     // copy data
-    wmakml.ways = d.ways;
+    wmakml.ways  = d.ways  || null;
+    wmakml.areas = d.areas || null;
     wmaDrawKML();
   }
 
