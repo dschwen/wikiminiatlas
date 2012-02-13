@@ -505,11 +505,11 @@ function wmaDrawKML() {
   var i, j, c = wmakml.c, w = wmakml.ways, a = wmakml.areas, p;
 
   function addToPath(w) {
-    var k,p;
+    var k, p;
     if( w.length > 0 ) {
       p = wmaLatLonToXY( w[0].lat, w[0].lon );
       c.moveTo( p.x-wikiminiatlas_gx, p.y-wikiminiatlas_gy );
-      for( k=1; k<w.length; ++k ) {
+      for( k = 1; k < w.length; ++k ) {
         p = wmaLatLonToXY( w[k].lat, w[k].lon );
         c.lineTo( p.x-wikiminiatlas_gx, p.y-wikiminiatlas_gy );
       }
@@ -524,17 +524,17 @@ function wmaDrawKML() {
     if( a !== null ) {
       c.fillStyle = "rgb(255,0,0)";
       for( i = 0; i<a.length; i++ ) {
-        c.globalCompositeOperation = 'source-in';
+        c.globalCompositeOperation = 'source-over';
         for( j = 0; j<a[i].outer.length; ++j ) {
           c.beginPath();
-          addToPath(a[i].outer[j])
+          addToPath(a[i].outer[j]);
           c.closePath();
           c.fill();
         }
         c.globalCompositeOperation = 'destination-out';
         for( j = 0; j<a[i].inner.length; ++j ) {
           c.beginPath();
-          addToPath(a[i].inner[j])
+          addToPath(a[i].inner[j]);
           c.closePath();
           c.fill();
         }
@@ -543,7 +543,7 @@ function wmaDrawKML() {
 
     // draw ways
     if( w !== null ) {
-      c.globalCompositeOperation = 'source-in';
+      c.globalCompositeOperation = 'source-over';
       c.lineWidth = 4.0;
       c.strokeStyle = "rgb(0,0,255)";
       c.beginPath();
