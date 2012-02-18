@@ -502,22 +502,23 @@ function wmaResize() {
 
 // draw KML data
 function wmaDrawKML() {
-  var i, j, c = wmakml.c, w = wmakml.ways, a = wmakml.areas, p;
+  var i, j, c = wmakml.c, w = wmakml.ways, a = wmakml.areas, p
+    , hw = wikiminiatlas_zoomsize[wikiminiatlas_zoom];
 
   function addToPath(w) {
-    var k, p, wlon = 0.0, llon, dl;
+    var k, p, wx = 0, lx, dx;
     if( w.length > 0 ) {
       p = wmaLatLonToXY( w[0].lat, w[0].lon );
-      llon = w[0].lon;
+      lx = p.x;
       c.moveTo( p.x-wikiminiatlas_gx, p.y-wikiminiatlas_gy );
       for( k = 1; k < w.length; ++k ) {
-        dl = w[k].lon - llon;
-        if( Math.abs(dl) > 180.0 ) {
-          wlon -= Math.round(dl/360.0)*360.0;
+        p = wmaLatLonToXY( w[k].lat, w[k].lon );
+        dx = p.x - lx;
+        if( Math.abs(dx) > hw ) {
+          wx -= Math.round(dx/(2*hw))*2*hw;
         }
-        p = wmaLatLonToXY( w[k].lat, w[k].lon + wlon );
-        llon = w[k].lon;
-        c.lineTo( p.x-wikiminiatlas_gx, p.y-wikiminiatlas_gy );
+        lx = p.x;
+        c.lineTo( p.x-wikiminiatlas_gx+wx, p.y-wikiminiatlas_gy );
       }
     }
   }
