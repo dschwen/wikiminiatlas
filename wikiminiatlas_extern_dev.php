@@ -75,7 +75,7 @@ var wmaci_image_span = null;
 var wmaci_link = null;
 var wmaci_link_text = null;
 
-var wmakml = { canvas: null, c: null, ways: null, areas: null };
+var wmakml = { shown: false, drawn: false, canvas: null, c: null, ways: null, areas: null };
 
 // include documentation strings
 <? require( 'wikiminiatlas_i18n.inc' ); ?>
@@ -249,6 +249,10 @@ function wikiminiatlasInstall()
    '<img id="button_target" src="' + wikiminiatlas_imgbase + 
     'button_target_locked.png" title="' + strings.center[UILang] + '"' +
     ' style="z-index:30; position:absolute; left:10px; top: 54px; width:18px; cursor:pointer" onclick="wmaMoveToTarget()">' +
+
+   '<img id="button_kml" src="' + wikiminiatlas_imgbase + 
+    'button_kml.png" title="' + strings.kml[UILang] + '"' +
+    ' style="display:none; z-index:30; position:absolute; left:10px; top: 76px; width:18px; cursor:pointer" onclick="wmaToggleKML()">' +
 
    '<img src="'+wikiminiatlas_imgbase+'button_menu.png" title="' + 
     strings.settings[UILang] + 
@@ -498,6 +502,16 @@ function wmaResize() {
     moveWikiMiniAtlasMapTo();
     $(wikiminiatlas_map).width(nw).height(nh);//.css('clip','rect(0px '+nw+'px '+nh+'px 0px)');
   }
+}
+
+// toggle layer visibility
+function wmaToggleKML() {
+  if( wmakml.shown ) {
+    wmakml.canvas.fadeOut(200);
+  } else {
+    wmakml.canvas.fadeIn(200);
+  }
+  wmakml.shown = !wmakml.shown;
 }
 
 // draw KML data
@@ -1015,6 +1029,9 @@ function wmaReceiveMessage(e) {
         .attr( { width: wikiminiatlas_width, height: wikiminiatlas_height } )
         .appendTo( $(wikiminiatlas_map) );
       wmakml.c = wmakml.canvas[0].getContext('2d');
+      wmakml.shown = true;
+      wmakml.drawn = true;
+      $('#button_kml').show();
     }
     // copy data
     wmakml.ways  = d.ways  || null;

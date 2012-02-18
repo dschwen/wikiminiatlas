@@ -971,5 +971,8 @@ var strings =
   uk:'білий',
   vi:'trắng',
   vo:'vietik'
+ },
+ kml: {
+  en:'Toggle overlay'
  }
 };
