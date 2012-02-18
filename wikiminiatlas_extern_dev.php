@@ -511,7 +511,7 @@ function wmaDrawKML() {
       llon = w[0].lon;
       c.moveTo( p.x-wikiminiatlas_gx, p.y-wikiminiatlas_gy );
       for( k = 1; k < w.length; ++k ) {
-        dl = w[k].lon + wlon - llon;
+        dl = w[k].lon - llon;
         if( Math.abs(dl) > 180.0 ) {
           wlon -= Math.round(dl/360.0)*360.0;
         }
