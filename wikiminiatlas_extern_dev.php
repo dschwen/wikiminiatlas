@@ -841,7 +841,7 @@ function wmaUpdateScalebar() {
  if( 5*slen2 < slen1 ) { slen2=slen2*5; skm2=skm2*5; }
  if( 2*slen2 < slen1 ) { slen2=slen2*2; skm2=skm2*2; }
  scalelabel.innerHTML = skm2 + ' km';
- scalebar.style.width = slen2;
+ scalebar.style.width = slen2+'px';
 }
 
 function wmaUpdateTargetButton() {
