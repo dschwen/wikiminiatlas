@@ -341,8 +341,8 @@ function wikiminiatlasInstall()
   news.click( function() { news.fadeOut(); } )
   setTimeout(  function() { news.fadeOut(); }, 20*1000 );
 
-  scalelabel = document.getElementById('scalelabel');
-  scalebar = document.getElementById('scalebar');
+  scalelabel = $('#scalelabel');
+  scalebar = $('#scalebar');
 
   wikiminiatlas_taget_button = document.getElementById('button_target');
   wikiminiatlas_settings = document.getElementById('wikiminiatlas_settings');
@@ -505,12 +505,18 @@ function wmaDrawKML() {
   var i, j, c = wmakml.c, w = wmakml.ways, a = wmakml.areas, p;
 
   function addToPath(w) {
-    var k, p;
+    var k, p, wlon = 0.0, llon, dl;
     if( w.length > 0 ) {
       p = wmaLatLonToXY( w[0].lat, w[0].lon );
+      llon = w[0].lon;
       c.moveTo( p.x-wikiminiatlas_gx, p.y-wikiminiatlas_gy );
       for( k = 1; k < w.length; ++k ) {
-        p = wmaLatLonToXY( w[k].lat, w[k].lon );
+        dl = w[k].lon + wlon - llon;
+        if( Math.abs(dl) > 180.0 ) {
+          wlon -= Math.round(dl/360.0)*360.0;
+        }
+        p = wmaLatLonToXY( w[k].lat, w[k].lon + wlon );
+        llon = w[k].lon;
         c.lineTo( p.x-wikiminiatlas_gx, p.y-wikiminiatlas_gy );
       }
     }
@@ -835,13 +841,17 @@ function wmaUpdateScalebar() {
  var sblocation = wmaXYToLatLon(wikiminiatlas_gx+wikiminiatlas_width/2,wikiminiatlas_gy+wikiminiatlas_height/2);
  var slen1 = 50, slen2;
  var skm1,skm2;
+ // slen1 pixels (50px) are skm1 kilometers horizontaly in the mapcenter
  skm1 = Math.cos(sblocation.lat*0.0174532778)*circ_eq*slen1/(256*wikiminiatlas_zoomsize[wikiminiatlas_zoom]);
+ // get the closest power of ten smaller than skm1
  skm2 = Math.pow(10,Math.floor(Math.log(skm1)/Math.log(10)));
+ // slen2/slen1 = skm2/skm1 get new length of this 'even' length in pixels 
  slen2 = slen1*skm2/skm1;
+ // 2* and 5* a power of ten is also acceptable
  if( 5*slen2 < slen1 ) { slen2=slen2*5; skm2=skm2*5; }
  if( 2*slen2 < slen1 ) { slen2=slen2*2; skm2=skm2*2; }
- scalelabel.innerHTML = skm2 + ' km';
- scalebar.style.width = slen2+'px';
+ scalelabel.text( skm2 + ' km' );
+ scalebar.width(slen2);
 }
 
 function wmaUpdateTargetButton() {
