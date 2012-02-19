@@ -243,16 +243,13 @@ function wikiminiatlasInstall()
     ' style="z-index:30; position:absolute; left:10px; top: 10px; width:18px; cursor:pointer">' +
 
    '<img id="button_minus" src="' + wikiminiatlas_imgbase + 
-    'button_minus.png" title="' + strings.zoomOut[UILang] + '"' +
-    ' style="z-index:30; position:absolute; left:10px; top: 32px; width:18px; cursor:pointer">' +
+    'button_minus.png" title="' + strings.zoomOut[UILang] + '"' + '>' +
 
    '<img id="button_target" src="' + wikiminiatlas_imgbase + 
-    'button_target_locked.png" title="' + strings.center[UILang] + '"' +
-    ' style="z-index:30; position:absolute; left:10px; top: 54px; width:18px; cursor:pointer" onclick="wmaMoveToTarget()">' +
+    'button_target_locked.png" title="' + strings.center[UILang] + '"' + ' onclick="wmaMoveToTarget()">' +
 
    '<img id="button_kml" src="' + wikiminiatlas_imgbase + 
-    'button_kml.png" title="' + strings.kml[UILang] + '"' +
-    ' style="display:none; z-index:30; position:absolute; left:10px; top: 76px; width:18px; cursor:pointer" onclick="wmaToggleKML()">' +
+    'button_kml.png" title="' + strings.kml[UILang] + '"' + ' onclick="wmaToggleKML()">' +
 
    '<img src="'+wikiminiatlas_imgbase+'button_menu.png" title="' + 
     strings.settings[UILang] + 
@@ -343,7 +340,7 @@ function wikiminiatlasInstall()
   //var news = $('<div></div>').html('<b>New:</b> More Zoom and new data by OpenStreetMap.').addClass('news');
   $('#wikiminiatlas_widget').append(news);
   news.click( function() { news.fadeOut(); } )
-  setTimeout(  function() { news.fadeOut(); }, 20*1000 );
+  setTimeout( function() { news.fadeOut(); }, 20*1000 );
 
   scalelabel = $('#scalelabel');
   scalebar = $('#scalebar');

@@ -9,6 +9,11 @@ a.label {
    padding-left:5px;
 }
 
+#button_plus   { z-index:30; position:absolute; left:10px; top: 10px; width:18px; cursor:pointer }
+#button_minus  { z-index:30; position:absolute; left:10px; top: 32px; width:18px; cursor:pointer }
+#button_target { z-index:30; position:absolute; left:10px; top: 54px; width:18px; cursor:pointer }
+#button_kml    { z-index:30; position:absolute; left:10px; top: 76px; width:18px; cursor:pointer; display: none }
+
 #wikiminiatlas_wmaci_link
 {
   font-weight: bold;
