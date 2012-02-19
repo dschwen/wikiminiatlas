@@ -239,21 +239,19 @@ function wikiminiatlasInstall()
   WikiMiniAtlasHTML = 
 
    '<img id="button_plus" src="' + wikiminiatlas_imgbase + 
-    'button_plus.png" title="' + strings.zoomIn[UILang] + '"' + 
-    ' style="z-index:30; position:absolute; left:10px; top: 10px; width:18px; cursor:pointer">' +
+    'button_plus.png" title="' + strings.zoomIn[UILang] + '">' + 
 
    '<img id="button_minus" src="' + wikiminiatlas_imgbase + 
-    'button_minus.png" title="' + strings.zoomOut[UILang] + '"' + '>' +
+    'button_minus.png" title="' + strings.zoomOut[UILang] + '">' +
 
    '<img id="button_target" src="' + wikiminiatlas_imgbase + 
-    'button_target_locked.png" title="' + strings.center[UILang] + '"' + ' onclick="wmaMoveToTarget()">' +
+    'button_target_locked.png" title="' + strings.center[UILang] + '" onclick="wmaMoveToTarget()">' +
 
    '<img id="button_kml" src="' + wikiminiatlas_imgbase + 
-    'button_kml.png" title="' + strings.kml[UILang] + '"' + ' onclick="wmaToggleKML()">' +
+    'button_kml.png" title="' + strings.kml[UILang] + '" onclick="wmaToggleKML()">' +
 
-   '<img src="'+wikiminiatlas_imgbase+'button_menu.png" title="' + 
-    strings.settings[UILang] + 
-    '" style="z-index:50; position:absolute; right:40px; top: 8px; width:18px; cursor:pointer" onclick="toggleSettings()">';
+   '<img id="button_menu" src="' + wikiminiatlas_imgbase + 
+    'button_menu.png" title="' + strings.settings[UILang] + '" onclick="toggleSettings()">';
 
   /*
     $('<img>').attr({ 
