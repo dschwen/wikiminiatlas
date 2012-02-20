@@ -625,7 +625,7 @@ function moveWikiMiniAtlasMapTo()
             this.append( $('<a></a>')
               .addClass( 'label' + l[i].style )
               .attr( { 
-                href: l[i].lang + '.wikipedia.org/wiki/' + l[i].page,
+                href: '//' + l[i].lang + '.wikipedia.org/wiki/' + l[i].page,
                 target: '_top' 
               } )
               .text(l[i].name)
