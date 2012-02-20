@@ -617,10 +617,24 @@ function moveWikiMiniAtlasMapTo()
     // TODO: instead of launching the XHR here, gather the needed coords and ...
     thistile.xhr = $.ajax( { url : dataurl, context : thistile.div } )
       .success( function(data) {
-        var l;
+        var l,i, ix=[0,0,5,0,0,2,3,4,5,6,6], iy=[0,0,8,0,0,2,3,4,5,6,6];
         try {
-          l = JSON.parse(data);
-          this.text(data); 
+          l = JSON.parse(data).label;
+          this.text('');
+          for( i=0; i<l.length; ++i ) {
+            this.append( $('<a></a>')
+              .addClass( 'label' + l[i].style )
+              .attr( { 
+                href: l[i].lang + '.wikipedia.org/wiki/' + l[i].page,
+                target: '_top' 
+              } )
+              .text(l[i].name)
+              .css( {
+                top:  ( l[i].ty - iy[l[i].style] ) + 'px',
+                left: ( l[i].tx - ix[l[i].style] ) + 'px'
+              } )
+            );
+          }
         } catch(e) {
           this.html(data); 
         }
