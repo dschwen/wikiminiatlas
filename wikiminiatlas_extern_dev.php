@@ -581,6 +581,7 @@ function moveWikiMiniAtlasMapTo()
 {
  if(wikiminiatlas_gy<0) wikiminiatlas_gy=0;
  if(wikiminiatlas_gx<0) wikiminiatlas_gx+=Math.floor(wikiminiatlas_zoomsize[wikiminiatlas_zoom]*256);
+ if(wikiminiatlas_gx>0) wikiminiatlas_gx%=Math.floor(wikiminiatlas_zoomsize[wikiminiatlas_zoom]*256);
 
  var lx = Math.floor(wikiminiatlas_gx/128) % wikiminiatlas_nx,
    ly = Math.floor(wikiminiatlas_gy/128) % wikiminiatlas_ny,
@@ -602,6 +603,7 @@ function moveWikiMiniAtlasMapTo()
    tileurl = 'url("' + wikiminiatlas_tilesets[wikiminiatlas_tileset].getTileURL( dy, dx, wikiminiatlas_zoom) + '")';
    dataurl = wmaGetDataURL( dy, dx, wikiminiatlas_zoom );
 
+   // move tile
    thistile = wikiminiatlas_tile[n];
    thistile.div.css( {
      left : (i*128-fx) + 'px',
