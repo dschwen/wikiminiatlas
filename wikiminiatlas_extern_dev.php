@@ -31,7 +31,7 @@ var wikiminiatlas_width = 500;
 var wikiminiatlas_height = 300;
 
 var wikiminiatlas_imgbase = '//toolserver.org/~dschwen/wma/tiles/';
-var wikiminiatlas_database = '//toolserver.org/~dschwen/wma/label.php';
+var wikiminiatlas_database = '//toolserver.org/~dschwen/wma/label_dev.php';
 var wikiminiatlas_tilebase = '.www.toolserver.org/~dschwen/wma/tiles/';
 
 // globals
@@ -616,7 +616,15 @@ function moveWikiMiniAtlasMapTo()
 
     // TODO: instead of launching the XHR here, gather the needed coords and ...
     thistile.xhr = $.ajax( { url : dataurl, context : thistile.div } )
-      .success( function(data) { this.html(data); } )
+      .success( function(data) {
+        var l;
+        try {
+          l = JSON.parse(data);
+          this.text(data); 
+        } catch(e) {
+          this.html(data); 
+        }
+      } )
       .error( function() { this.text(''); } );
    }
   }
