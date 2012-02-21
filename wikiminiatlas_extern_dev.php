@@ -31,7 +31,7 @@ var wikiminiatlas_width = 500;
 var wikiminiatlas_height = 300;
 
 var wikiminiatlas_imgbase = '//toolserver.org/~dschwen/wma/tiles/';
-var wikiminiatlas_database = '//toolserver.org/~dschwen/wma/label.php';
+var wikiminiatlas_database = '//toolserver.org/~dschwen/wma/label_dev.php';
 var wikiminiatlas_tilebase = '.www.toolserver.org/~dschwen/wma/tiles/';
 
 // globals
@@ -239,24 +239,19 @@ function wikiminiatlasInstall()
   WikiMiniAtlasHTML = 
 
    '<img id="button_plus" src="' + wikiminiatlas_imgbase + 
-    'button_plus.png" title="' + strings.zoomIn[UILang] + '"' + 
-    ' style="z-index:30; position:absolute; left:10px; top: 10px; width:18px; cursor:pointer">' +
+    'button_plus.png" title="' + strings.zoomIn[UILang] + '">' + 
 
    '<img id="button_minus" src="' + wikiminiatlas_imgbase + 
-    'button_minus.png" title="' + strings.zoomOut[UILang] + '"' +
-    ' style="z-index:30; position:absolute; left:10px; top: 32px; width:18px; cursor:pointer">' +
+    'button_minus.png" title="' + strings.zoomOut[UILang] + '">' +
 
    '<img id="button_target" src="' + wikiminiatlas_imgbase + 
-    'button_target_locked.png" title="' + strings.center[UILang] + '"' +
-    ' style="z-index:30; position:absolute; left:10px; top: 54px; width:18px; cursor:pointer" onclick="wmaMoveToTarget()">' +
+    'button_target_locked.png" title="' + strings.center[UILang] + '" onclick="wmaMoveToTarget()">' +
 
    '<img id="button_kml" src="' + wikiminiatlas_imgbase + 
-    'button_kml.png" title="' + strings.kml[UILang] + '"' +
-    ' style="display:none; z-index:30; position:absolute; left:10px; top: 76px; width:18px; cursor:pointer" onclick="wmaToggleKML()">' +
+    'button_kml.png" title="' + strings.kml[UILang] + '" onclick="wmaToggleKML()">' +
 
-   '<img src="'+wikiminiatlas_imgbase+'button_menu.png" title="' + 
-    strings.settings[UILang] + 
-    '" style="z-index:50; position:absolute; right:40px; top: 8px; width:18px; cursor:pointer" onclick="toggleSettings()">';
+   '<img id="button_menu" src="' + wikiminiatlas_imgbase + 
+    'button_menu.png" title="' + strings.settings[UILang] + '" onclick="toggleSettings()">';
 
   /*
     $('<img>').attr({ 
@@ -343,7 +338,7 @@ function wikiminiatlasInstall()
   //var news = $('<div></div>').html('<b>New:</b> More Zoom and new data by OpenStreetMap.').addClass('news');
   $('#wikiminiatlas_widget').append(news);
   news.click( function() { news.fadeOut(); } )
-  setTimeout(  function() { news.fadeOut(); }, 20*1000 );
+  setTimeout( function() { news.fadeOut(); }, 20*1000 );
 
   scalelabel = $('#scalelabel');
   scalebar = $('#scalebar');
@@ -623,7 +618,29 @@ function moveWikiMiniAtlasMapTo()
 
     // TODO: instead of launching the XHR here, gather the needed coords and ...
     thistile.xhr = $.ajax( { url : dataurl, context : thistile.div } )
-      .success( function(data) { this.html(data); } )
+      .success( function(data) {
+        var l,i, ix=[0,0,5,0,0,2,3,4,5,6,6], iy=[0,0,8,0,0,2,3,4,5,6,6];
+        try {
+          l = JSON.parse(data).label;
+          this.text('');
+          for( i=0; i<l.length; ++i ) {
+            this.append( $('<a></a>')
+              .addClass( 'label' + l[i].style )
+              .attr( { 
+                href: '//' + l[i].lang + '.wikipedia.org/wiki/' + l[i].page,
+                target: '_top' 
+              } )
+              .text(l[i].name)
+              .css( {
+                top:  ( l[i].ty - iy[l[i].style] ) + 'px',
+                left: ( l[i].tx - ix[l[i].style] ) + 'px'
+              } )
+            );
+          }
+        } catch(e) {
+          this.html(data); 
+        }
+      } )
       .error( function() { this.text(''); } );
    }
   }
