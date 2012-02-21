@@ -1,5 +1,8 @@
 <?php
 
+//error_reporting(E_ALL);
+//ini_set('display_errors', 1);
+
 // Apache .htaccess rules
 $lang=$_GET['l'];
 $y=floatval($_GET['a']);
@@ -7,12 +10,12 @@ $x=floatval($_GET['b']);
 $z=intval($_GET['z']);
 
 // experimental compressed query
-$y=floatval($_GET['r']);
+$r=$_GET['r'];
 
 //$rev=intval($_GET['rev']);
 
 // get language id
-$alllang=split(',',"ar,bg,ca,ceb,commons,cs,da,de,el,en,eo,es,et,eu,fa,fi,fr,gl,he,hi,hr,ht,hu,id,it,ja,ko,lt,ms,new,nl,nn,no,pl,pt,ro,ru,simple,sk,sl,sr,sv,sw,te,th,tr,uk,vi,vo,war,zh,af,als,be,bpy,fy,ga,hy,ka,ku,la,lb,lv,mk,ml,nds,nv,os,pam,pms,ta,vec");
+$alllang=explode(',',"ar,bg,ca,ceb,commons,cs,da,de,el,en,eo,es,et,eu,fa,fi,fr,gl,he,hi,hr,ht,hu,id,it,ja,ko,lt,ms,new,nl,nn,no,pl,pt,ro,ru,simple,sk,sl,sr,sv,sw,te,th,tr,uk,vi,vo,war,zh,af,als,be,bpy,fy,ga,hy,ka,ku,la,lb,lv,mk,ml,nds,nv,os,pam,pms,ta,vec");
 $l = array_search( $lang, $alllang );
 if( $l === FALSE ) {
   echo "";
@@ -34,20 +37,21 @@ unset($ts_mycnf, $ts_pw);
 mysql_select_db($lang.'wiki_p', $db);
 
 if( $r != NULL ) {
+  echo "Found r=";
   $co = Array('x','y');
   $q = Array();
   $n = 0;
 
   // decode compressed query
   $qi = explode("|",$r);
-  if( count($qi) < 1 || count($qi) > 10 ) exit;
-  foareach( $qi as $i ) {
+  if( ( count($qi) < 1 ) || ( count($qi) > 10 ) ) exit;
+  foreach( $qi as $i ) {
     $qp = explode(",",$i);
     if( count($qp) < 1 || count($qp) > 2 ) exit;
     $s=""; $n2=1;
-    foreach($j=0;$j<2;$j++) { 
+    for($j=0;$j<2;$j++) { 
       // = or >= <=
-      $k=explode("-",$i);
+      $k=explode("-",$qp[$j]);
       if( count($k) == 1 ) {
         $s .= "t.".$co[$j]."=".intval($k[0]);
       } 
@@ -61,22 +65,23 @@ if( $r != NULL ) {
     }
 
     // add query term
-    $q.push("(".$s.")");
+    $q[] = "(".$s.")";
     $n += $n2;
   }
-
+   
   if( $n2 > 500 ) {
     echo "Requesting too many tiles!";
     exit;
   }
-  $query = "select p.page_title as title, l.name as name, l.lat as lat, l.lon as lon, l.style as style from  page p, u_dschwen.wma_tile t, u_dschwen.wma_connect c, u_dschwen.wma_label l  WHERE l.lang_id='$l' AND c.rev='$rev' AND c.tile_id=t.id AND ( ".implode(" OR ",$q)." ) AND c.label_id=l.id AND t.z='$z' AND p.page_id = l.page_id AND c.tile_id = t.id AND page_namespace=0 AND l.page_id=p.page_id;";
-  echo $query,"\n";
-  exit;
+  $query = "select p.page_title as title, l.name as name, l.lat as lat, l.lon as lon, l.style as style, t.x as dx, t.y as dy from  page p, u_dschwen.wma_tile t, u_dschwen.wma_connect c, u_dschwen.wma_label l  WHERE l.lang_id='$l' AND c.rev='$rev' AND c.tile_id=t.id AND ( ".implode(" OR ",$q)." ) AND c.label_id=l.id AND t.z='$z' AND p.page_id = l.page_id AND c.tile_id = t.id AND page_namespace=0 AND l.page_id=p.page_id;";
+  //echo $query,"\n";
+  //exit;
 } else {
   $query = "select p.page_title as title, l.name as name, l.lat as lat, l.lon as lon, l.style as style, t.x as dx, t.y as dy from  page p, u_dschwen.wma_tile t, u_dschwen.wma_connect c, u_dschwen.wma_label l  WHERE l.lang_id='$l' AND c.rev='$rev' AND c.tile_id=t.id AND t.x='$x' AND c.label_id=l.id  AND t.y='$y' AND t.z='$z' AND p.page_id = l.page_id AND c.tile_id = t.id AND page_namespace=0 AND l.page_id=p.page_id;";
 }
 $res = mysql_query( $query );
 
+// todo $y=$dy $x=$dx move into loop
 $ymin = (180*$y)/$wikiminiatlas_zoomsize[$z] - 90.0;
 $ymax = $ymin + 180.0/$wikiminiatlas_zoomsize[$z];
 $xmin = (180.0*$x)/$wikiminiatlas_zoomsize[$z];
@@ -94,8 +99,8 @@ while( $row = mysql_fetch_array( $res) )
     "page"  => urlencode($row["title"]),
     "tx"    => $tx,
     "ty"    => $ty,
-    "name"  => $row['name']
-    "dx"  => $row['dx']
+    "name"  => $row['name'],
+    "dx"  => $row['dx'],
     "dy"  => $row['dy']
   );
 }
