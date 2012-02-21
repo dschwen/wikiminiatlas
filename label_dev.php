@@ -33,19 +33,45 @@ $db = mysql_connect($lang.'wiki-p.db.toolserver.org', $ts_mycnf['user'], $ts_myc
 unset($ts_mycnf, $ts_pw);
 mysql_select_db($lang.'wiki_p', $db);
 
-$co = Array('x','y');
 if( $r != NULL ) {
+  $co = Array('x','y');
   $q = Array();
+  $n = 0;
 
   // decode compressed query
   $qi = explode("|",$r);
+  if( count($qi) < 1 || count($qi) > 10 ) exit;
   foareach( $qi as $i ) {
     $qp = explode(",",$i);
-    // = or >= <=
+    if( count($qp) < 1 || count($qp) > 2 ) exit;
+    $s=""; $n2=1;
+    foreach($j=0;$j<2;$j++) { 
+      // = or >= <=
+      $k=explode("-",$i);
+      if( count($k) == 1 ) {
+        $s .= "t.".$co[$j]."=".intval($k[0]);
+      } 
+      else if( count($k) == 2 ){
+        $s .= "t.".$co[$j].">=".intval($k[0])." AND t.".$co[$j]."<=".intval($k[1]);
+        $n2 *= max(0,intval($k[1])-intval($k[0]));
+      }
+      else exit;
+
+      if($j==0) $s .= " AND ";
+    }
+
+    // add query term
+    $q.push("(".$s.")");
+    $n += $n2;
   }
 
-  $query = "select p.page_title as title, l.name as name, l.lat as lat, l.lon as lon, l.style as style from  page p, u_dschwen.wma_tile t, u_dschwen.wma_connect c, u_dschwen.wma_label l  WHERE l.lang_id='$l' AND c.rev='$rev' AND c.tile_id=t.id AND (".") AND c.label_id=l.id AND t.z='$z' AND p.page_id = l.page_id AND c.tile_id = t.id AND page_namespace=0 AND l.page_id=p.page_id;";
+  if( $n2 > 500 ) {
+    echo "Requesting too many tiles!";
+    exit;
+  }
+  $query = "select p.page_title as title, l.name as name, l.lat as lat, l.lon as lon, l.style as style from  page p, u_dschwen.wma_tile t, u_dschwen.wma_connect c, u_dschwen.wma_label l  WHERE l.lang_id='$l' AND c.rev='$rev' AND c.tile_id=t.id AND ( ".implode(" OR ",$q)." ) AND c.label_id=l.id AND t.z='$z' AND p.page_id = l.page_id AND c.tile_id = t.id AND page_namespace=0 AND l.page_id=p.page_id;";
   echo $query,"\n";
+  exit;
 } else {
   $query = "select p.page_title as title, l.name as name, l.lat as lat, l.lon as lon, l.style as style, t.x as dx, t.y as dy from  page p, u_dschwen.wma_tile t, u_dschwen.wma_connect c, u_dschwen.wma_label l  WHERE l.lang_id='$l' AND c.rev='$rev' AND c.tile_id=t.id AND t.x='$x' AND c.label_id=l.id  AND t.y='$y' AND t.z='$z' AND p.page_id = l.page_id AND c.tile_id = t.id AND page_namespace=0 AND l.page_id=p.page_id;";
 }
