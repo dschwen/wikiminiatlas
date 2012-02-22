@@ -81,14 +81,16 @@ if( $r != NULL ) {
 }
 $res = mysql_query( $query );
 
-// todo $y=$dy $x=$dx move into loop
-$ymin = (180*$y)/$wikiminiatlas_zoomsize[$z] - 90.0;
-$ymax = $ymin + 180.0/$wikiminiatlas_zoomsize[$z];
-$xmin = (180.0*$x)/$wikiminiatlas_zoomsize[$z];
-
 $items = array();
 while( $row = mysql_fetch_array( $res) )
 {
+  $x = $row['dx'];
+  $y = $row['dy'];
+
+  $ymin = (180*$y)/$wikiminiatlas_zoomsize[$z] - 90.0;
+  $ymax = $ymin + 180.0/$wikiminiatlas_zoomsize[$z];
+  $xmin = (180.0*$x)/$wikiminiatlas_zoomsize[$z];
+
   $ty = intval( ( ( $ymax - $row["lat"] ) * $wikiminiatlas_zoomsize[$z] * 128) / 180.0 );
   $tx = intval( ( ( $row["lon"] - $xmin ) * $wikiminiatlas_zoomsize[$z] * 128) / 180.0 );
   $s = $row['style'];
@@ -100,8 +102,8 @@ while( $row = mysql_fetch_array( $res) )
     "tx"    => $tx,
     "ty"    => $ty,
     "name"  => $row['name'],
-    "dx"  => $row['dx'],
-    "dy"  => $row['dy']
+    "dx"  => $x,
+    "dy"  => $y
   );
 }
 mysql_close( $db );
