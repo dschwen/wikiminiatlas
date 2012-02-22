@@ -37,7 +37,6 @@ unset($ts_mycnf, $ts_pw);
 mysql_select_db($lang.'wiki_p', $db);
 
 if( $r != NULL ) {
-  echo "Found r=";
   $co = Array('x','y');
   $q = Array();
   $n = 0;
