@@ -574,6 +574,30 @@ function wmaDrawKML() {
 // Set new map Position (to wikiminiatlas_gx, wikiminiatlas_gy)
 function moveWikiMiniAtlasMapTo()
 {
+  function parseLabels(tile,data) {
+    var l,i, ix=[0,0,5,0,0,2,3,4,5,6,6], iy=[0,0,8,0,0,2,3,4,5,6,6];
+    try {
+      l = JSON.parse(data).label;
+      tile.text('');
+      for( i=0; i<l.length; ++i ) {
+        tile.append( $('<a></a>')
+          .addClass( 'label' + l[i].style )
+          .attr( { 
+            href: '//' + l[i].lang + '.wikipedia.org/wiki/' + l[i].page,
+            target: '_top' 
+          } )
+          .text(l[i].name)
+          .css( {
+            top:  ( l[i].ty - iy[l[i].style] ) + 'px',
+            left: ( l[i].tx - ix[l[i].style] ) + 'px'
+          } )
+        );
+      }
+    } catch(e) {
+      tile.html(data); 
+    }
+  } 
+
  if(wikiminiatlas_gy<0) wikiminiatlas_gy=0;
  if(wikiminiatlas_gx<0) wikiminiatlas_gx+=Math.floor(wikiminiatlas_zoomsize[wikiminiatlas_zoom]*256);
  if(wikiminiatlas_gx>0) wikiminiatlas_gx%=Math.floor(wikiminiatlas_zoomsize[wikiminiatlas_zoom]*256);
@@ -595,6 +619,7 @@ function moveWikiMiniAtlasMapTo()
    //thistile.innerHTML = (Math.floor(wikiminiatlas_gx/128)+i)+','+(Math.floor(wikiminiatlas_gy/128)+j);
    dx = (Math.floor(wikiminiatlas_gx/128)+i);
    dy = (Math.floor(wikiminiatlas_gy/128)+j);
+   
    tileurl = 'url("' + wikiminiatlas_tilesets[wikiminiatlas_tileset].getTileURL( dy, dx, wikiminiatlas_zoom) + '")';
    dataurl = wmaGetDataURL( dy, dx, wikiminiatlas_zoom );
 
@@ -617,31 +642,19 @@ function moveWikiMiniAtlasMapTo()
     thistile.div.html('<span class="loading">' + strings.labelLoading[UILang] + '</span>');
 
     // TODO: instead of launching the XHR here, gather the needed coords and ...
-    thistile.xhr = $.ajax( { url : dataurl, context : thistile.div } )
-      .success( function(data) {
-        var l,i, ix=[0,0,5,0,0,2,3,4,5,6,6], iy=[0,0,8,0,0,2,3,4,5,6,6];
-        try {
-          l = JSON.parse(data).label;
-          this.text('');
-          for( i=0; i<l.length; ++i ) {
-            this.append( $('<a></a>')
-              .addClass( 'label' + l[i].style )
-              .attr( { 
-                href: '//' + l[i].lang + '.wikipedia.org/wiki/' + l[i].page,
-                target: '_top' 
-              } )
-              .text(l[i].name)
-              .css( {
-                top:  ( l[i].ty - iy[l[i].style] ) + 'px',
-                left: ( l[i].tx - ix[l[i].style] ) + 'px'
-              } )
-            );
+    if( sessionStorage && (data=sessionStorage.getItem(dataurl)) ) {
+      parseLabels(thistile.div,data);
+    }
+      (function(turl){// closure to retain access to dataurl in sucess callback
+      thistile.xhr = $.ajax( { url : turl, context : thistile.div } )
+        .success( function(data) { 
+          if( sessionStorage ) {
+            sessionStorage.setItem(turl,data);
           }
-        } catch(e) {
-          this.html(data); 
-        }
-      } )
-      .error( function() { this.text(''); } );
+          parseLabels(this,data);
+        } ) 
+        .error( function() { this.text(''); } );
+      })(dataurl);
    }
   }
   // ...request them here, all at once
