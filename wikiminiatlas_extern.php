@@ -31,7 +31,7 @@ var wikiminiatlas_width = 500;
 var wikiminiatlas_height = 300;
 
 var wikiminiatlas_imgbase = '//toolserver.org/~dschwen/wma/tiles/';
-var wikiminiatlas_database = '//toolserver.org/~dschwen/wma/label.php';
+var wikiminiatlas_database = '//toolserver.org/~dschwen/wma/label_dev.php';
 var wikiminiatlas_tilebase = '.www.toolserver.org/~dschwen/wma/tiles/';
 
 // globals
@@ -75,7 +75,7 @@ var wmaci_image_span = null;
 var wmaci_link = null;
 var wmaci_link_text = null;
 
-var wmakml = { canvas: null, c: null, ways: null, areas: null };
+var wmakml = { shown: false, drawn: false, canvas: null, c: null, ways: null, areas: null };
 
 // include documentation strings
 <? require( 'wikiminiatlas_i18n.inc' ); ?>
@@ -239,20 +239,19 @@ function wikiminiatlasInstall()
   WikiMiniAtlasHTML = 
 
    '<img id="button_plus" src="' + wikiminiatlas_imgbase + 
-    'button_plus.png" title="' + strings.zoomIn[UILang] + '"' + 
-    ' style="z-index:30; position:absolute; left:10px; top: 10px; width:18px; cursor:pointer">' +
+    'button_plus.png" title="' + strings.zoomIn[UILang] + '">' + 
 
    '<img id="button_minus" src="' + wikiminiatlas_imgbase + 
-    'button_minus.png" title="' + strings.zoomOut[UILang] + '"' +
-    ' style="z-index:30; position:absolute; left:10px; top: 32px; width:18px; cursor:pointer">' +
+    'button_minus.png" title="' + strings.zoomOut[UILang] + '">' +
 
    '<img id="button_target" src="' + wikiminiatlas_imgbase + 
-    'button_target_locked.png" title="' + strings.center[UILang] + '"' +
-    ' style="z-index:30; position:absolute; left:10px; top: 54px; width:18px; cursor:pointer" onclick="wmaMoveToTarget()">' +
+    'button_target_locked.png" title="' + strings.center[UILang] + '" onclick="wmaMoveToTarget()">' +
 
-   '<img src="'+wikiminiatlas_imgbase+'button_menu.png" title="' + 
-    strings.settings[UILang] + 
-    '" style="z-index:50; position:absolute; right:40px; top: 8px; width:18px; cursor:pointer" onclick="toggleSettings()">';
+   '<img id="button_kml" src="' + wikiminiatlas_imgbase + 
+    'button_kml.png" title="' + strings.kml[UILang] + '" onclick="wmaToggleKML()">' +
+
+   '<img id="button_menu" src="' + wikiminiatlas_imgbase + 
+    'button_menu.png" title="' + strings.settings[UILang] + '" onclick="toggleSettings()">';
 
   /*
     $('<img>').attr({ 
@@ -339,10 +338,10 @@ function wikiminiatlasInstall()
   //var news = $('<div></div>').html('<b>New:</b> More Zoom and new data by OpenStreetMap.').addClass('news');
   $('#wikiminiatlas_widget').append(news);
   news.click( function() { news.fadeOut(); } )
-  setTimeout(  function() { news.fadeOut(); }, 20*1000 );
+  setTimeout( function() { news.fadeOut(); }, 20*1000 );
 
-  scalelabel = document.getElementById('scalelabel');
-  scalebar = document.getElementById('scalebar');
+  scalelabel = $('#scalelabel');
+  scalebar = $('#scalebar');
 
   wikiminiatlas_taget_button = document.getElementById('button_target');
   wikiminiatlas_settings = document.getElementById('wikiminiatlas_settings');
@@ -500,18 +499,35 @@ function wmaResize() {
   }
 }
 
+// toggle layer visibility
+function wmaToggleKML() {
+  if( wmakml.shown ) {
+    wmakml.canvas.fadeOut(200);
+  } else {
+    wmakml.canvas.fadeIn(200);
+  }
+  wmakml.shown = !wmakml.shown;
+}
+
 // draw KML data
 function wmaDrawKML() {
-  var i, j, c = wmakml.c, w = wmakml.ways, a = wmakml.areas, p;
+  var i, j, c = wmakml.c, w = wmakml.ways, a = wmakml.areas, p
+    , hw = wikiminiatlas_zoomsize[wikiminiatlas_zoom];
 
   function addToPath(w) {
-    var k, p;
+    var k, p, wx = 0, lx, dx;
     if( w.length > 0 ) {
       p = wmaLatLonToXY( w[0].lat, w[0].lon );
+      lx = p.x;
       c.moveTo( p.x-wikiminiatlas_gx, p.y-wikiminiatlas_gy );
       for( k = 1; k < w.length; ++k ) {
         p = wmaLatLonToXY( w[k].lat, w[k].lon );
-        c.lineTo( p.x-wikiminiatlas_gx, p.y-wikiminiatlas_gy );
+        dx = p.x - lx;
+        if( Math.abs(dx) > hw ) {
+          wx -= Math.round(dx/(2*hw))*2*hw;
+        }
+        lx = p.x;
+        c.lineTo( p.x-wikiminiatlas_gx+wx, p.y-wikiminiatlas_gy );
       }
     }
   }
@@ -558,8 +574,33 @@ function wmaDrawKML() {
 // Set new map Position (to wikiminiatlas_gx, wikiminiatlas_gy)
 function moveWikiMiniAtlasMapTo()
 {
+  function parseLabels(tile,data) {
+    var l,i, ix=[0,0,5,0,0,2,3,4,5,6,6], iy=[0,0,8,0,0,2,3,4,5,6,6];
+    try {
+      l = JSON.parse(data).label;
+      tile.text('');
+      for( i=0; i<l.length; ++i ) {
+        tile.append( $('<a></a>')
+          .addClass( 'label' + l[i].style )
+          .attr( { 
+            href: '//' + l[i].lang + '.wikipedia.org/wiki/' + l[i].page,
+            target: '_top' 
+          } )
+          .text(l[i].name)
+          .css( {
+            top:  ( l[i].ty - iy[l[i].style] ) + 'px',
+            left: ( l[i].tx - ix[l[i].style] ) + 'px'
+          } )
+        );
+      }
+    } catch(e) {
+      tile.html(data); 
+    }
+  } 
+
  if(wikiminiatlas_gy<0) wikiminiatlas_gy=0;
  if(wikiminiatlas_gx<0) wikiminiatlas_gx+=Math.floor(wikiminiatlas_zoomsize[wikiminiatlas_zoom]*256);
+ if(wikiminiatlas_gx>0) wikiminiatlas_gx%=Math.floor(wikiminiatlas_zoomsize[wikiminiatlas_zoom]*256);
 
  var lx = Math.floor(wikiminiatlas_gx/128) % wikiminiatlas_nx,
    ly = Math.floor(wikiminiatlas_gy/128) % wikiminiatlas_ny,
@@ -578,9 +619,11 @@ function moveWikiMiniAtlasMapTo()
    //thistile.innerHTML = (Math.floor(wikiminiatlas_gx/128)+i)+','+(Math.floor(wikiminiatlas_gy/128)+j);
    dx = (Math.floor(wikiminiatlas_gx/128)+i);
    dy = (Math.floor(wikiminiatlas_gy/128)+j);
+   
    tileurl = 'url("' + wikiminiatlas_tilesets[wikiminiatlas_tileset].getTileURL( dy, dx, wikiminiatlas_zoom) + '")';
    dataurl = wmaGetDataURL( dy, dx, wikiminiatlas_zoom );
 
+   // move tile
    thistile = wikiminiatlas_tile[n];
    thistile.div.css( {
      left : (i*128-fx) + 'px',
@@ -599,9 +642,19 @@ function moveWikiMiniAtlasMapTo()
     thistile.div.html('<span class="loading">' + strings.labelLoading[UILang] + '</span>');
 
     // TODO: instead of launching the XHR here, gather the needed coords and ...
-    thistile.xhr = $.ajax( { url : dataurl, context : thistile.div } )
-      .success( function(data) { this.html(data); } )
-      .error( function() { this.text(''); } );
+    if( sessionStorage && (data=sessionStorage.getItem(dataurl)) ) {
+      parseLabels(thistile.div,data);
+    }
+      (function(turl){// closure to retain access to dataurl in sucess callback
+      thistile.xhr = $.ajax( { url : turl, context : thistile.div } )
+        .success( function(data) { 
+          if( sessionStorage ) {
+            sessionStorage.setItem(turl,data);
+          }
+          parseLabels(this,data);
+        } ) 
+        .error( function() { this.text(''); } );
+      })(dataurl);
    }
   }
   // ...request them here, all at once
@@ -835,13 +888,17 @@ function wmaUpdateScalebar() {
  var sblocation = wmaXYToLatLon(wikiminiatlas_gx+wikiminiatlas_width/2,wikiminiatlas_gy+wikiminiatlas_height/2);
  var slen1 = 50, slen2;
  var skm1,skm2;
+ // slen1 pixels (50px) are skm1 kilometers horizontaly in the mapcenter
  skm1 = Math.cos(sblocation.lat*0.0174532778)*circ_eq*slen1/(256*wikiminiatlas_zoomsize[wikiminiatlas_zoom]);
+ // get the closest power of ten smaller than skm1
  skm2 = Math.pow(10,Math.floor(Math.log(skm1)/Math.log(10)));
+ // slen2/slen1 = skm2/skm1 get new length of this 'even' length in pixels 
  slen2 = slen1*skm2/skm1;
+ // 2* and 5* a power of ten is also acceptable
  if( 5*slen2 < slen1 ) { slen2=slen2*5; skm2=skm2*5; }
  if( 2*slen2 < slen1 ) { slen2=slen2*2; skm2=skm2*2; }
- scalelabel.innerHTML = skm2 + ' km';
- scalebar.style.width = slen2+'px';
+ scalelabel.text( skm2 + ' km' );
+ scalebar.width(slen2);
 }
 
 function wmaUpdateTargetButton() {
@@ -1004,6 +1061,9 @@ function wmaReceiveMessage(e) {
         .attr( { width: wikiminiatlas_width, height: wikiminiatlas_height } )
         .appendTo( $(wikiminiatlas_map) );
       wmakml.c = wmakml.canvas[0].getContext('2d');
+      wmakml.shown = true;
+      wmakml.drawn = true;
+      $('#button_kml').show();
     }
     // copy data
     wmakml.ways  = d.ways  || null;
