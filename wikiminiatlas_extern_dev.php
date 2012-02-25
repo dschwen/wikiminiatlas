@@ -436,7 +436,8 @@ function wmaNewTile() {
   var t = {
     div : $('<div></div>').addClass('wmatile').mousedown(mouseDownWikiMiniAtlasMap),
     url : '',
-    xhr : null
+    xhr : null,
+    l : []
   }
   $(wikiminiatlas_map).append(t.div);
   return t;
@@ -574,27 +575,84 @@ function wmaDrawKML() {
 // Set new map Position (to wikiminiatlas_gx, wikiminiatlas_gy)
 function moveWikiMiniAtlasMapTo()
 {
-  function parseLabels(tile,data) {
-    var l,i, ix=[0,0,5,0,0,2,3,4,5,6,6], iy=[0,0,8,0,0,2,3,4,5,6,6];
+  function parseLabels(data,cache) {
+    var p,labels,tile,l,i,j,found,w,wopt,wopt2,h,lh, ix=[0,0,5,0,0,2,3,4,5,6,6], iy=[0,0,8,0,0,2,3,4,5,6,6];
     try {
-      l = JSON.parse(data).label;
-      tile.text('');
-      for( i=0; i<l.length; ++i ) {
-        tile.append( $('<a></a>')
-          .addClass( 'label' + l[i].style )
+      p = JSON.parse(data).label;
+      labels = p.label;
+      
+      // first ckeck if zoom is matching
+      if( p.z !== wikiminiatlas_zoom ) { return }
+      
+      for( i=0; i<labels.length; ++i ) {
+        // find matching tile
+        // TODO: there is a better (direct way) of getting the tile!
+        found = false;
+        for( j=0; j<wikiminiatlas_tile.length; ++j ) {
+          tile = wikiminiatlas_tile[j];
+          if( tile.dx === labels[i].dx && tile.dy === labels[i].dy ) { 
+            found = true;
+            break;
+           }
+        }
+        if( !found ) { continue; }
+        
+/*      
+        // make new label structure
+        l = { 
+          a:$('<a></a>').addClass( 'label' + labels[i].style )
+            .attr( { 
+              href: '//' + labels[i].lang + '.wikipedia.org/wiki/' + labels[i].page,
+              target: '_top' 
+            } )
+            .text(labels[i].name)
+            .appendTo(tile.div),
+          w: 0, h: 0
+        }
+        tile.l.push(l);
+        
+        // obtain max width
+        l.w = l.a.width(); 
+
+        // find best label shape
+        w = wopt = l.w;
+        lh = l.a.height();
+        for( ; w>l.w/4; w-=4 ) {
+          l.a.css( { width: w+'px' } );
+
+          // did the height change with this resize? (word wrap occured)
+          h = l.a.height();
+          if( h != lh ) {
+            wopt = wopt2;
+            lh = h;
+          }
+
+          // calculate new weighted area
+          h = Math.pow( h, 2 );
+          if( A === null || w*w*h < A ) {
+            wopt2 = w;
+            A = w*w*h;
+          }
+        }
+        l.w = wopt;
+        l.a.css( { width: l.w+'px' } );
+        l.h = l.a.height();
+*/      
+        tile.div.append( $('<a></a>')
+          .addClass( 'label' + labels[i].style )
           .attr( { 
-            href: '//' + l[i].lang + '.wikipedia.org/wiki/' + l[i].page,
+            href: '//' + labels[i].lang + '.wikipedia.org/wiki/' + labels[i].page,
             target: '_top' 
           } )
-          .text(l[i].name)
+          .text(labels[i].name)
           .css( {
-            top:  ( l[i].ty - iy[l[i].style] ) + 'px',
-            left: ( l[i].tx - ix[l[i].style] ) + 'px'
+            top:  ( labels[i].ty - iy[labels[i].style] ) + 'px',
+            left: ( labels[i].tx - ix[labels[i].style] ) + 'px'
           } )
         );
       }
     } catch(e) {
-      tile.html(data); 
+      tile.div.html(data); 
     }
   } 
 
@@ -639,24 +697,28 @@ function moveWikiMiniAtlasMapTo()
      thistile.xhr.abort();
     }
 
-    thistile.div.html('<span class="loading">' + strings.labelLoading[UILang] + '</span>');
+    // completely clear labels with pending requests
+    thistile.div.text('');
+    thistile.l = [];
 
-    // TODO: instead of launching the XHR here, gather the needed coords and ...
+    // check cache    
     if( sessionStorage && (data=sessionStorage.getItem(dataurl)) ) {
-      parseLabels(thistile.div,data);
-    }
+      parseLabels(data,false);
+    } else {
+      // TODO: instead of launching the XHR here, gather the needed coords and ...
       (function(turl){// closure to retain access to dataurl in sucess callback
-      thistile.xhr = $.ajax( { url : turl, context : thistile.div } )
+      thistile.xhr = $.ajax( { url : turl, context : thistile } )
         .success( function(data) { 
           if( sessionStorage ) {
             sessionStorage.setItem(turl,data);
           }
-          parseLabels(this,data);
-        } ) 
-        .error( function() { this.text(''); } );
+          parseLabels(data,true);
+        } );
       })(dataurl);
+    }
    }
   }
+  
   // ...request them here, all at once
 
   // update markers
