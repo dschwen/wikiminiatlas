@@ -578,7 +578,7 @@ function moveWikiMiniAtlasMapTo()
   function parseLabels(data,cache) {
     var p,labels,tile,l,i,j,found,w,wopt,wopt2,h,lh, ix=[0,0,5,0,0,2,3,4,5,6,6], iy=[0,0,8,0,0,2,3,4,5,6,6];
     try {
-      p = JSON.parse(data).label;
+      p = JSON.parse(data);
       labels = p.label;
       
       // first ckeck if zoom is matching
