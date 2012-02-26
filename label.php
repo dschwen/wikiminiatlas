@@ -106,5 +106,6 @@ while( $row = mysql_fetch_array( $res) )
   );
 }
 mysql_close( $db );
+header("Content-type: application/json");
 echo json_encode( array( "label" => $items, "z" => $z ) );
 ?>

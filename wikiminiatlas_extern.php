@@ -31,7 +31,7 @@ var wikiminiatlas_width = 500;
 var wikiminiatlas_height = 300;
 
 var wikiminiatlas_imgbase = '//toolserver.org/~dschwen/wma/tiles/';
-var wikiminiatlas_database = '//toolserver.org/~dschwen/wma/label_dev.php';
+var wikiminiatlas_database = '//toolserver.org/~dschwen/wma/label.php';
 var wikiminiatlas_tilebase = '.www.toolserver.org/~dschwen/wma/tiles/';
 
 // globals
