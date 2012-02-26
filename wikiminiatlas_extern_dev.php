@@ -597,7 +597,6 @@ function moveWikiMiniAtlasMapTo()
         }
         if( !found ) { continue; }
         
-/*      
         // make new label structure
         l = { 
           a:$('<a></a>').addClass( 'label' + labels[i].style )
@@ -637,7 +636,7 @@ function moveWikiMiniAtlasMapTo()
         l.w = wopt;
         l.a.css( { width: l.w+'px' } );
         l.h = l.a.height();
-*/      
+/*      
         tile.div.append( $('<a></a>')
           .addClass( 'label' + labels[i].style )
           .attr( { 
@@ -649,7 +648,7 @@ function moveWikiMiniAtlasMapTo()
             top:  ( labels[i].ty - iy[labels[i].style] ) + 'px',
             left: ( labels[i].tx - ix[labels[i].style] ) + 'px'
           } )
-        );
+        );*/
       }
     } catch(e) {
       tile.div.html(data); 
