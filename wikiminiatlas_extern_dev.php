@@ -437,7 +437,8 @@ function wmaNewTile() {
     div : $('<div></div>').addClass('wmatile').mousedown(mouseDownWikiMiniAtlasMap),
     url : '',
     xhr : null,
-    l : []
+    l : [],
+    dx : null, dy: null
   }
   $(wikiminiatlas_map).append(t.div);
   return t;
@@ -590,7 +591,7 @@ function moveWikiMiniAtlasMapTo()
         found = false;
         for( j=0; j<wikiminiatlas_tile.length; ++j ) {
           tile = wikiminiatlas_tile[j];
-          if( tile.dx === labels[i].dx && tile.dy === labels[i].dy ) { 
+          if( tile.dx == labels[i].dx && tile.dy == labels[i].dy ) { 
             found = true;
             break;
            }
@@ -636,19 +637,11 @@ function moveWikiMiniAtlasMapTo()
         l.w = wopt;
         l.a.css( { width: l.w+'px' } );
         l.h = l.a.height();
-/*      
-        tile.div.append( $('<a></a>')
-          .addClass( 'label' + labels[i].style )
-          .attr( { 
-            href: '//' + labels[i].lang + '.wikipedia.org/wiki/' + labels[i].page,
-            target: '_top' 
-          } )
-          .text(labels[i].name)
-          .css( {
+
+        l.a.css( {
             top:  ( labels[i].ty - iy[labels[i].style] ) + 'px',
             left: ( labels[i].tx - ix[labels[i].style] ) + 'px'
-          } )
-        );*/
+        } );
       }
     } catch(e) {
       tile.div.html(data); 
@@ -672,16 +665,16 @@ function moveWikiMiniAtlasMapTo()
   for(var i = 0; i < wikiminiatlas_nx; i++)
   {
    n = ((i+lx) % wikiminiatlas_nx) + ((j+ly) % wikiminiatlas_ny)*wikiminiatlas_nx;
+   thistile = wikiminiatlas_tile[n];
 
    //thistile.innerHTML = (Math.floor(wikiminiatlas_gx/128)+i)+','+(Math.floor(wikiminiatlas_gy/128)+j);
-   dx = (Math.floor(wikiminiatlas_gx/128)+i);
-   dy = (Math.floor(wikiminiatlas_gy/128)+j);
+   thistile.dx = dx = (Math.floor(wikiminiatlas_gx/128)+i);
+   thistile.dy = dy = (Math.floor(wikiminiatlas_gy/128)+j);
    
    tileurl = 'url("' + wikiminiatlas_tilesets[wikiminiatlas_tileset].getTileURL( dy, dx, wikiminiatlas_zoom) + '")';
    dataurl = wmaGetDataURL( dy, dx, wikiminiatlas_zoom );
 
    // move tile
-   thistile = wikiminiatlas_tile[n];
    thistile.div.css( {
      left : (i*128-fx) + 'px',
      top  : (j*128-fy) + 'px'
