@@ -579,12 +579,12 @@ function moveWikiMiniAtlasMapTo()
   function parseLabels(p,cache) {
     var labels = p.label,tile
       , l,i,j,found
-      , w, wopt, wopt2, h, lh
+      , w, wopt, wopt2, h, lh, A
       , ix=[0,0,5,0,0,2,3,4,5,6,6], iy=[0,0,8,0,0,2,3,4,5,6,6];
     
     // first ckeck if zoom is matching
     if( p.z !== wikiminiatlas_zoom ) { return }
-    
+
     for( i=0; i<labels.length; ++i ) {
       // find matching tile
       // TODO: there is a better (direct way) of getting the tile!
@@ -617,6 +617,7 @@ function moveWikiMiniAtlasMapTo()
       // find best label shape
       w = wopt = l.w;
       lh = l.a.height();
+      A = null;
       for( ; w>l.w/4; w-=4 ) {
         l.a.css( { width: w+'px' } );
 
@@ -677,7 +678,6 @@ function moveWikiMiniAtlasMapTo()
    } else {
     dataurl = wikiminiatlas_database + '?rev=1&l=' + wikiminiatlas_site + '&a=' + thistile.dy + '&b=' + thistile.dx + '&z=' + z;
    }
-   dataurl = wmaGetODataURL( dy, dx, wikiminiatlas_zoom );
 
    // move tile
    thistile.div.css( {
@@ -701,7 +701,7 @@ function moveWikiMiniAtlasMapTo()
     // check cache    
     skey = thistile.dx + '_' + thistile.dy + '_' + wikiminiatlas_zoom + '_' + wikiminiatlas_site;
     if( sessionStorage && (data=sessionStorage.getItem(dataurl)) ) {
-      parseLabels(data,false);
+      parseLabels(JSON.parse(data),false);
     } else {
       // TODO: instead of launching the XHR here, gather the needed coords and ...
       (function(turl){// closure to retain access to dataurl in sucess callback
