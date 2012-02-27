@@ -576,75 +576,73 @@ function wmaDrawKML() {
 // Set new map Position (to wikiminiatlas_gx, wikiminiatlas_gy)
 function moveWikiMiniAtlasMapTo()
 {
-  function parseLabels(data,cache) {
-    var p,labels,tile,l,i,j,found,w,wopt,wopt2,h,lh, ix=[0,0,5,0,0,2,3,4,5,6,6], iy=[0,0,8,0,0,2,3,4,5,6,6];
-    try {
-      p = JSON.parse(data);
-      labels = p.label;
-      
-      // first ckeck if zoom is matching
-      if( p.z !== wikiminiatlas_zoom ) { return }
-      
-      for( i=0; i<labels.length; ++i ) {
-        // find matching tile
-        // TODO: there is a better (direct way) of getting the tile!
-        found = false;
-        for( j=0; j<wikiminiatlas_tile.length; ++j ) {
-          tile = wikiminiatlas_tile[j];
-          if( tile.dx == labels[i].dx && tile.dy == labels[i].dy ) { 
-            found = true;
-            break;
-           }
-        }
-        if( !found ) { continue; }
-        
-        // make new label structure
-        l = { 
-          a:$('<a></a>').addClass( 'label' + labels[i].style )
-            .attr( { 
-              href: '//' + labels[i].lang + '.wikipedia.org/wiki/' + labels[i].page,
-              target: '_top' 
-            } )
-            .text(labels[i].name)
-            .appendTo(tile.div),
-          w: 0, h: 0
-        }
-        tile.l.push(l);
-        
-        // obtain max width
-        l.w = l.a.width(); 
-
-        // find best label shape
-        w = wopt = l.w;
-        lh = l.a.height();
-        for( ; w>l.w/4; w-=4 ) {
-          l.a.css( { width: w+'px' } );
-
-          // did the height change with this resize? (word wrap occured)
-          h = l.a.height();
-          if( h != lh ) {
-            wopt = wopt2;
-            lh = h;
-          }
-
-          // calculate new weighted area
-          h = Math.pow( h, 2 );
-          if( A === null || w*w*h < A ) {
-            wopt2 = w;
-            A = w*w*h;
-          }
-        }
-        l.w = wopt;
-        l.a.css( { width: l.w+'px' } );
-        l.h = l.a.height();
-
-        l.a.css( {
-            top:  ( labels[i].ty - iy[labels[i].style] ) + 'px',
-            left: ( labels[i].tx - ix[labels[i].style] ) + 'px'
-        } );
+  function parseLabels(p,cache) {
+    var labels = p.label,tile
+      , l,i,j,found
+      , w, wopt, wopt2, h, lh
+      , ix=[0,0,5,0,0,2,3,4,5,6,6], iy=[0,0,8,0,0,2,3,4,5,6,6];
+    
+    // first ckeck if zoom is matching
+    if( p.z !== wikiminiatlas_zoom ) { return }
+    
+    for( i=0; i<labels.length; ++i ) {
+      // find matching tile
+      // TODO: there is a better (direct way) of getting the tile!
+      found = false;
+      for( j=0; j<wikiminiatlas_tile.length; ++j ) {
+        tile = wikiminiatlas_tile[j];
+        if( tile.dx == labels[i].dx && tile.dy == labels[i].dy ) { 
+          found = true;
+          break;
+         }
       }
-    } catch(e) {
-      tile.div.html(data); 
+      if( !found ) { continue; }
+      
+      // make new label structure
+      l = { 
+        a:$('<a></a>').addClass( 'label' + labels[i].style )
+          .attr( { 
+            href: '//' + labels[i].lang + '.wikipedia.org/wiki/' + labels[i].page,
+            target: '_top' 
+          } )
+          .text(labels[i].name)
+          .appendTo(tile.div),
+        w: 0, h: 0
+      }
+      tile.l.push(l);
+      
+      // obtain max width
+      l.w = l.a.width(); 
+
+      // find best label shape
+      w = wopt = l.w;
+      lh = l.a.height();
+      for( ; w>l.w/4; w-=4 ) {
+        l.a.css( { width: w+'px' } );
+
+        // did the height change with this resize? (word wrap occured)
+        h = l.a.height();
+        if( h != lh ) {
+          wopt = wopt2;
+          lh = h;
+        }
+
+        // calculate new weighted area
+        h = Math.pow( h, 2 );
+        if( A === null || w*w*h < A ) {
+          wopt2 = w;
+          A = w*w*h;
+        }
+      }
+      l.w = wopt;
+      l.a.css( { width: l.w+'px' } );
+      l.h = l.a.height();
+
+      l.a.css( {
+          top:  ( labels[i].ty - iy[labels[i].style] ) + 'px',
+          left: ( labels[i].tx - ix[labels[i].style] ) + 'px'
+      } );
+    }
     }
   } 
 
