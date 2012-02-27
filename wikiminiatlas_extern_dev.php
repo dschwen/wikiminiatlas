@@ -653,7 +653,7 @@ function moveWikiMiniAtlasMapTo()
    , ly = Math.floor(wikiminiatlas_gy/128) % wikiminiatlas_ny
    , fx = wikiminiatlas_gx % 128
    , fy = wikiminiatlas_gy % 128
-   , zs = wikiminiatlas_zoomsize[wikiminiatlas_zoom]
+   , z = wikiminiatlas_zoom, zs = wikiminiatlas_zoomsize[z]
    , dx, dy, n, thistile, tileurl, dataurl, skey;
 
  wmaUpdateScalebar();
