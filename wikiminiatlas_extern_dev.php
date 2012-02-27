@@ -643,7 +643,6 @@ function moveWikiMiniAtlasMapTo()
           left: ( labels[i].tx - ix[labels[i].style] ) + 'px'
       } );
     }
-    }
   } 
 
  if(wikiminiatlas_gy<0) wikiminiatlas_gy=0;
