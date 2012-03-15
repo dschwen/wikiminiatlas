@@ -1114,30 +1114,66 @@ function processWIWOSM(d) {
     return way;
   }
 
+  function parsePolygon(p) {
+    var area = { outer: [], inner: [] }, i;
+    area.outer.push( reproject(p[0]) );
+    for( i=1; i<p.length; i++ ) {
+      area.inner.push( reproject(p[i]) );
+    }
+    if( wmakml.areas ) { wmakml.areas.push(area) } 
+    else { wmakml.areas = [area]; }
+  }
+  function parseLineString(l) {
+    var ways = [], i;
+    for( i=0; i<l.length; i++ ) {
+      ways.push( reproject(l[i]) );
+    }
+    if( wmakml.ways ) { wmakml.ways.push.apply(wmakml.ways,ways) }
+    else { wmakml.ways = ways; }
+  }
+
+  function parseGeometry(g) {
+    var i;
+    switch( g['type']) {
+      case "LineString": 
+        parseLineString(g['coordinates']);
+        addKMLCanvas();
+        wmaDrawKML();
+        break;
+      case "MultiLineString": 
+        for( i=0; i<g['coordinates'].length; i++ ) {
+          parseLineString(g['coordinates'][i]);
+        }
+        addKMLCanvas();
+        wmaDrawKML();
+        break;
+      case "Polygon":
+        parsePolygon(g['coordinates']);
+        addKMLCanvas();
+        wmaDrawKML();
+        break;
+      case "MultiPolygon":
+        for( i=0; i<g['coordinates'].length; i++ ) {
+          parsePolygon(g['coordinates'][i]);
+        }
+        addKMLCanvas();
+        wmaDrawKML();
+
+        break;
+    }
+  }
   // process different types
   var i;
   if( !('type' in d) ) { return; }
-  switch( d['type']) {
-    case "MultiLineString": 
-      var ways = [];
-      for( i=0; i<d['coordinates'].length; i++ ) {
-        ways.push( reproject(d['coordinates'][i]) );
-      }
-      wmakml.ways = wmakml.ways ? wmakml.ways.push.apply(wmakml.ways,ways) : ways;
-      addKMLCanvas();
-      wmaDrawKML();
-      break;
-    case "Polygon":
-      var area = { outer: [], inner: [] };
-      for( i=0; i<d['coordinates'].length; i++ ) {
-        area.outer.push( reproject(d['coordinates'][i]) );
-      }
-      wmakml.areas = wmakml.areas ? wmakml.areas.push(area) : [area];
-      addKMLCanvas();
-      wmaDrawKML();
 
-      break;
+  if( d['type'] == 'GeometryCollection' ) {
+    for( i=0; i<d['geometries'].length; ++i ) {
+      parseGeometry(d['geometries'][i]);
+    }
+  } else {
+    parseGeometry(d);
   }
+
 }
 
 // call installation routine
