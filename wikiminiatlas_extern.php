@@ -196,7 +196,7 @@ function wikiminiatlasInstall()
     $.ajax({
       url: 'http://toolserver.org/~master/osmjson/getGeoJSON.php?lang='+lang+'&article='+page,
       success: processWIWOSM
-    }
+    });
   }
 
   // parse coordinates
