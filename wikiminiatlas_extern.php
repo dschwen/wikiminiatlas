@@ -195,6 +195,7 @@ function wikiminiatlasInstall()
   if( page ) {
     $.ajax({
       url: 'http://toolserver.org/~master/osmjson/getGeoJSON.php?lang='+lang+'&article='+page,
+      dataType: 'json',
       success: processWIWOSM
     });
   }
@@ -532,14 +533,15 @@ function wmaToggleKML() {
 // draw KML data
 function wmaDrawKML() {
   var i, j, c = wmakml.c, w = wmakml.ways, a = wmakml.areas, p
-    , hw = wikiminiatlas_zoomsize[wikiminiatlas_zoom];
+    , hw = wikiminiatlas_zoomsize[wikiminiatlas_zoom]*128
+    , gx = wikiminiatlas_gx>hw ? wikiminiatlas_gx-2*hw : wikiminiatlas_gx;
 
   function addToPath(w) {
     var k, p, wx = 0, lx, dx;
     if( w.length > 0 ) {
       p = wmaLatLonToXY( w[0].lat, w[0].lon );
       lx = p.x;
-      c.moveTo( p.x-wikiminiatlas_gx, p.y-wikiminiatlas_gy );
+      c.moveTo( p.x-gx, p.y-wikiminiatlas_gy );
       for( k = 1; k < w.length; ++k ) {
         p = wmaLatLonToXY( w[k].lat, w[k].lon );
         dx = p.x - lx;
@@ -547,7 +549,7 @@ function wmaDrawKML() {
           wx -= Math.round(dx/(2*hw))*2*hw;
         }
         lx = p.x;
-        c.lineTo( p.x-wikiminiatlas_gx+wx, p.y-wikiminiatlas_gy );
+        c.lineTo( p.x-gx+wx, p.y-wikiminiatlas_gy );
       }
     }
   }
@@ -1102,10 +1104,10 @@ function wmaReceiveMessage(e) {
 function processWIWOSM(d) {
   // reproject from spherical mercator to WGS84
   function reproject(c) {
-    var i, pi180 = 180/Math.PI, pi2 = Math.PI/2, mercx = 180.0/20037508.34, way;
+    var i, pi180 = 180/Math.PI, pi2 = Math.PI/2, mercx = 180.0/20037508.34, way=[];
     for( i=0;  i<c.length; ++i ) {
       way.push( {
-        lat : pi180 * (2.0 * Math.atan(Math.exp(c[i][1]/pi180)) - pi2),
+        lat : pi180 * (2.0 * Math.atan(Math.exp(c[i][1]*mercx/pi180)) - pi2),
         lon : c[i][0] * mercx
       } );
     }
@@ -1113,17 +1115,27 @@ function processWIWOSM(d) {
   }
 
   // process different types
-  var i, ways = [];
+  var i;
   if( !('type' in d) ) { return; }
   switch( d['type']) {
     case "MultiLineString": 
+      var ways = [];
       for( i=0; i<d['coordinates'].length; i++ ) {
         ways.push( reproject(d['coordinates'][i]) );
       }
       wmakml.ways = wmakml.ways ? wmakml.ways.push.apply(wmakml.ways,ways) : ways;
       addKMLCanvas();
+      wmaDrawKML();
       break;
     case "Polygon":
+      var area = { outer: [], inner: [] };
+      for( i=0; i<d['coordinates'].length; i++ ) {
+        area.outer.push( reproject(d['coordinates'][i]) );
+      }
+      wmakml.areas = wmakml.areas ? wmakml.areas.push(area) : [area];
+      addKMLCanvas();
+      wmaDrawKML();
+
       break;
   }
 }
