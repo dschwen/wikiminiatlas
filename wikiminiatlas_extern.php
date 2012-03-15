@@ -1124,10 +1124,7 @@ function processWIWOSM(d) {
     else { wmakml.areas = [area]; }
   }
   function parseLineString(l) {
-    var ways = [], i;
-    for( i=0; i<l.length; i++ ) {
-      ways.push( reproject(l[i]) );
-    }
+    var ways = [ reproject(l) ];
     if( wmakml.ways ) { wmakml.ways.push.apply(wmakml.ways,ways) }
     else { wmakml.ways = ways; }
   }
