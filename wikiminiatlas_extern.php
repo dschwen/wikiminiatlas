@@ -186,7 +186,7 @@ function wikiminiatlasInstall()
 
   //document.getElementById('debugbox').innerHTML='';
   var url_params = parseParams(window.location.href)
-    , coord_params = url_params['wma']
+    , coord_params = url_params['wma'] || (window.location.search).substr(1)
     , page = decodeURIComponent(url_params['page'])
     , lang = decodeURIComponent(url_params['lang'])
     , synopsis_current = '';
