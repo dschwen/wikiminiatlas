@@ -166,6 +166,16 @@ var wikiminiatlas_tilesets = [
 ];
 var wikiminiatlas_tileset = 0;
 
+// parse url parameters into a hash
+function parseParams(url) {
+  var map = {}, h, i, pair = url.substr(url.indexOf('?')+1).split('&');
+  for( i=0; i<pair.length; ++i ) {
+    h = pair[i].split('=');
+    map[h[0]] = h[1];
+  }
+  return map;
+}
+
 //
 // Insert the map Widget into the page.
 //
@@ -175,9 +185,11 @@ function wikiminiatlasInstall()
  if( wikiminiatlas_widget === null ) {
 
   //document.getElementById('debugbox').innerHTML='';
-
-  var coord_params = (window.location.search).substr(1),
-      synopsis_current = '';
+  var url_params = parseParams(window.location.href)
+    , coord_params = url_params['wma'] || (window.location.search).substr(1)
+    , page = decodeURIComponent(url_params['page'])
+    , lang = decodeURIComponent(url_params['lang'])
+    , synopsis_current = '';
 
   // parse coordinates
   var coord_filter = /([\d+-.]+)_([\d+-.]+)_([\d]+)_([\d]+)/;
