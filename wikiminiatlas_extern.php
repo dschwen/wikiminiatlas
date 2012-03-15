@@ -187,9 +187,17 @@ function wikiminiatlasInstall()
   //document.getElementById('debugbox').innerHTML='';
   var url_params = parseParams(window.location.href)
     , coord_params = url_params['wma'] || (window.location.search).substr(1)
-    , page = decodeURIComponent(url_params['page'])
-    , lang = decodeURIComponent(url_params['lang'])
+    , page = url_params['page']
+    , lang = url_params['lang']
     , synopsis_current = '';
+
+  // launch the WIWOSM request (if a page was passed)
+  if( page ) {
+    $.ajax({
+      url: 'http://toolserver.org/~master/osmjson/getGeoJSON.php?lang='+lang+'&article='+page,
+      success: processWIWOSM
+    }
+  }
 
   // parse coordinates
   var coord_filter = /([\d+-.]+)_([\d+-.]+)_([\d]+)_([\d]+)/;
@@ -1042,6 +1050,20 @@ function extraMarkerMessage(index,cmd) {
  }
 }
 
+// make and insert a canvas element for KML/WIWOSM data
+function addKMLCanvas() {
+  // add canvas overlay
+  if( wmakml.canvas === null ) {
+    wmakml.canvas = $('<canvas class="wmakml"></canvas>')
+      .attr( { width: wikiminiatlas_width, height: wikiminiatlas_height } )
+      .appendTo( $(wikiminiatlas_map) );
+    wmakml.c = wmakml.canvas[0].getContext('2d');
+    wmakml.shown = true;
+    wmakml.drawn = true;
+    $('#button_kml').show();
+  }
+}
+
 // todo JSON for message passing!
 function wmaReceiveMessage(e) {
   e = e.originalEvent;
@@ -1067,22 +1089,43 @@ function wmaReceiveMessage(e) {
 
   // process line coordinates
   if( ( 'ways' in d ) || ( 'areas' in d ) ) {
-    // add canvas overlay
-    if( wmakml.canvas === null ) {
-      wmakml.canvas = $('<canvas class="wmakml"></canvas>')
-        .attr( { width: wikiminiatlas_width, height: wikiminiatlas_height } )
-        .appendTo( $(wikiminiatlas_map) );
-      wmakml.c = wmakml.canvas[0].getContext('2d');
-      wmakml.shown = true;
-      wmakml.drawn = true;
-      $('#button_kml').show();
-    }
+    addKMLCanvas();
     // copy data
     wmakml.ways  = d.ways  || null;
     wmakml.areas = d.areas || null;
     wmaDrawKML();
   }
 
+}
+
+// reproject and insert the WIWOSM geoJSON data
+function processWIWOSM(d) {
+  // reproject from spherical mercator to WGS84
+  function reproject(c) {
+    var i, pi180 = 180/Math.PI, pi2 = Math.PI/2, mercx = 180.0/20037508.34, way;
+    for( i=0;  i<c.length; ++i ) {
+      way.push( {
+        lat : pi180 * (2.0 * Math.atan(Math.exp(c[i][1]/pi180)) - pi2),
+        lon : c[i][0] * mercx
+      } );
+    }
+    return way;
+  }
+
+  // process different types
+  var i, ways = [];
+  if( !('type' in d) ) { return; }
+  switch( d['type']) {
+    case "MultiLineString": 
+      for( i=0; i<d['coordinates'].length; i++ ) {
+        ways.push( reproject(d['coordinates'][i]) );
+      }
+      wmakml.ways = wmakml.ways ? wmakml.ways.push.apply(wmakml.ways,ways) : ways;
+      addKMLCanvas();
+      break;
+    case "Polygon":
+      break;
+  }
 }
 
 // call installation routine
