@@ -75,7 +75,7 @@ var wmaci_image_span = null;
 var wmaci_link = null;
 var wmaci_link_text = null;
 
-var wmakml = { shown: false, drawn: false, canvas: null, c: null, ways: null, areas: null };
+var wmakml = { shown: false, drawn: false, canvas: null, c: null, ways: null, areas: null, minlon = Infinity, maxlon = -Infinity };
 
 // include documentation strings
 <? require( 'wikiminiatlas_i18n.inc' ); ?>
@@ -1104,11 +1104,14 @@ function wmaReceiveMessage(e) {
 function processWIWOSM(d) {
   // reproject from spherical mercator to WGS84
   function reproject(c) {
-    var i, pi180 = 180/Math.PI, pi2 = Math.PI/2, mercx = 180.0/20037508.34, way=[];
+    var i, lon, pi180 = 180/Math.PI, pi2 = Math.PI/2, mercx = 180.0/20037508.34, way=[];
     for( i=0;  i<c.length; ++i ) {
+      lon = c[i][0] * mercx;
+      if( lon > maxlon ) { maxlon = lon; }
+      if( lon < minlon ) { minlon = lon; }
       way.push( {
         lat : pi180 * (2.0 * Math.atan(Math.exp(c[i][1]*mercx/pi180)) - pi2),
-        lon : c[i][0] * mercx
+        lon : lon
       } );
     }
     return way;
