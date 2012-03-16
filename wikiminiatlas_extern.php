@@ -1098,6 +1098,11 @@ function wmaReceiveMessage(e) {
     wmaDrawKML();
   }
 
+  // process extent (only longitude for now)
+  if( ( 'minlon' in d ) && ( 'maxlon' in d ) ) {
+    if( d.maxlon > wmakml.maxlon ) { wmakml.maxlon = d.maxlon; }
+    if( d.minlon < wmakml.minlon ) { wmakml.minlon = d.minlon; }
+  }
 }
 
 // reproject and insert the WIWOSM geoJSON data
@@ -1107,8 +1112,8 @@ function processWIWOSM(d) {
     var i, lon, pi180 = 180/Math.PI, pi2 = Math.PI/2, mercx = 180.0/20037508.34, way=[];
     for( i=0;  i<c.length; ++i ) {
       lon = c[i][0] * mercx;
-      if( lon > maxlon ) { maxlon = lon; }
-      if( lon < minlon ) { minlon = lon; }
+      if( lon > wmakml.maxlon ) { wmakml.maxlon = lon; }
+      if( lon < wmakml.minlon ) { wmakml.minlon = lon; }
       way.push( {
         lat : pi180 * (2.0 * Math.atan(Math.exp(c[i][1]*mercx/pi180)) - pi2),
         lon : lon
