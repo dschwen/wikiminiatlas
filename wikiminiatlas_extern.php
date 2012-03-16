@@ -533,8 +533,8 @@ function wmaToggleKML() {
 // draw KML data
 function wmaDrawKML() {
   var i, j, c = wmakml.c, w = wmakml.ways, a = wmakml.areas, p
-    , hw = wikiminiatlas_zoomsize[wikiminiatlas_zoom]*128
-    , gx = wikiminiatlas_gx>hw ? wikiminiatlas_gx-2*hw : wikiminiatlas_gx;
+    , hw = wikiminiatlas_zoomsize[wikiminiatlas_zoom]*128, gx=0
+    ;
 
   function addToPath(w) {
     var k, p, wx = 0, lx, dx;
@@ -553,6 +553,12 @@ function wmaDrawKML() {
       }
     }
   }
+
+  // set gx (bad temp solution!)
+  if( wmakml.maxlon > 0 ) { 
+    gx = wikiminiatlas_gx>hw ? wikiminiatlas_gx-2*hw : wikiminiatlas_gx;
+  }
+  
 
   if( c !== null ) {
     // clear canvas
