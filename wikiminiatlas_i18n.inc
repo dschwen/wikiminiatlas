@@ -995,5 +995,11 @@ var strings =
  kml: {
   en:'Toggle overlay',
   de:'Artikelspezifische Karteneinblendung (de)aktivieren'
+ },
+ dyk: {
+  de: ['Halte Strg oder ⌘ und positioniere den Mauspfeil auf einen link, um eine Atrikelzusammenfassung anzuzeigen.'],
+  en: ['Hold Ctrl or ⌘ and hover over a link to read an article summary.'],
+  fr: ['Maintenir Ctrl ou ⌘ et survoler un lien pour lire un résumé de l'article.'],
+  eo: ['Tenu Stir aŭ ⌘ kaj ŝvebu super ligilo por legi resumon de artikolo.']
  }
 };
