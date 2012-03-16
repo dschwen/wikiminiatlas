@@ -75,7 +75,7 @@ var wmaci_image_span = null;
 var wmaci_link = null;
 var wmaci_link_text = null;
 
-var wmakml = { shown: false, drawn: false, canvas: null, c: null, ways: null, areas: null, minlon = Infinity, maxlon = -Infinity };
+var wmakml = { shown: false, drawn: false, canvas: null, c: null, ways: null, areas: null, minlon: Infinity, maxlon: -Infinity };
 
 // include documentation strings
 <? require( 'wikiminiatlas_i18n.inc' ); ?>
