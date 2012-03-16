@@ -847,7 +847,7 @@ var strings =
   bpy:'জোলাকি',
   br:'Loar (arnodel)',
   ca:'Lluna (experimental)',
-  cs:'Měsíc (experimentální)', 
+  cs:'Měsíc (experimentální)',
   da:'Måne (På prøve)',
   de:'Mond (testweise)',
   dsb:'Mjasec (eksperimentelny)',
