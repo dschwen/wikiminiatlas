@@ -532,7 +532,7 @@ function wmaToggleKML() {
 
 // draw KML data
 function wmaDrawKML() {
-  var i, j, c = wmakml.c, w = wmakml.ways, a = wmakml.areas, p
+  var i, j, n, c = wmakml.c, w = wmakml.ways, a = wmakml.areas, p, p1, p2
     , hw = wikiminiatlas_zoomsize[wikiminiatlas_zoom]*128, gx=wikiminiatlas_gx
     ;
 
@@ -554,47 +554,49 @@ function wmaDrawKML() {
     }
   }
 
-  // set gx (bad temp solution!)
-  p =  wmaLatLonToXY(0,wmakml.maxlon);
-  if( p.x-gx < 0 ) { gx-= 2*hw; }
-  p =  wmaLatLonToXY(0,wmakml.minlon);
-  if( p.x-gx > wikiminiatlas_width ) { gx+= 2*hw; }
-
   if( c !== null ) {
     // clear canvas
     c.clearRect( 0,0, wmakml.canvas[0].width, wmakml.canvas[0].height );
 
-    // areas
-    if( a !== null ) {
-      c.fillStyle = "rgb(255,0,0)";
-      for( i = 0; i<a.length; i++ ) {
-        c.globalCompositeOperation = 'source-over';
-        for( j = 0; j<a[i].outer.length; ++j ) {
-          c.beginPath();
-          addToPath(a[i].outer[j]);
-          c.closePath();
-          c.fill();
-        }
-        c.globalCompositeOperation = 'destination-out';
-        for( j = 0; j<a[i].inner.length; ++j ) {
-          c.beginPath();
-          addToPath(a[i].inner[j]);
-          c.closePath();
-          c.fill();
-        }
-      }
-    }
+    // loop over multiple copies (wrap around the sphere) 
+    for( n=-1; n<=0; ++n ) {
+      gx = wikiminiatlas_gx + n*2*hw;
+      p1 =  wmaLatLonToXY(0,wmakml.maxlon);
+      p2 =  wmaLatLonToXY(0,wmakml.minlon);
+      if( p1.x<p2.x && ( p1.x-gx < 0 || p1.x-gx > wikiminiatlas_width ) ) { continue; }
 
-    // draw ways
-    if( w !== null ) {
-      c.globalCompositeOperation = 'source-over';
-      c.lineWidth = 4.0;
-      c.strokeStyle = "rgb(0,0,255)";
-      c.beginPath();
-      for(i =0; i<w.length; ++i ) {
-        addToPath(w[i]) 
+      // areas
+      if( a !== null ) {
+        c.fillStyle = "rgb(255,0,0)";
+        for( i = 0; i<a.length; i++ ) {
+          c.globalCompositeOperation = 'source-over';
+          for( j = 0; j<a[i].outer.length; ++j ) {
+            c.beginPath();
+            addToPath(a[i].outer[j]);
+            c.closePath();
+            c.fill();
+          }
+          c.globalCompositeOperation = 'destination-out';
+          for( j = 0; j<a[i].inner.length; ++j ) {
+            c.beginPath();
+            addToPath(a[i].inner[j]);
+            c.closePath();
+            c.fill();
+          }
+        }
       }
-      c.stroke();
+
+      // draw ways
+      if( w !== null ) {
+        c.globalCompositeOperation = 'source-over';
+        c.lineWidth = 4.0;
+        c.strokeStyle = "rgb(0,0,255)";
+        c.beginPath();
+        for(i =0; i<w.length; ++i ) {
+          addToPath(w[i]) 
+        }
+        c.stroke();
+      }
     }
   }
 }
