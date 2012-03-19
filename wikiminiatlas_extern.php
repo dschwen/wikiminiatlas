@@ -539,7 +539,7 @@ function wmaDrawKML() {
   function addToPath(w) {
     var k, p, wx = 0, lx, dx;
     if( w.length > 0 ) {
-      p = wmaLatLonToXY( w[0].lat, w[0].lon );
+      p = wmaLatLonToXYnoWrap( w[0].lat, w[0].lon );
       lx = p.x;
       c.moveTo( p.x-gx, p.y-wikiminiatlas_gy );
       for( k = 1; k < w.length; ++k ) {
@@ -559,10 +559,10 @@ function wmaDrawKML() {
     c.clearRect( 0,0, wmakml.canvas[0].width, wmakml.canvas[0].height );
 
     // loop over multiple copies (wrap around the sphere) 
-    for( n=-1; n<=0; ++n ) {
+    for( n=-1; n<=1; ++n ) {
       gx = wikiminiatlas_gx + n*2*hw;
-      p1 =  wmaLatLonToXY(0,wmakml.maxlon);
-      p2 =  wmaLatLonToXY(0,wmakml.minlon);
+      p1 =  wmaLatLonToXYnoWrap(0,wmakml.maxlon);
+      p2 =  wmaLatLonToXYnoWrap(0,wmakml.minlon);
       if( p1.x<p2.x && ( p1.x-gx < 0 || p1.x-gx > wikiminiatlas_width ) ) { continue; }
 
       // areas
@@ -952,6 +952,10 @@ function wmaMoveToTarget() {
  wmaUpdateTargetButton();
 }
 
+function wmaLatLonToXYnoWrap(lat,lon) {
+ return { y:Math.floor((0.5-lat/180.0)*wikiminiatlas_zoomsize[wikiminiatlas_zoom]*128), 
+          x:Math.floor( (lon/360.0) * wikiminiatlas_zoomsize[wikiminiatlas_zoom]*256 ) };
+}
 function wmaLatLonToXY(lat,lon) {
  var newx = Math.floor( (lon/360.0) * wikiminiatlas_zoomsize[wikiminiatlas_zoom]*256 );
  if( newx < 0 ) {
