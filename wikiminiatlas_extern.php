@@ -1121,16 +1121,25 @@ function wmaReceiveMessage(e) {
 function processWIWOSM(d) {
   // reproject from spherical mercator to WGS84
   function reproject(c) {
-    var i, lon, pi180 = 180/Math.PI, pi2 = Math.PI/2, mercx = 180.0/20037508.34, way=[];
+    var i, lon, pi180 = 180/Math.PI, pi2 = Math.PI/2, mercx = 180.0/20037508.34, way=[]
+      , maxlon = -Infinity, minlon = Infinity, w;
     for( i=0;  i<c.length; ++i ) {
       lon = c[i][0] * mercx;
-      if( lon > wmakml.maxlon ) { wmakml.maxlon = lon; }
-      if( lon < wmakml.minlon ) { wmakml.minlon = lon; }
+      // exploit that OSM objects never cross the 180/-180 line
+      if( lon > maxlon ) { maxlon = lon; }
+      if( lon < minlon ) { minlon = lon; }
       way.push( {
         lat : pi180 * (2.0 * Math.atan(Math.exp(c[i][1]*mercx/pi180)) - pi2),
         lon : lon
       } );
     }
+    // adjust the extents
+    w = [ { r: Math.max(wmakml.maxlon,maxlon), l: Math.min(wmakml.minlon,minlon) },
+          { r: Math.max(wmakml.maxlon,maxlon+360), l: Math.min(wmakml.minlon,minlon+360)},
+          { r: Math.max(wmakml.maxlon+360,maxlon), l: Math.min(wmakml.minlon+360,minlon)} ];
+    w.sort(function(a,b){(a.r-a.l)-(b.r-b.l)});
+    wmakml.minlon = w[0].l;
+    wmakml.maxlon = w[0].r;
     return way;
   }
 
