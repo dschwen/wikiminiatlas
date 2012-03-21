@@ -1,0 +1,27 @@
+     -180                     0                      180
+------|-----------------------|-----------------------|------
+
+                                             aaaaaaaaaa
+      bbbbbb
+
+
+                        aaaaaaaaaaaaaaaaaaaaa
+                              bbbbbbbbb
+
+               aaaaaaaaaaaaaaa
+           bbbbbbbbbbbb
+
+                              aaaaaaaaaaaaaaa
+                                     bbbbbbbbbbb
+
+               aaaaaaaaaa
+                               bbbbbbb
+
+                          aaaaaaaaaaaaaaaaaa
+                 bbbbbb
+
+                    aaaaaaaa
+            bbbbbbbbbbbbbbbbbbbbbb
+
+new width
+Min( Max(ar,br)-Min(al,bl), Max(ar,br+360)-Min(al,bl+360) )
