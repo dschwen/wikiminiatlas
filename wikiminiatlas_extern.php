@@ -75,7 +75,7 @@ var wmaci_image_span = null;
 var wmaci_link = null;
 var wmaci_link_text = null;
 
-var wmakml = { shown: false, drawn: false, canvas: null, c: null, ways: null, areas: null };
+var wmakml = { shown: false, drawn: false, canvas: null, c: null, ways: null, areas: null, maxlat: -Infinity, minlat: Infinity };
 
 // include documentation strings
 <? require( 'wikiminiatlas_i18n.inc' ); ?>
@@ -1121,19 +1121,20 @@ function wmaReceiveMessage(e) {
 function processWIWOSM(d) {
   // reproject from spherical mercator to WGS84
   function reproject(c) {
-    var i, lon, pi180 = 180/Math.PI, pi2 = Math.PI/2, mercx = 180.0/20037508.34, way=[]
+    var i, lat, lon, pi180 = 180/Math.PI, pi2 = Math.PI/2, mercx = 180.0/20037508.34, way=[]
       , maxlon = -Infinity, minlon = Infinity, w;
     for( i=0;  i<c.length; ++i ) {
       lon = c[i][0] * mercx;
+      lat = pi180 * (2.0 * Math.atan(Math.exp(c[i][1]*mercx/pi180)) - pi2);
       // exploit that OSM objects never cross the 180/-180 line
       if( lon > maxlon ) { maxlon = lon; }
       if( lon < minlon ) { minlon = lon; }
-      way.push( {
-        lat : pi180 * (2.0 * Math.atan(Math.exp(c[i][1]*mercx/pi180)) - pi2),
-        lon : lon
-      } );
+      // lattitude is not a problem
+      if( lat > wmakml.maxlat ) { wmakml.maxlat = lat; }
+      if( lat < wmakml.minlat ) { wmakml.minlat = lat; }
+      way.push( { lat : lat, lon : lon } );
     }
-    // adjust the extents
+    // adjust the longitudinal extents
     if( !('maxlon' in wmakml) || !('maxlon' in wmakml) ) { 
       wmakml.maxlon = maxlon; 
       wmakml.minlon = minlon; 
@@ -1205,6 +1206,17 @@ function processWIWOSM(d) {
     parseGeometry(d);
   }
 
+  // zoom and center to wmakml data
+  var clon = ( wmakml.maxlon + wmakml.minlon )/2.0
+    , clat = ( wmakml.maxlat + wmakml.minlat )/2.0
+    , ex = (wmakml.maxlon - wmakml.minlon)/180.0 * 3.0*128
+    , ey = (wmakml.maxlat + wmakml.minlat)/180.0 * 3.0*128; // max extent in degrees, zoom0 has 3*128/180 px/degree
+
+  for( wikiminiatlas_zoom = 0; wikiminiatlas_zoom < 12; ++wikiminiatlas_zoom ) {
+    ex *= 2; ey *= 2;
+    if( ex>wikiminiatlas_width/2 || ey>wikiminiatlas_height/2 ) break;
+  }
+  wmaMoveToCoord( clat, clon );
 }
 
 // call installation routine
