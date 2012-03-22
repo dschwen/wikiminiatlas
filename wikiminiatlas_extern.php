@@ -75,7 +75,7 @@ var wmaci_image_span = null;
 var wmaci_link = null;
 var wmaci_link_text = null;
 
-var wmakml = { shown: false, drawn: false, canvas: null, c: null, ways: null, areas: null, minlon: Infinity, maxlon: -Infinity };
+var wmakml = { shown: false, drawn: false, canvas: null, c: null, ways: null, areas: null };
 
 // include documentation strings
 <? require( 'wikiminiatlas_i18n.inc' ); ?>
@@ -1112,8 +1112,8 @@ function wmaReceiveMessage(e) {
 
   // process extent (only longitude for now)
   if( ( 'minlon' in d ) && ( 'maxlon' in d ) ) {
-    if( d.maxlon > wmakml.maxlon ) { wmakml.maxlon = d.maxlon; }
-    if( d.minlon < wmakml.minlon ) { wmakml.minlon = d.minlon; }
+    if( !('maxlon' in wmakml) || d.maxlon > wmakml.maxlon ) { wmakml.maxlon = d.maxlon; }
+    if( !('minlon' in wmakml) || d.minlon < wmakml.minlon ) { wmakml.minlon = d.minlon; }
   }
 }
 
@@ -1134,12 +1134,17 @@ function processWIWOSM(d) {
       } );
     }
     // adjust the extents
-    w = [ { r: Math.max(wmakml.maxlon,maxlon), l: Math.min(wmakml.minlon,minlon) },
-          { r: Math.max(wmakml.maxlon,maxlon+360), l: Math.min(wmakml.minlon,minlon+360)},
-          { r: Math.max(wmakml.maxlon+360,maxlon), l: Math.min(wmakml.minlon+360,minlon)} ];
-    w.sort(function(a,b){(a.r-a.l)-(b.r-b.l)});
-    wmakml.minlon = w[0].l;
-    wmakml.maxlon = w[0].r;
+    if( !('maxlon' in wmakml) || !('maxlon' in wmakml) ) { 
+      wmakml.maxlon = maxlon; 
+      wmakml.minlon = minlon; 
+    } else {
+      w = [ { r: Math.max(wmakml.maxlon,maxlon), l: Math.min(wmakml.minlon,minlon) },
+            { r: Math.max(wmakml.maxlon,maxlon+360), l: Math.min(wmakml.minlon,minlon+360)},
+            { r: Math.max(wmakml.maxlon+360,maxlon), l: Math.min(wmakml.minlon+360,minlon)} ];
+      w.sort(function(a,b){return (a.r-a.l)-(b.r-b.l)});
+      wmakml.minlon = w[0].l;
+      wmakml.maxlon = w[0].r;
+    }
     return way;
   }
 
