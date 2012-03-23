@@ -274,25 +274,12 @@ function wikiminiatlasInstall()
    '<img id="button_menu" src="' + wikiminiatlas_imgbase + 
     'button_menu.png" title="' + strings.settings[UILang] + '" onclick="toggleSettings()">';
 
-  /*
-    $('<img>').attr({ 
-      src: wikiminiatlas_imgbase+'button_menu.png', 
-    } ).css( {
-      right: '40px', top: '8px', z-index: '50'
-    } ).click(toggleSettings);
-  */
-
-  if( wikiminiatlas_own_close )
-  {
-   WikiMiniAtlasHTML += '<img src="'+wikiminiatlas_imgbase+'button_hide.png" title="' + 
-    strings.close[UILang] + 
-    '" style="z-index:50; position:absolute; right:18px; top: 8px; width:18px; cursor:pointer" onclick="window.close()">';
-  }
-  else
-  {
-   WikiMiniAtlasHTML += '<img src="'+wikiminiatlas_imgbase+'button_fs.png" title="' + 
-    strings.fullscreen[UILang] + 
-    '" style="z-index:50; position:absolute; right:62px; top: 8px; width:18px; cursor:pointer" onclick="wmaFullscreen()">';
+  if( wikiminiatlas_own_close ) {
+   WikiMiniAtlasHTML += '<img id="button_hide" src="'+wikiminiatlas_imgbase+'button_hide.png" title="' + 
+    strings.close[UILang] + '" onclick="window.close()">';
+  } else {
+   WikiMiniAtlasHTML += '<img id="button_fs" src="'+wikiminiatlas_imgbase+'button_fs.png" title="' + 
+    strings.fullscreen[UILang] + '" onclick="wmaFullscreen()">';
   }
 
   WikiMiniAtlasHTML += '<a href="//meta.wikimedia.org/wiki/WikiMiniAtlas/' + wikiminiatlas_language + 
@@ -301,9 +288,6 @@ function wikiminiatlasInstall()
   WikiMiniAtlasHTML += '<div id="wikiminiatlas_map" style="position:absolute; width:' + wikiminiatlas_width + 
    'px; height:' + wikiminiatlas_height + 'px; border: 1px solid gray; cursor: move; background-color: #aaaaaa;"></div>';
 
-   //'px; height:' + wikiminiatlas_height + 'px; border: 1px solid gray; cursor: move; background-color: #aaaaaa; clip:rect(0px, ' + 
-   //wikiminiatlas_width + 'px, '+wikiminiatlas_height+'px, 0px);"></div>';
-  
   // Scalebar
   WikiMiniAtlasHTML += 
    '<div id="scalebox"><div id="scalebar"></div>' +
