@@ -1197,8 +1197,8 @@ function processWIWOSM(d) {
     , ey = (wmakml.maxlat - wmakml.minlat)/180.0 * 3.0*128; // max extent in degrees, zoom0 has 3*128/180 px/degree
 
   for( wikiminiatlas_zoom = 0; wikiminiatlas_zoom < 12; ++wikiminiatlas_zoom ) {
-    ex *= 2; ey *= 2;
     if( ex>wikiminiatlas_width/2 || ey>wikiminiatlas_height/2 ) break;
+    ex *= 2; ey *= 2;
   }
   wmaMoveToCoord( clat, clon );
 }
