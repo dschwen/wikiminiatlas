@@ -1194,7 +1194,7 @@ function processWIWOSM(d) {
   var clon = ( wmakml.maxlon + wmakml.minlon )/2.0
     , clat = ( wmakml.maxlat + wmakml.minlat )/2.0
     , ex = (wmakml.maxlon - wmakml.minlon)/180.0 * 3.0*128
-    , ey = (wmakml.maxlat + wmakml.minlat)/180.0 * 3.0*128; // max extent in degrees, zoom0 has 3*128/180 px/degree
+    , ey = (wmakml.maxlat - wmakml.minlat)/180.0 * 3.0*128; // max extent in degrees, zoom0 has 3*128/180 px/degree
 
   for( wikiminiatlas_zoom = 0; wikiminiatlas_zoom < 12; ++wikiminiatlas_zoom ) {
     ex *= 2; ey *= 2;
