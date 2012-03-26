@@ -75,7 +75,7 @@ var wmaci_image_span = null;
 var wmaci_link = null;
 var wmaci_link_text = null;
 
-var wmakml = { shown: false, drawn: false, canvas: null, c: null, ways: null, areas: null, maxlat: -Infinity, minlat: Infinity };
+var wmasize = {}, wmakml = { shown: false, drawn: false, canvas: null, c: null, ways: null, areas: null, maxlat: -Infinity, minlat: Infinity };
 
 // include documentation strings
 <? require( 'wikiminiatlas_i18n.inc' ); ?>
@@ -286,7 +286,7 @@ function wikiminiatlasInstall()
    '" target="_top" style="z-index:11; position:absolute; bottom:3px; right: 10px; color:black; font-size:5pt">WikiMiniAtlas</a>';
 
   WikiMiniAtlasHTML += '<div id="wikiminiatlas_map" style="position:absolute; width:' + wikiminiatlas_width + 
-   'px; height:' + wikiminiatlas_height + 'px; border: 1px solid gray; cursor: move; background-color: #aaaaaa;"></div>';
+   'px; height:' + wikiminiatlas_height + 'px; cursor: move; background-color: #aaaaaa;"></div>';
 
   // Scalebar
   WikiMiniAtlasHTML += 
@@ -657,9 +657,9 @@ function moveWikiMiniAtlasMapTo()
     thistile.div.html('<span class="loading">' + strings.labelLoading[UILang] + '</span>');
 
     // TODO: instead of launching the XHR here, gather the needed coords and ...
-    if( sessionStorage && (data=sessionStorage.getItem(dataurl)) ) {
+    if( sessionStorage && ((data=sessionStorage.getItem(dataurl))!==null) ) {
       parseLabels(thistile.div,data);
-    }
+    } else {
       (function(turl){// closure to retain access to dataurl in sucess callback
       thistile.xhr = $.ajax( { url : turl, context : thistile.div } )
         .success( function(data) { 
@@ -670,6 +670,7 @@ function moveWikiMiniAtlasMapTo()
         } ) 
         .error( function() { this.text(''); } );
       })(dataurl);
+    }
    }
   }
   // ...request them here, all at once
@@ -708,26 +709,27 @@ function mouseUpWikiMiniAtlasMap()
 
 // Mouse move handler
 function mouseMoveWikiMiniAtlasMap(ev) {
- window.scrollTo(0,0);
- if( wikiminiatlas_dragging !== null )
- {
-  var newev = ev || window.event;
-  var newcoords = wmaMouseCoords(newev);
+  window.scrollTo(0,0);
+  var newev = ev || window.event
+    , newcoords = wmaMouseCoords(newev);
 
-  wikiminiatlas_gx -= ( newcoords.x - wikiminiatlas_dragging.x );
-  wikiminiatlas_gy -= ( newcoords.y - wikiminiatlas_dragging.y );
-  wikiminiatlas_dragging = newcoords;
-
-  moveWikiMiniAtlasMapTo();
-
-  if( wikiminiatlas_marker_locked )
+  if( wikiminiatlas_dragging !== null )
   {
-   wikiminiatlas_marker_locked = false;
-   wmaUpdateTargetButton();
-  }
- }
 
- if( wikiminiatlas_old_onmousemove !== null ) wikiminiatlas_old_onmousemove(ev); 
+    wikiminiatlas_gx -= ( newcoords.x - wikiminiatlas_dragging.x );
+    wikiminiatlas_gy -= ( newcoords.y - wikiminiatlas_dragging.y );
+    wikiminiatlas_dragging = newcoords;
+    moveWikiMiniAtlasMapTo();
+
+    if( wikiminiatlas_marker_locked )
+    {
+      wikiminiatlas_marker_locked = false;
+      wmaUpdateTargetButton();
+    }
+  }
+
+  // call old handler (should never happen)
+  if( wikiminiatlas_old_onmousemove !== null ) { wikiminiatlas_old_onmousemove(ev); } 
 }
 
 function wmaDblclick(ev) {
@@ -758,6 +760,12 @@ function wmaKeypress(ev) {
   case 40 : wikiminiatlas_gy += wikiminiatlas_height/2; break; 
   case 107 : wmaZoomIn(); break;
   case 109 : wmaZoomOut(); break;
+  case 79 : // o 
+    $.ajax({
+      url: 'http://toolserver.org/~master/osmjson/getGeoJSON.php?lang=en&article=Germany', //'+lang+'&article='+page,
+      dataType: 'json',
+      success: processSizeOverlay
+    });
   default: ret=true;
  }
 
@@ -1050,16 +1058,17 @@ function extraMarkerMessage(index,cmd) {
 }
 
 // make and insert a canvas element for KML/WIWOSM data
-function addKMLCanvas() {
+function addKMLCanvas(geo) {
+  geo = geo || wmakml;
   // add canvas overlay
-  if( wmakml.canvas === null ) {
-    wmakml.canvas = $('<canvas class="wmakml"></canvas>')
+  if( geo.canvas === null ) {
+    geo.canvas = $('<canvas class="wmakml"></canvas>')
       .attr( { width: wikiminiatlas_width, height: wikiminiatlas_height } )
       .appendTo( $(wikiminiatlas_map) );
-    wmakml.c = wmakml.canvas[0].getContext('2d');
-    wmakml.shown = true;
-    wmakml.drawn = true;
-    $('#button_kml').show();
+    geo.c = wmakml.canvas[0].getContext('2d');
+    geo.shown = true;
+    geo.drawn = true;
+    if( geo == wmakml ) { $('#button_kml').show(); }
   }
 }
 
@@ -1103,7 +1112,7 @@ function wmaReceiveMessage(e) {
 }
 
 // reproject and insert the WIWOSM geoJSON data
-function processWIWOSM(d) {
+function processGeoJSON(d,geo) {
   // reproject from spherical mercator to WGS84
   function reproject(c) {
     var i, lat, lon, pi180 = 180/Math.PI, pi2 = Math.PI/2, mercx = 180.0/20037508.34, way=[]
@@ -1115,21 +1124,21 @@ function processWIWOSM(d) {
       if( lon > maxlon ) { maxlon = lon; }
       if( lon < minlon ) { minlon = lon; }
       // lattitude is not a problem
-      if( lat > wmakml.maxlat ) { wmakml.maxlat = lat; }
-      if( lat < wmakml.minlat ) { wmakml.minlat = lat; }
+      if( lat > geo.maxlat ) { geo.maxlat = lat; }
+      if( lat < geo.minlat ) { geo.minlat = lat; }
       way.push( { lat : lat, lon : lon } );
     }
     // adjust the longitudinal extents
-    if( !('maxlon' in wmakml) || !('maxlon' in wmakml) ) { 
-      wmakml.maxlon = maxlon; 
-      wmakml.minlon = minlon; 
+    if( !('maxlon' in geo) || !('maxlon' in geo) ) { 
+      geo.maxlon = maxlon; 
+      geo.minlon = minlon; 
     } else {
-      w = [ { r: Math.max(wmakml.maxlon,maxlon), l: Math.min(wmakml.minlon,minlon) },
-            { r: Math.max(wmakml.maxlon,maxlon+360), l: Math.min(wmakml.minlon,minlon+360)},
-            { r: Math.max(wmakml.maxlon+360,maxlon), l: Math.min(wmakml.minlon+360,minlon)} ];
+      w = [ { r: Math.max(geo.maxlon,maxlon), l: Math.min(geo.minlon,minlon) },
+            { r: Math.max(geo.maxlon,maxlon+360), l: Math.min(geo.minlon,minlon+360)},
+            { r: Math.max(geo.maxlon+360,maxlon), l: Math.min(geo.minlon+360,minlon)} ];
       w.sort(function(a,b){return (a.r-a.l)-(b.r-b.l)});
-      wmakml.minlon = w[0].l;
-      wmakml.maxlon = w[0].r;
+      geo.minlon = w[0].l;
+      geo.maxlon = w[0].r;
     }
     return way;
   }
@@ -1140,13 +1149,13 @@ function processWIWOSM(d) {
     for( i=1; i<p.length; i++ ) {
       area.inner.push( reproject(p[i]) );
     }
-    if( wmakml.areas ) { wmakml.areas.push(area) } 
-    else { wmakml.areas = [area]; }
+    if( geo.areas ) { geo.areas.push(area) } 
+    else { geo.areas = [area]; }
   }
   function parseLineString(l) {
     var ways = [ reproject(l) ];
-    if( wmakml.ways ) { wmakml.ways.push.apply(wmakml.ways,ways) }
-    else { wmakml.ways = ways; }
+    if( geo.ways ) { geo.ways.push.apply(geo.ways,ways) }
+    else { geo.ways = ways; }
   }
 
   function parseGeometry(g) {
@@ -1154,28 +1163,19 @@ function processWIWOSM(d) {
     switch( g['type']) {
       case "LineString": 
         parseLineString(g['coordinates']);
-        addKMLCanvas();
-        wmaDrawKML();
         break;
       case "MultiLineString": 
         for( i=0; i<g['coordinates'].length; i++ ) {
           parseLineString(g['coordinates'][i]);
         }
-        addKMLCanvas();
-        wmaDrawKML();
         break;
       case "Polygon":
         parsePolygon(g['coordinates']);
-        addKMLCanvas();
-        wmaDrawKML();
         break;
       case "MultiPolygon":
         for( i=0; i<g['coordinates'].length; i++ ) {
           parsePolygon(g['coordinates'][i]);
         }
-        addKMLCanvas();
-        wmaDrawKML();
-
         break;
     }
   }
@@ -1189,6 +1189,17 @@ function processWIWOSM(d) {
     }
   } else {
     parseGeometry(d);
+  }
+}
+
+function processWIWOSM(d) {
+  // process the returned data
+  processGeoJSON(d,wmakml);
+
+  // set up canvas
+  if( wmakml.ways || wmakml.areas ) {
+    addKMLCanvas();
+    wmaDrawKML();
   }
 
   // zoom and center to wmakml data
@@ -1204,6 +1215,20 @@ function processWIWOSM(d) {
     }
     wmaMoveToCoord( clat, clon );
   }
+}
+
+// wrapper to load a size comparison overlay object
+function processSizeOverlay(d) {
+  if( 'canvas' in wmasize ) {
+    wmasize.maxlat = -Infinity;
+    wmasize.minlat = Infinity;
+    wmasize.ways = null;
+    wmasize.areas = null;
+  } else {
+    wmasize = { shown: false, drawn: false, canvas: null, c: null, ways: null, areas: null, maxlat: -Infinity, minlat: Infinity };
+    addKMLCanvas(wmasize);
+  }
+  processGeoJSON(d,wmasize);
 }
 
 // call installation routine
