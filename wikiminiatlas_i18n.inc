@@ -1052,9 +1052,23 @@ var strings =
   de:'Artikelspezifische Karteneinblendung (de)aktivieren'
  },
  dyk: {
-  de: ['Halte Strg oder ⌘ und positioniere den Mauspfeil auf einen link, um eine Atrikelzusammenfassung anzuzeigen.'],
-  en: ['Hold Ctrl or ⌘ and hover over a link to read an article summary.'],
+  de: ['Halte Strg oder ⌘ und positioniere den Mauspfeil auf einen Link, um eine Artikelzusammenfassung anzuzeigen.',
+       'Druecke "o" oder oeffne die Einstellungen um eine Einblendung zum Groessenvergleich zu aktivieren.'],
+  en: ['Hold Ctrl or ⌘ and hover over a link to read an article summary.',
+       'Press "o" or go to the settings to activate a size-comparison overlay.'],
   fr: ['Maintenir Ctrl ou ⌘ et survoler un lien pour lire un résumé de l\'article.'],
   eo: ['Tenu Stir aŭ ⌘ kaj ŝvebu super ligilo por legi resumon de artikolo.']
+ },
+ other: {
+  de: 'andere',
+  en: 'other',
+  fr: 'autres'
+ },
+ // list of objects that are offered for size comparison
+ sover: {
+  de: { site:'de', list:['Deutschland','Niedersachsen','Berlin'] },
+  en: { site:'en', list:['California','Rhode Island','United States','Texas','Alaska'] },
+  fr: { site:'fr', list:['France'] }
  }
+
 };
