@@ -75,7 +75,7 @@ var wmaci_image_span = null;
 var wmaci_link = null;
 var wmaci_link_text = null;
 
-var wmakml = { shown: false, drawn: false, canvas: null, c: null, ways: null, areas: null, minlon: Infinity, maxlon: -Infinity };
+var wmasize = {}, wmakml = { shown: false, drawn: false, canvas: null, c: null, ways: null, areas: null, maxlat: -Infinity, minlat: Infinity };
 
 // include documentation strings
 <? require( 'wikiminiatlas_i18n.inc' ); ?>
@@ -274,36 +274,20 @@ function wikiminiatlasInstall()
    '<img id="button_menu" src="' + wikiminiatlas_imgbase + 
     'button_menu.png" title="' + strings.settings[UILang] + '" onclick="toggleSettings()">';
 
-  /*
-    $('<img>').attr({ 
-      src: wikiminiatlas_imgbase+'button_menu.png', 
-    } ).css( {
-      right: '40px', top: '8px', z-index: '50'
-    } ).click(toggleSettings);
-  */
-
-  if( wikiminiatlas_own_close )
-  {
-   WikiMiniAtlasHTML += '<img src="'+wikiminiatlas_imgbase+'button_hide.png" title="' + 
-    strings.close[UILang] + 
-    '" style="z-index:50; position:absolute; right:18px; top: 8px; width:18px; cursor:pointer" onclick="window.close()">';
-  }
-  else
-  {
-   WikiMiniAtlasHTML += '<img src="'+wikiminiatlas_imgbase+'button_fs.png" title="' + 
-    strings.fullscreen[UILang] + 
-    '" style="z-index:50; position:absolute; right:62px; top: 8px; width:18px; cursor:pointer" onclick="wmaFullscreen()">';
+  if( wikiminiatlas_own_close ) {
+   WikiMiniAtlasHTML += '<img id="button_hide" src="'+wikiminiatlas_imgbase+'button_hide.png" title="' + 
+    strings.close[UILang] + '" onclick="window.close()">';
+  } else {
+   WikiMiniAtlasHTML += '<img id="button_fs" src="'+wikiminiatlas_imgbase+'button_fs.png" title="' + 
+    strings.fullscreen[UILang] + '" onclick="wmaFullscreen()">';
   }
 
   WikiMiniAtlasHTML += '<a href="//meta.wikimedia.org/wiki/WikiMiniAtlas/' + wikiminiatlas_language + 
    '" target="_top" style="z-index:11; position:absolute; bottom:3px; right: 10px; color:black; font-size:5pt">WikiMiniAtlas</a>';
 
   WikiMiniAtlasHTML += '<div id="wikiminiatlas_map" style="position:absolute; width:' + wikiminiatlas_width + 
-   'px; height:' + wikiminiatlas_height + 'px; border: 1px solid gray; cursor: move; background-color: #aaaaaa;"></div>';
+   'px; height:' + wikiminiatlas_height + 'px; cursor: move; background-color: #aaaaaa;"></div>';
 
-   //'px; height:' + wikiminiatlas_height + 'px; border: 1px solid gray; cursor: move; background-color: #aaaaaa; clip:rect(0px, ' + 
-   //wikiminiatlas_width + 'px, '+wikiminiatlas_height+'px, 0px);"></div>';
-  
   // Scalebar
   WikiMiniAtlasHTML += 
    '<div id="scalebox"><div id="scalebar"></div>' +
@@ -538,10 +522,11 @@ function wmaDrawKML() {
 
   function addToPath(w) {
     var k, p, wx = 0, lx, dx;
+    if(  w[0].lon < wmakml.minlon ) { wx = 2*hw; }
     if( w.length > 0 ) {
       p = wmaLatLonToXYnoWrap( w[0].lat, w[0].lon );
       lx = p.x;
-      c.moveTo( p.x-gx, p.y-wikiminiatlas_gy );
+      c.moveTo( p.x-gx+wx, p.y-wikiminiatlas_gy );
       for( k = 1; k < w.length; ++k ) {
         p = wmaLatLonToXY( w[k].lat, w[k].lon );
         dx = p.x - lx;
@@ -559,11 +544,11 @@ function wmaDrawKML() {
     c.clearRect( 0,0, wmakml.canvas[0].width, wmakml.canvas[0].height );
 
     // loop over multiple copies (wrap around the sphere) 
-    for( n=-1; n<=1; ++n ) {
+    for( n=-2; n<=2; ++n ) {
       gx = wikiminiatlas_gx + n*2*hw;
-      p1 =  wmaLatLonToXYnoWrap(0,wmakml.maxlon);
-      p2 =  wmaLatLonToXYnoWrap(0,wmakml.minlon);
-      if( p1.x<p2.x && ( p1.x-gx < 0 || p1.x-gx > wikiminiatlas_width ) ) { continue; }
+      p1 =  wmaLatLonToXYnoWrap(0,wmakml.minlon);
+      p2 =  wmaLatLonToXYnoWrap(0,wmakml.maxlon);
+      if( p2.x-gx < 0 || p1.x-gx > wikiminiatlas_width ) { continue; }
 
       // areas
       if( a !== null ) {
@@ -672,9 +657,9 @@ function moveWikiMiniAtlasMapTo()
     thistile.div.html('<span class="loading">' + strings.labelLoading[UILang] + '</span>');
 
     // TODO: instead of launching the XHR here, gather the needed coords and ...
-    if( sessionStorage && (data=sessionStorage.getItem(dataurl)) ) {
+    if( sessionStorage && ((data=sessionStorage.getItem(dataurl))!==null) ) {
       parseLabels(thistile.div,data);
-    }
+    } else {
       (function(turl){// closure to retain access to dataurl in sucess callback
       thistile.xhr = $.ajax( { url : turl, context : thistile.div } )
         .success( function(data) { 
@@ -685,6 +670,7 @@ function moveWikiMiniAtlasMapTo()
         } ) 
         .error( function() { this.text(''); } );
       })(dataurl);
+    }
    }
   }
   // ...request them here, all at once
@@ -773,6 +759,12 @@ function wmaKeypress(ev) {
   case 40 : wikiminiatlas_gy += wikiminiatlas_height/2; break; 
   case 107 : wmaZoomIn(); break;
   case 109 : wmaZoomOut(); break;
+  case 79 : // o 
+    $.ajax({
+      url: 'http://toolserver.org/~master/osmjson/getGeoJSON.php?lang=en&article=Germany', //'+lang+'&article='+page,
+      dataType: 'json',
+      success: processSizeOverlay
+    });
   default: ret=true;
  }
 
@@ -1065,16 +1057,17 @@ function extraMarkerMessage(index,cmd) {
 }
 
 // make and insert a canvas element for KML/WIWOSM data
-function addKMLCanvas() {
+function addKMLCanvas(geo) {
+  geo = geo || wmakml;
   // add canvas overlay
-  if( wmakml.canvas === null ) {
-    wmakml.canvas = $('<canvas class="wmakml"></canvas>')
+  if( geo.canvas === null ) {
+    geo.canvas = $('<canvas class="wmakml"></canvas>')
       .attr( { width: wikiminiatlas_width, height: wikiminiatlas_height } )
       .appendTo( $(wikiminiatlas_map) );
-    wmakml.c = wmakml.canvas[0].getContext('2d');
-    wmakml.shown = true;
-    wmakml.drawn = true;
-    $('#button_kml').show();
+    geo.c = wmakml.canvas[0].getContext('2d');
+    geo.shown = true;
+    geo.drawn = true;
+    if( geo == wmakml ) { $('#button_kml').show(); }
   }
 }
 
@@ -1112,24 +1105,39 @@ function wmaReceiveMessage(e) {
 
   // process extent (only longitude for now)
   if( ( 'minlon' in d ) && ( 'maxlon' in d ) ) {
-    if( d.maxlon > wmakml.maxlon ) { wmakml.maxlon = d.maxlon; }
-    if( d.minlon < wmakml.minlon ) { wmakml.minlon = d.minlon; }
+    if( !('maxlon' in wmakml) || d.maxlon > wmakml.maxlon ) { wmakml.maxlon = d.maxlon; }
+    if( !('minlon' in wmakml) || d.minlon < wmakml.minlon ) { wmakml.minlon = d.minlon; }
   }
 }
 
 // reproject and insert the WIWOSM geoJSON data
-function processWIWOSM(d) {
+function processGeoJSON(d,geo) {
   // reproject from spherical mercator to WGS84
   function reproject(c) {
-    var i, lon, pi180 = 180/Math.PI, pi2 = Math.PI/2, mercx = 180.0/20037508.34, way=[];
+    var i, lat, lon, pi180 = 180/Math.PI, pi2 = Math.PI/2, mercx = 180.0/20037508.34, way=[]
+      , maxlon = -Infinity, minlon = Infinity, w;
     for( i=0;  i<c.length; ++i ) {
       lon = c[i][0] * mercx;
-      if( lon > wmakml.maxlon ) { wmakml.maxlon = lon; }
-      if( lon < wmakml.minlon ) { wmakml.minlon = lon; }
-      way.push( {
-        lat : pi180 * (2.0 * Math.atan(Math.exp(c[i][1]*mercx/pi180)) - pi2),
-        lon : lon
-      } );
+      lat = pi180 * (2.0 * Math.atan(Math.exp(c[i][1]*mercx/pi180)) - pi2);
+      // exploit that OSM objects never cross the 180/-180 line
+      if( lon > maxlon ) { maxlon = lon; }
+      if( lon < minlon ) { minlon = lon; }
+      // lattitude is not a problem
+      if( lat > geo.maxlat ) { geo.maxlat = lat; }
+      if( lat < geo.minlat ) { geo.minlat = lat; }
+      way.push( { lat : lat, lon : lon } );
+    }
+    // adjust the longitudinal extents
+    if( !('maxlon' in geo) || !('maxlon' in geo) ) { 
+      geo.maxlon = maxlon; 
+      geo.minlon = minlon; 
+    } else {
+      w = [ { r: Math.max(geo.maxlon,maxlon), l: Math.min(geo.minlon,minlon) },
+            { r: Math.max(geo.maxlon,maxlon+360), l: Math.min(geo.minlon,minlon+360)},
+            { r: Math.max(geo.maxlon+360,maxlon), l: Math.min(geo.minlon+360,minlon)} ];
+      w.sort(function(a,b){return (a.r-a.l)-(b.r-b.l)});
+      geo.minlon = w[0].l;
+      geo.maxlon = w[0].r;
     }
     return way;
   }
@@ -1140,13 +1148,13 @@ function processWIWOSM(d) {
     for( i=1; i<p.length; i++ ) {
       area.inner.push( reproject(p[i]) );
     }
-    if( wmakml.areas ) { wmakml.areas.push(area) } 
-    else { wmakml.areas = [area]; }
+    if( geo.areas ) { geo.areas.push(area) } 
+    else { geo.areas = [area]; }
   }
   function parseLineString(l) {
     var ways = [ reproject(l) ];
-    if( wmakml.ways ) { wmakml.ways.push.apply(wmakml.ways,ways) }
-    else { wmakml.ways = ways; }
+    if( geo.ways ) { geo.ways.push.apply(geo.ways,ways) }
+    else { geo.ways = ways; }
   }
 
   function parseGeometry(g) {
@@ -1154,28 +1162,19 @@ function processWIWOSM(d) {
     switch( g['type']) {
       case "LineString": 
         parseLineString(g['coordinates']);
-        addKMLCanvas();
-        wmaDrawKML();
         break;
       case "MultiLineString": 
         for( i=0; i<g['coordinates'].length; i++ ) {
           parseLineString(g['coordinates'][i]);
         }
-        addKMLCanvas();
-        wmaDrawKML();
         break;
       case "Polygon":
         parsePolygon(g['coordinates']);
-        addKMLCanvas();
-        wmaDrawKML();
         break;
       case "MultiPolygon":
         for( i=0; i<g['coordinates'].length; i++ ) {
           parsePolygon(g['coordinates'][i]);
         }
-        addKMLCanvas();
-        wmaDrawKML();
-
         break;
     }
   }
@@ -1190,7 +1189,45 @@ function processWIWOSM(d) {
   } else {
     parseGeometry(d);
   }
+}
 
+function processWIWOSM(d) {
+  // process the returned data
+  processGeoJSON(d,wmakml);
+
+  // set up canvas
+  if( wmakml.ways || wmakml.areas ) {
+    addKMLCanvas();
+    wmaDrawKML();
+  }
+
+  // zoom and center to wmakml data
+  if( wmakml.maxlon && wmakml.minlon && wmakml.maxlat>-Infinity && wmakml.minlat < Infinity ) {
+    var clon = ( wmakml.maxlon + wmakml.minlon )/2.0
+      , clat = ( wmakml.maxlat + wmakml.minlat )/2.0
+      , ex = (wmakml.maxlon - wmakml.minlon)/180.0 * 3.0*128
+      , ey = (wmakml.maxlat - wmakml.minlat)/180.0 * 3.0*128; // max extent in degrees, zoom0 has 3*128/180 px/degree
+
+    for( wikiminiatlas_zoom = 0; wikiminiatlas_zoom < 12; ++wikiminiatlas_zoom ) {
+      if( ex>wikiminiatlas_width/2 || ey>wikiminiatlas_height/2 ) break;
+      ex *= 2; ey *= 2;
+    }
+    wmaMoveToCoord( clat, clon );
+  }
+}
+
+// wrapper to load a size comparison overlay object
+function processSizeOverlay(d) {
+  if( 'canvas' in wmasize ) {
+    wmasize.maxlat = -Infinity;
+    wmasize.minlat = Infinity;
+    wmasize.ways = null;
+    wmasize.areas = null;
+  } else {
+    wmasize = { shown: false, drawn: false, canvas: null, c: null, ways: null, areas: null, maxlat: -Infinity, minlat: Infinity };
+    addKMLCanvas(wmasize);
+  }
+  processGeoJSON(d,wmasize);
 }
 
 // call installation routine
