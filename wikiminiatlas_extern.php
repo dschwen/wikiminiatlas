@@ -515,6 +515,67 @@ function wmaToggleKML() {
 }
 
 // draw KML data
+function wmaDrawSizeOverlay(at) {
+  var i, j, n, c = wmasize.c, w = wmasize.ways, a = wmasize.areas, p
+    , gx=wikiminiatlas_gx, gy=wikiminiatlas_gy
+    ;
+
+  function addToPath(w) {
+    var k, p, lx, dx, lat;
+    if( w.length > 0 ) {
+      lat = w[0].lat + at.lat;
+      p = wmaLatLonToXY( lat, w[0].lon/Math.cos(lat/180.0*Math.PI) + at.lon );
+      lx = p.x;
+      c.moveTo( p.x-gx, p.y-gy );
+      for( k = 1; k < w.length; ++k ) {
+        lat = w[k].lat + at.lat;
+        p = wmaLatLonToXY( lat, w[k].lon/Math.cos(lat/180.0*Math.PI) + at.lon );
+        c.lineTo( p.x-gx, p.y-gy );
+      }
+    }
+  }
+
+  if( c !== null ) {
+    // clear canvas
+    c.clearRect( 0,0, wmasize.canvas[0].width, wmasize.canvas[0].height );
+
+
+    // areas
+    if( a !== null ) {
+      c.fillStyle = "rgb(0,255,0)";
+      for( i = 0; i<a.length; i++ ) {
+        c.globalCompositeOperation = 'source-over';
+        for( j = 0; j<a[i].outer.length; ++j ) {
+          c.beginPath();
+          addToPath(a[i].outer[j]);
+          c.closePath();
+          c.fill();
+        }
+        c.globalCompositeOperation = 'destination-out';
+        for( j = 0; j<a[i].inner.length; ++j ) {
+          c.beginPath();
+          addToPath(a[i].inner[j]);
+          c.closePath();
+          c.fill();
+        }
+      }
+    }
+
+    // draw ways
+    if( w !== null ) {
+      c.globalCompositeOperation = 'source-over';
+      c.lineWidth = 4.0;
+      c.strokeStyle = "rgb(0,255,0)";
+      c.beginPath();
+      for(i =0; i<w.length; ++i ) {
+        addToPath(w[i]) 
+      }
+      c.stroke();
+    }
+  }
+}
+
+// draw KML data
 function wmaDrawKML() {
   var i, j, n, c = wmakml.c, w = wmakml.ways, a = wmakml.areas, p, p1, p2
     , hw = wikiminiatlas_zoomsize[wikiminiatlas_zoom]*128, gx=wikiminiatlas_gx
@@ -728,6 +789,11 @@ function mouseMoveWikiMiniAtlasMap(ev) {
     }
   }
 
+  // display size overlay at mouse coords
+  if( wmasize.c ) {
+    wmaDrawSizeOverlay( wmaXYToLatLon(wikiminiatlas_gx+newcoords.x,wikiminiatlas_gy+newcoords.y) );
+  }
+ 
   // call old handler (should never happen)
   if( wikiminiatlas_old_onmousemove !== null ) { wikiminiatlas_old_onmousemove(ev); } 
 }
@@ -1065,7 +1131,7 @@ function addKMLCanvas(geo) {
     geo.canvas = $('<canvas class="wmakml"></canvas>')
       .attr( { width: wikiminiatlas_width, height: wikiminiatlas_height } )
       .appendTo( $(wikiminiatlas_map) );
-    geo.c = wmakml.canvas[0].getContext('2d');
+    geo.c = geo.canvas[0].getContext('2d');
     geo.shown = true;
     geo.drawn = true;
     if( geo == wmakml ) { $('#button_kml').show(); }
@@ -1229,6 +1295,27 @@ function processSizeOverlay(d) {
     addKMLCanvas(wmasize);
   }
   processGeoJSON(d,wmasize);
+  
+  // postprocess data
+  var a=wmasize.areas, w=wmasize.ways, clon = ( wmasize.maxlon + wmasize.minlon )/2.0, clat = ( wmasize.maxlat + wmasize.minlat )/2.0
+  function norm(w){
+    var k, dx = 0.0;
+    if(  w[0].lon < wmasize.minlon ) { dx = 360.0; }
+    for( k = 0; k < w.length; ++k ) {
+      w[k].lon -= clon+dx;
+      w[k].lon *= Math.cos(w[k].lat/180*Math.PI);
+      w[k].lat -= clat;
+    }
+  }
+  if( a !== null ) {
+    for( i = 0; i<a.length; i++ ) {
+      for( j = 0; j<a[i].outer.length; ++j ) { norm(a[i].outer[j]); }
+      for( j = 0; j<a[i].inner.length; ++j ) { norm(a[i].inner[j]); }
+    }
+  }
+  if( w !== null ) {
+    for(i =0; i<w.length; ++i ) { latNorm(w[i]); }
+  }
 }
 
 // call installation routine
