@@ -331,6 +331,11 @@ function wikiminiatlasInstall()
    '<option value="red">'    + strings.red[UILang]   +'</option>' +
    '<option value="white">'  + strings.white[UILang] +'</option>' + 
    '<option value="black">'  + strings.black[UILang] +'</option></select></p>' +
+
+   '<p class="option">' + 'Size Comparison' + ' <select onchange="wmaSetSizeOverlay(this.value)">';
+
+  WikiMiniAtlasHTML +=
+   '</select></p>' +
    //'<p class="option" style="font-size: 50%; color:gray">Debug info:<br>marker: ' + typeof(marker.lat) + ', ' + marker.lon + '<br>site:'+wikiminiatlas_site+', uilang'+wikiminiatlas_language+'</p>' +
    '<a href="//wiki.toolserver.org/" target="_top"><img src="//toolserver.org/images/wikimedia-toolserver-button.png" border="0"></a>' +
    '</div>' +
@@ -790,7 +795,7 @@ function mouseMoveWikiMiniAtlasMap(ev) {
   }
 
   // display size overlay at mouse coords
-  if( wmasize.c ) {
+  if( wmasize.shown ) {
     wmaDrawSizeOverlay( wmaXYToLatLon(wikiminiatlas_gx+newcoords.x,wikiminiatlas_gy+newcoords.y) );
   }
  
@@ -1290,8 +1295,9 @@ function processSizeOverlay(d) {
     wmasize.minlat = Infinity;
     wmasize.ways = null;
     wmasize.areas = null;
+    wmasize.shown = true;
   } else {
-    wmasize = { shown: false, drawn: false, canvas: null, c: null, ways: null, areas: null, maxlat: -Infinity, minlat: Infinity };
+    wmasize = { shown: true, drawn: false, canvas: null, c: null, ways: null, areas: null, maxlat: -Infinity, minlat: Infinity };
     addKMLCanvas(wmasize);
   }
   processGeoJSON(d,wmasize);
