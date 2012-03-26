@@ -522,7 +522,7 @@ function wmaDrawKML() {
 
   function addToPath(w) {
     var k, p, wx = 0, lx, dx;
-    if(  w[0].lon <= wmakml.minlon ) { wx = 2*hw; }
+    if(  w[0].lon < wmakml.minlon ) { wx = 2*hw; }
     if( w.length > 0 ) {
       p = wmaLatLonToXYnoWrap( w[0].lat, w[0].lon );
       lx = p.x;
