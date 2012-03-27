@@ -1062,13 +1062,16 @@ var strings =
  other: {
   de: 'andere',
   en: 'other',
-  fr: 'autres'
+  fi: 'toiset',
+  fr: 'autres',
+  pl: 'inne',
+  pt: 'outros'
  },
  // list of objects that are offered for size comparison
  sover: {
-  de: { site:'de', list:['Deutschland','Niedersachsen','Berlin'] },
-  en: { site:'en', list:['California','Rhode Island','United States','Texas','Alaska'] },
-  fr: { site:'fr', list:['France'] }
+  de: { site:'de', list:['Deutschland','Schweiz','Österreich','Niedersachsen','Berlin'] },
+  en: { site:'en', list:['California','United Kingdom','Republic of Ireland','Australia','Rhode Island','Texas','Alaska'] },
+  fr: { site:'fr', list:['France','Suisse','Guyane'] },
+  pl: { site:'pl', list:['Polska'] }
  }
-
 };
