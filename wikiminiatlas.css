@@ -17,6 +17,8 @@ a.label {
 #button_fs     { z-index:50; position:absolute; right:62px; top: 8px; width:18px; cursor:pointer; }
 #button_hide   { z-index:50; position:absolute; right:18px; top: 8px; width:18px; cursor:pointer; }
 
+option.bg { background-color: #aaaaff }
+
 #wikiminiatlas_wmaci_link
 {
   font-weight: bold;
