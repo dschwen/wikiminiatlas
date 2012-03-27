@@ -75,6 +75,7 @@ var wmaci_image_span = null;
 var wmaci_link = null;
 var wmaci_link_text = null;
 
+var url_params = parseParams(window.location.href);
 var wmasize = {}, wmakml = { shown: false, drawn: false, canvas: null, c: null, ways: null, areas: null, maxlat: -Infinity, minlat: Infinity };
 
 // include documentation strings
@@ -185,8 +186,7 @@ function wikiminiatlasInstall()
  if( wikiminiatlas_widget === null ) {
 
   //document.getElementById('debugbox').innerHTML='';
-  var url_params = parseParams(window.location.href)
-    , coord_params = url_params['wma'] || (window.location.search).substr(1)
+  var coord_params = url_params['wma'] || (window.location.search).substr(1)
     , page = url_params['page']
     , lang = url_params['lang']
     , synopsis_current = '';
@@ -336,6 +336,7 @@ function wikiminiatlasInstall()
   l = strings.sover[UILang].list;
   WikiMiniAtlasHTML += '<option value="-" class="bg" selected="selected">-</option>';
   WikiMiniAtlasHTML += '<option value="+" class="bg">'+strings.other[UILang]+'</option>';
+  WikiMiniAtlasHTML += '<option value="*" class="bg">'+decodeURIComponent(page)+'</option>';
   for( i in l ) {
     WikiMiniAtlasHTML += '<option value="' + l[i] + '">' + l[i] + '</option>';
   }
@@ -827,14 +828,18 @@ function wmaDblclick(ev) {
 }
 
 function wmaSetSizeOverlay(lang,page) {
+  if( page == '+' ) {
+    page = prompt('Enter article title to use as overlay');
+    if( !page ) { return; }
+  }
+  if( page == '*' ) {
+    page = url_params['page'];
+    lang = url_params['lang'];
+  }
   if( page == '-' ) {
     wmasize.shown=false;
     wmasize.canvas.fadeOut(200);
     return;
-  }
-  if( page == '+' ) {
-    page = prompt('Enter article title to use as overlay');
-    if( !page ) { return; }
   }
   wmaLoadSizeOverlay(lang,page);
   toggleSettings();
