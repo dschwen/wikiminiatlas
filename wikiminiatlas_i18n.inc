@@ -1053,19 +1053,30 @@ var strings =
  },
  dyk: {
   de: ['Halte Strg oder ⌘ und positioniere den Mauspfeil auf einen Link, um eine Artikelzusammenfassung anzuzeigen.',
-       'Druecke "o" oder oeffne die Einstellungen um eine Einblendung zum Groessenvergleich zu aktivieren.'],
+       'Druecke "o" oder oeffne die Einstellungen um eine Einblendung zum Groessenvergleich zu aktivieren.',
+       'Die Groesse des WikiMiniAtlas kann jetzt mit der Maus in der unteren linken Ecke geaendert werden.'],
   en: ['Hold Ctrl or ⌘ and hover over a link to read an article summary.',
-       'Press "o" or go to the settings to activate a size-comparison overlay.'],
+       'Press "o" or go to the settings to activate a size-comparison overlay.',
+       'WikiMiniAtlas is now resizable. Just move the mouse in the bottom left corner!'],
   fr: ['Maintenir Ctrl ou ⌘ et survoler un lien pour lire un résumé de l\'article.'],
   eo: ['Tenu Stir aŭ ⌘ kaj ŝvebu super ligilo por legi resumon de artikolo.']
  },
  other: {
+  ar: 'آخرون',
+  ca: 'altres',
   de: 'andere',
+  dk: 'andre',
   en: 'other',
+  es: 'otros',
+  fa: 'دیگران',
   fi: 'toiset',
   fr: 'autres',
+  he: 'אנדערע',
+  ja: '他人',
+  nl: 'anderen',
   pl: 'inne',
-  pt: 'outros'
+  pt: 'outros',
+  sv: 'andra'
  },
  // list of objects that are offered for size comparison
  sover: {
