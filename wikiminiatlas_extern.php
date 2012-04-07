@@ -75,6 +75,7 @@ var wmaci_image_span = null;
 var wmaci_link = null;
 var wmaci_link_text = null;
 
+var url_params = parseParams(window.location.href);
 var wmasize = {}, wmakml = { shown: false, drawn: false, canvas: null, c: null, ways: null, areas: null, maxlat: -Infinity, minlat: Infinity };
 
 // include documentation strings
@@ -185,8 +186,7 @@ function wikiminiatlasInstall()
  if( wikiminiatlas_widget === null ) {
 
   //document.getElementById('debugbox').innerHTML='';
-  var url_params = parseParams(window.location.href)
-    , coord_params = url_params['wma'] || (window.location.search).substr(1)
+  var coord_params = url_params['wma'] || (window.location.search).substr(1)
     , page = url_params['page']
     , lang = url_params['lang']
     , synopsis_current = '';
@@ -249,13 +249,13 @@ function wikiminiatlasInstall()
    wikiminiatlas_gy = newcoords.y-wikiminiatlas_height/2;
   }
 
-  var WikiMiniAtlasHTML;
+  var WikiMiniAtlasHTML,i,l;
   UILang = wikiminiatlas_language;
   if( UILang == 'co' || UILang == 'commons' ) UILang = 'en';
 
   // Fill missing i18n items
-  for( var item in strings )
-   if( !strings[item][UILang] ) strings[item][UILang] = strings[item].en;
+  for( i in strings )
+   if( !strings[i][UILang] ) strings[i][UILang] = strings[i].en;
 
   WikiMiniAtlasHTML = 
 
@@ -302,7 +302,7 @@ function wikiminiatlasInstall()
    '<h4>' + strings.settings[UILang] + '</h4>' +
    '<p class="option">' + strings.mode[UILang] + ' <select onchange="wmaSelectTileset(this.value)">';
  
-  for( var i = 0; i < wikiminiatlas_tilesets.length; i++ )
+  for( i = 0; i < wikiminiatlas_tilesets.length; i++ )
   {
    WikiMiniAtlasHTML +=
     '<option value="'+i+'">' + wikiminiatlas_tilesets[i].name + '</option>';
@@ -312,7 +312,7 @@ function wikiminiatlasInstall()
    '</select></p>' +
    '<p class="option">' + strings.labelSet[UILang] + ' <select onchange="wmaLabelSet(this.value)">';
 
-  for( var i in wikiminiatlas_sites )
+  for( i in wikiminiatlas_sites )
   {
    WikiMiniAtlasHTML +=
     '<option value="' + i + '"';
@@ -331,6 +331,17 @@ function wikiminiatlasInstall()
    '<option value="red">'    + strings.red[UILang]   +'</option>' +
    '<option value="white">'  + strings.white[UILang] +'</option>' + 
    '<option value="black">'  + strings.black[UILang] +'</option></select></p>' +
+
+   '<p class="option">' + 'Size Comparison' + ' <select onchange="wmaSetSizeOverlay(\''+strings.sover[UILang].site+'\',this.value)">';
+  l = strings.sover[UILang].list;
+  WikiMiniAtlasHTML += '<option value="-" class="bg" selected="selected">-</option>';
+  WikiMiniAtlasHTML += '<option value="+" class="bg">'+strings.other[UILang]+'</option>';
+  WikiMiniAtlasHTML += '<option value="*" class="bg">'+decodeURIComponent(page)+'</option>';
+  for( i in l ) {
+    WikiMiniAtlasHTML += '<option value="' + l[i] + '">' + l[i] + '</option>';
+  }
+  WikiMiniAtlasHTML +=
+   '</select></p>' +
    //'<p class="option" style="font-size: 50%; color:gray">Debug info:<br>marker: ' + typeof(marker.lat) + ', ' + marker.lon + '<br>site:'+wikiminiatlas_site+', uilang'+wikiminiatlas_language+'</p>' +
    '<a href="//wiki.toolserver.org/" target="_top"><img src="//toolserver.org/images/wikimedia-toolserver-button.png" border="0"></a>' +
    '</div>' +
@@ -339,7 +350,8 @@ function wikiminiatlasInstall()
   wikiminiatlas_widget  = document.getElementById('wikiminiatlas_widget');
   wikiminiatlas_widget.innerHTML += WikiMiniAtlasHTML;
 
-  var news = $('<div></div>').html('<b>New:</b> hold Ctrl or &#x2318; and hover over a link to read an article summary.').addClass('news');
+  l = strings.dyk[UILang];
+  var news = $('<div></div>').html(l[Math.floor(Math.random()*l.length)]).addClass('news');
   //var news = $('<div></div>').html('<b>New:</b> More Zoom and new data by OpenStreetMap.').addClass('news');
   $('#wikiminiatlas_widget').append(news);
   news.click( function() { news.fadeOut(); } )
@@ -524,12 +536,12 @@ function wmaDrawSizeOverlay(at) {
     var k, p, lx, dx, lat;
     if( w.length > 0 ) {
       lat = w[0].lat + at.lat;
-      p = wmaLatLonToXY( lat, w[0].lon/Math.cos(lat/180.0*Math.PI) + at.lon );
+      p = wmaLatLonToXYnoWrap( lat, w[0].lon/Math.cos(lat/180.0*Math.PI) + at.lon );
       lx = p.x;
       c.moveTo( p.x-gx, p.y-gy );
       for( k = 1; k < w.length; ++k ) {
         lat = w[k].lat + at.lat;
-        p = wmaLatLonToXY( lat, w[k].lon/Math.cos(lat/180.0*Math.PI) + at.lon );
+        p = wmaLatLonToXYnoWrap( lat, w[k].lon/Math.cos(lat/180.0*Math.PI) + at.lon );
         c.lineTo( p.x-gx, p.y-gy );
       }
     }
@@ -790,7 +802,7 @@ function mouseMoveWikiMiniAtlasMap(ev) {
   }
 
   // display size overlay at mouse coords
-  if( wmasize.c ) {
+  if( wmasize.shown ) {
     wmaDrawSizeOverlay( wmaXYToLatLon(wikiminiatlas_gx+newcoords.x,wikiminiatlas_gy+newcoords.y) );
   }
  
@@ -815,6 +827,32 @@ function wmaDblclick(ev) {
  return false;
 }
 
+function wmaSetSizeOverlay(lang,page) {
+  if( page == '+' ) {
+    page = prompt('Enter article title to use as overlay');
+    if( !page ) { return; }
+  }
+  if( page == '*' ) {
+    page = url_params['page'];
+    lang = url_params['lang'];
+  }
+  if( page == '-' ) {
+    wmasize.shown=false;
+    wmasize.canvas.fadeOut(200);
+    return;
+  }
+  wmaLoadSizeOverlay(lang,page);
+  toggleSettings();
+}
+
+function wmaLoadSizeOverlay(lang,page) {
+  $.ajax({
+    url: 'http://toolserver.org/~master/osmjson/getGeoJSON.php?lang='+lang+'&article='+page,
+    dataType: 'json',
+    success: processSizeOverlay
+  });
+}
+
 function wmaKeypress(ev) {
  var ret = false;
  ev = ev || window.event;
@@ -824,14 +862,18 @@ function wmaKeypress(ev) {
   case 38 : wikiminiatlas_gy -= wikiminiatlas_height/2; break; 
   case 39 : wikiminiatlas_gx += wikiminiatlas_width/2; break; 
   case 40 : wikiminiatlas_gy += wikiminiatlas_height/2; break; 
+  case 187 :
   case 107 : wmaZoomIn(); break;
+  case 189 :
   case 109 : wmaZoomOut(); break;
-  case 79 : // o 
-    $.ajax({
-      url: 'http://toolserver.org/~master/osmjson/getGeoJSON.php?lang=en&article=Germany', //'+lang+'&article='+page,
-      dataType: 'json',
-      success: processSizeOverlay
-    });
+  case 79 : // o
+    if( wmasize.shown ) {
+      wmasize.shown=false;
+      wmasize.canvas.fadeOut(200);
+    } else { 
+      wmaLoadSizeOverlay( strings.sover[UILang].site, strings.sover[UILang].list[0] );
+    }
+    break;
   default: ret=true;
  }
 
@@ -1285,13 +1327,11 @@ function processWIWOSM(d) {
 
 // wrapper to load a size comparison overlay object
 function processSizeOverlay(d) {
-  if( 'canvas' in wmasize ) {
-    wmasize.maxlat = -Infinity;
-    wmasize.minlat = Infinity;
-    wmasize.ways = null;
-    wmasize.areas = null;
+  var c = wmasize.c, canvas = wmasize.canvas;
+  if( canvas ) {
+    wmasize = { shown: true, drawn: false, canvas: canvas, c: c, ways: null, areas: null, maxlat: -Infinity, minlat: Infinity };
   } else {
-    wmasize = { shown: false, drawn: false, canvas: null, c: null, ways: null, areas: null, maxlat: -Infinity, minlat: Infinity };
+    wmasize = { shown: true, drawn: false, canvas: null, c: null, ways: null, areas: null, maxlat: -Infinity, minlat: Infinity };
     addKMLCanvas(wmasize);
   }
   processGeoJSON(d,wmasize);
@@ -1302,7 +1342,7 @@ function processSizeOverlay(d) {
     var k, dx = 0.0;
     if(  w[0].lon < wmasize.minlon ) { dx = 360.0; }
     for( k = 0; k < w.length; ++k ) {
-      w[k].lon -= clon+dx;
+      w[k].lon -= clon-dx;
       w[k].lon *= Math.cos(w[k].lat/180*Math.PI);
       w[k].lat -= clat;
     }
@@ -1316,6 +1356,7 @@ function processSizeOverlay(d) {
   if( w !== null ) {
     for(i =0; i<w.length; ++i ) { latNorm(w[i]); }
   }
+  wmasize.canvas.fadeIn(200);
 }
 
 // call installation routine

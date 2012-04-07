@@ -75,6 +75,7 @@ var wmaci_image_span = null;
 var wmaci_link = null;
 var wmaci_link_text = null;
 
+var url_params = parseParams(window.location.href);
 var wmasize = {}, wmakml = { shown: false, drawn: false, canvas: null, c: null, ways: null, areas: null, maxlat: -Infinity, minlat: Infinity };
 
 // include documentation strings
@@ -185,8 +186,7 @@ function wikiminiatlasInstall()
  if( wikiminiatlas_widget === null ) {
 
   //document.getElementById('debugbox').innerHTML='';
-  var url_params = parseParams(window.location.href)
-    , coord_params = url_params['wma'] || (window.location.search).substr(1)
+  var coord_params = url_params['wma'] || (window.location.search).substr(1)
     , page = url_params['page']
     , lang = url_params['lang']
     , synopsis_current = '';
@@ -336,6 +336,7 @@ function wikiminiatlasInstall()
   l = strings.sover[UILang].list;
   WikiMiniAtlasHTML += '<option value="-" class="bg" selected="selected">-</option>';
   WikiMiniAtlasHTML += '<option value="+" class="bg">'+strings.other[UILang]+'</option>';
+  WikiMiniAtlasHTML += '<option value="*" class="bg">'+decodeURIComponent(page)+'</option>';
   for( i in l ) {
     WikiMiniAtlasHTML += '<option value="' + l[i] + '">' + l[i] + '</option>';
   }
@@ -349,7 +350,8 @@ function wikiminiatlasInstall()
   wikiminiatlas_widget  = document.getElementById('wikiminiatlas_widget');
   wikiminiatlas_widget.innerHTML += WikiMiniAtlasHTML;
 
-  var news = $('<div></div>').html('<b>New:</b> hold Ctrl or &#x2318; and hover over a link to read an article summary.').addClass('news');
+  l = strings.dyk[UILang];
+  var news = $('<div></div>').html(l[Math.floor(Math.random()*l.length)]).addClass('news');
   //var news = $('<div></div>').html('<b>New:</b> More Zoom and new data by OpenStreetMap.').addClass('news');
   $('#wikiminiatlas_widget').append(news);
   news.click( function() { news.fadeOut(); } )
@@ -826,14 +828,18 @@ function wmaDblclick(ev) {
 }
 
 function wmaSetSizeOverlay(lang,page) {
+  if( page == '+' ) {
+    page = prompt('Enter article title to use as overlay');
+    if( !page ) { return; }
+  }
+  if( page == '*' ) {
+    page = url_params['page'];
+    lang = url_params['lang'];
+  }
   if( page == '-' ) {
     wmasize.shown=false;
     wmasize.canvas.fadeOut(200);
     return;
-  }
-  if( page == '+' ) {
-    page = prompt('Enter article title to use as overlay');
-    if( !page ) { return; }
   }
   wmaLoadSizeOverlay(lang,page);
   toggleSettings();
@@ -856,7 +862,9 @@ function wmaKeypress(ev) {
   case 38 : wikiminiatlas_gy -= wikiminiatlas_height/2; break; 
   case 39 : wikiminiatlas_gx += wikiminiatlas_width/2; break; 
   case 40 : wikiminiatlas_gy += wikiminiatlas_height/2; break; 
+  case 187 :
   case 107 : wmaZoomIn(); break;
+  case 189 :
   case 109 : wmaZoomOut(); break;
   case 79 : // o
     if( wmasize.shown ) {
