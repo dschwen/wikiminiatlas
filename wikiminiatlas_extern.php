@@ -490,6 +490,10 @@ function wmaResize() {
       ny =  Math.floor(nh/128)+2, i;
   wikiminiatlas_width = nw;
   wikiminiatlas_height = nh;
+  // resize kml canvas, if it exists
+  if( wmakml.canvas !== null ) {
+    wmakml.canvas.attr( { width: nw, height: nh } );
+  }
   if( nx != wikiminiatlas_nx || ny != wikiminiatlas_ny ) {
     wikiminiatlas_nx = nx;
     wikiminiatlas_ny = ny;
@@ -506,13 +510,13 @@ function wmaResize() {
       }
     }
 
-    // resize kml canvas, if it exists
-    if( wmakml.canvas !== null ) {
-      wmakml.canvas.attr( { width: nw, height: nh } );
-    }
 
     moveWikiMiniAtlasMapTo();
     $(wikiminiatlas_map).width(nw).height(nh);//.css('clip','rect(0px '+nw+'px '+nh+'px 0px)');
+  } else {
+    if( wmakml.shown ) {
+      wmaDrawKML();
+    }
   }
 }
 
