@@ -194,7 +194,7 @@ function wikiminiatlasInstall()
   // launch the WIWOSM request (if a page was passed)
   if( page ) {
     $.ajax({
-      url: 'http://toolserver.org/~master/osmjson/getGeoJSON.php?lang='+lang+'&article='+page,
+      url: '//toolserver.org/~master/osmjson/getGeoJSON.php?lang='+lang+'&article='+page,
       dataType: 'json',
       success: processWIWOSM
     });
@@ -851,7 +851,7 @@ function wmaSetSizeOverlay(lang,page) {
 
 function wmaLoadSizeOverlay(lang,page) {
   $.ajax({
-    url: 'http://toolserver.org/~master/osmjson/getGeoJSON.php?lang='+lang+'&article='+page,
+    url: '//toolserver.org/~master/osmjson/getGeoJSON.php?lang='+lang+'&article='+page,
     dataType: 'json',
     success: processSizeOverlay
   });

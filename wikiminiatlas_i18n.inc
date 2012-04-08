@@ -8,6 +8,7 @@ var wikiminiatlas_sites = {
   eo:'Esperanto',
   es:'Español',
   eu:'Euskara',
+  fa:'فارسی',
   fr:'Français',
   ja:'日本語',
   is:'Íslenska',
