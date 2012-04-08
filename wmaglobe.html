@@ -10,17 +10,23 @@ var sx0 = [], sx = [], sy = []
   , canvas = $('#globe')
   , w = canvas.width(), h = canvas.height()
   , c = canvas[0].getContext('2d')
-  , cm = $('#map')[0].getContext('2d')
-  , i, j
+  , d = c.getImageData(0, 0, w, h)
+  , cm = ($('#map').attr( { width: 6*128, height: 3*128 } ))[0].getContext('2d')
+  , dm= cm.createImageData(6*128, 3*128), loadcount = 0
+  , i, j, k, l, m, n
   ;
 
-$('#map').attr( { width: 6*128, height: 3*128 } );
+// load map tiles
 for( i=0; i<6; ++i ) {
   for( j=0; j<3; ++j ) {
     (function(x,y){
       var img = new Image;
       $(img).load(function(){
         cm.drawImage(img,x*128,y*128);
+        loadcount++;
+        if( loadcount = 3*6 ) {
+          dm = cm.getImageData(0, 0, 6*128, 3*128);
+        }
       }).attr('src','tiles/mapnik/0/tile_'+y+'_'+x+'.png');
     })(i,j);
   }
@@ -46,10 +52,27 @@ for( i = 0; i<h; ++i ) {
     b = ((j-w/2)*h)/((i-h/2)*w)*Math.tan(lon);
     if( Math.abs(b) > 1.0 ) { sx0[i]++; continue; }
     lat = Math.asin(b);
-    sx[i].push(lon);
-    sy[i].push(lat);
+    sx[i].push(Math.floor(lon/Math.PI*3*128));
+    sy[i].push(Math.floor(1.5*(128-lat/Math.PI*128)));
   }
 }
+
+// draw the globe
+function draw() {
+  for( i = 0; i<h; ++i ) {
+    l = sx[i].length; 
+    m = sx0[i]*4+i*w*4;
+    for( j = 0; j<l; ++j ) {
+      n = sx[i][j]*4 + sy[i][j]*4*128*6;
+      for( k=0; k<4; ++k ) {
+        d[m+k] = dm[n+k];
+      }
+    }
+  }
+  c.putImageData(d,0,0);
+}
+
+setInterval(draw,20);
 
 </script>
 </body>
