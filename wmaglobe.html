@@ -1,0 +1,26 @@
+<html>
+<head>
+ <script type="text/javascript" src="jquery-1.5.1.min.js"></script>
+</head>
+<body>
+<canvas id="globe" width=50 height=50></canvas>
+<script>
+var sx0 = [], sx = [], sy = []
+  , canvas = $('#globe')
+  , w = canvas.width(), h = canvas.height()
+  , c = canvas[0].getContext('2d')
+  , i, j
+  ;
+
+/* forward transform (assum lat lon in rad)
+ x = sin(lat)*cos(lon)*w/2;
+ y = sin(lon)*h/2
+
+ lon = asin(2y/h)
+ x/y = sin(lat)/tan(lon) * w/h
+ lat = asin( (x*h)/(y*w) * tan(lon) )
+
+*/
+</script>
+</body>
+</html>
