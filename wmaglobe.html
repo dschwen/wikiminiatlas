@@ -4,13 +4,27 @@
 </head>
 <body>
 <canvas id="globe" width=50 height=50></canvas>
+<canvas id="map"></canvas>
 <script>
 var sx0 = [], sx = [], sy = []
   , canvas = $('#globe')
   , w = canvas.width(), h = canvas.height()
   , c = canvas[0].getContext('2d')
+  , cm = $('#map')[0].getContext('2d')
   , i, j
   ;
+
+$('#map').attr( { width: 6*128, height: 3*128 } );
+for( i=0; i<6; ++i ) {
+  for( j=0; j<3; ++j ) {
+    (function(x,y){
+      var img = new Image;
+      $(img).load(function(){
+        cm.drawImage(img,x*128,y*128);
+      }).attr('src','tiles/mapnik/0/tile_'+y+'_'+x+'.png');
+    })(i,j);
+  }
+}
 
 /* forward transform (assum lat lon in rad)
  x = sin(lat)*cos(lon)*w/2;
@@ -21,6 +35,22 @@ var sx0 = [], sx = [], sy = []
  lat = asin( (x*h)/(y*w) * tan(lon) )
 
 */
+
+var a,b,lon,lat;
+for( i = 0; i<h; ++i ) {
+  sx0[i] = 0; sx[i] = []; sy[i] = []; 
+  for( j = 0; j<w; ++j ) {
+    a = 2*(i-h/2)/h;
+    if( Math.abs(a) > 1.0 ) { sx0[i]++; continue; }
+    lon = Math.asin(a);
+    b = ((j-w/2)*h)/((i-h/2)*w)*Math.tan(lon);
+    if( Math.abs(b) > 1.0 ) { sx0[i]++; continue; }
+    lat = Math.asin(b);
+    sx[i].push(lon);
+    sy[i].push(lat);
+  }
+}
+
 </script>
 </body>
 </html>
