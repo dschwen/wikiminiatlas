@@ -1,10 +1,35 @@
 <html>
 <head>
  <script type="text/javascript" src="jquery-1.5.1.min.js"></script>
+ <style>
+   .globewrap {
+     position: relative;
+     border-radius: 75px;
+     box-shadow: 5px 5px 15px #888;
+     width: 150px;
+     height: 150px;
+     background-color: #ccc;
+   }
+   .globeshade {
+     position: absolute;
+     top: 0; left: 0;
+     width: 150px;
+     height: 150px;
+     border-radius: 75px;
+     /*-moz-radial-gradient(36px 10px 45deg, circle cover, rgba(255, 255, 255, 1), rgba(255, 255, 255, 0) 20%, rgba(255, 255, 255, 0) 50%, rgba(0, 0, 0, 1) 80%)
+     -webkit-gradient(radial,36 36, 72, 36 10, 0, from(rgba(0, 0, 0, 1)), to(rgba(255, 255, 255, 1)), color-stop(0.85, rgba(255, 255, 255, 0)), color-stop(0.4, rgba(0, 0, 0, 1)) )*/
+     background-image: -webkit-gradient(radial,75 75, 150, 75 30, 30, from(rgba(0, 0, 0, 0.2)), to(rgba(0, 0, 0, 0)), color-stop(0.85, rgba(0,0,0,0)), color-stop(0.4, rgba(0, 0, 0, 0.2)) )
+   }
+
+ </style>
 </head>
 <body>
-<canvas id="globe" width=150 height=150></canvas>
-<canvas id="map"></canvas>
+  <div class="globewrap">
+    <canvas id="globe" width=150 height=150></canvas>
+    <div class="globeshade"></div>
+  </div>
+
+<canvas id="map" style="margin-top: 30px"></canvas>
 <script>
 var sx0 = [], sx = [], sy = []
   , canvas = $('#globe')
@@ -75,7 +100,7 @@ function draw() {
   scroll++;
 }
 
-setInterval(draw,20);
+setInterval(draw,10);
 
 </script>
 </body>
