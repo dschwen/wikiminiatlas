@@ -29,7 +29,14 @@
     <div class="globeshade"></div>
   </div>
 
-<canvas id="map" style="margin-top: 30px"></canvas>
+  <select id="style" style="margin-top: 30px">
+    <option value="tiles/mapnik/0/tile_{xy}.png">Map</option>
+    <option value="tiles/mapnik/sat/0/{xy}.png">Satellite</option>
+    <option value="tiles/relief/0/{xy}.png">Terrain</option>
+    <option value="tiles/moon/0/{xy}.jpg">Moon</option>
+    <option value="tiles/nightonearth/0/{xy}.png">Night</option>
+  </select>
+<canvas id="map" style="margin-top: 30px; display: none"></canvas>
 <script>
 var sx0 = [], sx = [], sy = []
   , canvas = $('#globe')
@@ -42,21 +49,25 @@ var sx0 = [], sx = [], sy = []
   , scroll = 0
   ;
 
-// load map tiles
-for( i=0; i<6; ++i ) {
-  for( j=0; j<3; ++j ) {
-    (function(x,y){
-      var img = new Image;
-      $(img).load(function(){
-        cm.drawImage(img,x*128,y*128);
-        loadcount++;
-        if( loadcount = 3*6 ) {
-          dm = cm.getImageData(0, 0, 6*128, 3*128);
-        }
-      }).attr('src','tiles/mapnik/0/tile_'+y+'_'+x+'.png');
-    })(i,j);
+  // load map tiles
+  function loadTiles(set) {
+    for( i=0; i<6; ++i ) {
+      for( j=0; j<3; ++j ) {
+        (function(x,y){
+          var img = new Image;
+          $(img).load(function(){
+            cm.drawImage(img,x*128,y*128);
+            loadcount++;
+            if( loadcount = 3*6 ) {
+              dm = cm.getImageData(0, 0, 6*128, 3*128);
+            }
+          }).attr('src',set.replace('{xy}',y+'_'+x));
+        })(i,j);
+      }
+    }
   }
-}
+  loadTiles('tiles/mapnik/0/tile_{xy}.png');
+  $('#style').change(function(){ loadTiles($(this).val()) } );
 
 /* forward transform (assum lat lon in rad)
  x = sin(lon)*cos(lat)*w/2;
