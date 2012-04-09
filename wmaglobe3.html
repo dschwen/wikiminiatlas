@@ -160,7 +160,7 @@
     }
 
 
-    var moonTexture;
+    var wmaglobeTexture;
 
     // load map tiles
     function loadTiles(set) {
@@ -173,9 +173,9 @@
               cm.drawImage(img,x*128*4/3,y*128*4/3,128*4/3,128*4/3);
               loadcount++;
               if( loadcount == 3*6 ) {
-                moonTexture = gl.createTexture();
-                moonTexture.image = c;
-                handleLoadedTexture(moonTexture);
+                wmaglobeTexture = gl.createTexture();
+                wmaglobeTexture.image = c;
+                handleLoadedTexture(wmaglobeTexture);
               }
             }).attr('src',set.replace('{xy}',y+'_'+x));
           })(i,j);
@@ -226,8 +226,8 @@
     var lastMouseX = null;
     var lastMouseY = null;
 
-    var moonRotationMatrix = mat4.create();
-    mat4.identity(moonRotationMatrix);
+    var wmaglobeRotationMatrix = mat4.create();
+    mat4.identity(wmaglobeRotationMatrix);
 
     function handleMouseDown(event) {
         mouseDown = true;
@@ -256,7 +256,7 @@
         var deltaY = newY - lastMouseY;
         mat4.rotate(newRotationMatrix, degToRad(deltaY / 10), [1, 0, 0]);
 
-        mat4.multiply(newRotationMatrix, moonRotationMatrix, moonRotationMatrix);
+        mat4.multiply(newRotationMatrix, wmaglobeRotationMatrix, wmaglobeRotationMatrix);
 
         lastMouseX = newX
         lastMouseY = newY;
@@ -264,10 +264,10 @@
 
 
 
-    var moonVertexPositionBuffer;
-    var moonVertexNormalBuffer;
-    var moonVertexTextureCoordBuffer;
-    var moonVertexIndexBuffer;
+    var wmaglobeVertexPositionBuffer;
+    var wmaglobeVertexNormalBuffer;
+    var wmaglobeVertexTextureCoordBuffer;
+    var wmaglobeVertexIndexBuffer;
 
     function initBuffers() {
         var latitudeBands = 30;
@@ -319,29 +319,29 @@
             }
         }
 
-        moonVertexNormalBuffer = gl.createBuffer();
-        gl.bindBuffer(gl.ARRAY_BUFFER, moonVertexNormalBuffer);
+        wmaglobeVertexNormalBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, wmaglobeVertexNormalBuffer);
         gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(normalData), gl.STATIC_DRAW);
-        moonVertexNormalBuffer.itemSize = 3;
-        moonVertexNormalBuffer.numItems = normalData.length / 3;
+        wmaglobeVertexNormalBuffer.itemSize = 3;
+        wmaglobeVertexNormalBuffer.numItems = normalData.length / 3;
 
-        moonVertexTextureCoordBuffer = gl.createBuffer();
-        gl.bindBuffer(gl.ARRAY_BUFFER, moonVertexTextureCoordBuffer);
+        wmaglobeVertexTextureCoordBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, wmaglobeVertexTextureCoordBuffer);
         gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(textureCoordData), gl.STATIC_DRAW);
-        moonVertexTextureCoordBuffer.itemSize = 2;
-        moonVertexTextureCoordBuffer.numItems = textureCoordData.length / 2;
+        wmaglobeVertexTextureCoordBuffer.itemSize = 2;
+        wmaglobeVertexTextureCoordBuffer.numItems = textureCoordData.length / 2;
 
-        moonVertexPositionBuffer = gl.createBuffer();
-        gl.bindBuffer(gl.ARRAY_BUFFER, moonVertexPositionBuffer);
+        wmaglobeVertexPositionBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, wmaglobeVertexPositionBuffer);
         gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertexPositionData), gl.STATIC_DRAW);
-        moonVertexPositionBuffer.itemSize = 3;
-        moonVertexPositionBuffer.numItems = vertexPositionData.length / 3;
+        wmaglobeVertexPositionBuffer.itemSize = 3;
+        wmaglobeVertexPositionBuffer.numItems = vertexPositionData.length / 3;
 
-        moonVertexIndexBuffer = gl.createBuffer();
-        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, moonVertexIndexBuffer);
+        wmaglobeVertexIndexBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, wmaglobeVertexIndexBuffer);
         gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(indexData), gl.STATIC_DRAW);
-        moonVertexIndexBuffer.itemSize = 1;
-        moonVertexIndexBuffer.numItems = indexData.length;
+        wmaglobeVertexIndexBuffer.itemSize = 1;
+        wmaglobeVertexIndexBuffer.numItems = indexData.length;
     }
 
 
@@ -383,24 +383,24 @@
 
         mat4.translate(mvMatrix, [0, 0, -6]);
 
-        mat4.multiply(mvMatrix, moonRotationMatrix);
+        mat4.multiply(mvMatrix, wmaglobeRotationMatrix);
 
         gl.activeTexture(gl.TEXTURE0);
-        gl.bindTexture(gl.TEXTURE_2D, moonTexture);
+        gl.bindTexture(gl.TEXTURE_2D, wmaglobeTexture);
         gl.uniform1i(shaderProgram.samplerUniform, 0);
 
-        gl.bindBuffer(gl.ARRAY_BUFFER, moonVertexPositionBuffer);
-        gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, moonVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
+        gl.bindBuffer(gl.ARRAY_BUFFER, wmaglobeVertexPositionBuffer);
+        gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, wmaglobeVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
 
-        gl.bindBuffer(gl.ARRAY_BUFFER, moonVertexTextureCoordBuffer);
-        gl.vertexAttribPointer(shaderProgram.textureCoordAttribute, moonVertexTextureCoordBuffer.itemSize, gl.FLOAT, false, 0, 0);
+        gl.bindBuffer(gl.ARRAY_BUFFER, wmaglobeVertexTextureCoordBuffer);
+        gl.vertexAttribPointer(shaderProgram.textureCoordAttribute, wmaglobeVertexTextureCoordBuffer.itemSize, gl.FLOAT, false, 0, 0);
 
-        gl.bindBuffer(gl.ARRAY_BUFFER, moonVertexNormalBuffer);
-        gl.vertexAttribPointer(shaderProgram.vertexNormalAttribute, moonVertexNormalBuffer.itemSize, gl.FLOAT, false, 0, 0);
+        gl.bindBuffer(gl.ARRAY_BUFFER, wmaglobeVertexNormalBuffer);
+        gl.vertexAttribPointer(shaderProgram.vertexNormalAttribute, wmaglobeVertexNormalBuffer.itemSize, gl.FLOAT, false, 0, 0);
 
-        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, moonVertexIndexBuffer);
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, wmaglobeVertexIndexBuffer);
         setMatrixUniforms();
-        gl.drawElements(gl.TRIANGLES, moonVertexIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
+        gl.drawElements(gl.TRIANGLES, wmaglobeVertexIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
     }
 
 
@@ -439,7 +439,7 @@
     <br/>
 
     <input type="checkbox" id="lighting" checked /> Use lighting<br/>
-    Spin the moon by dragging it with the mouse.
+    Spin the wmaglobe by dragging it with the mouse.
     <br/>
 
     <h2>Directional light:</h2>
