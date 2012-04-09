@@ -3,7 +3,7 @@
  <script type="text/javascript" src="jquery-1.5.1.min.js"></script>
 </head>
 <body>
-<canvas id="globe" width=50 height=50></canvas>
+<canvas id="globe" width=150 height=150></canvas>
 <canvas id="map"></canvas>
 <script>
 var sx0 = [], sx = [], sy = []
@@ -14,6 +14,7 @@ var sx0 = [], sx = [], sy = []
   , cm = ($('#map').attr( { width: 6*128, height: 3*128 } ))[0].getContext('2d')
   , dm= cm.createImageData(6*128, 3*128), loadcount = 0
   , i, j, k, l, m, n
+  , scroll = 0
   ;
 
 // load map tiles
@@ -33,12 +34,12 @@ for( i=0; i<6; ++i ) {
 }
 
 /* forward transform (assum lat lon in rad)
- x = sin(lat)*cos(lon)*w/2;
- y = sin(lon)*h/2
+ x = sin(lon)*cos(lat)*w/2;
+ y = sin(lat)*h/2
 
- lon = asin(2y/h)
- x/y = sin(lat)/tan(lon) * w/h
- lat = asin( (x*h)/(y*w) * tan(lon) )
+ lat = asin(2y/h)
+ x/y = sin(lon)/tan(lat) * w/h
+ lon = asin( (x*h)/(y*w) * tan(lat) )
 
 */
 
@@ -47,13 +48,13 @@ for( i = 0; i<h; ++i ) {
   sx0[i] = 0; sx[i] = []; sy[i] = []; 
   for( j = 0; j<w; ++j ) {
     a = 2*(i-h/2)/h;
-    if( Math.abs(a) > 1.0 ) { sx0[i]++; continue; }
-    lon = Math.asin(a);
-    b = ((j-w/2)*h)/((i-h/2)*w)*Math.tan(lon);
-    if( Math.abs(b) > 1.0 ) { sx0[i]++; continue; }
-    lat = Math.asin(b);
+    if( Math.abs(a) > 1.0 ) { if( sx[i].length == 0 ) { sx0[i]++; } continue; }
+    lat = Math.asin(a);
+    b = ((a==0)?(2*(j-w/2)/w):(((j-w/2)*h)/((i-h/2)*w)*Math.tan(lat)));
+    if( Math.abs(b) > 1.0 ) { if( sx[i].length == 0 ) { sx0[i]++; } continue; }
+    lon = Math.asin(b);
     sx[i].push(Math.floor(lon/Math.PI*3*128));
-    sy[i].push(Math.floor(1.5*(128-lat/Math.PI*128)));
+    sy[i].push(Math.floor(1.5*128+3*lat/Math.PI*128));
   }
 }
 
@@ -63,13 +64,15 @@ function draw() {
     l = sx[i].length; 
     m = sx0[i]*4+i*w*4;
     for( j = 0; j<l; ++j ) {
-      n = sx[i][j]*4 + sy[i][j]*4*128*6;
+      n = ((sx[i][j]+6*128+scroll)%(6*128))*4 + sy[i][j]*4*128*6;
       for( k=0; k<4; ++k ) {
-        d[m+k] = dm[n+k];
+        d.data[m+k] = dm.data[n+k];
       }
+      m+=4;
     }
   }
   c.putImageData(d,0,0);
+  scroll++;
 }
 
 setInterval(draw,20);
