@@ -128,7 +128,6 @@
         shaderProgram.directionalColorUniform = gl.getUniformLocation(shaderProgram, "uDirectionalColor");
     }
 
-
     function handleLoadedTexture(texture) {
         gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
         gl.bindTexture(gl.TEXTURE_2D, texture);
@@ -167,8 +166,6 @@
     function initTexture() {
       loadTiles('tiles/mapnik/0/tile_{xy}.png');
     }
-
-
 
     var mvMatrix = mat4.create();
     var mvMatrixStack = [];
@@ -294,18 +291,14 @@
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
         var dlat = tlat-lat, dlon = tlon-lon;
-        lon += 0.05*dlon;
-        lat += 0.05*dlat;
+        lon += 0.1*Math.pow(Math.abs(dlon),0.85)*(dlon<0?-1:1);
+        lat += 0.1*Math.pow(Math.abs(dlat),0.85)*(dlat<0?-1:1);
         mat4.identity(wmaglobeRotationMatrix);
         var theta = degToRad(-(lon+90));
         mat4.rotate(wmaglobeRotationMatrix, theta, [0, 1, 0]);
         mat4.rotate(wmaglobeRotationMatrix, degToRad(lat), [Math.cos(theta), 0, Math.sin(theta)]);
 
         mat4.perspective(3.85, gl.viewportWidth / gl.viewportHeight, 1, 100.0, pMatrix);
-        //mat4.perspective(45, gl.viewportWidth / gl.viewportHeight, 0.1, 100.0, pMatrix);
-
-
-
 
         mat4.identity(mvMatrix);
         mat4.translate(mvMatrix, [0, 0, -60]);
