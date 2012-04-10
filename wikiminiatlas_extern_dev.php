@@ -206,7 +206,9 @@ function wikiminiatlasInstall()
   // setup the globe
   (function(){
     var map = $('<canvas></canvas>').attr( { width: 6*128*4/3, height: 3*128*4/3 } ).css( { display: 'none' } ),
-        globe = $('<canvas></canvas>').attr( { width: 160, height: 160 } ).css( { position: 'absolute', width: '80px', height: '80px', bottom: '20px', right: '5px' } );
+        globe = $('<canvas></canvas>')
+          .attr( { width: 160, height: 160 } )
+          .css( { position: 'absolute', width: '80px', height: '80px', bottom: '20px', right: '5px', zIndex: 51 } );
 
     // load map tiles
     function loadTiles(set) {
@@ -219,7 +221,8 @@ function wikiminiatlasInstall()
               c.drawImage(img,x*128*4/3,y*128*4/3,128*4/3,128*4/3);
               loadcount++;
               if( loadcount == 3*6 ) {
-                setLatLon = wmaGlobe3d(globe[0],map[0]);
+                setLatLon = wmaGlobe3d(globe[0],map[0]) || (function(){});
+                setLatLon(marker.lat,marker.lon);
               }
             }).attr('src',set.replace('{xy}',y+'_'+x));
           })(i,j);
@@ -840,6 +843,10 @@ function mouseMoveWikiMiniAtlasMap(ev) {
   if( wmasize.shown ) {
     wmaDrawSizeOverlay( wmaXYToLatLon(wikiminiatlas_gx+newcoords.x,wikiminiatlas_gy+newcoords.y) );
   }
+
+  //rotate globe
+  var mapcenter = wmaXYToLatLon(wikiminiatlas_gx+wikiminiatlas_width/2,wikiminiatlas_gy+wikiminiatlas_height/2);
+  setLatLon(mapcenter.lat,mapcenter.lon);
  
   // call old handler (should never happen)
   if( wikiminiatlas_old_onmousemove !== null ) { wikiminiatlas_old_onmousemove(ev); } 
