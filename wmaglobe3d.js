@@ -192,8 +192,9 @@ function wmaGlobe3d(canvas,textureCanvas) {
 
   function drawScene() {
     gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
+    gl.colorMask(1,1,1,0);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-
+    gl.colorMask(1,1,1,1);
     // center view on lat,lon
     mat4.identity(wmaglobeRotationMatrix);
     var theta = degToRad(-(lon+90));
@@ -253,7 +254,7 @@ function wmaGlobe3d(canvas,textureCanvas) {
   initBuffers();
   initTexture();
 
-  gl.clearColor(1.0, 1.0, 0.0, 0.0);
+  gl.clearColor(0.0, 0.0, 0.0, 1.0);
   gl.enable(gl.DEPTH_TEST);
 
   var lightingDirection = [ 5, -10, -50 ];
