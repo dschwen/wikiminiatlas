@@ -24,6 +24,9 @@
 
 // include minified jquery
 <? require( 'jquery-1.5.1.min.js' ); ?>
+<? require( 'glMatrix-0.9.5.custom.js' ); ?>
+<? require( 'webgl-utils_min.js' ); ?>
+<? require( 'wmaglobe3d_min.js' ); ?>
 
 // defaults
 var wikiminiatlas_coordinate_region = '';
@@ -77,6 +80,8 @@ var wmaci_link_text = null;
 
 var url_params = parseParams(window.location.href);
 var wmasize = {}, wmakml = { shown: false, drawn: false, canvas: null, c: null, ways: null, areas: null, maxlat: -Infinity, minlat: Infinity };
+
+var setLatLon = (function(){});
 
 // include documentation strings
 <? require( 'wikiminiatlas_i18n.inc' ); ?>
@@ -199,6 +204,39 @@ function wikiminiatlasInstall()
       success: processWIWOSM
     });
   }
+
+  // setup the globe
+  (function(){
+    var map = $('<canvas></canvas>').attr( { width: 6*128*4/3, height: 3*128*4/3 } ).css( { display: 'none' } ),
+        tmap = $('<canvas></canvas>').attr( { width: 6*128, height: 3*128 } ).css( { display: 'none' } ),
+        globe = $('<canvas></canvas>')
+          .attr( { width: 160, height: 160 } )
+          .css( { position: 'absolute', width: '80px', height: '80px', bottom: '20px', right: '5px', zIndex: 51 } );
+
+    // load map tiles
+    function loadTiles(set) {
+      var i,j, loadcount=0, c = tmap[0].getContext('2d'), cm = map[0].getContext('2d');
+      for( i=0; i<6; ++i ) {
+        for( j=0; j<3; ++j ) {
+          (function(x,y){
+            var img = new Image;
+            $(img).load(function(){
+              c.drawImage(img,x*128,y*128);
+              loadcount++;
+              if( loadcount == 3*6 ) {
+                cm.drawImage(tmap[0],0,0,6*128*4/3,3*128*4/3);
+                setLatLon = wmaGlobe3d(globe[0],map[0]) || (function(){});
+                setLatLon(marker.lat,marker.lon);
+              }
+            }).attr('src',set.replace('{xy}',y+'_'+x));
+          })(i,j);
+        }
+      }
+    }
+
+    $('body').append(globe).append(map);
+    loadTiles('tiles/mapnik/0/tile_{xy}.png');
+  })();
 
   // parse coordinates
   var coord_filter = /([\d+-.]+)_([\d+-.]+)_([\d]+)_([\d]+)/;
@@ -809,6 +847,10 @@ function mouseMoveWikiMiniAtlasMap(ev) {
   if( wmasize.shown ) {
     wmaDrawSizeOverlay( wmaXYToLatLon(wikiminiatlas_gx+newcoords.x,wikiminiatlas_gy+newcoords.y) );
   }
+
+  //rotate globe
+  var mapcenter = wmaXYToLatLon(wikiminiatlas_gx+wikiminiatlas_width/2,wikiminiatlas_gy+wikiminiatlas_height/2);
+  setLatLon(mapcenter.lat,mapcenter.lon);
  
   // call old handler (should never happen)
   if( wikiminiatlas_old_onmousemove !== null ) { wikiminiatlas_old_onmousemove(ev); } 
