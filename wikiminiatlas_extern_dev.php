@@ -202,6 +202,34 @@ function wikiminiatlasInstall()
     });
   }
 
+  // setup the globe
+  (function(){
+    var map = $('<canvas></canvas>').attr( { width: 6*128*4/3, height: 3*128*4/3 } ).css( { display: 'none' } ),
+        globe = $('<canvas></canvas>').attr( { width: 160, height: 160 } ).css( { position: 'absolute', width: '80px', height: '80px', bottom: '20px', right: '5px' } );
+
+    // load map tiles
+    function loadTiles(set) {
+      var i,j, loadcount=0, c = map[0].getContext('2d');
+      for( i=0; i<6; ++i ) {
+        for( j=0; j<3; ++j ) {
+          (function(x,y){
+            var img = new Image;
+            $(img).load(function(){
+              c.drawImage(img,x*128*4/3,y*128*4/3,128*4/3,128*4/3);
+              loadcount++;
+              if( loadcount == 3*6 ) {
+                setLatLon = wmaGlobe3d(globe[0],map[0]);
+              }
+            }).attr('src',set.replace('{xy}',y+'_'+x));
+          })(i,j);
+        }
+      }
+    }
+
+    $('body').append(globe).append(map);
+    loadTiles('tiles/mapnik/0/tile_{xy}.png');
+  })();
+
   // parse coordinates
   var coord_filter = /([\d+-.]+)_([\d+-.]+)_([\d]+)_([\d]+)/;
   if(coord_filter.test(coord_params))
