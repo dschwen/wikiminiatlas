@@ -1,4 +1,4 @@
-function wmaGlobe3d(canvas) {
+function wmaGlobe3d(canvas,textureCanvas) {
   var gl;
 
 
@@ -63,49 +63,29 @@ function wmaGlobe3d(canvas) {
       shaderProgram.directionalColorUniform = gl.getUniformLocation(shaderProgram, "uDirectionalColor");
   }
 
-  function handleLoadedTexture(texture) {
-      gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
-      gl.bindTexture(gl.TEXTURE_2D, texture);
-      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, texture.image);
-      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
-      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-
-      gl.bindTexture(gl.TEXTURE_2D, null);
-  }
 
 
   var wmaglobeTexture;
+  function updateTexture() {
+    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+    gl.bindTexture(gl.TEXTURE_2D, wmaglobeTexture; );
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, wmaglobeTexture.image);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
 
-  // load map tiles
-  function loadTiles(set) {
-    var i,j,loadcount=0, myTexture, c = $('#map').attr( { width: 6*128*4/3, height: 3*128*4/3 } )[0], cm = c.getContext('2d');
-    for( i=0; i<6; ++i ) {
-      for( j=0; j<3; ++j ) {
-        (function(x,y){
-          var img = new Image;
-          $(img).load(function(){
-            cm.drawImage(img,x*128*4/3,y*128*4/3,128*4/3,128*4/3);
-            loadcount++;
-            if( loadcount == 3*6 ) {
-              wmaglobeTexture = gl.createTexture();
-              wmaglobeTexture.image = c;
-              handleLoadedTexture(wmaglobeTexture);
-            }
-          }).attr('src',set.replace('{xy}',y+'_'+x));
-        })(i,j);
-      }
-    }
+    gl.bindTexture(gl.TEXTURE_2D, null);
   }
-
   function initTexture() {
-    loadTiles('tiles/mapnik/0/tile_{xy}.png');
+    wmaglobeTexture = gl.createTexture();
+    wmaglobeTexture.image = textureCanvas;
+    updateTexture(wmaglobeTexture);
   }
 
   var mvMatrix = mat4.create();
   var mvMatrixStack = [];
   var pMatrix = mat4.create();
-
+/*
   function mvPushMatrix() {
       var copy = mat4.create();
       mat4.set(mvMatrix, copy);
@@ -118,7 +98,7 @@ function wmaGlobe3d(canvas) {
       }
       mvMatrix = mvMatrixStack.pop();
   }
-
+*/
   function setMatrixUniforms() {
       gl.uniformMatrix4fv(shaderProgram.pMatrixUniform, false, pMatrix);
       gl.uniformMatrix4fv(shaderProgram.mvMatrixUniform, false, mvMatrix);

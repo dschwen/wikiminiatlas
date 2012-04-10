@@ -51,7 +51,29 @@
     <canvas id="map" style="display: none"></canvas>
     <script>
       var setLatLon;
-      $(function(){setLatLon = wmaGlobe3d($('#globe')[0]);});
+      $(function(){
+        // load map tiles
+        function loadTiles(set) {
+          var i,j,loadcount=0, myTexture, c = $('#map').attr( { width: 6*128*4/3, height: 3*128*4/3 } )[0], cm = c.getContext('2d');
+          for( i=0; i<6; ++i ) {
+            for( j=0; j<3; ++j ) {
+              (function(x,y){
+                var img = new Image;
+                $(img).load(function(){
+                  cm.drawImage(img,x*128*4/3,y*128*4/3,128*4/3,128*4/3);
+                  loadcount++;
+                  if( loadcount == 3*6 ) {
+                    setLatLon = wmaGlobe3d($('#globe')[0],c);
+                  }
+                }).attr('src',set.replace('{xy}',y+'_'+x));
+              })(i,j);
+            }
+          }
+        }
+
+       
+        loadTiles('tiles/mapnik/0/tile_{xy}.png');
+      });
     </script>
 
 </body>
