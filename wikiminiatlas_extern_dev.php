@@ -81,6 +81,8 @@ var wmaci_link_text = null;
 var url_params = parseParams(window.location.href);
 var wmasize = {}, wmakml = { shown: false, drawn: false, canvas: null, c: null, ways: null, areas: null, maxlat: -Infinity, minlat: Infinity };
 
+var setLatLon = (function(){});
+
 // include documentation strings
 <? require( 'wikiminiatlas_i18n.inc' ); ?>
 
@@ -206,21 +208,23 @@ function wikiminiatlasInstall()
   // setup the globe
   (function(){
     var map = $('<canvas></canvas>').attr( { width: 6*128*4/3, height: 3*128*4/3 } ).css( { display: 'none' } ),
+        tmap = $('<canvas></canvas>').attr( { width: 6*128, height: 3*128 } ).css( { display: 'none' } ),
         globe = $('<canvas></canvas>')
           .attr( { width: 160, height: 160 } )
           .css( { position: 'absolute', width: '80px', height: '80px', bottom: '20px', right: '5px', zIndex: 51 } );
 
     // load map tiles
     function loadTiles(set) {
-      var i,j, loadcount=0, c = map[0].getContext('2d');
+      var i,j, loadcount=0, c = tmap[0].getContext('2d'), cm = map[0].getContext('2d');
       for( i=0; i<6; ++i ) {
         for( j=0; j<3; ++j ) {
           (function(x,y){
             var img = new Image;
             $(img).load(function(){
-              c.drawImage(img,x*128*4/3,y*128*4/3,128*4/3,128*4/3);
+              c.drawImage(img,x*128,y*128);
               loadcount++;
               if( loadcount == 3*6 ) {
+                cm.drawImage(tmap[0],0,0,6*128*4/3,3*128*4/3);
                 setLatLon = wmaGlobe3d(globe[0],map[0]) || (function(){});
                 setLatLon(marker.lat,marker.lon);
               }
