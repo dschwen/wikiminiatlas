@@ -9,50 +9,44 @@
 <script type="text/javascript" src="webgl-utils.js"></script>
 
 <script id="shader-fs" type="x-shader/x-fragment">
-    precision mediump float;
+  precision mediump float;
 
-    varying vec2 vTextureCoord;
-    varying vec3 vLightWeighting;
+  varying vec2 vTextureCoord;
+  varying vec3 vLightWeighting;
 
-    uniform sampler2D uSampler;
+  uniform sampler2D uSampler;
 
-    void main(void) {
-        vec4 textureColor = texture2D(uSampler, vec2(vTextureCoord.s, vTextureCoord.t));
-        gl_FragColor = vec4(textureColor.rgb * vLightWeighting, textureColor.a);
-    }
+  void main(void) {
+    vec4 textureColor = texture2D(uSampler, vec2(vTextureCoord.s, vTextureCoord.t));
+    gl_FragColor = vec4(textureColor.rgb * vLightWeighting, textureColor.a);
+  }
 </script>
 
 <script id="shader-vs" type="x-shader/x-vertex">
-    attribute vec3 aVertexPosition;
-    attribute vec3 aVertexNormal;
-    attribute vec2 aTextureCoord;
+  attribute vec3 aVertexPosition;
+  attribute vec3 aVertexNormal;
+  attribute vec2 aTextureCoord;
 
-    uniform mat4 uMVMatrix;
-    uniform mat4 uPMatrix;
-    uniform mat3 uNMatrix;
+  uniform mat4 uMVMatrix;
+  uniform mat4 uPMatrix;
+  uniform mat3 uNMatrix;
 
-    uniform vec3 uAmbientColor;
+  uniform vec3 uAmbientColor;
 
-    uniform vec3 uLightingDirection;
-    uniform vec3 uDirectionalColor;
+  uniform vec3 uLightingDirection;
+  uniform vec3 uDirectionalColor;
 
-    uniform bool uUseLighting;
+  varying vec2 vTextureCoord;
+  varying vec3 vLightWeighting;
 
-    varying vec2 vTextureCoord;
-    varying vec3 vLightWeighting;
+  void main(void) {
+    gl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1.0);
+    vTextureCoord = aTextureCoord;
 
-    void main(void) {
-        gl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1.0);
-        vTextureCoord = aTextureCoord;
-
-        if (!uUseLighting) {
-            vLightWeighting = vec3(1.0, 1.0, 1.0);
-        } else {
-            vec3 transformedNormal = uNMatrix * aVertexNormal;
-            float directionalLightWeighting = max(dot(transformedNormal, uLightingDirection), 0.0);
-            vLightWeighting = uAmbientColor + uDirectionalColor * directionalLightWeighting;
-        }
-    }
+    vec3 transformedNormal = uNMatrix * aVertexNormal;
+    float directionalLightWeighting = max(dot(transformedNormal, uLightingDirection), 0.0);
+    vLightWeighting = uAmbientColor + uDirectionalColor * directionalLightWeighting;
+  }
 </script>
 
 
@@ -68,44 +62,34 @@
         } catch (e) {
         }
         if (!gl) {
-            alert("Could not initialise WebGL, sorry :-(");
+            //alert("Could not initialise WebGL, sorry :-(");
         }
     }
 
 
     function getShader(gl, id) {
-        var shaderScript = document.getElementById(id);
-        if (!shaderScript) {
-            return null;
-        }
+      var ss = $('#'+id), str = ss.text(), shader;
 
-        var str = "";
-        var k = shaderScript.firstChild;
-        while (k) {
-            if (k.nodeType == 3) {
-                str += k.textContent;
-            }
-            k = k.nextSibling;
-        }
+      switch(ss.attr('type')) { 
+        case "x-shader/x-fragment" : 
+          shader = gl.createShader(gl.FRAGMENT_SHADER);
+          break;
+        case "x-shader/x-vertex" :
+          shader = gl.createShader(gl.VERTEX_SHADER);
+          break;
+        default:
+          return null;
+      }
 
-        var shader;
-        if (shaderScript.type == "x-shader/x-fragment") {
-            shader = gl.createShader(gl.FRAGMENT_SHADER);
-        } else if (shaderScript.type == "x-shader/x-vertex") {
-            shader = gl.createShader(gl.VERTEX_SHADER);
-        } else {
-            return null;
-        }
+      gl.shaderSource(shader, str);
+      gl.compileShader(shader);
 
-        gl.shaderSource(shader, str);
-        gl.compileShader(shader);
+      /*if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+          alert(gl.getShaderInfoLog(shader));
+          return null;
+      }*/
 
-        if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
-            alert(gl.getShaderInfoLog(shader));
-            return null;
-        }
-
-        return shader;
+      return shader;
     }
 
 
@@ -139,7 +123,6 @@
         shaderProgram.mvMatrixUniform = gl.getUniformLocation(shaderProgram, "uMVMatrix");
         shaderProgram.nMatrixUniform = gl.getUniformLocation(shaderProgram, "uNMatrix");
         shaderProgram.samplerUniform = gl.getUniformLocation(shaderProgram, "uSampler");
-        shaderProgram.useLightingUniform = gl.getUniformLocation(shaderProgram, "uUseLighting");
         shaderProgram.ambientColorUniform = gl.getUniformLocation(shaderProgram, "uAmbientColor");
         shaderProgram.lightingDirectionUniform = gl.getUniformLocation(shaderProgram, "uLightingDirection");
         shaderProgram.directionalColorUniform = gl.getUniformLocation(shaderProgram, "uDirectionalColor");
@@ -219,47 +202,7 @@
         return degrees * Math.PI / 180;
     }
 
-
-    var mouseDown = false;
-    var lastMouseX = null;
-    var lastMouseY = null;
-
     var wmaglobeRotationMatrix = mat4.create();
-    mat4.identity(wmaglobeRotationMatrix);
-
-    function handleMouseDown(event) {
-        mouseDown = true;
-        lastMouseX = event.clientX;
-        lastMouseY = event.clientY;
-    }
-
-
-    function handleMouseUp(event) {
-        mouseDown = false;
-    }
-
-
-    function handleMouseMove(event) {
-        if (!mouseDown) {
-            return;
-        }
-        var newX = event.clientX;
-        var newY = event.clientY;
-
-        var deltaX = newX - lastMouseX
-        var newRotationMatrix = mat4.create();
-        mat4.identity(newRotationMatrix);
-        mat4.rotate(newRotationMatrix, degToRad(deltaX / 10), [0, 1, 0]);
-
-        var deltaY = newY - lastMouseY;
-        mat4.rotate(newRotationMatrix, degToRad(deltaY / 10), [1, 0, 0]);
-
-        mat4.multiply(newRotationMatrix, wmaglobeRotationMatrix, wmaglobeRotationMatrix);
-
-        lastMouseX = newX
-        lastMouseY = newY;
-    }
-
     var tlat=0, tlon=0, lat=0, lon=0;
     function setLatLon(nlat,nlon) {
       tlat=nlat; tlon=nlon;
@@ -361,21 +304,8 @@
         mat4.perspective(3.85, gl.viewportWidth / gl.viewportHeight, 1, 100.0, pMatrix);
         //mat4.perspective(45, gl.viewportWidth / gl.viewportHeight, 0.1, 100.0, pMatrix);
 
-        gl.uniform1i(shaderProgram.useLightingUniform, true);
 
-        gl.uniform3f(
-            shaderProgram.ambientColorUniform, 0.7, 0.7, 0.7
-        );
 
-        var lightingDirection = [ 5, -10, -50 ];
-        var adjustedLD = vec3.create();
-        vec3.normalize(lightingDirection, adjustedLD);
-        vec3.scale(adjustedLD, -1);
-        gl.uniform3fv(shaderProgram.lightingDirectionUniform, adjustedLD);
-
-        gl.uniform3f(
-            shaderProgram.directionalColorUniform, 0.3,0.3,0.3
-        );
 
         mat4.identity(mvMatrix);
         mat4.translate(mvMatrix, [0, 0, -60]);
@@ -416,9 +346,13 @@
         gl.clearColor(1.0, 1.0, 0.0, 0.0);
         gl.enable(gl.DEPTH_TEST);
 
-        canvas.onmousedown = handleMouseDown;
-        document.onmouseup = handleMouseUp;
-        document.onmousemove = handleMouseMove;
+        var lightingDirection = [ 5, -10, -50 ];
+        var adjustedLD = vec3.create();
+        vec3.normalize(lightingDirection, adjustedLD);
+        vec3.scale(adjustedLD, -1);
+        gl.uniform3fv(shaderProgram.lightingDirectionUniform, adjustedLD);
+        gl.uniform3f( shaderProgram.directionalColorUniform, 0.3,0.3,0.3 );
+        gl.uniform3f( shaderProgram.ambientColorUniform, 0.7, 0.7, 0.7 );
 
         tick();
     }
