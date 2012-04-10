@@ -229,6 +229,7 @@ function wmaGlobe3d(canvas,textureCanvas) {
   function tick() {
     // ease to target
     var dlat = tlat-lat, dlon = tlon-lon;
+    dlon -= Math.round(dlat/360.0)*360.0;
     lon += 0.1*Math.pow(Math.abs(dlon),0.85)*(dlon<0?-1:1);
     lat += 0.1*Math.pow(Math.abs(dlat),0.85)*(dlat<0?-1:1);
     if( (Math.abs(dlat)+Math.abs(dlon)) > 0.1 ) {
