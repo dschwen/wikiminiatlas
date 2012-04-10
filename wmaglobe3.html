@@ -260,11 +260,9 @@
         lastMouseY = newY;
     }
 
-    //var lat, lon;
-    function setLatLon(lat,lon) {
-      mat4.identity(wmaglobeRotationMatrix);
-      mat4.rotate(wmaglobeRotationMatrix, degToRad(-(lon+90)), [0, 1, 0]);
-      mat4.rotate(wmaglobeRotationMatrix, degToRad(lat), [1, 0, 0]);
+    var tlat=0, tlon=0, lat=0, lon=0;
+    function setLatLon(nlat,nlon) {
+      tlat=nlat; tlon=nlon;
     }
 
     var wmaglobeVertexPositionBuffer;
@@ -351,6 +349,14 @@
     function drawScene() {
         gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+        var dlat = tlat-lat, dlon = tlon-lon;
+        lon += 0.05*dlon;
+        lat += 0.05*dlat;
+        mat4.identity(wmaglobeRotationMatrix);
+        var theta = degToRad(-(lon+90));
+        mat4.rotate(wmaglobeRotationMatrix, theta, [0, 1, 0]);
+        mat4.rotate(wmaglobeRotationMatrix, degToRad(lat), [Math.cos(theta), 0, Math.sin(theta)]);
 
         mat4.perspective(3.85, gl.viewportWidth / gl.viewportHeight, 1, 100.0, pMatrix);
         //mat4.perspective(45, gl.viewportWidth / gl.viewportHeight, 0.1, 100.0, pMatrix);
