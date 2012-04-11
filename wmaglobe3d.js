@@ -31,36 +31,37 @@ function wmaGlobe3d(canvas,textureCanvas) {
   var shaderProgram;
 
   function initShaders() {
-      var fragmentShader = getShader(gl, "shader-fs");
-      var vertexShader = getShader(gl, "shader-vs");
+    var fragmentShader = getShader(gl, "shader-fs");
+    var vertexShader = getShader(gl, "shader-vs");
 
-      shaderProgram = gl.createProgram();
-      gl.attachShader(shaderProgram, vertexShader);
-      gl.attachShader(shaderProgram, fragmentShader);
-      gl.linkProgram(shaderProgram);
+    shaderProgram = gl.createProgram();
+    gl.attachShader(shaderProgram, vertexShader);
+    gl.attachShader(shaderProgram, fragmentShader);
+    gl.linkProgram(shaderProgram);
 
-      if (!gl.getProgramParameter(shaderProgram, gl.LINK_STATUS)) {
-          alert("Could not initialise shaders");
-      }
+    if (!gl.getProgramParameter(shaderProgram, gl.LINK_STATUS)) {
+      return false;
+    }
 
-      gl.useProgram(shaderProgram);
+    gl.useProgram(shaderProgram);
 
-      shaderProgram.vertexPositionAttribute = gl.getAttribLocation(shaderProgram, "aVertexPosition");
-      gl.enableVertexAttribArray(shaderProgram.vertexPositionAttribute);
+    shaderProgram.vertexPositionAttribute = gl.getAttribLocation(shaderProgram, "aVertexPosition");
+    gl.enableVertexAttribArray(shaderProgram.vertexPositionAttribute);
 
-      shaderProgram.textureCoordAttribute = gl.getAttribLocation(shaderProgram, "aTextureCoord");
-      gl.enableVertexAttribArray(shaderProgram.textureCoordAttribute);
+    shaderProgram.textureCoordAttribute = gl.getAttribLocation(shaderProgram, "aTextureCoord");
+    gl.enableVertexAttribArray(shaderProgram.textureCoordAttribute);
 
-      shaderProgram.vertexNormalAttribute = gl.getAttribLocation(shaderProgram, "aVertexNormal");
-      gl.enableVertexAttribArray(shaderProgram.vertexNormalAttribute);
+    shaderProgram.vertexNormalAttribute = gl.getAttribLocation(shaderProgram, "aVertexNormal");
+    gl.enableVertexAttribArray(shaderProgram.vertexNormalAttribute);
 
-      shaderProgram.pMatrixUniform = gl.getUniformLocation(shaderProgram, "uPMatrix");
-      shaderProgram.mvMatrixUniform = gl.getUniformLocation(shaderProgram, "uMVMatrix");
-      shaderProgram.nMatrixUniform = gl.getUniformLocation(shaderProgram, "uNMatrix");
-      shaderProgram.samplerUniform = gl.getUniformLocation(shaderProgram, "uSampler");
-      shaderProgram.ambientColorUniform = gl.getUniformLocation(shaderProgram, "uAmbientColor");
-      shaderProgram.lightingDirectionUniform = gl.getUniformLocation(shaderProgram, "uLightingDirection");
-      shaderProgram.directionalColorUniform = gl.getUniformLocation(shaderProgram, "uDirectionalColor");
+    shaderProgram.pMatrixUniform = gl.getUniformLocation(shaderProgram, "uPMatrix");
+    shaderProgram.mvMatrixUniform = gl.getUniformLocation(shaderProgram, "uMVMatrix");
+    shaderProgram.nMatrixUniform = gl.getUniformLocation(shaderProgram, "uNMatrix");
+    shaderProgram.samplerUniform = gl.getUniformLocation(shaderProgram, "uSampler");
+    shaderProgram.ambientColorUniform = gl.getUniformLocation(shaderProgram, "uAmbientColor");
+    shaderProgram.lightingDirectionUniform = gl.getUniformLocation(shaderProgram, "uLightingDirection");
+    shaderProgram.directionalColorUniform = gl.getUniformLocation(shaderProgram, "uDirectionalColor");
+    return true;
   }
 
 
@@ -251,7 +252,7 @@ function wmaGlobe3d(canvas,textureCanvas) {
     return false;
   }
   
-  initShaders();
+  if( !initShaders() ) {return false; }
   initBuffers();
   initTexture();
 
@@ -268,7 +269,11 @@ function wmaGlobe3d(canvas,textureCanvas) {
 
   tick();
 
-  return setLatLon;
+  return {
+    setLatLon : setLatLon,
+    updateTexture: updateTexture,
+    draw: drawScene
+  }
 }
 
 // export for closure compiler
