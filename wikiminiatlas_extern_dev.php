@@ -240,12 +240,12 @@ function wikiminiatlasInstall()
                   wmaGlobe.omap = omap[0]; // overlay buffer
                   wmaGlobe.omapContext = omap[0].getContext('2d');
                   wmaGlobe.updateKML = function() {
-                    wmaGlobe.mapContext.globaAlpha = 1.0;
                     wmaGlobe.mapContext.drawImage(wmaGlobe.tmap,0,0,6*128*4/3,3*128*4/3);
-                    wmaGlobe.mapContext.globaAlpha = 0.5;
+                    wmaGlobe.mapContext.save();
+                    wmaGlobe.mapContext.globalAlpha = 0.5;
                     wmaDrawKML(3*128,0,0,6*128,3*128,wmaGlobe.omapContext)
                     wmaGlobe.mapContext.drawImage(wmaGlobe.omap,0,0,6*128*4/3,3*128*4/3);
-                    wmaGlobe.mapContext.globaAlpha = 1.0;
+                    wmaGlobe.mapContext.restore();
                     wmaGlobe.updateTexture();
                     wmaGlobe.draw();
                   }
