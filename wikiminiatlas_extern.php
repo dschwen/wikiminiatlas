@@ -136,7 +136,7 @@ var wikiminiatlas_tilesets = [
   maxzoom: 13,
   minzoom: 0
  },
- {
+ /*{
   name: "Daily aqua",
   getTileURL: function(y,x,z) {
    return wikiminiatlas_imgbase + 
@@ -155,7 +155,7 @@ var wikiminiatlas_tilesets = [
   linkcolor: "#aa0000",
   maxzoom: 7,
   minzoom: 0
- },
+ },*/
  {
   name: "Moon (experimental!)",
   getTileURL: function(y,x,z) 
@@ -163,7 +163,7 @@ var wikiminiatlas_tilesets = [
    var x1 = x % (wikiminiatlas_zoomsize[z]*2);
    if( x1<0 ) x1+=(wikiminiatlas_zoomsize[z]*2);
 
-   return wikiminiatlas_imgbase + 'satellite/moon/'+z+'/'+y+'_'+x1+'.jpg'; 
+   return wikiminiatlas_imgbase + 'moon/'+z+'/'+y+'_'+x1+'.jpg'; 
   },
   linkcolor: "#aa0000",
   maxzoom: 7,
