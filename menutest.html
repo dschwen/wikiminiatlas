@@ -14,6 +14,9 @@
   div.wmamenuitem {
     padding: 2px 2px 2px 1em;
     cursor: pointer;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    user-select: none;
   }
   div.wmasubmenu {
     padding: 2px 20px 2px 1em;
@@ -22,31 +25,35 @@
     position: relative;
     background-position: right center;
     background-repeat: no-repeat;
-    background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAMAAAAoLQ9TAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAAxQTFRF3d3deXl5////nZ2dQA6SoAAAAAN0Uk5T//8A18oNQQAAADNJREFUeNpiYEIDDMQKMKALMDOgCTDCRWACcBG4AEwEIcDITEAFuhnotmC4g4EEzwEEGAADqgHmQSPJKgAAAABJRU5ErkJggg==');
-    /*background-image: url('');*/
+    background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgAAAAJCAYAAAAPU20uAAAABmJLR0QA/wD/AP+gvaeTAAAAB3RJTUUH2QcVDAoXXCQI0wAAAFZJREFUGJV9z7EJgEAUg+HvLAR7t7BwG3EPwTlsdJhbRXdwAAttvM5nIE34CQlkdH5048KKNgKKT8xoIqD4wIgqvUGkJWrYMSB9bZhQf73YohcZfTTiAd6YHdRNounnAAAAAElFTkSuQmCC');
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    user-select: none;
   }
 
   div.wmamenuchecked {
     background-position: left center;
     background-repeat: no-repeat;
-    background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAMAAAAoLQ9TAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAAxQTFRF3d3deXl5////nZ2dQA6SoAAAAAN0Uk5T//8A18oNQQAAADNJREFUeNpiYEIDDMQKMKALMDOgCTDCRWACcBG4AEwEIcDITEAFuhnotmC4g4EEzwEEGAADqgHmQSPJKgAAAABJRU5ErkJggg==');
+    background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAABmJLR0QA/wD/AP+gvaeTAAAAB3RJTUUH1wsHDCMl1V/V3QAAAHpJREFUGJV90C0KAlEQAOAPHl7A7A3UIord4IkEvYBnEIOwddmDWOxWs13RRVjLC7L4ZuLMx/wlccxxwCxCCzxwx7SEhrjhhWXUrUGHbYTWGZ2R+sVJTg5wxQfjPtqgxRH73O30b9QK7ww6PDEq7bX7gVV0QEKNi8Jzv6fAGPgDUdPDAAAAAElFTkSuQmCC');
   }
   div.wmamenuselected {
     background-position: left center;
     background-repeat: no-repeat;
-    background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAMAAAAoLQ9TAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAAxQTFRF3d3deXl5////nZ2dQA6SoAAAAAN0Uk5T//8A18oNQQAAADNJREFUeNpiYEIDDMQKMKALMDOgCTDCRWACcBG4AEwEIcDITEAFuhnotmC4g4EEzwEEGAADqgHmQSPJKgAAAABJRU5ErkJggg==');
+    background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAABmJLR0QA/wD/AP+gvaeTAAAAe0lEQVQYlY3PwQnCQBCF4U8FCdpAKsjdBjwHb8GLddhLCrCFFODFFBREEDwYD1lhWZaQBzMwwz+8eSzUJplL1DjghSF3dMETY6gPrilU4R1B//riCOsAnlBkXFZoYnA/k2MXg/0M+EgXbebHLthPLdI5/LvFHTdToOX6AaSjGA0r/PG9AAAAAElFTkSuQmCC');
   }
 </style>
 <script>
   function wmaMenu() {
     this.div = $('<div></div>').addClass('wmamenu');
+    this.parent = null;
+    this.shown = false;
   }
   wmaMenu.prototype.addItem = function(html,func) {
     func = func || (function(){});
-    var item = $('<div></div>').addClass('wmamenuitem').html(html)
+    var that = this, item = $('<div></div>').addClass('wmamenuitem').html(html)
       .mouseenter(function(){ item.css('background-color', '#AAA'); })
       .mouseleave(function(){ item.css('background-color', ''); })
-      .click(func)
+      .click( function() { func(); that.close() } )
       .appendTo(this.div);
     return item;
   }
@@ -60,6 +67,8 @@
       })
       .append(menu.div)
       .appendTo(this.div);
+    menu.parent = this;
+    return item;
   }
   wmaMenu.prototype.addCheck = function(html,func,selected) {
     function check() {
@@ -88,7 +97,7 @@
     var items = [], that = this, current = -1;
     function select(n) {
       if( n === current ) { return; }
-      for( i in items ) {
+      for( var i = 0; i<items.length; ++i ) {
         if( i===n ) { items[i].addClass('wmamenuselected'); } 
         else { items[i].removeClass('wmamenuselected'); }
       }
@@ -97,9 +106,9 @@
     }
     selected = selected || 0;
     func = func || (function(){});
-    for( var i in options ) {
+    for( var i=0; i<options.length; ++i ) {
       (function(n){
-        items[n] = that.addItem(options[n], function() { select(n); } );
+        items[n] = that.addItem( options[n], function() { select(n); } );
       })(i);
     }
     select(selected);
@@ -107,8 +116,6 @@
       items: items, select: select
     }
   }
-  //wmaMenu.prototype.addSep = function() { $('<hr/>').appendTo(this.div); }
-  //wmaMenu.prototype.addSep = function() { $('<span></span>').addClass('wmamenusep').appendTo(this.div); }
   wmaMenu.prototype.addSep = function() { 
     this.div.children().last().css({
       'border-bottom-style': 'solid', 
@@ -116,8 +123,10 @@
       'border-bottom-color': '#AAA'
     }); 
   }
-  wmaMenu.prototype.show = function() { this.div.fadeIn(200); }
-  wmaMenu.prototype.hide = function() { this.div.fadeOut(200); }
+  wmaMenu.prototype.show = function() { this.div.fadeIn(200); shown = true; }
+  wmaMenu.prototype.hide = function() { this.div.fadeOut(200); shown = false; }
+  wmaMenu.prototype.toggle = function() { this.shown?this.hide():this.show(); }
+  wmaMenu.prototype.close = function() { this.hide(); this.parent && this.parent.close(); }
   wmaMenu.prototype.move = function(x,y) { this.div.css({top:y+'px',left:x+'px'}); }
 
   $(function(){
