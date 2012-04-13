@@ -235,6 +235,7 @@ function wikiminiatlasInstall()
     // load map tiles
     function loadTiles() {
       var i,j, loadcount=0, c = tmap[0].getContext('2d'), cm = map[0].getContext('2d');
+      c.clearRect(0,0,6*128,3*128);
       for( i=0; i<6; ++i ) {
         for( j=0; j<3; ++j ) {
           (function(x,y){
@@ -259,6 +260,7 @@ function wikiminiatlasInstall()
                   wmaGlobe.omapContext = omap[0].getContext('2d');
 
                   wmaGlobe.updateKML = function() {
+                    wmaGlobe.mapContext.clearRect(0,0,6*128*4/3,3*128*4/3);
                     wmaGlobe.mapContext.drawImage(wmaGlobe.tmap,0,0,6*128*4/3,3*128*4/3);
                     wmaGlobe.mapContext.save();
                     wmaGlobe.mapContext.globalAlpha = 0.5;
