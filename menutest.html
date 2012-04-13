@@ -1,0 +1,144 @@
+<html>
+<head>
+ <script type="text/javascript" src="jquery-1.5.1.min.js"></script>
+ <style>
+  div.wmamenu {
+    position: absolute;
+    display: none;
+    margin: 0px;
+    padding: 2px;
+    background-color: white;
+    border: 1px solid black;
+    box-shadow: 2px 2px 5px rgba(0,0,0,0.3);
+  }
+  div.wmamenuitem {
+    padding: 2px 2px 2px 1em;
+    cursor: pointer;
+  }
+  div.wmasubmenu {
+    padding: 2px 20px 2px 1em;
+    padding-right: 1em;
+    cursor: pointer;
+    position: relative;
+    background-position: right center;
+    background-repeat: no-repeat;
+    background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAMAAAAoLQ9TAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAAxQTFRF3d3deXl5////nZ2dQA6SoAAAAAN0Uk5T//8A18oNQQAAADNJREFUeNpiYEIDDMQKMKALMDOgCTDCRWACcBG4AEwEIcDITEAFuhnotmC4g4EEzwEEGAADqgHmQSPJKgAAAABJRU5ErkJggg==');
+    /*background-image: url('');*/
+  }
+
+  div.wmamenuchecked {
+    background-position: left center;
+    background-repeat: no-repeat;
+    background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAMAAAAoLQ9TAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAAxQTFRF3d3deXl5////nZ2dQA6SoAAAAAN0Uk5T//8A18oNQQAAADNJREFUeNpiYEIDDMQKMKALMDOgCTDCRWACcBG4AEwEIcDITEAFuhnotmC4g4EEzwEEGAADqgHmQSPJKgAAAABJRU5ErkJggg==');
+  }
+  div.wmamenuselected {
+    background-position: left center;
+    background-repeat: no-repeat;
+    background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAMAAAAoLQ9TAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAAxQTFRF3d3deXl5////nZ2dQA6SoAAAAAN0Uk5T//8A18oNQQAAADNJREFUeNpiYEIDDMQKMKALMDOgCTDCRWACcBG4AEwEIcDITEAFuhnotmC4g4EEzwEEGAADqgHmQSPJKgAAAABJRU5ErkJggg==');
+  }
+</style>
+<script>
+  function wmaMenu() {
+    this.div = $('<div></div>').addClass('wmamenu');
+  }
+  wmaMenu.prototype.addItem = function(html,func) {
+    func = func || (function(){});
+    var item = $('<div></div>').addClass('wmamenuitem').html(html)
+      .mouseenter(function(){ item.css('background-color', '#AAA'); })
+      .mouseleave(function(){ item.css('background-color', ''); })
+      .click(func)
+      .appendTo(this.div);
+    return item;
+  }
+  wmaMenu.prototype.addMenu = function(html,menu) {
+    var item = $('<div></div>').addClass('wmasubmenu').html(html)
+      .mouseenter(function(){ item.css('background-color', '#AAA'); })
+      .mouseleave(function(){ item.css('background-color', ''); menu.hide(); })
+      .click(function(){
+        menu.move( item.width(), 0 );//item.height()/2);
+        menu.show();
+      })
+      .append(menu.div)
+      .appendTo(this.div);
+  }
+  wmaMenu.prototype.addCheck = function(html,func,selected) {
+    function check() {
+      if( selected ) { item.addClass('wmamenuchecked'); } 
+      else { item.removeClass('wmamenuchecked'); }
+    }
+    function click() {
+      selected = !selected;
+      check();
+      func(selected);
+    }
+    var item = this.addItem(html,click);
+    func = func || (function(){});
+    check();
+    return {
+      toggle: function(state) {
+        if( state === undefined ) {
+          selected = !selected;
+          check();
+        }
+      },
+      check : check, item: item
+    }
+  }
+  wmaMenu.prototype.addGroup = function(options,func,selected) {
+    var items = [], that = this, current = -1;
+    function select(n) {
+      if( n === current ) { return; }
+      for( i in items ) {
+        if( i===n ) { items[i].addClass('wmamenuselected'); } 
+        else { items[i].removeClass('wmamenuselected'); }
+      }
+      current = n;
+      func(current);
+    }
+    selected = selected || 0;
+    func = func || (function(){});
+    for( var i in options ) {
+      (function(n){
+        items[n] = that.addItem(options[n], function() { select(n); } );
+      })(i);
+    }
+    select(selected);
+    return {
+      items: items, select: select
+    }
+  }
+  //wmaMenu.prototype.addSep = function() { $('<hr/>').appendTo(this.div); }
+  //wmaMenu.prototype.addSep = function() { $('<span></span>').addClass('wmamenusep').appendTo(this.div); }
+  wmaMenu.prototype.addSep = function() { 
+    this.div.children().last().css({
+      'border-bottom-style': 'solid', 
+      'border-bottom-width': '1px',
+      'border-bottom-color': '#AAA'
+    }); 
+  }
+  wmaMenu.prototype.show = function() { this.div.fadeIn(200); }
+  wmaMenu.prototype.hide = function() { this.div.fadeOut(200); }
+  wmaMenu.prototype.move = function(x,y) { this.div.css({top:y+'px',left:x+'px'}); }
+
+  $(function(){
+    var submenu = new wmaMenu;
+    submenu.addItem('sub1');
+    submenu.addItem('sub2');
+    var menu = new wmaMenu;
+    menu.addItem('item1');
+    menu.addItem('item2');
+    menu.addMenu('<b>menu1</b>',submenu);
+    menu.addSep();
+    menu.addCheck('item3');
+    menu.addSep();
+    menu.addGroup(['option1','option2','option3'],function(o){console.log('selected '+o)},1);
+    menu.show();
+
+    menu.div.appendTo('body');
+    menu.show();
+  });
+</script>
+</head>
+<body>
+</body>
+</html>
