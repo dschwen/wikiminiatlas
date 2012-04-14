@@ -768,7 +768,7 @@ function moveWikiMiniAtlasMapTo()
       tile.text('');
       for( i=0; i<l.length; ++i ) {
         tile.append( $('<a></a>')
-          .addClass( 'label' + l[i].style )
+          .addClass('label').addClass( 'label' + l[i].style )
           .attr( { 
             href: '//' + l[i].lang + '.wikipedia.org/wiki/' + l[i].page,
             target: '_top' 

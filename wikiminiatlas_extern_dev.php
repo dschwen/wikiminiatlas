@@ -81,6 +81,8 @@ var wmaci_link_text = null;
 var url_params = parseParams(window.location.href);
 var wmasize = {}, wmakml = { shown: false, drawn: false, canvas: null, c: null, ways: null, areas: null, maxlat: -Infinity, minlat: Infinity };
 
+var wmaLinkStyle = {};
+
 var wmaGlobe = false;
 var wmaGlobeLoadTiles = null;
 
@@ -113,7 +115,7 @@ var wikiminiatlas_tilesets = [
      }
    }
   },
-  linkcolor: "#2255aa",
+  linkcolor: [ "#2255aa", "white 0pt 0pt 2pt" ],
   maxzoom: 12,
   minzoom: 0
  },
@@ -122,7 +124,7 @@ var wikiminiatlas_tilesets = [
   getTileURL: function( y, x, z ) {
    return wikiminiatlas_imgbase+'relief/' + z + '/' + y + '_' + ( x % ( wikiminiatlas_zoomsize[z] * 2 ) ) + '.png'; 
   },
-  linkcolor: "#2255aa",
+  linkcolor: [ "#2255aa", "white 0pt 0pt 2pt" ],
   maxzoom: 5,
   minzoom: 0
  },
@@ -131,7 +133,7 @@ var wikiminiatlas_tilesets = [
   getTileURL: function(y,x,z) {
    return wikiminiatlas_imgbase + 'plain/' + z + '/tile_' + y + '_' + ( x % ( wikiminiatlas_zoomsize[z] * 2 ) ) + '.png';
   },
-  linkcolor: "#2255aa",
+  linkcolor: [ "#2255aa", "white 0pt 0pt 2pt" ],
   maxzoom: 7,
   minzoom: 0
  },
@@ -148,7 +150,7 @@ var wikiminiatlas_tilesets = [
              z + '/' + y + '/' + y + '_' + ( x1 % ( wikiminiatlas_zoomsize[z] * 2 ) ) + '.png';
    }
   },
-  linkcolor: "white",
+  linkcolor: [ "white", "black 0pt 0pt 2pt" ],
   maxzoom: 13,
   minzoom: 0
  },
@@ -181,7 +183,7 @@ var wikiminiatlas_tilesets = [
 
    return wikiminiatlas_imgbase + 'moon/'+z+'/'+y+'_'+x1+'.jpg'; 
   },
-  linkcolor: "#aa0000",
+  linkcolor: [ "white", "black 0pt 0pt 2pt" ],
   maxzoom: 7,
   minzoom: 0
  }
@@ -768,7 +770,7 @@ function moveWikiMiniAtlasMapTo()
       tile.text('');
       for( i=0; i<l.length; ++i ) {
         tile.append( $('<a></a>')
-          .addClass( 'label' + l[i].style )
+          .addClass('label').addClass( 'label' + l[i].style ).css(wmaLinkStyle)
           .attr( { 
             href: '//' + l[i].lang + '.wikipedia.org/wiki/' + l[i].page,
             target: '_top' 
@@ -1097,16 +1099,21 @@ function wmaSelectTileset( n ) {
   wikiminiatlas_gx = newcoords.x-wikiminiatlas_width/2;
   wikiminiatlas_gy = newcoords.y-wikiminiatlas_height/2;
  }
+
+ wmaLinkStyle = { color: wikiminiatlas_tilesets[n].linkcolor[0], textShadow: wikiminiatlas_tilesets[n].linkcolor[1] };
+ $('a.label').css(wmaLinkStyle);
   
  moveWikiMiniAtlasMapTo();
  toggleSettings();
  wmaGlobeLoadTiles();
 }
 
-function wmaLinkColor(c) {
- document.styleSheets[0].cssRules[0].style.color = c;
- toggleSettings();
- return false;
+function wmaLinkColor(c,s) {
+  wmaLinkStyle.color = c;
+  s && ( wmaLinkStyle.textShadow = s );
+  $('a.label').css(wmaLinkStyle);
+  toggleSettings();
+  return false;
 }
 
 function wmaLabelSet(s) {

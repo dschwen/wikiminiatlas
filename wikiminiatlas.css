@@ -80,106 +80,67 @@ a.dir14 { background-image:url('symbols/dir_14.png'); }
 a.dir15 { background-image:url('symbols/dir_15.png'); }
 
 /* Standard */
-a.label0 {
+a.label {
    font-size:7pt;
    z-index:20;
    position: absolute;
-   background-image:url('symbols/label_corner_ul.png');
    background-repeat: no-repeat;
    padding-left:5px;
 }
 
-a.label1 {
-   font-size:7pt;
-   z-index:20;
-   position: absolute;
+a.label0 {
    background-image:url('symbols/label_corner_ul.png');
-   background-repeat: no-repeat;
-   padding-left:5px;
+}
+
+a.label1 {
+   background-image:url('symbols/label_corner_ul.png');
 }
 
 /* Mountain */
 a.label2 {
-   font-size:7pt;
-   z-index:20;
-   position: absolute;
    background-image:url('symbols/label_summit.png');
-   background-repeat: no-repeat;
    padding-left:13px;
 }
 
 /* Country */
 a.label3 {
-   font-size:7pt;
    font-weight: bold;
    text-align: center;
-   /*text-decoration: underline;*/
-   z-index:20;
-   position: absolute;
+   padding: 0px;
 }
 
 /* Landmark */
 a.label4 {
-   font-size:7pt;
-   z-index:20;
-   position: absolute;
    background-image:url('symbols/label_corner_ul.png');
-   background-repeat: no-repeat;
-   padding-left:5px;
 }
 
 /* City < 10000 */
 a.label5 {
-   font-size:7pt;
-   z-index:20;
-   position: absolute;
    background-image:url('symbols/label_dot_3.png');
-   background-repeat: no-repeat;
-   padding-left:5px;
 }
 /* City < 100000 */
 a.label6 {
-   font-size:7pt;
-   z-index:20;
-   position: absolute;
    background-image:url('symbols/label_dot_5.png');
-   background-repeat: no-repeat;
    padding-left:7px;
 }
 /* City < 500000 */
 a.label7 {
-   font-size:7pt;
-   z-index:20;
-   position: absolute;
    background-image:url('symbols/label_dot_7.png');
-   background-repeat: no-repeat;
    padding-left:9px;
 }
 /* City < 1000000 */
 a.label8 {
-   font-size:7pt;
-   z-index:20;
-   position: absolute;
    background-image:url('symbols/label_dot_9.png');
-   background-repeat: no-repeat;
    padding-left:11px;
 }
 /* City > 1000000 */
 a.label9 {
-   font-size:7pt;
-   z-index:20;
-   position: absolute;
    background-image:url('symbols/label_dot_11.png');
-   background-repeat: no-repeat;
    padding-left:13px;
 }
 /* Event */
 a.label10 {
-   font-size:7pt;
-   z-index:20;
-   position: absolute;
    background-image:url('http://upload.wikimedia.org/wikipedia/commons/0/0a/Wma_event_11.png');
-   background-repeat: no-repeat;
    padding-left:13px;
    filter:alpha(opacity=50); 
    -moz-opacity: 0.5; 
