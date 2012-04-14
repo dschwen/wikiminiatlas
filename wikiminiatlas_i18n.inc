@@ -671,7 +671,7 @@ var strings =
   mk:'полн кран',
   sk:'celá obrazovka'
  },
- FullBasemap: {
+ mapFull: {
   af:'Volledige basiskaart',
   ar:'خريطة أساسية كاملة (VMAP0)',
   'be-tarask':'Поўная асноўная мапа (VMAP0)',
@@ -710,7 +710,7 @@ var strings =
   vi:'Bản đồ nền đầy đủ (VMAP0)',
   vo:'Stabakaed fulik (VMAP0)'
  },
- Physical: {
+ mapPhysical: {
   af:'Fisiese',
   ar:'فيزيائي',
   'be-tarask':'Фізычная',
@@ -749,7 +749,7 @@ var strings =
   vi:'Vật lý',
   vo:'füsüdik'
  },
- MinimalBasemap: {
+ mapMinimal: {
   ar:'خريطة أساسية أقل ما يمكن (أشرطة ساحلية)',
   'be-tarask':'Мінімальная асноўная мапа (берагавыя лініі)',
   'be-x-old':'Мінімальная асноўная мапа (берагавыя лініі)',
@@ -839,7 +839,7 @@ var strings =
   vi:'Màu đất',
   vo:'Län delik'
  },
- Moon: {
+ mapMoon: {
   af:'Maan',
   ar:'قمر (تجريبي)',
   'be-tarask':'Месяц (экспэрымэнтальна)',
