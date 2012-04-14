@@ -261,6 +261,12 @@ function wikiminiatlasInstall()
                   wmaGlobe.omap = omap[0]; // overlay buffer
                   wmaGlobe.omapContext = omap[0].getContext('2d');
 
+                  wmaGlobe.updateTiles = function() {
+                    wmaGlobe.mapContext.clearRect(0,0,6*128*4/3,3*128*4/3);
+                    wmaGlobe.mapContext.drawImage(wmaGlobe.tmap,0,0,6*128*4/3,3*128*4/3);
+                    wmaGlobe.updateTexture();
+                    wmaGlobe.draw();
+                  }
                   wmaGlobe.updateKML = function() {
                     wmaGlobe.mapContext.clearRect(0,0,6*128*4/3,3*128*4/3);
                     wmaGlobe.mapContext.drawImage(wmaGlobe.tmap,0,0,6*128*4/3,3*128*4/3);
@@ -276,7 +282,9 @@ function wikiminiatlasInstall()
                 // check if overlay has already been loaded
                 if( wmakml.canvas ) {
                   wmaGlobe.updateKML();
-                } 
+                } else {
+                  wmaGlobe.updateTiles();
+                }
               }
             }).attr('src',wikiminiatlas_tilesets[wikiminiatlas_tileset].getTileURL(y,x,0,true)); // disable rotating tileservers (causes DOM Security exception)
           })(i,j);
