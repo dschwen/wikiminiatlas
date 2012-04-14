@@ -91,7 +91,7 @@ var wmaGlobeLoadTiles = null;
 
 var wikiminiatlas_tilesets = [
  {
-  name: "Full basemap (VMAP0,OSM)",
+  name: "mapFull", //"Full basemap (VMAP0,OSM)",
   getTileURL: function( y, x, z, norot ) 
   { 
    me = wikiminiatlas_tilesets[0];
@@ -120,7 +120,7 @@ var wikiminiatlas_tilesets = [
   minzoom: 0
  },
  {
-  name: "Physical",
+  name: "mapPhysical",
   getTileURL: function( y, x, z ) {
    return wikiminiatlas_imgbase+'relief/' + z + '/' + y + '_' + ( x % ( wikiminiatlas_zoomsize[z] * 2 ) ) + '.png'; 
   },
@@ -129,7 +129,7 @@ var wikiminiatlas_tilesets = [
   minzoom: 0
  },
  {
-  name: "Minimal basemap (coastlines)",
+  name: "mapCoastline", //"Minimal basemap (coastlines)",
   getTileURL: function(y,x,z) {
    return wikiminiatlas_imgbase + 'plain/' + z + '/tile_' + y + '_' + ( x % ( wikiminiatlas_zoomsize[z] * 2 ) ) + '.png';
   },
@@ -138,7 +138,7 @@ var wikiminiatlas_tilesets = [
   minzoom: 0
  },
  {
-  name: "Landsat",
+  name: "mapLandsat",
   getTileURL: function(y,x,z, norot) {
    var x1 = x % (wikiminiatlas_zoomsize[z]*2);
    if( x1<0 ) x1+=(wikiminiatlas_zoomsize[z]*2);
@@ -449,16 +449,17 @@ function wikiminiatlasInstall()
   wikiminiatlas_widget.innerHTML += WikiMiniAtlasHTML;
   // build and hook-up dropdown menu
   var menu = new wmaMenu();
-  /*menu.addGroup( (function(){ 
+  menu.addGroup( (function(){ 
     var list = [];
     for( i = 0; i < wikiminiatlas_tilesets.length; i++ ) {
       list.push(wikiminiatlas_tilesets[i].name);
     }
     return list;
-  })(), wmaSelectTileset, wikiminiatlas_tileset );*/
+  })(), wmaSelectTileset, wikiminiatlas_tileset );
+  menu.addSep();
   menu.addItem('Settings',toggleSettings);
   $('#button_menu').click( function(){menu.toggle();} );
-  $('#wikiminiatlas_widget').append(menu.div.css({ right: '40px', top: '26px' }));
+  $('#wikiminiatlas_widget').append(menu.div.css({ right: '40px', top: '26px',zIndex: 50 }));
 
   l = strings.dyk[UILang];
   var news = $('<div></div>').html(l[Math.floor(Math.random()*l.length)]).addClass('news');
@@ -1125,7 +1126,7 @@ function wmaSelectTileset( n ) {
  $('a.label').css(wmaLinkStyle);
   
  moveWikiMiniAtlasMapTo();
- toggleSettings();
+ //toggleSettings();
  wmaGlobeLoadTiles();
 }
 
@@ -1558,13 +1559,12 @@ wmaMenu.prototype.addGroup = function(options,func,selected) {
       else { items[i].removeClass('wmamenuselected'); }
     }
     current = n;
-    func(current);
   }
   selected = selected || 0;
   func = func || (function(){});
   for( var i=0; i<options.length; ++i ) {
     (function(n){
-      items[n] = that.addItem( options[n], function() { select(n); } );
+      items[n] = that.addItem( options[n], function() { select(n); func(n); } );
     })(i);
   }
   select(selected);
