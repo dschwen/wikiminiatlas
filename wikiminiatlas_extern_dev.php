@@ -175,7 +175,7 @@ var wikiminiatlas_tilesets = [
   minzoom: 0
  },*/
  {
-  name: "Moon (experimental!)",
+  name: "mapMoon",
   getTileURL: function(y,x,z) 
   { 
    var x1 = x % (wikiminiatlas_zoomsize[z]*2);
@@ -452,14 +452,14 @@ function wikiminiatlasInstall()
   menu.addGroup( (function(){ 
     var list = [];
     for( i = 0; i < wikiminiatlas_tilesets.length; i++ ) {
-      list.push(wikiminiatlas_tilesets[i].name);
+      list.push(strings[wikiminiatlas_tilesets[i].name][UILang]);
     }
     return list;
   })(), wmaSelectTileset, wikiminiatlas_tileset );
   menu.addSep();
   menu.addItem('Settings',toggleSettings);
   $('#button_menu').click( function(){menu.toggle();} );
-  $('#wikiminiatlas_widget').append(menu.div.css({ right: '40px', top: '26px',zIndex: 50 }));
+  $('#wikiminiatlas_widget').append(menu.div.css({ right: '40px', top: '26px',zIndex: 50, fontSize: '90%' }));
 
   l = strings.dyk[UILang];
   var news = $('<div></div>').html(l[Math.floor(Math.random()*l.length)]).addClass('news');
@@ -1579,8 +1579,8 @@ wmaMenu.prototype.addSep = function() {
     'border-bottom-color': '#AAA'
   }); 
 }
-wmaMenu.prototype.show = function() { this.div.fadeIn(200); shown = true; }
-wmaMenu.prototype.hide = function() { this.div.fadeOut(200); shown = false; }
+wmaMenu.prototype.show = function() { this.div.fadeIn(200); this.shown = true; }
+wmaMenu.prototype.hide = function() { this.div.fadeOut(200); this.shown = false; }
 wmaMenu.prototype.toggle = function() { this.shown?this.hide():this.show(); }
 wmaMenu.prototype.close = function() { this.hide(); this.parent && this.parent.close(); }
 wmaMenu.prototype.move = function(x,y) { this.div.css({top:y+'px',left:x+'px'}); }
