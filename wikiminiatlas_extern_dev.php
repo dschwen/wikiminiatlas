@@ -92,6 +92,7 @@ var wmaGlobeLoadTiles = null;
 var wikiminiatlas_tilesets = [
  {
   name: "mapFull", //"Full basemap (VMAP0,OSM)",
+  globe: "Earth",
   getTileURL: function( y, x, z, norot ) 
   { 
    me = wikiminiatlas_tilesets[0];
@@ -121,6 +122,7 @@ var wikiminiatlas_tilesets = [
  },
  {
   name: "mapPhysical",
+  globe: "Earth",
   getTileURL: function( y, x, z ) {
    return wikiminiatlas_imgbase+'relief/' + z + '/' + y + '_' + ( x % ( wikiminiatlas_zoomsize[z] * 2 ) ) + '.png'; 
   },
@@ -130,6 +132,7 @@ var wikiminiatlas_tilesets = [
  },
  {
   name: "mapCoastline", //"Minimal basemap (coastlines)",
+  globe: "Earth",
   getTileURL: function(y,x,z) {
    return wikiminiatlas_imgbase + 'plain/' + z + '/tile_' + y + '_' + ( x % ( wikiminiatlas_zoomsize[z] * 2 ) ) + '.png';
   },
@@ -139,6 +142,7 @@ var wikiminiatlas_tilesets = [
  },
  {
   name: "mapLandsat",
+  globe: "Earth",
   getTileURL: function(y,x,z, norot) {
    var x1 = x % (wikiminiatlas_zoomsize[z]*2);
    if( x1<0 ) x1+=(wikiminiatlas_zoomsize[z]*2);
@@ -176,6 +180,7 @@ var wikiminiatlas_tilesets = [
  },*/
  {
   name: "mapMoon",
+  globe: "Moon",
   getTileURL: function(y,x,z) 
   { 
    var x1 = x % (wikiminiatlas_zoomsize[z]*2);
@@ -1003,7 +1008,7 @@ function wmaGetDataURL(y,x,z) {
  if( wikiminiatlas_site == 'commons' ) {
   return '//toolserver.org/~dschwen/wma/label/commons_' + (wikiminiatlas_zoomsize[z]-y-1) + '_' + (x % (wikiminiatlas_zoomsize    [z]*2) ) + '_' + z;
  }
- return wikiminiatlas_database + '?rev=1&l=' + wikiminiatlas_site + '&a=' + (wikiminiatlas_zoomsize[z]-y-1) + '&b=' + (x % (wikiminiatlas_zoomsize[z]*2) ) + '&z=' + z;
+ return wikiminiatlas_database + '?rev=1&l=' + wikiminiatlas_site + '&a=' + (wikiminiatlas_zoomsize[z]-y-1) + '&b=' + (x % (wikiminiatlas_zoomsize[z]*2) ) + '&z=' + z + '&g=' + wikiminiatlas_tilesets[wikiminiatlas_tileset].globe;
 }
 
 function tilesetUpgrade() {
