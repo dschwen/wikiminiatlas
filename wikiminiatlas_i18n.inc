@@ -1055,7 +1055,7 @@ var strings =
  dyk: {
   de: ['Halte Strg oder ⌘ und positioniere den Mauspfeil auf einen Link, um eine Artikelzusammenfassung anzuzeigen.',
        'Druecke "o" oder oeffne die Einstellungen um eine Einblendung zum Groessenvergleich zu aktivieren.',
-       'Jetzt mit <a href="#" onclick="wmaSelectTileset(4)">Mondkarte</a>!'],
+       'Jetzt mit <a href="#" onclick="wmaSelectTileset(4)">Mondkarte</a>!',
        'Die Groesse des WikiMiniAtlas kann jetzt mit der Maus in der unteren linken Ecke geaendert werden.'],
   en: ['Hold Ctrl or ⌘ and hover over a link to read an article summary.',
        'Press "o" or go to the settings to activate a size-comparison overlay.',
