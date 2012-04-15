@@ -1055,11 +1055,11 @@ var strings =
  dyk: {
   de: ['Halte Strg oder ⌘ und positioniere den Mauspfeil auf einen Link, um eine Artikelzusammenfassung anzuzeigen.',
        'Druecke "o" oder oeffne die Einstellungen um eine Einblendung zum Groessenvergleich zu aktivieren.',
-       //'Jetzt mit <a htef="#" onclick="wmaSelectTileset(4)">Mondkarte</a>!'],
+       'Jetzt mit <a href="#" onclick="wmaSelectTileset(4)">Mondkarte</a>!'],
        'Die Groesse des WikiMiniAtlas kann jetzt mit der Maus in der unteren linken Ecke geaendert werden.'],
   en: ['Hold Ctrl or ⌘ and hover over a link to read an article summary.',
        'Press "o" or go to the settings to activate a size-comparison overlay.',
-       //'Explore <a htef="#" onclick="wmaSelectTileset(4)">the Moon</a>!',
+       'Explore <a href="#" onclick="wmaSelectTileset(4)">the Moon</a>!',
        'WikiMiniAtlas is now resizable. Just move the mouse in the bottom left corner!'],
   fr: ['Maintenir Ctrl ou ⌘ et survoler un lien pour lire un résumé de l\'article.'],
   eo: ['Tenu Stir aŭ ⌘ kaj ŝvebu super ligilo por legi resumon de artikolo.']

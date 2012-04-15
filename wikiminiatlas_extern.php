@@ -91,7 +91,8 @@ var wmaGlobeLoadTiles = null;
 
 var wikiminiatlas_tilesets = [
  {
-  name: "Full basemap (VMAP0,OSM)",
+  name: "mapFull", //"Full basemap (VMAP0,OSM)",
+  globe: "Earth",
   getTileURL: function( y, x, z, norot ) 
   { 
    me = wikiminiatlas_tilesets[0];
@@ -120,7 +121,8 @@ var wikiminiatlas_tilesets = [
   minzoom: 0
  },
  {
-  name: "Physical",
+  name: "mapPhysical",
+  globe: "Earth",
   getTileURL: function( y, x, z ) {
    return wikiminiatlas_imgbase+'relief/' + z + '/' + y + '_' + ( x % ( wikiminiatlas_zoomsize[z] * 2 ) ) + '.png'; 
   },
@@ -129,7 +131,8 @@ var wikiminiatlas_tilesets = [
   minzoom: 0
  },
  {
-  name: "Minimal basemap (coastlines)",
+  name: "mapCoastline", //"Minimal basemap (coastlines)",
+  globe: "Earth",
   getTileURL: function(y,x,z) {
    return wikiminiatlas_imgbase + 'plain/' + z + '/tile_' + y + '_' + ( x % ( wikiminiatlas_zoomsize[z] * 2 ) ) + '.png';
   },
@@ -138,7 +141,8 @@ var wikiminiatlas_tilesets = [
   minzoom: 0
  },
  {
-  name: "Landsat",
+  name: "mapLandsat",
+  globe: "Earth",
   getTileURL: function(y,x,z, norot) {
    var x1 = x % (wikiminiatlas_zoomsize[z]*2);
    if( x1<0 ) x1+=(wikiminiatlas_zoomsize[z]*2);
@@ -175,7 +179,8 @@ var wikiminiatlas_tilesets = [
   minzoom: 0
  },*/
  {
-  name: "Moon (experimental!)",
+  name: "mapMoon",
+  globe: "Moon",
   getTileURL: function(y,x,z) 
   { 
    var x1 = x % (wikiminiatlas_zoomsize[z]*2);
@@ -355,21 +360,11 @@ function wikiminiatlasInstall()
    if( !strings[i][UILang] ) strings[i][UILang] = strings[i].en;
 
   WikiMiniAtlasHTML = 
-
-   '<img id="button_plus" src="' + wikiminiatlas_imgbase + 
-    'button_plus.png" title="' + strings.zoomIn[UILang] + '">' + 
-
-   '<img id="button_minus" src="' + wikiminiatlas_imgbase + 
-    'button_minus.png" title="' + strings.zoomOut[UILang] + '">' +
-
-   '<img id="button_target" src="' + wikiminiatlas_imgbase + 
-    'button_target_locked.png" title="' + strings.center[UILang] + '" onclick="wmaMoveToTarget()">' +
-
-   '<img id="button_kml" src="' + wikiminiatlas_imgbase + 
-    'button_kml.png" title="' + strings.kml[UILang] + '" onclick="wmaToggleKML()">' +
-
-   '<img id="button_menu" src="' + wikiminiatlas_imgbase + 
-    'button_menu.png" title="' + strings.settings[UILang] + '" onclick="toggleSettings()">';
+   '<div class="bsprite" id="button_plus" title="' + strings.zoomIn[UILang] + '"></div>' +
+   '<div class="bsprite" id="button_minus" title="' + strings.zoomOut[UILang] + '"></div>' +
+   '<div class="bsprite" id="button_target" title="' + strings.center[UILang] + '"></div>' +
+   '<div class="bsprite" id="button_kml" title="' + strings.kml[UILang] + '"></div>' +
+   '<div class="bsprite" id="button_menu" title="' + strings.settings[UILang] + '"></div>';
 
   if( wikiminiatlas_own_close ) {
    WikiMiniAtlasHTML += '<img id="button_hide" src="'+wikiminiatlas_imgbase+'button_hide.png" title="' + 
@@ -397,16 +392,6 @@ function wikiminiatlasInstall()
   WikiMiniAtlasHTML += 
    '<div id="wikiminiatlas_settings">' +
    '<h4>' + strings.settings[UILang] + '</h4>' +
-   '<p class="option">' + strings.mode[UILang] + ' <select onchange="wmaSelectTileset(this.value)">';
- 
-  for( i = 0; i < wikiminiatlas_tilesets.length; i++ )
-  {
-   WikiMiniAtlasHTML +=
-    '<option value="'+i+'">' + wikiminiatlas_tilesets[i].name + '</option>';
-  }
-
-  WikiMiniAtlasHTML +=
-   '</select></p>' +
    '<p class="option">' + strings.labelSet[UILang] + ' <select onchange="wmaLabelSet(this.value)">';
 
   for( i in wikiminiatlas_sites )
@@ -446,13 +431,26 @@ function wikiminiatlasInstall()
 
   wikiminiatlas_widget  = document.getElementById('wikiminiatlas_widget');
   wikiminiatlas_widget.innerHTML += WikiMiniAtlasHTML;
+  // build and hook-up dropdown menu
+  var menu = new wmaMenu();
+  menu.addGroup( (function(){ 
+    var list = [];
+    for( i = 0; i < wikiminiatlas_tilesets.length; i++ ) {
+      list.push(strings[wikiminiatlas_tilesets[i].name][UILang]);
+    }
+    return list;
+  })(), wmaSelectTileset, wikiminiatlas_tileset );
+  menu.addSep();
+  menu.addItem('Settings',toggleSettings);
+  $('#button_menu').click( function(){menu.toggle();} );
+  $('#wikiminiatlas_widget').append(menu.div.css({ right: '40px', top: '26px',zIndex: 50, fontSize: '90%' }));
 
   l = strings.dyk[UILang];
   var news = $('<div></div>').html(l[Math.floor(Math.random()*l.length)]).addClass('news');
   //var news = $('<div></div>').html('<b>New:</b> More Zoom and new data by OpenStreetMap.').addClass('news');
   $('#wikiminiatlas_widget').append(news);
   news.click( function() { news.fadeOut(); } )
-  setTimeout( function() { news.fadeOut(); }, 20*1000 );
+  setTimeout( function() { news.fadeOut(); }, 10*1000 );
 
   scalelabel = $('#scalelabel');
   scalebar = $('#scalebar');
@@ -462,6 +460,8 @@ function wikiminiatlasInstall()
  
   $('#button_plus').bind('mousedown', wmaZoomIn );
   $('#button_minus').bind('mousedown', wmaZoomOut );
+  $('#button_target').click(wmaMoveToTarget);
+  $('#button_kml').click(wmaToggleKML);
 
   //document.body.oncontextmenu = function() { return false; };
   $(document).keydown(wmaKeypress);
@@ -1008,7 +1008,7 @@ function wmaGetDataURL(y,x,z) {
  if( wikiminiatlas_site == 'commons' ) {
   return '//toolserver.org/~dschwen/wma/label/commons_' + (wikiminiatlas_zoomsize[z]-y-1) + '_' + (x % (wikiminiatlas_zoomsize    [z]*2) ) + '_' + z;
  }
- return wikiminiatlas_database + '?rev=1&l=' + wikiminiatlas_site + '&a=' + (wikiminiatlas_zoomsize[z]-y-1) + '&b=' + (x % (wikiminiatlas_zoomsize[z]*2) ) + '&z=' + z;
+ return wikiminiatlas_database + '?rev=1&l=' + wikiminiatlas_site + '&a=' + (wikiminiatlas_zoomsize[z]-y-1) + '&b=' + (x % (wikiminiatlas_zoomsize[z]*2) ) + '&z=' + z + '&g=' + wikiminiatlas_tilesets[wikiminiatlas_tileset].globe;
 }
 
 function tilesetUpgrade() {
@@ -1112,7 +1112,7 @@ function wmaSelectTileset( n ) {
  $('a.label').css(wmaLinkStyle);
   
  moveWikiMiniAtlasMapTo();
- toggleSettings();
+ //toggleSettings();
  wmaGlobeLoadTiles();
 }
 
@@ -1153,9 +1153,9 @@ function wmaUpdateScalebar() {
 
 function wmaUpdateTargetButton() {
  if( wikiminiatlas_marker_locked ) {
-  wikiminiatlas_taget_button.src = wikiminiatlas_imgbase + 'button_target_locked.png';
+   $('#button_target').css('background-position', '');
  } else {
-  wikiminiatlas_taget_button.src = wikiminiatlas_imgbase + 'button_target.png';
+   $('#button_target').css('background-position', '-40px 0');
  }
 }
 
@@ -1484,6 +1484,92 @@ function processSizeOverlay(d) {
   }
   wmasize.canvas.fadeIn(200);
 }
+
+// drop down menu class
+function wmaMenu() {
+  this.div = $('<div></div>').addClass('wmamenu');
+  this.parent = null;
+  this.shown = false;
+}
+wmaMenu.prototype.addItem = function(html,func) {
+  func = func || (function(){});
+  var that = this, item = $('<div></div>').addClass('wmamenuitem').html(html)
+    .mouseenter(function(){ item.css('background-color', '#AAA'); })
+    .mouseleave(function(){ item.css('background-color', ''); })
+    .click( function() { func(); that.close() } )
+    .appendTo(this.div);
+  return item;
+}
+wmaMenu.prototype.addMenu = function(html,menu) {
+  var item = $('<div></div>').addClass('wmasubmenu').html(html)
+    .mouseenter(function(){ item.css('background-color', '#AAA'); })
+    .mouseleave(function(){ item.css('background-color', ''); menu.hide(); })
+    .click(function(){
+      menu.move( item.width(), 0 );//item.height()/2);
+      menu.show();
+    })
+    .append(menu.div)
+    .appendTo(this.div);
+  menu.parent = this;
+  return item;
+}
+wmaMenu.prototype.addCheck = function(html,func,selected) {
+  function check() {
+    if( selected ) { item.addClass('wmamenuchecked'); } 
+    else { item.removeClass('wmamenuchecked'); }
+  }
+  function click() {
+    selected = !selected;
+    check();
+    func(selected);
+  }
+  var item = this.addItem(html,click);
+  func = func || (function(){});
+  check();
+  return {
+    toggle: function(state) {
+      if( state === undefined ) {
+        selected = !selected;
+        check();
+      }
+    },
+    check : check, item: item
+  }
+}
+wmaMenu.prototype.addGroup = function(options,func,selected) {
+  var items = [], that = this, current = -1;
+  function select(n) {
+    if( n === current ) { return; }
+    for( var i = 0; i<items.length; ++i ) {
+      if( i===n ) { items[i].addClass('wmamenuselected'); } 
+      else { items[i].removeClass('wmamenuselected'); }
+    }
+    current = n;
+  }
+  selected = selected || 0;
+  func = func || (function(){});
+  for( var i=0; i<options.length; ++i ) {
+    (function(n){
+      items[n] = that.addItem( options[n], function() { select(n); func(n); } );
+    })(i);
+  }
+  select(selected);
+  return {
+    items: items, select: select
+  }
+}
+wmaMenu.prototype.addSep = function() { 
+  this.div.children().last().css({
+    'border-bottom-style': 'solid', 
+    'border-bottom-width': '1px',
+    'border-bottom-color': '#AAA'
+  }); 
+}
+wmaMenu.prototype.show = function() { this.div.fadeIn(200); this.shown = true; }
+wmaMenu.prototype.hide = function() { this.div.fadeOut(200); this.shown = false; }
+wmaMenu.prototype.toggle = function() { this.shown?this.hide():this.show(); }
+wmaMenu.prototype.close = function() { this.hide(); this.parent && this.parent.close(); }
+wmaMenu.prototype.move = function(x,y) { this.div.css({top:y+'px',left:x+'px'}); }
 
 // call installation routine
 $(function(){
