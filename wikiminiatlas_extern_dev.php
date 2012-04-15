@@ -355,22 +355,11 @@ function wikiminiatlasInstall()
    if( !strings[i][UILang] ) strings[i][UILang] = strings[i].en;
 
   WikiMiniAtlasHTML = 
-
-   '<img id="button_plus" src="' + wikiminiatlas_imgbase + 
-    'button_plus.png" title="' + strings.zoomIn[UILang] + '">' + 
-
-   '<img id="button_minus" src="' + wikiminiatlas_imgbase + 
-    'button_minus.png" title="' + strings.zoomOut[UILang] + '">' +
-
-   '<img id="button_target" src="' + wikiminiatlas_imgbase + 
-    'button_target_locked.png" title="' + strings.center[UILang] + '" onclick="wmaMoveToTarget()">' +
-
-   '<img id="button_kml" src="' + wikiminiatlas_imgbase + 
-    'button_kml.png" title="' + strings.kml[UILang] + '" onclick="wmaToggleKML()">' +
-
-   //'<img id="button_menu" src="' + wikiminiatlas_imgbase + 
-   // 'button_menu.png" title="' + strings.settings[UILang] + '" onclick="toggleSettings()">';
-   '<img id="button_menu" src="' + wikiminiatlas_imgbase + 'button_menu.png" title="' + strings.settings[UILang] + '">';
+   '<div class="bsprite" id="button_plus" title="' + strings.zoomIn[UILang] + '"></div>' +
+   '<div class="bsprite" id="button_minus" title="' + strings.zoomOut[UILang] + '"></div>' +
+   '<div class="bsprite" id="button_target" title="' + strings.center[UILang] + '"></div>' +
+   '<div class="bsprite" id="button_kml" title="' + strings.kml[UILang] + '"></div>' +
+   '<div class="bsprite" id="button_menu" title="' + strings.settings[UILang] + '"></div>';
 
   if( wikiminiatlas_own_close ) {
    WikiMiniAtlasHTML += '<img id="button_hide" src="'+wikiminiatlas_imgbase+'button_hide.png" title="' + 
@@ -398,16 +387,6 @@ function wikiminiatlasInstall()
   WikiMiniAtlasHTML += 
    '<div id="wikiminiatlas_settings">' +
    '<h4>' + strings.settings[UILang] + '</h4>' +
-   '<p class="option">' + strings.mode[UILang] + ' <select onchange="wmaSelectTileset(this.value)">';
- 
-  for( i = 0; i < wikiminiatlas_tilesets.length; i++ )
-  {
-   WikiMiniAtlasHTML +=
-    '<option value="'+i+'">' + wikiminiatlas_tilesets[i].name + '</option>';
-  }
-
-  WikiMiniAtlasHTML +=
-   '</select></p>' +
    '<p class="option">' + strings.labelSet[UILang] + ' <select onchange="wmaLabelSet(this.value)">';
 
   for( i in wikiminiatlas_sites )
@@ -476,6 +455,8 @@ function wikiminiatlasInstall()
  
   $('#button_plus').bind('mousedown', wmaZoomIn );
   $('#button_minus').bind('mousedown', wmaZoomOut );
+  $('#button_target').click(wmaMoveToTarget);
+  $('#button_kml').click(wmaToggleKML);
 
   //document.body.oncontextmenu = function() { return false; };
   $(document).keydown(wmaKeypress);
@@ -1167,9 +1148,9 @@ function wmaUpdateScalebar() {
 
 function wmaUpdateTargetButton() {
  if( wikiminiatlas_marker_locked ) {
-  wikiminiatlas_taget_button.src = wikiminiatlas_imgbase + 'button_target_locked.png';
+   $('#button_target').css('background-position', '');
  } else {
-  wikiminiatlas_taget_button.src = wikiminiatlas_imgbase + 'button_target.png';
+   $('#button_target').css('background-position', '-40px 0');
  }
 }
 
