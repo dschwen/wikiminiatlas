@@ -9,6 +9,10 @@ $y=floatval($_GET['a']);
 $x=floatval($_GET['b']);
 $z=intval($_GET['z']);
 
+// globe parameter (defaults to Earth)
+$g=$_GET['g'];
+if(!isset($g)) $g="Earth";
+
 // experimental compressed query
 $r=$_GET['r'];
 
@@ -35,6 +39,8 @@ $ts_mycnf = parse_ini_file($ts_pw['dir'] . "/.my.cnf");
 $db = mysql_connect($lang.'wiki-p.db.toolserver.org', $ts_mycnf['user'], $ts_mycnf['password']);
 unset($ts_mycnf, $ts_pw);
 mysql_select_db($lang.'wiki_p', $db);
+
+$g=mysql_real_escape_string($g);
 
 if( $r != NULL ) {
   $co = Array('x','y');
@@ -72,11 +78,11 @@ if( $r != NULL ) {
     echo "Requesting too many tiles!";
     exit;
   }
-  $query = "select p.page_title as title, l.name as name, l.lat as lat, l.lon as lon, l.style as style, t.x as dx, t.y as dy from  page p, u_dschwen.wma_tile t, u_dschwen.wma_connect c, u_dschwen.wma_label l  WHERE l.lang_id='$l' AND c.rev='$rev' AND c.tile_id=t.id AND ( ".implode(" OR ",$q)." ) AND c.label_id=l.id AND t.z='$z' AND p.page_id = l.page_id AND c.tile_id = t.id AND page_namespace=0 AND l.page_id=p.page_id;";
+  $query = "select p.page_title as title, l.name as name, l.lat as lat, l.lon as lon, l.style as style, t.x as dx, t.y as dy from  page p, u_dschwen.wma_tile t, u_dschwen.wma_connect c, u_dschwen.wma_label l  WHERE l.lang_id='$l' AND l.globe='$g' AND c.rev='$rev' AND c.tile_id=t.id AND ( ".implode(" OR ",$q)." ) AND c.label_id=l.id AND t.z='$z' AND p.page_id = l.page_id AND c.tile_id = t.id AND page_namespace=0 AND l.page_id=p.page_id;";
   //echo $query,"\n";
   //exit;
 } else {
-  $query = "select p.page_title as title, l.name as name, l.lat as lat, l.lon as lon, l.style as style, t.x as dx, t.y as dy from  page p, u_dschwen.wma_tile t, u_dschwen.wma_connect c, u_dschwen.wma_label l  WHERE l.lang_id='$l' AND c.rev='$rev' AND c.tile_id=t.id AND t.x='$x' AND c.label_id=l.id  AND t.y='$y' AND t.z='$z' AND p.page_id = l.page_id AND c.tile_id = t.id AND page_namespace=0 AND l.page_id=p.page_id;";
+  $query = "select p.page_title as title, l.name as name, l.lat as lat, l.lon as lon, l.style as style, t.x as dx, t.y as dy from  page p, u_dschwen.wma_tile t, u_dschwen.wma_connect c, u_dschwen.wma_label l  WHERE l.lang_id='$l' AND  l.globe='$g' AND c.rev='$rev' AND c.tile_id=t.id AND t.x='$x' AND c.label_id=l.id  AND t.y='$y' AND t.z='$z' AND p.page_id = l.page_id AND c.tile_id = t.id AND page_namespace=0 AND l.page_id=p.page_id;";
 }
 $res = mysql_query( $query );
 
