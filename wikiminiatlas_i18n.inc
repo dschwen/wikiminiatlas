@@ -187,9 +187,9 @@ var strings =
   wuu:'火星',
   yi:'מאדים',
   yo:'Mársì',
-  zh-yue:'火星',
+  'zh-yue':'火星',
   diq:'Mars',
-  bat-smg:'Marsos',
+  'bat-smg':'Marsos',
   zh:'火星'
  },
  mapCoastline : {
