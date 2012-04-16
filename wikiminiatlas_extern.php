@@ -186,6 +186,20 @@ var wikiminiatlas_tilesets = [
    var x1 = x % (wikiminiatlas_zoomsize[z]*2);
    if( x1<0 ) x1+=(wikiminiatlas_zoomsize[z]*2);
 
+   return wikiminiatlas_imgbase + 'lro_moon/lromoon_'+('00'+(5-z))+'_'+('000'+x1).substr(-3)+'_'+('000'+y).substr(-3)+'.png'; 
+  },
+  linkcolor: [ "black", "white 0pt 0pt 2pt" ],
+  maxzoom: 5,
+  minzoom: 0
+ },
+ {
+  name: "mapMoon",
+  globe: "Moon",
+  getTileURL: function(y,x,z) 
+  { 
+   var x1 = x % (wikiminiatlas_zoomsize[z]*2);
+   if( x1<0 ) x1+=(wikiminiatlas_zoomsize[z]*2);
+
    return wikiminiatlas_imgbase + 'moon/'+z+'/'+y+'_'+x1+'.jpg'; 
   },
   linkcolor: [ "white", "black 0pt 0pt 2pt" ],
@@ -217,6 +231,7 @@ function wikiminiatlasInstall()
   var coord_params = url_params['wma'] || (window.location.search).substr(1)
     , page = url_params['page']
     , lang = url_params['lang']
+    , globe = url_params['globe'] || "Earth"
     , synopsis_current = '';
 
   // launch the WIWOSM request (if a page was passed)
@@ -227,6 +242,12 @@ function wikiminiatlasInstall()
       success: processWIWOSM
     });
   }
+
+  // select tileset compatible with globe parameter
+  for( wikiminiatlas_tileset=0; 
+       wikiminiatlas_tileset<wikiminiatlas_tilesets.length && 
+       wikiminiatlas_tilesets[wikiminiatlas_tileset].globe!=globe; 
+       ++wikiminiatlas_tileset );
 
   // setup the globe
   wmaGlobeLoadTiles = (function(){
@@ -350,6 +371,10 @@ function wikiminiatlasInstall()
    wikiminiatlas_gx = newcoords.x-wikiminiatlas_width/2;
    wikiminiatlas_gy = newcoords.y-wikiminiatlas_height/2;
   }
+
+  // make sure zoom is in range
+  wikiminiatlas_zoom = Math.min( wikiminiatlas_zoom, wikiminiatlas_tilesets[wikiminiatlas_tileset].maxzoom );
+  wikiminiatlas_zoom = Math.max( wikiminiatlas_zoom, wikiminiatlas_tilesets[wikiminiatlas_tileset].minzoom );
 
   var WikiMiniAtlasHTML,i,l;
   UILang = wikiminiatlas_language;
