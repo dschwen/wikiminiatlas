@@ -116,6 +116,29 @@ wmaMenu.prototype.addGroup = function(options,func,selected) {
     items: items, select: select
   }
 }
+wmaMenu.prototype.addAccordeon = function(options,func,selected) {
+  var items = [], that = this, current = -1;
+  function select(n) {
+    if( n === current ) { return; }
+    for( var i = 0; i<items.length; ++i ) {
+      if( i===n ) { items[i].addClass('wmamenuselected'); } 
+      else { items[i].removeClass('wmamenuselected'); }
+    }
+    current = n;
+  }
+  selected = selected || 0;
+  func = func || (function(){});
+  for( var i=0; i<options.length; ++i ) {
+    (function(n){
+      items[n] = that.addItem( options[n][0], function() { select(n); func(n); } );
+      // style
+    })(i);
+  }
+  select(selected);
+  return {
+    items: items, select: select
+  }
+}
 wmaMenu.prototype.addSep = function() { 
   this.div.children().last().css({
     'border-bottom-style': 'solid', 

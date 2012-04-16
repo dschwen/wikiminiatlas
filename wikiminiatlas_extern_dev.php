@@ -211,7 +211,7 @@ var wikiminiatlas_tilesets = [
   globe: "Mars",
   getTileURL: function(y,x,z) 
   { 
-   var x1 = x % (wikiminiatlas_zoomsize[z]*2);
+   var x1 = (x+wikiminiatlas_zoomsize[z]) % (wikiminiatlas_zoomsize[z]*2);
    if( x1<0 ) x1+=(wikiminiatlas_zoomsize[z]*2);
 
    return wikiminiatlas_imgbase + 'mars/mars_'+('00'+(5-z))+'_'+('000'+x1).substr(-3)+'_'+('000'+y).substr(-3)+'.png'; 
