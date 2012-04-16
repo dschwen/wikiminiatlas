@@ -57,6 +57,7 @@ var strings =
   cy:'Mawrth',
   da:'Mars',
   de:'Mars',
+  en:'Mars',
   nv:'Máaz',
   et:'Marss',
   el:'Άρης',

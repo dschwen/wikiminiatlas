@@ -479,7 +479,7 @@ function wikiminiatlasInstall()
   menu.addGroup( (function(){ 
     var list = [];
     for( i = 0; i < wikiminiatlas_tilesets.length; i++ ) {
-      list.push(strings[wikiminiatlas_tilesets[i].name][UILang]);
+      list.push(strings[wikiminiatlas_tilesets[i].name][UILang] || '');
     }
     return list;
   })(), wmaSelectTileset, wikiminiatlas_tileset );
