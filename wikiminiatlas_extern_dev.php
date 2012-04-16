@@ -244,10 +244,10 @@ function wikiminiatlasInstall()
   }
 
   // select tileset compatible with globe parameter
-  for( wikiminiatlas_tileset=0; 
-       wikiminiatlas_tileset<wikiminiatlas_tilesets.length && 
-       wikiminiatlas_tilesets[wikiminiatlas_tileset].globe!=globe; 
-       ++wikiminiatlas_tileset );
+  var WikiMiniAtlasHTML,i,l;
+  for( i=0; i<wikiminiatlas_tilesets.length && wikiminiatlas_tilesets[i].globe!=globe; ++i );
+  wmaLinkStyle = { color: wikiminiatlas_tilesets[i].linkcolor[0], textShadow: wikiminiatlas_tilesets[i].linkcolor[1] };
+  wikiminiatlas_tileset = i;
 
   // setup the globe
   wmaGlobeLoadTiles = (function(){
@@ -344,6 +344,9 @@ function wikiminiatlasInstall()
     coord_filter.exec(coord_params);
     wikiminiatlas_defaultzoom = parseInt( RegExp.$6, 10 );
     wikiminiatlas_zoom = wikiminiatlas_defaultzoom;
+    // make sure zoom is in range
+    wikiminiatlas_zoom = Math.min( wikiminiatlas_zoom, wikiminiatlas_tilesets[wikiminiatlas_tileset].maxzoom );
+    wikiminiatlas_zoom = Math.max( wikiminiatlas_zoom, wikiminiatlas_tilesets[wikiminiatlas_tileset].minzoom );
    }
 
    coord_filter = /([\d+-.]+)_([\d+-.]+)_([\d]+)_([\d]+)_([a-z]+)_([\d]+)_([a-z]+)/;
@@ -372,11 +375,6 @@ function wikiminiatlasInstall()
    wikiminiatlas_gy = newcoords.y-wikiminiatlas_height/2;
   }
 
-  // make sure zoom is in range
-  wikiminiatlas_zoom = Math.min( wikiminiatlas_zoom, wikiminiatlas_tilesets[wikiminiatlas_tileset].maxzoom );
-  wikiminiatlas_zoom = Math.max( wikiminiatlas_zoom, wikiminiatlas_tilesets[wikiminiatlas_tileset].minzoom );
-
-  var WikiMiniAtlasHTML,i,l;
   UILang = wikiminiatlas_language;
   if( UILang == 'co' || UILang == 'commons' ) UILang = 'en';
 
