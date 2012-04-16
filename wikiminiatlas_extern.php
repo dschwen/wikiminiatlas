@@ -64,7 +64,6 @@ var wikiminiatlas_language = 'de';
 var wikiminiatlas_site = '';
 var UILang = 'en';
 
-var circ_eq = 40075.0; // equatorial circumfence in km
 var scalelabel = null;
 var scalebar = null;
 
@@ -117,6 +116,7 @@ var wikiminiatlas_tilesets = [
    }
   },
   linkcolor: [ "#2255aa", "white 0pt 0pt 2pt" ],
+  equator: 40075.0, // equatorial circumfence in km
   maxzoom: 12,
   minzoom: 0
  },
@@ -127,6 +127,7 @@ var wikiminiatlas_tilesets = [
    return wikiminiatlas_imgbase+'relief/' + z + '/' + y + '_' + ( x % ( wikiminiatlas_zoomsize[z] * 2 ) ) + '.png'; 
   },
   linkcolor: [ "#2255aa", "white 0pt 0pt 2pt" ],
+  equator: 40075.0, // equatorial circumfence in km
   maxzoom: 5,
   minzoom: 0
  },
@@ -137,6 +138,7 @@ var wikiminiatlas_tilesets = [
    return wikiminiatlas_imgbase + 'plain/' + z + '/tile_' + y + '_' + ( x % ( wikiminiatlas_zoomsize[z] * 2 ) ) + '.png';
   },
   linkcolor: [ "#2255aa", "white 0pt 0pt 2pt" ],
+  equator: 40075.0, // equatorial circumfence in km
   maxzoom: 7,
   minzoom: 0
  },
@@ -155,6 +157,7 @@ var wikiminiatlas_tilesets = [
    }
   },
   linkcolor: [ "white", "black 0pt 0pt 2pt" ],
+  equator: 40075.0, // equatorial circumfence in km
   maxzoom: 13,
   minzoom: 0
  },
@@ -189,6 +192,7 @@ var wikiminiatlas_tilesets = [
    return wikiminiatlas_imgbase + 'lro_moon/lromoon_'+('00'+(5-z))+'_'+('000'+x1).substr(-3)+'_'+('000'+y).substr(-3)+'.png'; 
   },
   linkcolor: [ "black", "white 0pt 0pt 2pt" ],
+  equator: 10940.475, // equatorial circumfence in km
   maxzoom: 5,
   minzoom: 0
  },
@@ -203,7 +207,23 @@ var wikiminiatlas_tilesets = [
    return wikiminiatlas_imgbase + 'moon/'+z+'/'+y+'_'+x1+'.jpg'; 
   },
   linkcolor: [ "white", "black 0pt 0pt 2pt" ],
+  equator: 10940.475, // equatorial circumfence in km
   maxzoom: 7,
+  minzoom: 0
+ },
+ {
+  name: "mapMars",
+  globe: "Mars",
+  getTileURL: function(y,x,z) 
+  { 
+   var x1 = (x+wikiminiatlas_zoomsize[z]) % (wikiminiatlas_zoomsize[z]*2);
+   if( x1<0 ) x1+=(wikiminiatlas_zoomsize[z]*2);
+
+   return wikiminiatlas_imgbase + 'mars/mars_'+('00'+(5-z))+'_'+('000'+x1).substr(-3)+'_'+('000'+y).substr(-3)+'.png'; 
+  },
+  linkcolor: [ "white", "black 0pt 0pt 2pt" ],
+  equator: 21359.975, // equatorial circumfence in km
+  maxzoom: 5,
   minzoom: 0
  }
 ];
@@ -1162,7 +1182,7 @@ function wmaUpdateScalebar() {
  var slen1 = 50, slen2;
  var skm1,skm2;
  // slen1 pixels (50px) are skm1 kilometers horizontaly in the mapcenter
- skm1 = Math.cos(sblocation.lat*0.0174532778)*circ_eq*slen1/(256*wikiminiatlas_zoomsize[wikiminiatlas_zoom]);
+ skm1 = Math.cos(sblocation.lat*0.0174532778)*wikiminiatlas_tilesets[wikiminiatlas_tileset].equator*slen1/(256*wikiminiatlas_zoomsize[wikiminiatlas_zoom]);
  // get the closest power of ten smaller than skm1
  skm2 = Math.pow(10,Math.floor(Math.log(skm1)/Math.log(10)));
  // slen2/slen1 = skm2/skm1 get new length of this 'even' length in pixels 
