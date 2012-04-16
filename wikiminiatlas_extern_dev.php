@@ -85,6 +85,8 @@ var wmaLinkStyle = {};
 var wmaGlobe = false;
 var wmaGlobeLoadTiles = null;
 
+var hasCanvas = "HTMLCanvasElement" in window;
+
 // include documentation strings
 <? require( 'wikiminiatlas_i18n.inc' ); ?>
 
@@ -255,7 +257,7 @@ function wikiminiatlasInstall()
     , synopsis_current = '';
 
   // launch the WIWOSM request (if a page was passed)
-  if( page ) {
+  if( page && hasCanvas ) {
     $.ajax({
       url: '//toolserver.org/~master/osmjson/getGeoJSON.php?lang='+lang+'&article='+page,
       dataType: 'json',
@@ -271,6 +273,8 @@ function wikiminiatlasInstall()
 
   // setup the globe
   wmaGlobeLoadTiles = (function(){
+    if( !hasCanvas ) { return function(){}; }
+
     var map = $('<canvas></canvas>').attr( { width: 6*128*4/3, height: 3*128*4/3 } ).css( { display: 'none' } ),
         tmap = $('<canvas></canvas>').attr( { width: 6*128, height: 3*128 } ).css( { display: 'none' } ),
         omap = $('<canvas></canvas>').attr( { width: 6*128, height: 3*128 } ).css( { display: 'none' } ),
@@ -882,13 +886,13 @@ function moveWikiMiniAtlasMapTo()
     thistile.div.html('<span class="loading">' + strings.labelLoading[UILang] + '</span>');
 
     // TODO: instead of launching the XHR here, gather the needed coords and ...
-    if( sessionStorage && ((data=sessionStorage.getItem(dataurl))!==null) ) {
+    if( window.sessionStorage && ((data=sessionStorage.getItem(dataurl))!==null) ) {
       parseLabels(thistile.div,data);
     } else {
       (function(turl){// closure to retain access to dataurl in sucess callback
       thistile.xhr = $.ajax( { url : turl, context : thistile.div } )
         .success( function(data) { 
-          if( sessionStorage ) {
+          if( window.sessionStorage ) {
             sessionStorage.setItem(turl,data);
           }
           parseLabels(this,data);
@@ -1331,6 +1335,8 @@ function extraMarkerMessage(index,cmd) {
 
 // make and insert a canvas element for KML/WIWOSM data
 function addKMLCanvas(geo) {
+  if( !hasCanvas) { return; }
+
   geo = geo || wmakml;
   // add canvas overlay
   if( geo.canvas === null ) {
