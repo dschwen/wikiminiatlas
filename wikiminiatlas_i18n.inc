@@ -29,7 +29,7 @@ var strings =
 {
  mapMars : {
   en: 'Mars'
- }
+ },
  mapCoastline : {
   af:'Kuslyn',
   ar:'شريط ساحلي',
