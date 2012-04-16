@@ -24,6 +24,7 @@
 
 // include minified jquery
 <? require( 'jquery-1.5.1.min.js' ); ?>
+<? require( 'json2min.js' ); ?>
 <? require( 'glMatrix-0.9.5.custom.js' ); ?>
 <? require( 'webgl-utils_min.js' ); ?>
 <? require( 'wmaglobe3d_min.js' ); ?>
