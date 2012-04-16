@@ -43,6 +43,7 @@
   }
 </style>
 <script>
+  // drop down menu class
   function wmaMenu() {
     this.div = $('<div></div>').addClass('wmamenu');
     this.parent = null;
@@ -102,13 +103,12 @@
         else { items[i].removeClass('wmamenuselected'); }
       }
       current = n;
-      func(current);
     }
     selected = selected || 0;
     func = func || (function(){});
     for( var i=0; i<options.length; ++i ) {
       (function(n){
-        items[n] = that.addItem( options[n], function() { select(n); } );
+        items[n] = that.addItem( options[n], function() { select(n); func(n); } );
       })(i);
     }
     select(selected);
@@ -123,8 +123,8 @@
       'border-bottom-color': '#AAA'
     }); 
   }
-  wmaMenu.prototype.show = function() { this.div.fadeIn(200); shown = true; }
-  wmaMenu.prototype.hide = function() { this.div.fadeOut(200); shown = false; }
+  wmaMenu.prototype.show = function() { this.div.fadeIn(200); this.shown = true; }
+  wmaMenu.prototype.hide = function() { this.div.fadeOut(200); this.shown = false; }
   wmaMenu.prototype.toggle = function() { this.shown?this.hide():this.show(); }
   wmaMenu.prototype.close = function() { this.hide(); this.parent && this.parent.close(); }
   wmaMenu.prototype.move = function(x,y) { this.div.css({top:y+'px',left:x+'px'}); }
