@@ -27,6 +27,9 @@ var wikiminiatlas_sites = {
 
 var strings =
 {
+ mapMars : {
+  en: 'Mars'
+ }
  mapCoastline : {
   af:'Kuslyn',
   ar:'شريط ساحلي',
@@ -842,43 +845,43 @@ var strings =
  mapMoon: {
   af:'Maan',
   ar:'قمر (تجريبي)',
-  'be-tarask':'Месяц (экспэрымэнтальна)',
-  'be-x-old':'Месяц (экспэрымэнтальна)',
-  bar:'Mond (Zun Teschtn)',
+  'be-tarask':'Месяц',
+  'be-x-old':'Месяц',
+  bar:'Mond',
   bpy:'জোলাকি',
-  br:'Loar (arnodel)',
-  ca:'Lluna (experimental)',
-  cs:'Měsíc (experimentální)',
-  da:'Måne (På prøve)',
-  de:'Mond (testweise)',
-  dsb:'Mjasec (eksperimentelny)',
-  el:'Σελήνη (πειραματικό)',
-  en:'Moon (experimental)',
-  eo:'Luno (eksperimenta)',
-  es:'Luna (experimental)',
+  br:'Loar',
+  ca:'Lluna',
+  cs:'Měsíc',
+  da:'Måne',
+  de:'Mond',
+  dsb:'Mjasec',
+  el:'Σελήνη',
+  en:'Moon',
+  eo:'Luno',
+  es:'Luna',
   fa:'ماه (تجربی)',
-  fr:'Lune (expérimental)',
-  fur:'Lune (sperimentâl)',
-  fy:'Moanne (eksperiminteel)',
-  gl:'Lúa (experimental)',
-  hi:'चंद्रमा (प्रायोगिक)',
-  hr:'Mjesec (eksperimentalno)',
-  hsb:'Měsačk (eksperimentalny)',
-  hu:'Hold (kísérleti)',
-  id:'Bulan (eksperimen)',
-  ilo:'Bulan (subukan)',
-  km:'ព្រះច័ន្ទ (ពិសោធ)',
+  fr:'Lune',
+  fur:'Lune',
+  fy:'Moanne',
+  gl:'Lúa',
+  hi:'चंद्रमा',
+  hr:'Mjesec',
+  hsb:'Měsačk',
+  hu:'Hold',
+  id:'Bulan',
+  ilo:'Bulan',
+  km:'ព្រះច័ន្ទ',
   lt:'Mėnulis',
-  lv:'Mēness (eksperimentāli)',
-  mk:'Месечина (експериментално)',
-  nl:'Maan (experimenteel)',
-  ro:'Luna (experimental)',
-  ru:'Луна (экспериментально)',
-  sk:'Mesiac (experimentálne)',
-  sl:'Mesec (eksperimentalno)',
-  uk:'Місяць (експериментально)',
-  vi:'Mặt trăng (thử nghiệm)',
-  vo:'Mun (sperimäntik)'
+  lv:'Mēness',
+  mk:'Месечина',
+  nl:'Maan',
+  ro:'Luna',
+  ru:'Луна',
+  sk:'Mesiac',
+  sl:'Mesec',
+  uk:'Місяць',
+  vi:'Mặt trăng',
+  vo:'Mun'
   },
  blue: {
   af:'Blou',
@@ -1089,3 +1092,4 @@ var strings =
   pl: { site:'pl', list:['Polska'] }
  }
 };
+
