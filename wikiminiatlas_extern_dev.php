@@ -228,6 +228,36 @@ var wikiminiatlas_tilesets = [
   equator: 21359.975, // equatorial circumfence in km
   maxzoom: 5,
   minzoom: 0
+ },
+ {
+  name: "mapVenus",
+  globe: "Venus",
+  getTileURL: function(y,x,z) 
+  { 
+   var x1 = x % (wikiminiatlas_zoomsize[z]*2);
+   if( x1<0 ) x1+=(wikiminiatlas_zoomsize[z]*2);
+
+   return wikiminiatlas_imgbase + 'venus/venus_'+('00'+(3-z))+'_'+('000'+x1).substr(-3)+'_'+('000'+y).substr(-3)+'.png'; 
+  },
+  linkcolor: [ "white", "black 0pt 0pt 2pt" ],
+  equator: 38024.6, // equatorial circumfence in km
+  maxzoom: 3,
+  minzoom: 0
+ },
+ {
+  name: "mapMercury",
+  globe: "Mercury",
+  getTileURL: function(y,x,z) 
+  { 
+   var x1 = (x+1*wikiminiatlas_zoomsize[z]) % (wikiminiatlas_zoomsize[z]*2);
+   if( x1<0 ) x1+=(wikiminiatlas_zoomsize[z]*2);
+   var z1 = 6-z;
+   return wikiminiatlas_imgbase + 'mercury/'+((z1<3)?(z1+'/'):'')+((z1==0)?(Math.floor(x/100)+'/'):'')+'merc_'+('00'+z1)+'_'+('000'+x1).substr(-3)+'_'+('000'+y).substr(-3)+'.png'; 
+  },
+  linkcolor: [ "white", "black 0pt 0pt 2pt" ],
+  equator: 15329.1, // equatorial circumfence in km
+  maxzoom: 6,
+  minzoom: 0
  }
 ];
 var wikiminiatlas_tileset = 0;
@@ -1060,8 +1090,10 @@ function wmaGetDataURL(y,x,z) {
 }
 
 function tilesetUpgrade() {
+var globe = wikiminiatlas_tilesets[wikiminiatlas_tileset].globe;
  for( var i = wikiminiatlas_tileset+1; i < wikiminiatlas_tilesets.length; i++ ) {
-  if( wikiminiatlas_tilesets[i].maxzoom > (wikiminiatlas_zoom+1) ) {
+  if( wikiminiatlas_tilesets[i].maxzoom >= (wikiminiatlas_zoom+1) &&
+      wikiminiatlas_tilesets[i].globe == globe ) {
    wikiminiatlas_tileset = i;
    wikiminiatlas_zoom++;
    return;

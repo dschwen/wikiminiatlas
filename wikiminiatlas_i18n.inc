@@ -27,6 +27,13 @@ var wikiminiatlas_sites = {
 
 var strings =
 {
+ mapVenus : {
+   en: 'Venus'
+ },
+ mapMercury : {
+   en: 'Mercury',
+   de: 'Merkur'
+ },
  mapMars : {
   af:'Mars',
   als:'Mars',
