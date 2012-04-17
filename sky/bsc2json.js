@@ -55,13 +55,21 @@ function parseStar(line) {
 
 // handle input from stdin
 stdin.resume(); // see http://nodejs.org/docs/v0.4.7/api/process.html#process.stdin
-stdin.on('data',function(line){ // called on each line of input
-  var s = parseStar(line.toString());
-   console.log(starcol[s.Spec2]);
-  /*if( ! (s.Spec2 in starcol) ) {
-    console.log(line.toString());
-  }*/
-}).on('end',function(){ // called when stdin closes (via ^D)
-  console.log('stdin:closed');
+//stdin.setEncoding('utf8');
+
+var alltext = '';
+
+stdin.on('data',function(chunk){ // called on each line of input
+  alltext += chunk.toString(); 
+});
+
+stdin.on('end',function(){ // called when stdin closes (via ^D)
+  var s,i,l = alltext.split('\n');
+  for( i=0; i<l.length; ++i ) {
+    s = parseStar(l[i]);
+    if( ! (s.Spec2 in starcol) ) {
+      console.log(s.SpType);
+    }
+  }
 });
 
