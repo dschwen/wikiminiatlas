@@ -10,13 +10,13 @@ $(function(){
     , h = canvas.height
     , c = canvas.getContext('2d')
     , bsc = []
-    , now = new Date; T =  (now / 86400000) + 2440587.5;
-    //, now = new Date; T =  (now / 86400000) - (now.getTimezoneOffset()/1440) + 2440587.5;
+    //, now = new Date; T =  (now / 86400000) + 2440587.5;
+    , now = new Date; T =  (now / 86400000) - (now.getTimezoneOffset()/1440) + 2440587.5;
 
   // planetary orbit data
   var pd = [
-    //{ name: 'EM_Bary', a0:1.00000261, e0:0.01671123 ,I0 :-0.00001531, L0:100.46457166, lp0:102.93768193, ln0:0.0,
-    //  da:0.00000562, de:-0.00004392 ,dI :-0.01294668, dL:35999.37244981, dlp:0.32327364, dln:0.0 },
+    { name: 'EM_Bary', a0:1.00000261, e0:0.01671123 ,I0 :-0.00001531, L0:100.46457166, lp0:102.93768193, ln0:0.0,
+      da:0.00000562, de:-0.00004392 ,dI :-0.01294668, dL:35999.37244981, dlp:0.32327364, dln:0.0 },
     { name: 'Mercury', a0:0.38709927, e0:0.20563593 ,I0 :7.00497902, L0:252.25032350, lp0:77.45779628, ln0:48.33076593,
       da:0.00000037, de:0.00001906 ,dI :-0.00594749, dL:149472.67411175, dlp:0.16047689, dln:-0.12534081 },
     { name: 'Venus', a0:0.72333566, e0:0.00677672 ,I0 :3.39467605, L0:181.97909950, lp0:131.60246718, ln0:76.67984255,
@@ -40,7 +40,7 @@ $(function(){
       , eps = 23.43928/180*Math.PI
       , a, e, I, L, ln, lp, w, Mr
       , i, tol = 1e-6, es, M, dM, dE, E
-      , x1, y1, xec,yec,zec, xeq,yeq,zeq, r;
+      , x1, y1, xec,yec,zec, xeq,yeq,zeq, r, ex,ey,ez;
     for( i=0; i<pd.length; ++i ) {
       a = pd[i].a0 + pd[i].da*T;
       e = pd[i].e0 + pd[i].de*T;
@@ -75,24 +75,35 @@ $(function(){
       zec = ( Math.sin(w)*Math.sin(I) )*x1 + ( Math.cos(w)*Math.sin(I) )*y1;
 
       console.log( pd[i].name, xec,yec,zec );
-      //console.log( pd[i].name, xec,yec,zec );
 
       xeq = xec;
       yeq = Math.cos(eps)*yec - Math.sin(eps)*zec;
       zeq = Math.sin(eps)*yec + Math.cos(eps)*zec;
 
-      r = Math.sqrt(xeq*xeq+yeq*yeq+zeq*zeq);
+      if( i == 0 ) {
+        ex = xeq;
+        ey = yeq;
+        ez = zeq;
+      } else {
+        xeq -= ex;
+        yeq -= ey;
+        zeq -= ez;
 
-      pd[i].DE = Math.asin(zeq/r);
-      pd[i].RA = (Math.atan2(yeq,xeq) + 2*Math.PI ) % (2*Math.PI);
+        console.log( pd[i].name, xeq,yeq,zeq );
 
-      (function(){
-        var RA = pd[i].RA*180/15/Math.PI, DE = pd[i].DE*180/Math.PI
-          ,  RAh = Math.floor(RA), RAm = Math.floor((RA-RAh)*60.0), RAs = RA-RAh-RAm/60.0
-          ,  DEd = Math.floor(DE), DEm = Math.floor((DE-DEd)*60.0), DEs = DE-DEd-DEm/60.0;
-        //console.log( pd[i].name, RAh+'h '+RAm+'m '+RAs+'s , '+DEd+'°'+DEm+"'"+DEs+'"' );
-        console.log( pd[i].name, RAh+'h '+RAm+'m  , '+DEd+'deg '+DEm+"'" );
-      })();
+        r = Math.sqrt( xeq*xeq + yeq*yeq + zeq*zeq );
+
+        pd[i].DE = Math.asin(zeq/r);
+        pd[i].RA = (Math.atan2(yeq,xeq) + 2*Math.PI ) % (2*Math.PI);
+
+        (function(){
+          var RA = pd[i].RA*180/15/Math.PI, DE = pd[i].DE*180/Math.PI
+            ,  RAh = Math.floor(RA), RAm = Math.floor((RA-RAh)*60.0), RAs = RA-RAh-RAm/60.0
+            ,  DEd = Math.floor(DE), DEm = Math.floor((DE-DEd)*60.0), DEs = DE-DEd-DEm/60.0;
+          //console.log( pd[i].name, RAh+'h '+RAm+'m '+RAs+'s , '+DEd+'°'+DEm+"'"+DEs+'"' );
+          console.log( pd[i].name, RAh+'h '+RAm+'m  , '+DEd+'deg '+DEm+"'" );
+        })();
+      }
     }
   }
 
