@@ -75,10 +75,16 @@ function parseStar(line) {
 }
 
 function processStar(s) {
-  var p = { ra: 0, de: 0, mag: 0 }
+  var p = { ra: 0, de: 0, mag: 0, c: '255,255,255' }, t;
   p.mag = parseFloat(s.Vmag);
   p.ra = ( ( parseFloat(s.RAh) + ( parseFloat(s.RAm) + parseFloat(s.RAs)/60.0 )/60.0 )/24.0 ) * 2.0*Math.PI;
   p.de = ( ( parseFloat(s.DEd) + ( parseFloat(s.DEm) + parseFloat(s.DEs)/60.0 )/60.0 )/360.0 ) * 2.0*Math.PI * (s.DEx=='-'?-1:1); 
+  if( /^([OBAFGKMN])([0-9]+\.?[0-9]*)([I]*[V]*)/.exec(s.SpType.substr(2)) ) {
+    t = RegExp.$1+RegExp.$2+RegExp.$3;
+    if( t in starcol ) {
+      p.c = starcol[t].join(',');
+    }
+  }
   return p;
 }
 
@@ -93,12 +99,10 @@ stdin.on('data',function(chunk){ // called on each line of input
 });
 
 stdin.on('end',function(){ // called when stdin closes (via ^D)
-  var s,i,l = alltext.split('\n'),p=[], q;
+  var s,i,l = alltext.split('\n'),p=[], q, t;
   for( i=0; i<l.length; ++i ) {
     s = parseStar(l[i]);
-    /*if( ! (s.Spec2 in starcol) ) {
-      console.log(s.SpType);
-    }*/
+
     q = processStar(s);
     if( q.mag || q.mag===0 ) {
       p.push( q );

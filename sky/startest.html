@@ -13,8 +13,10 @@ $(function(){
 
   function draw() {
     var i;
-    c.clearRect(0,0,w,h);
+    c.fillStyle='rgb(0,0,10)';
+    c.fillRect(0,0,w,h);
     for( i = 0; i < bsc.length; ++i ) {
+      c.fillStyle='rgb('+bsc[i].c+')';
       c.beginPath();
       c.arc( w*bsc[i].ra/(2*Math.PI), h*bsc[i].de/(Math.PI)+h/2, (8-bsc[i].mag)/2, 0, 2*Math.PI, true ); 
       c.fill();
