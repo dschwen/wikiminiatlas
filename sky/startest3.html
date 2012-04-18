@@ -10,16 +10,17 @@ $(function(){
     , h = canvas.height
     , c = canvas.getContext('2d')
     , bsc = []
-    , now = new Date; T =  (now / 86400000) - (now.getTimezoneOffset()/1440) + 2440587.5;
+    , now = new Date; T =  (now / 86400000) + 2440587.5;
+    //, now = new Date; T =  (now / 86400000) - (now.getTimezoneOffset()/1440) + 2440587.5;
 
   // planetary orbit data
   var pd = [
+    //{ name: 'EM_Bary', a0:1.00000261, e0:0.01671123 ,I0 :-0.00001531, L0:100.46457166, lp0:102.93768193, ln0:0.0,
+    //  da:0.00000562, de:-0.00004392 ,dI :-0.01294668, dL:35999.37244981, dlp:0.32327364, dln:0.0 },
     { name: 'Mercury', a0:0.38709927, e0:0.20563593 ,I0 :7.00497902, L0:252.25032350, lp0:77.45779628, ln0:48.33076593,
       da:0.00000037, de:0.00001906 ,dI :-0.00594749, dL:149472.67411175, dlp:0.16047689, dln:-0.12534081 },
     { name: 'Venus', a0:0.72333566, e0:0.00677672 ,I0 :3.39467605, L0:181.97909950, lp0:131.60246718, ln0:76.67984255,
       da:0.00000390, de:-0.00004107 ,dI :-0.00078890, dL:58517.81538729, dlp:0.00268329, dln:-0.27769418 },
-    { name: 'EM_Bary', a0:1.00000261, e0:0.01671123 ,I0 :-0.00001531, L0:100.46457166, lp0:102.93768193, l0n:0.0,
-      da:0.00000562, de:-0.00004392 ,dI :-0.01294668, dL:35999.37244981, dlp:0.32327364, dln:0.0 },
     { name: 'Mars', a0:1.52371034, e0:0.09339410 ,I0 :1.84969142, L0:-4.55343205, lp0:-23.94362959, ln0:49.55953891,
       da:0.00001847, de:0.00007882 ,dI :-0.00813131, dL:19140.30268499, dlp:0.44441088, dln:-0.29257343 },
     { name: 'Jupiter', a0:5.20288700, e0:0.04838624 ,I0 :1.30439695, L0:34.39644051, lp0:14.72847983, ln0:100.47390909,
@@ -43,10 +44,10 @@ $(function(){
     for( i=0; i<pd.length; ++i ) {
       a = pd[i].a0 + pd[i].da*T;
       e = pd[i].e0 + pd[i].de*T;
-      I = pd[i].I0 + pd[i].dI*T;
-      L = pd[i].L0 + pd[i].dL*T;
-      lp = pd[i].lp0 + pd[i].dlp*T;
-      ln = pd[i].ln0 + pd[i].dln*T;
+      I = (pd[i].I0 + pd[i].dI*T)/180*Math.PI;
+      L = (pd[i].L0 + pd[i].dL*T)/180*Math.PI;
+      lp = (pd[i].lp0 + pd[i].dlp*T)/180*Math.PI;
+      ln = (pd[i].ln0 + pd[i].dln*T)/180*Math.PI;
 
       w  = lp - ln;
       Mr = L - lp;
@@ -56,20 +57,25 @@ $(function(){
       // solve Kepler equation iteratively
       es = 180.0/Math.PI * e; // e*
       M = 180.0/Math.PI * Mr;
+      console.log('');
       E = M+es*Math.sin(Mr);
       do {
         dM = M - ( E - es*Math.sin( E/180*Math.PI ) );
         dE = dM/( 1.0 - e*Math.cos( E/180*Math.PI ) );
         E += dE;
       } while( Math.abs(dE) > tol );
-      console.log( pd[i].name, M, E-es*Math.sin( E/180*Math.PI ) );
+      //console.log( pd[i].name, M, E-es*Math.sin( E/180*Math.PI ) );
 
       x1 = a*(Math.cos(E/180*Math.PI)-e);
       y1 = a*Math.sqrt(1-e*e)*Math.sin(E/180*Math.PI);
+      console.log( pd[i].name, x1,y1 );
 
       xec = ( Math.cos(w)*Math.cos(ln)-Math.sin(w)*Math.sin(ln)*Math.cos(I) )*x1 + (-Math.sin(w)*Math.cos(ln)-Math.cos(w)*Math.sin(ln)*Math.cos(I))*y1;
       yec = ( Math.cos(w)*Math.sin(ln)-Math.sin(w)*Math.cos(ln)*Math.cos(I) )*x1 + (-Math.sin(w)*Math.sin(ln)+Math.cos(w)*Math.cos(ln)*Math.cos(I))*y1;
       zec = ( Math.sin(w)*Math.sin(I) )*x1 + ( Math.cos(w)*Math.sin(I) )*y1;
+
+      console.log( pd[i].name, xec,yec,zec );
+      //console.log( pd[i].name, xec,yec,zec );
 
       xeq = xec;
       yeq = Math.cos(eps)*yec - Math.sin(eps)*zec;
@@ -77,8 +83,16 @@ $(function(){
 
       r = Math.sqrt(xeq*xeq+yeq*yeq+zeq*zeq);
 
-      pd[i].RA = Math.acos(zeq/r);
-      pd[i].DE = Math.atan2(yeq,xeq);
+      pd[i].DE = Math.asin(zeq/r);
+      pd[i].RA = (Math.atan2(yeq,xeq) + 2*Math.PI ) % (2*Math.PI);
+
+      (function(){
+        var RA = pd[i].RA*180/15/Math.PI, DE = pd[i].DE*180/Math.PI
+          ,  RAh = Math.floor(RA), RAm = Math.floor((RA-RAh)*60.0), RAs = RA-RAh-RAm/60.0
+          ,  DEd = Math.floor(DE), DEm = Math.floor((DE-DEd)*60.0), DEs = DE-DEd-DEm/60.0;
+        //console.log( pd[i].name, RAh+'h '+RAm+'m '+RAs+'s , '+DEd+'°'+DEm+"'"+DEs+'"' );
+        console.log( pd[i].name, RAh+'h '+RAm+'m  , '+DEd+'deg '+DEm+"'" );
+      })();
     }
   }
 
