@@ -39,7 +39,7 @@ $(function(){
       , eps = 23.43928/180*Math.PI
       , a, e, I, L, ln, lp, w, Mr
       , i, tol = 1e-6, es, M, dM, dE, E
-      , x1, y1, xec,yec,zec, xeq,yeq,zeq;
+      , x1, y1, xec,yec,zec, xeq,yeq,zeq, r;
     for( i=0; i<pd.length; ++i ) {
       a = pd[i].a0 + pd[i].da*T;
       e = pd[i].e0 + pd[i].de*T;
@@ -64,8 +64,8 @@ $(function(){
       } while( Math.abs(dE) > tol );
       console.log( pd[i].name, M, E-es*Math.sin( E/180*Math.PI ) );
 
-      x1 = pd[i].a*(Math.cos(E/180*Math.PI)-e);
-      y1 = pd[i].a*Math.sqrt(1-e*e)*Math.sin(E/180*Math.PI);
+      x1 = a*(Math.cos(E/180*Math.PI)-e);
+      y1 = a*Math.sqrt(1-e*e)*Math.sin(E/180*Math.PI);
 
       xec = ( Math.cos(w)*Math.cos(ln)-Math.sin(w)*Math.sin(ln)*Math.cos(I) )*x1 + (-Math.sin(w)*Math.cos(ln)-Math.cos(w)*Math.sin(ln)*Math.cos(I))*y1;
       yec = ( Math.cos(w)*Math.sin(ln)-Math.sin(w)*Math.cos(ln)*Math.cos(I) )*x1 + (-Math.sin(w)*Math.sin(ln)+Math.cos(w)*Math.cos(ln)*Math.cos(I))*y1;
@@ -74,11 +74,11 @@ $(function(){
       xeq = xec;
       yeq = Math.cos(eps)*yec - Math.sin(eps)*zec;
       zeq = Math.sin(eps)*yec + Math.cos(eps)*zec;
-      
-      //Given ecliptic coordinates λ and β, the equatorial coordinates are:
-      //α = atan2((sin λ cos ε - tan β sin ε), cos λ)
-      //δ = asin(sin ε sin λ cos β + cos ε sin β)
 
+      r = Math.sqrt(xeq*xeq+yeq*yeq+zeq*zeq);
+
+      pd[i].RA = Math.acos(zeq/r);
+      pd[i].DE = Math.atan2(yeq,xeq);
     }
   }
 
@@ -90,6 +90,12 @@ $(function(){
       c.fillStyle='rgb('+bsc[i].c+')';
       c.beginPath();
       c.arc( w*bsc[i].ra/(2*Math.PI), h*bsc[i].de/(Math.PI)+h/2, (8-bsc[i].mag)/2, 0, 2*Math.PI, true ); 
+      c.fill();
+    }
+    for( i = 0; i < pd.length; ++i ) {
+      c.fillStyle='rgb(255,0,0)';
+      c.beginPath();
+      c.arc( w*pd[i].RA/(2*Math.PI), h*pd[i].DE/(Math.PI)+h/2, 5, 0, 2*Math.PI, true ); 
       c.fill();
     }
   }
