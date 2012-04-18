@@ -12,6 +12,10 @@ $(function(){
     , bsc = []
     , now = new Date; T =  (now / 86400000) - (now.getTimezoneOffset()/1440) + 2440587.5;
 
+  function computeElements(Teph) {
+    var T = (Teph-2451545.0)/36525.0;
+
+  }
 
   function draw() {
     var i;
