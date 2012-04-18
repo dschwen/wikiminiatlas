@@ -27,6 +27,9 @@ var wikiminiatlas_sites = {
 
 var strings =
 {
+ mapIo : {
+   en: 'Io'
+ },
  mapVenus : {
    en: 'Venus'
  },

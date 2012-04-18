@@ -258,6 +258,21 @@ var wikiminiatlas_tilesets = [
   equator: 15329.1, // equatorial circumfence in km
   maxzoom: 6,
   minzoom: 0
+ },
+ {
+  name: "mapIo",
+  globe: "Io",
+  getTileURL: function(y,x,z) 
+  { 
+   var x1 = (x+wikiminiatlas_zoomsize[z]) % (wikiminiatlas_zoomsize[z]*2);
+   if( x1<0 ) x1+=(wikiminiatlas_zoomsize[z]*2);
+
+   return wikiminiatlas_imgbase + 'io/io_'+('00'+(4-z))+'_'+('000'+x1).substr(-3)+'_'+('000'+y).substr(-3)+'.png'; 
+  },
+  linkcolor: [ "black", "white 0pt 0pt 2pt" ],
+  equator: 11443.6, // equatorial circumfence in km
+  maxzoom: 4,
+  minzoom: 0
  }
 ];
 var wikiminiatlas_tileset = 0;
