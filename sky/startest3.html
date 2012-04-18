@@ -1,0 +1,45 @@
+<html>
+<head>
+ <script type="text/javascript" src="../jquery-1.5.1.min.js"></script>
+ <style>
+</style>
+<script>
+$(function(){
+  var canvas = $('canvas')[0]
+    , w = canvas.width
+    , h = canvas.height
+    , c = canvas.getContext('2d')
+    , bsc = []
+    , now = new Date; T =  (now / 86400000) - (now.getTimezoneOffset()/1440) + 2440587.5;
+
+
+  function draw() {
+    var i;
+    c.fillStyle='rgb(0,0,10)';
+    c.fillRect(0,0,w,h);
+    for( i = 0; i < bsc.length; ++i ) {
+      c.fillStyle='rgb('+bsc[i].c+')';
+      c.beginPath();
+      c.arc( w*bsc[i].ra/(2*Math.PI), h*bsc[i].de/(Math.PI)+h/2, (8-bsc[i].mag)/2, 0, 2*Math.PI, true ); 
+      c.fill();
+    }
+  }
+
+  function start(data) {
+    bsc = data;
+    draw();
+  }
+
+  $.ajax({
+    url: 'bsc5.json',
+    dataType: 'json',
+    success: start
+  });
+
+});
+</script>
+</head>
+<body>
+  <canvas width=1200 height=600></canvas>
+</body>
+</html>
