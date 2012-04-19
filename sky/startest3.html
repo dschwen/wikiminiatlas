@@ -15,7 +15,7 @@ $(function(){
 
   // planetary orbit data
   var pd = [
-    { name: 'EM_Bary', a0:1.00000261, e0:0.01671123 ,I0 :-0.00001531, L0:100.46457166, lp0:102.93768193, ln0:0.0,
+    { name: 'EM_Bary/-Sun', a0:1.00000261, e0:0.01671123 ,I0 :-0.00001531, L0:100.46457166, lp0:102.93768193, ln0:0.0,
       da:0.00000562, de:-0.00004392 ,dI :-0.01294668, dL:35999.37244981, dlp:0.32327364, dln:0.0 },
     { name: 'Mercury', a0:0.38709927, e0:0.20563593 ,I0 :7.00497902, L0:252.25032350, lp0:77.45779628, ln0:48.33076593,
       da:0.00000037, de:0.00001906 ,dI :-0.00594749, dL:149472.67411175, dlp:0.16047689, dln:-0.12534081 },
@@ -66,8 +66,8 @@ $(function(){
       } while( Math.abs(dE) > tol );
       //console.log( pd[i].name, M, E-es*Math.sin( E/180*Math.PI ) );
 
-      x1 = a*(Math.cos(E/180*Math.PI)-e);
       y1 = a*Math.sqrt(1-e*e)*Math.sin(E/180*Math.PI);
+      x1 = a*(Math.cos(E/180*Math.PI)-e);
       console.log( pd[i].name, x1,y1 );
 
       xec = ( Math.cos(w)*Math.cos(ln)-Math.sin(w)*Math.sin(ln)*Math.cos(I) )*x1 + (-Math.sin(w)*Math.cos(ln)-Math.cos(w)*Math.sin(ln)*Math.cos(I))*y1;
@@ -76,36 +76,43 @@ $(function(){
 
       console.log( pd[i].name, xec,yec,zec );
 
+      if( i == 0 ) { 
+        // coordinates of Earth-Moon Barycenter in heliocentric ecliptic coordinates
+        ex = xec;
+        ey = yec;
+        ez = zec;
+
+        // sun vector from earth is -earth vector from sun
+        xec *= -1;
+        yec *= -1;
+        zec *= -1;
+      } else { 
+        // Coordinates relative to EM Barycenter
+        xec -= ex;
+        yec -= ey;
+        zec -= ez;
+      }
       // equatorial coordinates centered on sun
       xeq = xec;
       yeq = Math.cos(eps)*yec - Math.sin(eps)*zec;
       zeq = Math.sin(eps)*yec + Math.cos(eps)*zec;
 
-      if( i == 0 ) { // coordinates of Earth-Moon Barycenter
-        ex = xeq;
-        ey = yeq;
-        ez = zeq;
-      } else { // Coordinates relative to EM Barycenter
-        xeq -= ex;
-        yeq -= ey;
-        zeq -= ez;
+      console.log( pd[i].name, xeq,yeq,zeq );
 
-        console.log( pd[i].name, xeq,yeq,zeq );
+      //r = Math.sqrt( xeq*xeq + yeq*yeq + zeq*zeq );
+      r = Math.sqrt( xeq*xeq + yeq*yeq );
 
-        //r = Math.sqrt( xeq*xeq + yeq*yeq + zeq*zeq );
-        r = Math.sqrt( xeq*xeq + yeq*yeq );
+      pd[i].DE = Math.asin(zeq/r);
+      pd[i].RA = (Math.atan2(yeq,xeq) + 2*Math.PI ) % (2*Math.PI);
 
-        pd[i].DE = Math.asin(zeq/r);
-        pd[i].RA = (Math.atan2(yeq,xeq) + 2*Math.PI ) % (2*Math.PI);
-
-        (function(){
-          var RA = pd[i].RA*180/15/Math.PI, DE = pd[i].DE*180/Math.PI
-            ,  RAh = Math.floor(RA), RAm = Math.floor((RA-RAh)*60.0), RAs = RA-RAh-RAm/60.0
-            ,  DEd = Math.floor(DE), DEm = Math.floor((DE-DEd)*60.0), DEs = DE-DEd-DEm/60.0;
-          //console.log( pd[i].name, RAh+'h '+RAm+'m '+RAs+'s , '+DEd+'°'+DEm+"'"+DEs+'"' );
-          console.log( pd[i].name, RAh+'h '+RAm+'m  , '+DEd+'deg '+DEm+"'" );
-        })();
-      }
+      (function(){
+        var RA = pd[i].RA*180/15/Math.PI, DE = pd[i].DE*180/Math.PI
+          ,  RAh = Math.floor(RA), RAm = Math.floor((RA-RAh)*60.0), RAs = RA-RAh-RAm/60.0
+          ,  DEd = Math.floor(DE), DEm = Math.floor((DE-DEd)*60.0), DEs = DE-DEd-DEm/60.0;
+        //console.log( pd[i].name, RAh+'h '+RAm+'m '+RAs+'s , '+DEd+'°'+DEm+"'"+DEs+'"' );
+        console.log( pd[i].name, RAh+'h '+RAm+'m  , '+DEd+'deg '+DEm+"'" );
+      })();
+    
     }
   }
 
@@ -119,10 +126,10 @@ $(function(){
       c.arc( w*bsc[i].ra/(2*Math.PI), h*bsc[i].de/(Math.PI)+h/2, (8-bsc[i].mag)/2, 0, 2*Math.PI, true ); 
       c.fill();
     }
-    for( i = 1; i < pd.length; ++i ) {
+    for( i = 0; i < pd.length; ++i ) {
       c.fillStyle='rgb(255,0,0)';
       c.beginPath();
-      c.arc( w*pd[i].RA/(2*Math.PI), h*pd[i].DE/(Math.PI)+h/2, 5, 0, 2*Math.PI, true ); 
+      c.arc( w*pd[i].RA/(2*Math.PI), h*pd[i].DE/(Math.PI)+h/2, i?5:10, 0, 2*Math.PI, true ); 
       c.fill();
     }
   }
