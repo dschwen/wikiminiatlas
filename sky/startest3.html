@@ -10,8 +10,8 @@ $(function(){
     , h = canvas.height
     , c = canvas.getContext('2d')
     , bsc = []
-    //, now = new Date; T =  (now / 86400000) + 2440587.5;
-    , now = new Date; T =  (now / 86400000) - (now.getTimezoneOffset()/1440) + 2440587.5;
+    , now = new Date; T =  (now / 86400000) + 2440587.5;
+    //, now = new Date; T =  (now / 86400000) - (now.getTimezoneOffset()/1440) + 2440587.5;
 
   // planetary orbit data
   var pd = [
@@ -76,22 +76,24 @@ $(function(){
 
       console.log( pd[i].name, xec,yec,zec );
 
+      // equatorial coordinates centered on sun
       xeq = xec;
       yeq = Math.cos(eps)*yec - Math.sin(eps)*zec;
       zeq = Math.sin(eps)*yec + Math.cos(eps)*zec;
 
-      if( i == 0 ) {
+      if( i == 0 ) { // coordinates of Earth-Moon Barycenter
         ex = xeq;
         ey = yeq;
         ez = zeq;
-      } else {
+      } else { // Coordinates relative to EM Barycenter
         xeq -= ex;
         yeq -= ey;
         zeq -= ez;
 
         console.log( pd[i].name, xeq,yeq,zeq );
 
-        r = Math.sqrt( xeq*xeq + yeq*yeq + zeq*zeq );
+        //r = Math.sqrt( xeq*xeq + yeq*yeq + zeq*zeq );
+        r = Math.sqrt( xeq*xeq + yeq*yeq );
 
         pd[i].DE = Math.asin(zeq/r);
         pd[i].RA = (Math.atan2(yeq,xeq) + 2*Math.PI ) % (2*Math.PI);
@@ -117,7 +119,7 @@ $(function(){
       c.arc( w*bsc[i].ra/(2*Math.PI), h*bsc[i].de/(Math.PI)+h/2, (8-bsc[i].mag)/2, 0, 2*Math.PI, true ); 
       c.fill();
     }
-    for( i = 0; i < pd.length; ++i ) {
+    for( i = 1; i < pd.length; ++i ) {
       c.fillStyle='rgb(255,0,0)';
       c.beginPath();
       c.arc( w*pd[i].RA/(2*Math.PI), h*pd[i].DE/(Math.PI)+h/2, 5, 0, 2*Math.PI, true ); 
@@ -127,6 +129,7 @@ $(function(){
 
   function start(data) {
     bsc = data;
+    console.log(T);
     computeElements(T);
     draw();
   }
