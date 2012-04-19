@@ -1,0 +1,76 @@
+{\rtf1\ansi\ansicpg1252\deff0\deflang1033{\fonttbl {\f0\froman\fcharset0 Times New Roman;}}
+\uc1\pard\qc\lang1046\ulnone\b\f0 A Via-L\'e1ctea para SkyMap Pro 6\par
+\pard\par
+\b0 Agora voc\'ea pode plotar nossa gal\'e1xia em mapas gerados pelo SkyMap. Isso \'e9 poss\'edvel devido \'e0 capacidade do software de manipular dados de arquivos externos (arquivos SDC, sigla para \i SkyMap Data Catalog\i0 ). O arquivo MWSMP6.ZIP cont\'e9m os arquivos com os dados necess\'e1rios para a cria\'e7\'e3o dos SDC\'b4s. Estes arquivos s\'e3o, basicamente, de dois tipos:\par
+\tab - SDD (\i SkyMap Data Definition\i0 ): arquivos contendo as informa\'e7\'f5es de formato necess\'e1rias para a cria\'e7\'e3o dos SDC\'b4s (caminho do arquivo de dados, campos com coordenadas, s\'edmbolos, cores, etc.)\par
+\tab - DAT: os arquivos de dados, propriamente ditos. Arquivos contendo coordenadas equatoriais e outras informa\'e7\'f5es usadas pelo SkyMap quando plotando objetos.\par
+\par
+O arquivo ZIP cont\'e9m 10 SDD\'b4s e 10 DAT\'b4s, al\'e9m da documenta\'e7\'e3o. Uma vez compilados e inclu\'eddos na refer\'eancia de cat\'e1logos do SkyMap, eles lhe permitir\'e3o plotar a Via-L\'e1ctea em at\'e9 cinco n\'edveis de intensidade luminosa. Ser\'e1 poss\'edvel plotar estes n\'edveis na forma de 'contornos' ou 'preenchimentos'. Voc\'ea tamb\'e9m poder\'e1 usar ambas as formas ao mesmo tempo, ou qualquer combina\'e7\'e3o delas.\par
+\par
+Para criar os SDC\'b4s, voc\'ea precisar\'e1 compilar os SDD\'b4s e DAT\'b4s usando o \i Data Catalog Preparation Tool\i0  (\i DataPrep\i0 , que voc\'ea recebe como parte integrante do SkyMap, nas vers\'f5es completa ou de demonstra\'e7\'e3o).\par
+\b\par
+\b0 Refer\'eancias:\par
+-Manual impresso: 'Using External Data Catalogs', p\'e1gina 265\par
+-T\'f3picos de ajuda do SkyMap Pro: 'Using External Data Catalogs', no conte\'fado do Help\par
+\b\par
+\par
+Descompactando\par
+\pard\li720\par
+\pard\b0 Simplemente crie um diret\'f3rio para os arquivos DAT e SDD (por exemplo: \i C:\\Program Files\\Skymap Pro 6\\External\\Catalogs\\MilkyWay\i0 ) e descompacte o conte\'fado do MWSMP6.ZIP nesse diret\'f3rio.\par
+\par
+\par
+\b Compilando\par
+\par
+\b0 -Abra o DataPrep\par
+-V\'e1 para \i File - Open,\i0  selecione o diret\'f3rio para o qual voc\'ea acabou de descompactar os arquivos do MWSMP6 e abra um dos SDD's.\par
+-V\'e1 para \i Tools - Compile. \i0 Ap\'f3s alguns instantes, voc\'ea ver\'e1 uma solicita\'e7\'e3o para salvar o arquivo. Clique em \'b4OK\'b4. Pronto, para este.\par
+-Repita o processo para os SDD\'b4s restantes.\par
+\par
+\par
+\b Incluindo os SDC\'b4s no SkyMap\par
+\par
+\b0 -Abra o SkyMap\par
+-V\'e1 para \i File - Preferences - External Data Catalogs\i0 .\par
+-Na janela \i External Data Catalogs\i0 , clique em 'Add...'.\par
+-Na janela \i Add New Catalog\i0 , clique em '...' e selecione um dos SDC\'b4s rec\'e9m-criados. Clique em 'OK'.\par
+-Defina os n\'edveis de ativa\'e7\'e3o para o cat\'e1logo.\par
+-Repita o processo para os arquivos restantes (uma sugest\'e3o: voc\'ea pode usar 'copy' e \'b4paste' (ou 'copiar-colar') para o caminho do SDC, para tornar as coisas mais f\'e1ceis). \par
+\par
+Nota: os arquivos 'mw_sh*.sdc' devem ser inclu\'eddos em ordem (isto \'e9, de mw_sh1' a 'mw_sh5'). Isto \'e9 necess\'e1rio porque estes arquivos se 'sobrep\'f5e' quando plotados nos mapas, e os n\'edves mais baixos devem ser plotados 'por tr\'e1s' dos mais altos. A ordem n\'e3o \'e9 importante para os arquivos 'mw_ol*.sdc'.\par
+\par
+\par
+\b Testando\par
+\par
+\b0 -Crie um novo mapa, usando o seguinte:\par
+\tab RA: 17h00\rquote 00\rquote\rquote\par
+\tab Dec: 30\'b0S\par
+\tab Field of view: 60\'b0\par
+Voc\'ea ver\'e1 a regi\'e3o central da Gal\'e1xia, o melhor lugar para testes. Se n\'e3o vir nada, certifique-se de que 'Display Deep Sky Objects' est\'e1 selecionado na janela de configura\'e7\'e3o de \i Deep Sky Objects\i0 . Al\'e9m disso, verifique se os cat\'e1logos est\'e3o ativos para o n\'edvel atual. Tente ativ\'e1-los e desativ\'e1-los, para ter certeza de que est\'e3o funcionando corretamente. Se voc\'ea fez tudo com descrito acima, n\'e3o deve encontrar problemas.\par
+\par
+\b\par
+Usando\b0\par
+\par
+-Voc\'ea pode usar as defini\'e7\'f5es de n\'edveis de visualiza\'e7\'e3o do SkyMap para definir quais cat\'e1logos ser\'e3o plotados, de acordo com o campo de vis\'e3o. Os preenchimentos s\'e3o melhor visualizados usando de 60\'b0 a 30\'b0. Para campos de vis\'e3o mais abrangentes, os pontos s\'e3o plotados muito pr\'f3ximos uns dos outros, e voc\'ea percebe que o SkyMap os coloca em frente \'e0s estrelas. Nestes casos, uma sugest\'e3o \'e9 usar apenas contornos. Estes cat\'e1logos n\'e3o foram criados para visualiza\'e7\'f5es de alta amplia\'e7\'e3o (pequenos campos de vis\'e3o). O limite depende da opini\'e3o de cada um. Na minha, \'e9 de 20\'b0.\par
+-Um dos campos definidos nos arquivos DAT \'e9 um campo de magnitude. Esta foi definida como '0' para todos os pontos. Assim, a decis\'e3o de visualizar ou n\'e3o um cat\'e1logo \'e9 feita simplesmente pela sua ativa\'e7\'e3o ou desativa\'e7\'e3o. Obviamente, se voc\'ea tentar uma magnitude negativa no filtro (algo que normalmente n\'e3o usar\'edamos para objetos do c\'e9u profundo), voc\'ea n\'e3o ver\'e1 nada destes cat\'e1logos em seus mapas.\par
+\par
+\par
+\b Um problema menor... e sua solu\'e7\'e3o\par
+\par
+\b0 O seguinte comportamento foi observado: come\'e7ando, por exemplo, com os preenchimentos 4 e 5 ativados, se voc\'ea centrar o mapar num novo local e ativar os preenchimentos 1, 2 e 3, eles s\'e3o plotados sobre o 4 e o 5, independentemente da ordem em que tenham sido inclu\'eddos nas refer\'eancias do SkyMap. Para corrigir isso, simplesmente centre o mapa novamente.\par
+\b\par
+\par
+Como foram feitos...\par
+\par
+\b0 O \i contorno 1\i0  e o \i preenchimento 1\i0   s\'e3o baseados no livro 'Uranografia, Descri\'e7\'e3o do C\'e9u', do astr\'f4nomo brasileiro Ronaldo Rog\'e9rio de Freitas Mour\'e3o. As coordenadas equatoriais forma manualmente extra\'eddas de seus mapas. Estas foram ent\'e3o convertidas para coordenadas gal\'e1cticas, por meio do Microsof Excel, e manualmente inseridas em um bitmap como pontos pretos num fundo branco. As dimens\'f5es do bitmap eram 450 por 3600 pixels, fazendo com que cada pixel correspondesse a 0.1 grau. Os pixels foram manualmente conectados (e suas conex\'f5es suavizadas), usando Adobe Photoshop 3.0. Com isso, criou-se a base para o \i contorno 1\i0 . Finalmente, o espa\'e7o entre as duas curvas definindo o \i contorno 1\i0  foi preenchida com pixels na cor preta, criando a base para o \i preenchimento 1\i0 .\par
+\par
+Os contornos e preenchimentos de 2 a 5 s\'e3o baseados num mosaico de fotos da Via-L\'e1ctea criado pelo astrofot\'f3grafo alem\'e3o Axel Mellinger. A figura original, baixada de seu website (http://canopus.physik.uni-potsdam.de/~axm/astrophot.html), tinha 300 por 2400 pixels. Ela foi expandida para 450 por 3600 pixels, usando Adobe Photoshop. Ainda no Adobe Photoshop, um filtro 'minimum' de 1 pixel foi aplicado, para eliminar imagens individuais de estrelas. Ap\'f3s ajustes de brilho e contraste e convers\'e3o para um bitmap em tons de cinza, um filtro 'gaussian blur' de 2 pixels foi usado para criar um aspecto 'nebuloso'. Ent\'e3o um filtro 'trace contour' foi aplicado em quatro n\'edveis de brilho, criando as bases para os contornos 2 a 5. Estas foram preenchidas com pixels em preto,  criando as bases para os preenchimentos 2 a 5.\par
+\par
+Uma vez que os bitmaps base tinham sido criados, uma aplica\'e7\'e3o escrita em Microsoft Visual Basic 6.0 foi usada para rastrear as imagens, encontrar pixels em preto, obter suas coordenadas na imagem, convert\'ea-las para coordenadas gal\'e1cticas e ent\'e3o para coordenadas equatoriais que eram enviadas para arquivos tipo texto. Estes s\'e3o os arquivos DAT inclu\'eddos no MWSMP6.ZIP.\par
+\par
+A dist\'e2ncia m\'e9dia entre cada ponto nos contornos \'e9 de 0.1\'b0 ou 6'. Para os preenchimentos, ela \'e9 de 0.4\'b0 ou 24'.\par
+\par
+\b\par
+\pard\qr Jos\'e9 R. Vieira, S\'e3o Paulo, Brasil, Fev/2000\par
+\pard\b0\par
+}
+ 
