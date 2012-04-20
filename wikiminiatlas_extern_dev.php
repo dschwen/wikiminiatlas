@@ -1356,22 +1356,15 @@ function wmaCommonsImage( name, w, h )
 }
 
 function wmaFullscreen() {
-  var fs = window.open('', 'showwin', 'left=0,top=0,width=' + screen.width + ',height=' + screen.height + ',toolbar=0,resizable=0,fullscreen=1');
-  var w, h;
+  var fs = window.open('', 'showwin', 'left=0,top=0,width=' + screen.width + ',height=' + screen.height + ',toolbar=0,resizable=0,fullscreen=1')
+    , page = url_params['page']
+    , lang = url_params['lang']
+    , globe = wikiminiatlas_tilesets[wikiminiatlas_tileset].globe
+    , mapcenter = wmaXYToLatLon( wikiminiatlas_gx + wikiminiatlas_width / 2, wikiminiatlas_gy + wikiminiatlas_height / 2 );
 
-  if ( fs.innerWidth ) {
-    w = fs.innerWidth;
-    h = fs.innerHeight;
-  }
-  else if ( fs.document.body.offsetWidth ) {
-    w = fs.document.body.offsetWidth;
-    h = fs.document.body.offsetHeight;
-  }
-
-  var mapcenter = wmaXYToLatLon( wikiminiatlas_gx + wikiminiatlas_width / 2, wikiminiatlas_gy + wikiminiatlas_height / 2 );
-
-  fs.document.location = 'iframe.html' + '?' + marker.lat + '_' + marker.lon + '_' + w + '_' + h + '_' + 
-    wikiminiatlas_site + '_' + wikiminiatlas_zoom + '_' + wikiminiatlas_language + '_' + mapcenter.lat + '_' + mapcenter.lon;
+  fs.document.location = 'iframe.html' + '?' + marker.lat + '_' + marker.lon + '_' + 0 + '_' + 0 + '_' + 
+    wikiminiatlas_site + '_' + wikiminiatlas_zoom + '_' + wikiminiatlas_language + '_' + mapcenter.lat + '_' + mapcenter.lon + 
+    '&globe=' + globe + '&page=' + page + '&lang=' + lang;
 }
 
 // mouse over handler for extra markers
