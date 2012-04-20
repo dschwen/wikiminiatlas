@@ -252,7 +252,7 @@ var wikiminiatlas_tilesets = [
    var x1 = (x+1*wikiminiatlas_zoomsize[z]) % (wikiminiatlas_zoomsize[z]*2);
    if( x1<0 ) x1+=(wikiminiatlas_zoomsize[z]*2);
    var z1 = 6-z;
-   return wikiminiatlas_imgbase + 'mercury/'+((z1<3)?(z1+'/'):'')+((z1==0)?(Math.floor(x/100)+'/'):'')+'merc_'+('00'+z1)+'_'+('000'+x1).substr(-3)+'_'+('000'+y).substr(-3)+'.png'; 
+   return wikiminiatlas_imgbase + 'mercury/'+((z1<3)?(z1+'/'):'')+((z1==0)?(Math.floor(x1/100)+'/'):'')+'merc_'+('00'+z1)+'_'+('000'+x1).substr(-3)+'_'+('000'+y).substr(-3)+'.png'; 
   },
   linkcolor: [ "white", "black 0pt 0pt 2pt" ],
   equator: 15329.1, // equatorial circumfence in km
