@@ -41,6 +41,7 @@
     background-repeat: no-repeat;
     background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAABmJLR0QA/wD/AP+gvaeTAAAAe0lEQVQYlY3PwQnCQBCF4U8FCdpAKsjdBjwHb8GLddhLCrCFFODFFBREEDwYD1lhWZaQBzMwwz+8eSzUJplL1DjghSF3dMETY6gPrilU4R1B//riCOsAnlBkXFZoYnA/k2MXg/0M+EgXbebHLthPLdI5/LvFHTdToOX6AaSjGA0r/PG9AAAAAElFTkSuQmCC');
   }
+  div.wmamenuspacer { height: 0px; margin: 0px; padding: 0px; border: none }
 </style>
 <script>
 // drop down menu class
@@ -121,8 +122,8 @@ wmaMenu.prototype.addAccordeon = function(options,func,selected) {
   function select(n) {
     if( n === current ) { return; }
     for( var i = 0; i<items.length; ++i ) {
-      if( i===n ) { items[i].addClass('wmamenuselected'); } 
-      else { items[i].removeClass('wmamenuselected'); }
+      //if( i===n ) { items[i].addClass('wmamenuselected'); } 
+      //else { items[i].removeClass('wmamenuselected'); }
     }
     current = n;
   }
@@ -130,8 +131,22 @@ wmaMenu.prototype.addAccordeon = function(options,func,selected) {
   func = func || (function(){});
   for( var i=0; i<options.length; ++i ) {
     (function(n){
-      items[n] = that.addItem( options[n][0], function() { select(n); func(n); } );
+      //items[n] = that.addItem( ('<span style="position: absolute; bottom: 2px">'+options[n][0]+'</span>'), function() { select(n); func(n); } );
+      items[n] = that.addItem( ('<div class="wmamenuspacer"></div><div>'+options[n][0]+'</div>'), function() { select(n); func(n); } );
       // style
+      items[n].css( { 
+        paddingLeft: '2px', 
+        margin: '1px',
+        border: '1px solid #aaa',
+        backgroundImage: 'url(tiles/mapnik/0/tile_1_2.png)' 
+      } );
+      items[n].unbind('mouseenter').unbind('mouseleave')
+        .mouseenter(function(){
+          items[n].find('.wmamenuspacer').css('height','20px');
+        })
+        .mouseleave(function(){
+          items[n].find('.wmamenuspacer').css('height','0px');
+        });
     })(i);
   }
   select(selected);
@@ -163,7 +178,8 @@ $(function(){
   menu.addSep();
   menu.addCheck('item3');
   menu.addSep();
-  menu.addGroup(['option1','option2','option3'],function(o){console.log('selected '+o)},1);
+  //menu.addGroup(['option1','option2','option3'],function(o){console.log('selected '+o)},1);
+  menu.addAccordeon([['option1'],['option2'],['option3']],function(o){console.log('selected '+o)},1);
   menu.show();
 
   menu.div.appendTo('body');
