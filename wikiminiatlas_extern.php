@@ -865,23 +865,50 @@ function wmaDrawKML(hw,ox,oy,ow,oh,c) {
 function moveWikiMiniAtlasMapTo()
 {
   function parseLabels(tile,data) {
-    var l,i, ix=[0,0,5,0,0,2,3,4,5,6,6], iy=[0,0,8,0,0,2,3,4,5,6,6];
+    var w,a,l,io, ix=[0,0,5,0,0,2,3,4,5,6,6], iy=[0,0,8,0,0,2,3,4,5,6,6];
     try {
       l = JSON.parse(data).label;
       tile.text('');
       for( i=0; i<l.length; ++i ) {
-        tile.append( $('<a></a>')
-          .addClass('label').addClass( 'label' + l[i].style ).css(wmaLinkStyle)
-          .attr( { 
-            href: '//' + l[i].lang + '.wikipedia.org/wiki/' + l[i].page,
-            target: '_top' 
-          } )
-          .text(l[i].name)
-          .css( {
-            top:  ( l[i].ty - iy[l[i].style] ) + 'px',
-            left: ( l[i].tx - ix[l[i].style] ) + 'px'
-          } )
-        );
+        a = $('<a></a>')
+
+        if( "img" in l[i] ) {
+          // thumbnails
+          (function(n,w,h){
+            a.click( function() { wmaCommonsImage(n,w,h); } );
+          })(l[i].img,l[i].w,l[i].h);
+
+          w = ( parseInt(l[i].w) > parseInt(l[i].h) ) ? 48 : Math.floor(48*l[i].w/l[i].h);
+          
+          a.addClass('cthumb')
+            .append( $('<img/>').attr('src','http://commons.wikimedia.org/w/thumb.php?w='+w+'&f='+l[i].img) );
+
+          if( l[i].head < 18 ) {
+            a.addClass('dir dir'+l[i].head);
+            io = 0;
+          } else {
+            io = 6;
+          }
+
+          a.css( {
+            top:  ( l[i].ty - io ) + 'px',
+            left: ( l[i].tx - io ) + 'px'
+          } );
+        } else {
+          // text labels
+          a.addClass('label').addClass( 'label' + l[i].style ).css(wmaLinkStyle)
+            .attr( { 
+              href: '//' + l[i].lang + '.wikipedia.org/wiki/' + l[i].page,
+              target: '_top' 
+            } )
+            .css( {
+              top:  ( l[i].ty - iy[l[i].style] ) + 'px',
+              left: ( l[i].tx - ix[l[i].style] ) + 'px'
+            } ) 
+           .text(l[i].name);
+        }
+
+        tile.append(a);
       }
     } catch(e) {
       tile.html(data); 
@@ -1098,10 +1125,7 @@ function wmaMouseCoords(ev) {
 }
 
 function wmaGetDataURL(y,x,z) {
- if( wikiminiatlas_site == 'commons' ) {
-  return '//toolserver.org/~dschwen/wma/label/commons_' + (wikiminiatlas_zoomsize[z]-y-1) + '_' + (x % (wikiminiatlas_zoomsize    [z]*2) ) + '_' + z;
- }
- return wikiminiatlas_database + '?rev=1&l=' + wikiminiatlas_site + '&a=' + (wikiminiatlas_zoomsize[z]-y-1) + '&b=' + (x % (wikiminiatlas_zoomsize[z]*2) ) + '&z=' + z + '&g=' + wikiminiatlas_tilesets[wikiminiatlas_tileset].globe;
+ return wikiminiatlas_database + '?l=' + wikiminiatlas_site + '&a=' + (wikiminiatlas_zoomsize[z]-y-1) + '&b=' + (x % (wikiminiatlas_zoomsize[z]*2) ) + '&z=' + z + '&g=' + wikiminiatlas_tilesets[wikiminiatlas_tileset].globe;
 }
 
 function tilesetUpgrade() {
@@ -1310,6 +1334,7 @@ function wmaCommonsImageBuild() {
 
  wmaci_link = document.createElement('A');
  wmaci_link.id = 'wikiminiatlas_wmaci_link';
+ wmaci_link.target = '_top';
  wmaci_link_text = document.createTextNode('');
  wmaci_link.appendChild( wmaci_link_text );
  wmaci_panel_sub.appendChild( wmaci_link );
