@@ -7,6 +7,7 @@ a.label {
    background-image:url('symbols/label_corner_ul.png');
    background-repeat: no-repeat;
    padding-left:5px;
+   cursor:pointer;
 }
 
 div.bsprite { 
@@ -42,15 +43,16 @@ div.sprite {
 
 /* commons thumb */
 a.cthumb {
-   font-size:7pt;
-   z-index:20;
-   position: absolute;
-   background-image:url('symbols/label_corner_ul.png');
-   background-repeat: no-repeat;
-   padding-left:3px;
-   padding-top:3px;
-   width:51px; /* 48+3 */
-   border: none;
+  font-size:7pt;
+  z-index:20;
+  position: absolute;
+  background-image:url('symbols/label_corner_ul.png');
+  background-repeat: no-repeat;
+  padding-left:3px;
+  padding-top:3px;
+  width:51px; /* 48+3 */
+  border: none;
+  cursor:pointer; 
 }
 a.cthumb:hover {
    z-index:21;
