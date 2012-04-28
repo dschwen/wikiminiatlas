@@ -34,6 +34,11 @@ $rev = $lrev[$lang];
 
 $wikiminiatlas_zoomsize = array( 3.0, 6.0 ,12.0 ,24.0 ,48.0, 96.0, 192.0, 384.0, 768.0, 1536.0,  3072.0, 6144.0, 12288.0, 24576.0, 49152.0, 98304.0 );
 
+if( $lang=="commons" ) 
+  $namespace = 6;
+else
+  $namespace = 0;
+
 $ts_pw = posix_getpwuid(posix_getuid());
 $ts_mycnf = parse_ini_file($ts_pw['dir'] . "/.my.cnf");
 $db = mysql_connect($lang.'wiki-p.db.toolserver.org', $ts_mycnf['user'], $ts_mycnf['password']);
@@ -78,11 +83,11 @@ if( $r != NULL ) {
     echo "Requesting too many tiles!";
     exit;
   }
-  $query = "select p.page_title as title, l.name as name, l.lat as lat, l.lon as lon, l.style as style, t.x as dx, t.y as dy from  page p, u_dschwen.wma_tile t, u_dschwen.wma_connect c, u_dschwen.wma_label l  WHERE l.lang_id='$l' AND l.globe='$g' AND c.rev='$rev' AND c.tile_id=t.id AND ( ".implode(" OR ",$q)." ) AND c.label_id=l.id AND t.z='$z' AND p.page_id = l.page_id AND c.tile_id = t.id AND page_namespace=0 AND l.page_id=p.page_id;";
+  $query = "select p.page_title as title, l.name as name, l.lat as lat, l.lon as lon, l.style as style, t.x as dx, t.y as dy from  page p, u_dschwen.wma_tile t, u_dschwen.wma_connect c, u_dschwen.wma_label l  WHERE l.lang_id='$l' AND l.globe='$g' AND c.rev='$rev' AND c.tile_id=t.id AND ( ".implode(" OR ",$q)." ) AND c.label_id=l.id AND t.z='$z' AND p.page_id = l.page_id AND c.tile_id = t.id AND page_namespace='$namespace' AND l.page_id=p.page_id;";
   //echo $query,"\n";
   //exit;
 } else {
-  $query = "select p.page_title as title, l.name as name, l.lat as lat, l.lon as lon, l.style as style, t.x as dx, t.y as dy from  page p, u_dschwen.wma_tile t, u_dschwen.wma_connect c, u_dschwen.wma_label l  WHERE l.lang_id='$l' AND  l.globe='$g' AND c.rev='$rev' AND c.tile_id=t.id AND t.x='$x' AND c.label_id=l.id  AND t.y='$y' AND t.z='$z' AND p.page_id = l.page_id AND c.tile_id = t.id AND page_namespace=0 AND l.page_id=p.page_id;";
+  $query = "select p.page_title as title, l.name as name, l.lat as lat, l.lon as lon, l.style as style, t.x as dx, t.y as dy from  page p, u_dschwen.wma_tile t, u_dschwen.wma_connect c, u_dschwen.wma_label l  WHERE l.lang_id='$l' AND  l.globe='$g' AND c.rev='$rev' AND c.tile_id=t.id AND t.x='$x' AND c.label_id=l.id  AND t.y='$y' AND t.z='$z' AND p.page_id = l.page_id AND c.tile_id = t.id AND page_namespace='$namespace' AND l.page_id=p.page_id;";
 }
 $res = mysql_query( $query );
 
@@ -100,16 +105,34 @@ while( $row = mysql_fetch_array( $res) )
   $tx = intval( ( ( $row["lon"] - $xmin ) * $wikiminiatlas_zoomsize[$z] * 128) / 180.0 );
   $s = $row['style'];
 
-  $items[] = array( 
-    "style" => $s,
-    "lang"  => $lang,
-    "page"  => urlencode($row["title"]),
-    "tx"    => $tx,
-    "ty"    => $ty,
-    "name"  => $row['name'],
-    "dx"  => $x,
-    "dy"  => $y
-  );
+  if( $lang == "commons" ) {
+    $n = explode( '|', $row["name"], 4 );
+    $w = $n[0];
+    $h = $n[1];
+    $head = $n[3];
+    $items[] = array( 
+      "style" => $s,
+      "img"  => urlencode($row["title"]),
+      "tx"    => $tx,
+      "ty"    => $ty,
+      "w" => $n[0],
+      "h" => $n[1],
+      "head"  => $n[2],
+      "dx"  => $x,
+      "dy"  => $y
+    );
+  } else {
+    $items[] = array( 
+      "style" => $s,
+      "lang"  => $lang,
+      "page"  => urlencode($row["title"]),
+      "tx"    => $tx,
+      "ty"    => $ty,
+      "name"  => $row['name'],
+      "dx"  => $x,
+      "dy"  => $y
+    );
+  }
 }
 mysql_close( $db );
 //header("Content-type: application/json");
