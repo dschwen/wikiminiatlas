@@ -878,7 +878,7 @@ function moveWikiMiniAtlasMapTo()
             a.click( function() { wmaCommonsImage(n,w,h); } );
           })(l[i].img,l[i].w,l[i].h);
 
-          w = ( parseInt(l[i].w) > parseInt(l[i].h) ) ? 48 : Math.floor(48*l[i].w/l[i].h);
+          w = ( parseInt(l[i].w) > parseInt(l[i].h) ) ? (l[i].style==-2?24:48) : Math.floor((l[i].style==-2?24:48)*l[i].w/l[i].h);
           
           a.addClass('cthumb')
             .append( $('<img/>').attr('src','http://commons.wikimedia.org/w/thumb.php?w='+w+'&f='+l[i].img) );
