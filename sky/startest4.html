@@ -37,7 +37,7 @@ $(function(){
 
   function computeElements(Teph) {
     var T = (Teph-2451545.0)/36525.0
-      , eps = 23.4393 - 0.0130138575*T; // 23.43928/180*Math.PI
+      , eps = ( 23.4393 - 0.0130138575*T )/180*Math.PI // 23.43928/180*Math.PI
       , a, e, I, L, ln, lp, w, Mr, V
       , i, tol = 1e-6, es, M, dM, dE, E
       , x1, y1, xec,yec,zec, xeq,yeq,zeq, r, ex,ey,ez;
@@ -49,36 +49,44 @@ $(function(){
       lp = (pd[i].lp0 + pd[i].dlp*T)/180*Math.PI;
       ln = (pd[i].ln0 + pd[i].dln*T)/180*Math.PI;
 
-      // 
+      // argument of perihelion
       w  = lp - ln;
-      Mr = L - lp;
 
-      Mr -= Math.round(Mr/(Math.PI*2))*Math.PI*2; // modulo into -180 - 180deg
+      // mean anomaly
+      M = L - lp;
+      //M -= Math.floor(M/(Math.PI*2))*Math.PI*2; // modulo into -180 - 180deg
+      M -= Math.round(M/(Math.PI*2))*Math.PI*2; // modulo into -180 - 180deg
 
       // solve Kepler equation iteratively
-      es = 180.0/Math.PI * e; // e*
-      M = 180.0/Math.PI * Mr;
-      console.log('');
-      E = M+es*Math.sin(Mr);
+      E = M + e*Math.sin(M) * ( 1.0 + e*Math.cos(M) )
+      console.log( pd[i].name, M, E-e*Math.sin(E) );
       do {
-        dM = M - ( E - es*Math.sin( E/180*Math.PI ) );
-        dE = dM/( 1.0 - e*Math.cos( E/180*Math.PI ) );
+        dM = M - ( E - e*Math.sin(E) );
+        dE = dM/( 1.0 - e*Math.cos(E) );
         E += dE;
       } while( Math.abs(dE) > tol );
-      console.log( pd[i].name, M, E-es*Math.sin( E/180*Math.PI ) );
+      console.log( pd[i].name, M, E-e*Math.sin(E) );
       
       // convert eccentric anomaly to true anomaly
       //V = 2*Math.atan( Math.sqrt((1+e)/(1-e)) * Math.tan( 0.5*E/180*Math.PI ) );
       //V = (V+2*Math.PI) % (2*Math.PI);
 
+      //v = atan2( yv, xv )
 
-      y1 = a*Math.sqrt(1-e*e)*Math.sin(E/180*Math.PI);
-      x1 = a*(Math.cos(E/180*Math.PI)-e);
+      y1 = a*Math.sqrt(1-e*e)*Math.sin(E);
+      x1 = a*(Math.cos(E)-e);
       console.log( pd[i].name, x1,y1 );
 
-      xec = ( Math.cos(w)*Math.cos(ln)-Math.sin(w)*Math.sin(ln)*Math.cos(I) )*x1 + (-Math.sin(w)*Math.cos(ln)-Math.cos(w)*Math.sin(ln)*Math.cos(I))*y1;
+      V = Math.atan2( y1, x1 );
+      r = Math.sqrt( x1*x1 + y1*y1 );
+      xec = r * ( Math.cos(ln) * Math.cos(V+w) - Math.sin(ln) * Math.sin(V+w) * Math.cos(I) );
+      yec = r * ( Math.sin(ln) * Math.cos(V+w) + Math.cos(ln) * Math.sin(V+w) * Math.cos(I) );
+      zec = r * ( Math.sin(V+w) * Math.sin(I) );
+
+
+      /*xec = ( Math.cos(w)*Math.cos(ln)-Math.sin(w)*Math.sin(ln)*Math.cos(I) )*x1 + (-Math.sin(w)*Math.cos(ln)-Math.cos(w)*Math.sin(ln)*Math.cos(I))*y1;
       yec = ( Math.cos(w)*Math.sin(ln)-Math.sin(w)*Math.cos(ln)*Math.cos(I) )*x1 + (-Math.sin(w)*Math.sin(ln)+Math.cos(w)*Math.cos(ln)*Math.cos(I))*y1;
-      zec = ( Math.sin(w)*Math.sin(I) )*x1 + ( Math.cos(w)*Math.sin(I) )*y1;
+      zec = ( Math.sin(w)*Math.sin(I) )*x1 + ( Math.cos(w)*Math.sin(I) )*y1;*/
 
       console.log( pd[i].name, xec,yec,zec );
 
@@ -108,8 +116,8 @@ $(function(){
       //r = Math.sqrt( xeq*xeq + yeq*yeq + zeq*zeq );
       r = Math.sqrt( xeq*xeq + yeq*yeq );
 
-      pd[i].DE = Math.atan(zeq/r);
       pd[i].RA = (Math.atan2(yeq,xeq) + 2*Math.PI ) % (2*Math.PI);
+      pd[i].DE = Math.atan2(zeq, r);
 
 
       (function(){

@@ -37,8 +37,8 @@ $(function(){
 
   function computeElements(Teph) {
     var T = (Teph-2451545.0)/36525.0
-      , eps = 23.43928/180*Math.PI
-      , a, e, I, L, ln, lp, w, Mr
+      , eps = 23.4393 - 0.0130138575*T; // 23.43928/180*Math.PI
+      , a, e, I, L, ln, lp, w, Mr, V
       , i, tol = 1e-6, es, M, dM, dE, E
       , x1, y1, xec,yec,zec, xeq,yeq,zeq, r, ex,ey,ez;
     for( i=0; i<pd.length; ++i ) {
@@ -49,6 +49,7 @@ $(function(){
       lp = (pd[i].lp0 + pd[i].dlp*T)/180*Math.PI;
       ln = (pd[i].ln0 + pd[i].dln*T)/180*Math.PI;
 
+      // 
       w  = lp - ln;
       Mr = L - lp;
 
@@ -64,7 +65,12 @@ $(function(){
         dE = dM/( 1.0 - e*Math.cos( E/180*Math.PI ) );
         E += dE;
       } while( Math.abs(dE) > tol );
-      //console.log( pd[i].name, M, E-es*Math.sin( E/180*Math.PI ) );
+      console.log( pd[i].name, M, E-es*Math.sin( E/180*Math.PI ) );
+      
+      // convert eccentric anomaly to true anomaly
+      //V = 2*Math.atan( Math.sqrt((1+e)/(1-e)) * Math.tan( 0.5*E/180*Math.PI ) );
+      //V = (V+2*Math.PI) % (2*Math.PI);
+
 
       y1 = a*Math.sqrt(1-e*e)*Math.sin(E/180*Math.PI);
       x1 = a*(Math.cos(E/180*Math.PI)-e);
@@ -102,8 +108,9 @@ $(function(){
       //r = Math.sqrt( xeq*xeq + yeq*yeq + zeq*zeq );
       r = Math.sqrt( xeq*xeq + yeq*yeq );
 
-      pd[i].DE = Math.asin(zeq/r);
+      pd[i].DE = Math.atan(zeq/r);
       pd[i].RA = (Math.atan2(yeq,xeq) + 2*Math.PI ) % (2*Math.PI);
+
 
       (function(){
         var RA = pd[i].RA*180/15/Math.PI, DE = pd[i].DE*180/Math.PI
