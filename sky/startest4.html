@@ -1,0 +1,163 @@
+<html>
+<head>
+ <script type="text/javascript" src="../jquery-1.5.1.min.js"></script>
+ <style>
+</style>
+<script>
+$(function(){
+  var canvas = $('canvas')[0]
+    , w = canvas.width
+    , h = canvas.height
+    , c = canvas.getContext('2d')
+    , bsc = []
+    , now = new Date; T =  (now / 86400000) + 2440587.5;
+    //, now = new Date; T =  (now / 86400000) - (now.getTimezoneOffset()/1440) + 2440587.5;
+
+  // planetary orbit data
+  var pd = [
+    { name: 'EM_Bary/-Sun', a0:1.00000261, e0:0.01671123 ,I0 :-0.00001531, L0:100.46457166, lp0:102.93768193, ln0:0.0,
+      da:0.00000562, de:-0.00004392 ,dI :-0.01294668, dL:35999.37244981, dlp:0.32327364, dln:0.0 },
+    { name: 'Mercury', a0:0.38709927, e0:0.20563593 ,I0 :7.00497902, L0:252.25032350, lp0:77.45779628, ln0:48.33076593,
+      da:0.00000037, de:0.00001906 ,dI :-0.00594749, dL:149472.67411175, dlp:0.16047689, dln:-0.12534081 },
+    { name: 'Venus', a0:0.72333566, e0:0.00677672 ,I0 :3.39467605, L0:181.97909950, lp0:131.60246718, ln0:76.67984255,
+      da:0.00000390, de:-0.00004107 ,dI :-0.00078890, dL:58517.81538729, dlp:0.00268329, dln:-0.27769418 },
+    { name: 'Mars', a0:1.52371034, e0:0.09339410 ,I0 :1.84969142, L0:-4.55343205, lp0:-23.94362959, ln0:49.55953891,
+      da:0.00001847, de:0.00007882 ,dI :-0.00813131, dL:19140.30268499, dlp:0.44441088, dln:-0.29257343 },
+    { name: 'Jupiter', a0:5.20288700, e0:0.04838624 ,I0 :1.30439695, L0:34.39644051, lp0:14.72847983, ln0:100.47390909,
+      da:-0.00011607, de:-0.00013253 ,dI :-0.00183714, dL:3034.74612775, dlp:0.21252668, dln:0.20469106 },
+    { name: 'Saturn', a0:9.53667594, e0:0.05386179 ,I0 :2.48599187, L0:49.95424423, lp0:92.59887831, ln0:113.66242448,
+      da:-0.00125060, de:-0.00050991 ,dI :0.00193609, dL:1222.49362201, dlp:-0.41897216, dln:-0.28867794 },
+    { name: 'Uranus', a0:19.18916464, e0:0.04725744 ,I0 :0.77263783, L0:313.23810451, lp0:170.95427630, ln0:74.01692503,
+      da:-0.00196176, de:-0.00004397 ,dI :-0.00242939, dL:428.48202785, dlp:0.40805281, dln:0.04240589 },
+    { name: 'Neptune', a0:30.06992276, e0:0.00859048 ,I0 :1.77004347, L0:-55.12002969, lp0:44.96476227, ln0:131.78422574,
+      da:0.00026291, de:0.00005105 ,dI :0.00035372, dL:218.45945325, dlp:-0.32241464, dln:-0.00508664 },
+    { name: 'Pluto', a0:39.48211675, e0:0.24882730 ,I0 :17.14001206, L0:238.92903833, lp0:224.06891629, ln0:110.30393684,
+      da:-0.00031596, de:0.00005170 ,dI :0.00004818, dL:145.20780515, dlp:-0.04062942, dln:-0.01183482 }
+  ];
+
+  function computeElements(Teph) {
+    var T = (Teph-2451545.0)/36525.0
+      , eps = 23.4393 - 0.0130138575*T; // 23.43928/180*Math.PI
+      , a, e, I, L, ln, lp, w, Mr, V
+      , i, tol = 1e-6, es, M, dM, dE, E
+      , x1, y1, xec,yec,zec, xeq,yeq,zeq, r, ex,ey,ez;
+    for( i=0; i<pd.length; ++i ) {
+      a = pd[i].a0 + pd[i].da*T;
+      e = pd[i].e0 + pd[i].de*T;
+      I = (pd[i].I0 + pd[i].dI*T)/180*Math.PI;
+      L = (pd[i].L0 + pd[i].dL*T)/180*Math.PI;
+      lp = (pd[i].lp0 + pd[i].dlp*T)/180*Math.PI;
+      ln = (pd[i].ln0 + pd[i].dln*T)/180*Math.PI;
+
+      // 
+      w  = lp - ln;
+      Mr = L - lp;
+
+      Mr -= Math.round(Mr/(Math.PI*2))*Math.PI*2; // modulo into -180 - 180deg
+
+      // solve Kepler equation iteratively
+      es = 180.0/Math.PI * e; // e*
+      M = 180.0/Math.PI * Mr;
+      console.log('');
+      E = M+es*Math.sin(Mr);
+      do {
+        dM = M - ( E - es*Math.sin( E/180*Math.PI ) );
+        dE = dM/( 1.0 - e*Math.cos( E/180*Math.PI ) );
+        E += dE;
+      } while( Math.abs(dE) > tol );
+      console.log( pd[i].name, M, E-es*Math.sin( E/180*Math.PI ) );
+      
+      // convert eccentric anomaly to true anomaly
+      //V = 2*Math.atan( Math.sqrt((1+e)/(1-e)) * Math.tan( 0.5*E/180*Math.PI ) );
+      //V = (V+2*Math.PI) % (2*Math.PI);
+
+
+      y1 = a*Math.sqrt(1-e*e)*Math.sin(E/180*Math.PI);
+      x1 = a*(Math.cos(E/180*Math.PI)-e);
+      console.log( pd[i].name, x1,y1 );
+
+      xec = ( Math.cos(w)*Math.cos(ln)-Math.sin(w)*Math.sin(ln)*Math.cos(I) )*x1 + (-Math.sin(w)*Math.cos(ln)-Math.cos(w)*Math.sin(ln)*Math.cos(I))*y1;
+      yec = ( Math.cos(w)*Math.sin(ln)-Math.sin(w)*Math.cos(ln)*Math.cos(I) )*x1 + (-Math.sin(w)*Math.sin(ln)+Math.cos(w)*Math.cos(ln)*Math.cos(I))*y1;
+      zec = ( Math.sin(w)*Math.sin(I) )*x1 + ( Math.cos(w)*Math.sin(I) )*y1;
+
+      console.log( pd[i].name, xec,yec,zec );
+
+      if( i == 0 ) { 
+        // coordinates of Earth-Moon Barycenter in heliocentric ecliptic coordinates
+        ex = xec;
+        ey = yec;
+        ez = zec;
+
+        // sun vector from earth is -earth vector from sun
+        xec *= -1;
+        yec *= -1;
+        zec *= -1;
+      } else { 
+        // Coordinates relative to EM Barycenter
+        xec -= ex;
+        yec -= ey;
+        zec -= ez;
+      }
+      // equatorial coordinates centered on sun
+      xeq = xec;
+      yeq = Math.cos(eps)*yec - Math.sin(eps)*zec;
+      zeq = Math.sin(eps)*yec + Math.cos(eps)*zec;
+
+      console.log( pd[i].name, xeq,yeq,zeq );
+
+      //r = Math.sqrt( xeq*xeq + yeq*yeq + zeq*zeq );
+      r = Math.sqrt( xeq*xeq + yeq*yeq );
+
+      pd[i].DE = Math.atan(zeq/r);
+      pd[i].RA = (Math.atan2(yeq,xeq) + 2*Math.PI ) % (2*Math.PI);
+
+
+      (function(){
+        var RA = pd[i].RA*180/15/Math.PI, DE = pd[i].DE*180/Math.PI
+          ,  RAh = Math.floor(RA), RAm = Math.floor((RA-RAh)*60.0), RAs = RA-RAh-RAm/60.0
+          ,  DEd = Math.floor(DE), DEm = Math.floor((DE-DEd)*60.0), DEs = DE-DEd-DEm/60.0;
+        //console.log( pd[i].name, RAh+'h '+RAm+'m '+RAs+'s , '+DEd+'°'+DEm+"'"+DEs+'"' );
+        console.log( pd[i].name, RAh+'h '+RAm+'m  , '+DEd+'deg '+DEm+"'" );
+      })();
+    
+    }
+  }
+
+  function draw() {
+    var i;
+    c.fillStyle='rgb(0,0,10)';
+    c.fillRect(0,0,w,h);
+    for( i = 0; i < bsc.length; ++i ) {
+      c.fillStyle='rgb('+bsc[i].c+')';
+      c.beginPath();
+      c.arc( w*bsc[i].ra/(2*Math.PI), h*bsc[i].de/(Math.PI)+h/2, (8-bsc[i].mag)/2, 0, 2*Math.PI, true ); 
+      c.fill();
+    }
+    for( i = 0; i < pd.length; ++i ) {
+      c.fillStyle='rgb(255,0,0)';
+      c.beginPath();
+      c.arc( w*pd[i].RA/(2*Math.PI), h*pd[i].DE/(Math.PI)+h/2, i?5:10, 0, 2*Math.PI, true ); 
+      c.fill();
+    }
+  }
+
+  function start(data) {
+    bsc = data;
+    console.log(T);
+    computeElements(T);
+    draw();
+  }
+
+  $.ajax({
+    url: 'bsc5.json',
+    dataType: 'json',
+    success: start
+  });
+
+});
+</script>
+</head>
+<body>
+  <canvas width=1200 height=600></canvas>
+</body>
+</html>
