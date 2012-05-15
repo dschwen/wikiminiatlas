@@ -49,6 +49,7 @@ var wma_tileurl = [];
 var wikiminiatlas_old_onmouseup;
 var wikiminiatlas_old_onmousemove;
 var wikiminiatlas_dragging = null;
+var wikiminiatlas_mdcoord = { x: -1, y: -1 };
 var wikiminiatlas_gx = 0;
 var wikiminiatlas_gy = 0;
 var wikiminiatlas_zoom = 1;
@@ -560,6 +561,16 @@ function wikiminiatlasInstall()
   $(document).keydown(wmaKeypress);
   $(document).bind('contextmenu', function() { return false; } );
 
+  $('body')
+    .bind('dragstart', function() { return false; } )
+    .click( function(e) { 
+      // only count clicks if the mouse pointer has not moved between mouse down and mouse up! 
+      var r = wmaMouseCoords(e.originalEvent);
+      if( r.x != wikiminiatlas_mdcoord.x || 
+          r.y != wikiminiatlas_mdcoord.y ) return false; 
+    } );
+
+
   wikiminiatlas_old_onmouseup = document.onmouseup || null;
   wikiminiatlas_old_onmousemove = document.onmousemove || null;
 
@@ -999,7 +1010,7 @@ function updateMarker(m) {
 function mouseDownWikiMiniAtlasMap(ev)
 {
  ev = ev || window.event;
- wikiminiatlas_dragging = wmaMouseCoords(ev);
+ wikiminiatlas_mdcoord = wikiminiatlas_dragging = wmaMouseCoords(ev);
 }
 
 // Mouse up handler (finish map-drag)

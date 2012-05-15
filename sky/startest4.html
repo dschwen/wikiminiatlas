@@ -10,7 +10,9 @@ $(function(){
     , h = canvas.height
     , c = canvas.getContext('2d')
     , bsc = []
-    , now = new Date; T =  (now / 86400000) + 2440587.5;
+    , now = new Date; T =  (now / 86400000) + 2440587.5
+    , Ls // mean longitude of sun
+    ;
     //, now = new Date; T =  (now / 86400000) - (now.getTimezoneOffset()/1440) + 2440587.5;
 
   // planetary orbit data
@@ -100,6 +102,9 @@ $(function(){
         xec *= -1;
         yec *= -1;
         zec *= -1;
+
+        // save mean longitude of sun
+        Ls = L;
       } else { 
         // Coordinates relative to EM Barycenter
         xec -= ex;
