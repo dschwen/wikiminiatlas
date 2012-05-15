@@ -1554,6 +1554,7 @@ function processGeoJSON(d,geo) {
 
 function processWIWOSM(d) {
   // process the returned data
+  if( d===0 ) return;
   processGeoJSON(d,wmakml);
 
   // set up canvas
