@@ -6,7 +6,7 @@
         2008 by Daniel Schwen, licensed under GFDL
 -->
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-<link rel="stylesheet" href="wikiminiatlas.css?2" type="text/css">
+<link rel="stylesheet" href="wikiminiatlas_dev.css" type="text/css">
 <script id="shader-fs" type="x-shader/x-fragment">
   precision mediump float;
 
@@ -49,6 +49,11 @@
 <script src="wikiminiatlas_extern_dev.php" type="text/javascript"></script>
 </head>
 <body style="padding:0px;" onselectstart="return false">
-<div id="wikiminiatlas_widget"></div>
+<div id="wma_widget"></div>
+<script>
+  $(function(){
+    wikiminiatlasInstall($('#wma_widget'));
+  });
+</script>
 </body>
 </html>
