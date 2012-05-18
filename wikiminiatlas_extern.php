@@ -465,7 +465,7 @@ function wikiminiatlasInstall( wma_widget, url_params ) {
       strings.close[UILang] + '" onclick="window.close()">';
     } else {
      WikiMiniAtlasHTML += '<img id="button_fs" src="'+wma_imgbase+'button_fs.png" title="' + 
-      strings.fullscreen[UILang] + '" onclick="wmaFullscreen()">';
+      strings.fullscreen[UILang] + '">';
     }
 
     WikiMiniAtlasHTML += '<a href="//meta.wikimedia.org/wiki/WikiMiniAtlas/' + wma_language + 
@@ -536,6 +536,7 @@ function wikiminiatlasInstall( wma_widget, url_params ) {
     menu.addSep();
     menu.addItem('Settings',toggleSettings);
     $('#button_menu').click( function(){menu.toggle();} );
+    $('#button_fs').click( wmaFullscreen );
     $('#wma_widget').append(menu.div.css({ right: '40px', top: '26px',zIndex: 50, fontSize: '90%' }));
 
     l = strings.dyk[UILang];
