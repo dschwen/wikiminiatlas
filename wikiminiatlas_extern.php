@@ -267,7 +267,10 @@ function wikiminiatlasInstall( wma_widget, url_params ) {
   var wma_language = 'de';
   var wma_site = '';
   var UILang = 'en';
+
+  // this block of variables is set by setTileSet
   var wma_tileset = 0;
+  var tsx = 128, tsy = 128; // tile size
 
   var scalelabel = null;
   var scalebar = null;
@@ -671,8 +674,8 @@ function wikiminiatlasInstall( wma_widget, url_params ) {
       $('#wma_map').dblclick(wmaDblclick).mousedown(mouseDownWikiMiniAtlasMap);
       wma_map = document.getElementById('wma_map');
 
-      wma_nx = Math.floor(wma_width/128)+2;
-      wma_ny = Math.floor(wma_height/128)+2;
+      wma_nx = Math.floor(wma_width/tsx)+2;
+      wma_ny = Math.floor(wma_height/tsy)+2;
       wma_tile = [];
 
       for(var j = 0; j < wma_ny; j++) {
@@ -689,8 +692,8 @@ function wikiminiatlasInstall( wma_widget, url_params ) {
   function wmaResize() {
     var nw = $(window).width(),
         nh = $(window).height(),
-        nx = Math.floor(nw/128)+2,
-        ny =  Math.floor(nh/128)+2, i;
+        nx = Math.floor(nw/tsx)+2,
+        ny =  Math.floor(nh/tsy)+2, i;
     wma_width = nw;
     wma_height = nh;
     // resize kml canvas, if it exists
@@ -800,7 +803,7 @@ function wikiminiatlasInstall( wma_widget, url_params ) {
       ;
 
     // all parameters optional (used only for updating globe texture)
-    hw = hw || wma_zoomsize[wma_zoom]*128;
+    hw = hw || wma_zoomsize[wma_zoom]*tsx;
     ox = (ox!==undefined)?ox:wma_gx; // to allow passing 0 as a parameter!
     oy = (oy!==undefined)?oy:wma_gy;
     c = c || wmakml.c;
@@ -929,13 +932,13 @@ function wikiminiatlasInstall( wma_widget, url_params ) {
     } 
 
    if(wma_gy<0) wma_gy=0;
-   if(wma_gx<0) wma_gx+=Math.floor(wma_zoomsize[wma_zoom]*256);
-   if(wma_gx>0) wma_gx%=Math.floor(wma_zoomsize[wma_zoom]*256);
+   if(wma_gx<0) wma_gx+=Math.floor(wma_zoomsize[wma_zoom]*2*tsx); // TODO: Mercator is 1:1 not 2:1
+   if(wma_gx>0) wma_gx%=Math.floor(wma_zoomsize[wma_zoom]*2*tsx);
 
-   var lx = Math.floor(wma_gx/128) % wma_nx,
-     ly = Math.floor(wma_gy/128) % wma_ny,
-     fx = wma_gx % 128,
-     fy = wma_gy % 128,
+   var lx = Math.floor(wma_gx/tsx) % wma_nx,
+     ly = Math.floor(wma_gy/tsy) % wma_ny,
+     fx = wma_gx % tsx,
+     fy = wma_gy % tsy,
      dx, dy, n, thistile, tileurl, dataurl;
 
    wmaUpdateScalebar();
@@ -947,8 +950,8 @@ function wikiminiatlasInstall( wma_widget, url_params ) {
      n = ((i+lx) % wma_nx) + ((j+ly) % wma_ny)*wma_nx;
 
      //thistile.innerHTML = (Math.floor(wma_gx/128)+i)+','+(Math.floor(wma_gy/128)+j);
-     dx = (Math.floor(wma_gx/128)+i);
-     dy = (Math.floor(wma_gy/128)+j);
+     dx = (Math.floor(wma_gx/tsx)+i);
+     dy = (Math.floor(wma_gy/tsy)+j);
      
      tileurl = 'url("' + wma_tilesets[wma_tileset].getTileURL( dy, dx, wma_zoom) + '")';
      dataurl = wmaGetDataURL( dy, dx, wma_zoom );
@@ -956,8 +959,8 @@ function wikiminiatlasInstall( wma_widget, url_params ) {
      // move tile
      thistile = wma_tile[n];
      thistile.div.css( {
-       left : (i*128-fx) + 'px',
-       top  : (j*128-fy) + 'px'
+       left : (i*tsx-fx) + 'px',
+       top  : (j*tsy-fy) + 'px'
      } );
 
      if( thistile.url != tileurl )
@@ -1304,13 +1307,14 @@ function wikiminiatlasInstall( wma_widget, url_params ) {
    wmaUpdateTargetButton();
   }
 
+  // TODO: make a latlon and a mercator version for these
   function wmaLatLonToXYnoWrap(lat,lon,hw) {
-    hw = hw || wma_zoomsize[wma_zoom]*128;
+    hw = hw || wma_zoomsize[wma_zoom]*tsx;
     return { y:Math.floor( (0.5-lat/180.0)*hw ), 
              x:Math.floor( (lon/360.0)    *hw*2 ) };
   }
   function wmaLatLonToXY(lat,lon,hw) {
-   hw = hw || wma_zoomsize[wma_zoom]*128;
+   hw = hw || wma_zoomsize[wma_zoom]*tsx;
    var newx = Math.floor( (lon/360.0) * hw*2 );
    if( newx < 0 ) {
     newx += hw*2;
@@ -1568,7 +1572,7 @@ function wikiminiatlasInstall( wma_widget, url_params ) {
     if( wmakml.maxlon && wmakml.minlon && wmakml.maxlat>-Infinity && wmakml.minlat < Infinity ) {
       var clon = ( wmakml.maxlon + wmakml.minlon )/2.0
         , clat = ( wmakml.maxlat + wmakml.minlat )/2.0
-        , ex = (wmakml.maxlon - wmakml.minlon)/180.0 * 3.0*128
+        , ex = (wmakml.maxlon - wmakml.minlon)/180.0 * 3.0*128 // TODO: Mercator is 1:1
         , ey = (wmakml.maxlat - wmakml.minlat)/180.0 * 3.0*128; // max extent in degrees, zoom0 has 3*128/180 px/degree
 
       for( wma_zoom = 0; wma_zoom < 12; ++wma_zoom ) {
