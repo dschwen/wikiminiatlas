@@ -881,7 +881,7 @@ function wikiminiatlasInstall( wma_widget, url_params ) {
   function moveWikiMiniAtlasMapTo()
   {
     function parseLabels(tile,data) {
-      var w,a,l,io, ix=[0,0,5,0,0,2,3,4,5,6,6], iy=[0,0,8,0,0,2,3,4,5,6,6];
+      var w,a,i,l,io, ix=[0,0,5,0,0,2,3,4,5,6,6], iy=[0,0,8,0,0,2,3,4,5,6,6];
       try {
         l = JSON.parse(data).label;
         tile.text('');
@@ -939,7 +939,7 @@ function wikiminiatlasInstall( wma_widget, url_params ) {
      ly = Math.floor(wma_gy/tsy) % wma_ny,
      fx = wma_gx % tsx,
      fy = wma_gy % tsy,
-     dx, dy, n, thistile, tileurl, dataurl;
+     i,j,dx, dy, n, thistile, tileurl, dataurl;
 
    wmaUpdateScalebar();
    //document.getElementById('debugbox').innerHTML='';

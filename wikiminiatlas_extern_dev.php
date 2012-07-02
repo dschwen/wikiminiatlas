@@ -892,7 +892,7 @@ function wikiminiatlasInstall( wma_widget, url_params ) {
   function moveWikiMiniAtlasMapTo()
   {
     function parseLabels(tile,data) {
-      var w,a,l,io, ix=[0,0,5,0,0,2,3,4,5,6,6], iy=[0,0,8,0,0,2,3,4,5,6,6];
+      var w,a, i,l,io, ix=[0,0,5,0,0,2,3,4,5,6,6], iy=[0,0,8,0,0,2,3,4,5,6,6];
       try {
         l = JSON.parse(data).label;
         tile.text('');
@@ -950,7 +950,7 @@ function wikiminiatlasInstall( wma_widget, url_params ) {
      ly = Math.floor(wma_gy/tsy) % wma_ny,
      fx = wma_gx % tsx,
      fy = wma_gy % tsy,
-     dx, dy, n, thistile, tileurl, dataurl;
+     i, j, dx, dy, n, thistile, tileurl, dataurl;
 
    wmaUpdateScalebar();
    //document.getElementById('debugbox').innerHTML='';
@@ -959,6 +959,7 @@ function wikiminiatlasInstall( wma_widget, url_params ) {
     for(var i = 0; i < wma_nx; i++)
     {
      n = ((i+lx) % wma_nx) + ((j+ly) % wma_ny)*wma_nx;
+       console.log(i,j);
 
      //thistile.innerHTML = (Math.floor(wma_gx/128)+i)+','+(Math.floor(wma_gy/128)+j);
      dx = (Math.floor(wma_gx/tsx)+i);
@@ -977,6 +978,7 @@ function wikiminiatlasInstall( wma_widget, url_params ) {
 
      if( thistile.url != tileurl )
      {
+       console.log('process');
       thistile.url = tileurl;
       //thistile.div.css( 'backgroundImage', tileurl );
       thistile.img.fadeOut(0).attr( 'src', tileurl );
@@ -1005,6 +1007,9 @@ function wikiminiatlasInstall( wma_widget, url_params ) {
           .error( function() { this.text(''); } );
         })(dataurl);
       }
+     }
+     else {
+       console.log( thistile );
      }
     }
     // ...request them here, all at once
