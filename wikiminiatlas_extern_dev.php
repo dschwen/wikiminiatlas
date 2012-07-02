@@ -664,7 +664,7 @@ function wikiminiatlasInstall( wma_widget, url_params ) {
           $(this).fadeIn(100);
         })
         .error(function(){
-          console.log('onerror for tile ' + $(this).attr('src') );
+          //console.log('onerror for tile ' + $(this).attr('src') );
           $(this).attr("src",$(this).attr('src') + "?" + Math.random() );
         })
         .appendTo(d),
@@ -959,7 +959,6 @@ function wikiminiatlasInstall( wma_widget, url_params ) {
     for(var i = 0; i < wma_nx; i++)
     {
      n = ((i+lx) % wma_nx) + ((j+ly) % wma_ny)*wma_nx;
-       console.log(i,j);
 
      //thistile.innerHTML = (Math.floor(wma_gx/128)+i)+','+(Math.floor(wma_gy/128)+j);
      dx = (Math.floor(wma_gx/tsx)+i);
@@ -978,7 +977,6 @@ function wikiminiatlasInstall( wma_widget, url_params ) {
 
      if( thistile.url != tileurl )
      {
-       console.log('process');
       thistile.url = tileurl;
       //thistile.div.css( 'backgroundImage', tileurl );
       thistile.img.fadeOut(0).attr( 'src', tileurl );
@@ -1007,9 +1005,6 @@ function wikiminiatlasInstall( wma_widget, url_params ) {
           .error( function() { this.text(''); } );
         })(dataurl);
       }
-     }
-     else {
-       console.log( thistile );
      }
     }
     // ...request them here, all at once
@@ -1143,6 +1138,13 @@ function wikiminiatlasInstall( wma_widget, url_params ) {
       } else { 
         wmaLoadSizeOverlay( strings.sover[UILang].site, strings.sover[UILang].list[0] );
       }
+      break;
+    case 84 :
+      wmaSelectTileset( (wma_tileset+1) % wma_tilesets.length );
+      break;
+    case 76 :
+      var n, alllang = ['ar','bg','ca','ceb','commons','cs','da','de','el','en','eo','es','et','eu','fa','fi','fr','gl','he','hi','hr','ht','hu','id','it','ja','ko','lt','ms','new','nl','nn','no','pl','pt','ro','ru','simple','sk','sl','sr','sv','sw','te','th','tr','uk','vi','vo','war','zh'];
+      wmaLabelSet( alllang[($.inArray(wma_site,alllang)+1)%alllang.length], true )
       break;
     default: ret=true;
    }
@@ -1280,13 +1282,13 @@ function wikiminiatlasInstall( wma_widget, url_params ) {
     return false;
   }
 
-  function wmaLabelSet(s) {
+  function wmaLabelSet(s,noset) {
    wma_site = s;
    for( var n = 0; n < wma_nx * wma_ny; n++) {
      wma_tile[n].url='';
    }
    moveWikiMiniAtlasMapTo();
-   toggleSettings();
+   if(noset !== true ) { toggleSettings(); }
    return false;
   }
 
