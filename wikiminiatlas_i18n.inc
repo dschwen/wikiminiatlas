@@ -10,6 +10,7 @@ var wikiminiatlas_sites = {
   eu:'Euskara',
   fa:'فارسی',
   fr:'Français',
+  he:'עברית',
   ja:'日本語',
   is:'Íslenska',
   it:'Italiano',

@@ -83,17 +83,6 @@ var wma_tilesets = [
   minzoom: 0
  },
  {
-  name: "mapCoastline", //"Minimal basemap (coastlines)",
-  globe: "Earth",
-  getTileURL: function(y,x,z) {
-   return wma_imgbase + 'plain/' + z + '/tile_' + y + '_' + ( x % ( wma_zoomsize[z] * 2 ) ) + '.png';
-  },
-  linkcolor: [ "#2255aa", "white 0pt 0pt 2pt" ],
-  equator: 40075.0, // equatorial circumfence in km
-  maxzoom: 7,
-  minzoom: 0
- },
- {
   name: "mapLandsat",
   globe: "Earth",
   getTileURL: function(y,x,z, norot) {
@@ -110,6 +99,17 @@ var wma_tilesets = [
   linkcolor: [ "white", "black 0pt 0pt 2pt" ],
   equator: 40075.0, // equatorial circumfence in km
   maxzoom: 13,
+  minzoom: 0
+ },
+ {
+  name: "mapCoastline", //"Minimal basemap (coastlines)",
+  globe: "Earth",
+  getTileURL: function(y,x,z) {
+   return wma_imgbase + 'plain/' + z + '/tile_' + y + '_' + ( x % ( wma_zoomsize[z] * 2 ) ) + '.png';
+  },
+  linkcolor: [ "#2255aa", "white 0pt 0pt 2pt" ],
+  equator: 40075.0, // equatorial circumfence in km
+  maxzoom: 7,
   minzoom: 0
  },
  /*{
@@ -294,6 +294,8 @@ function wikiminiatlasInstall( wma_widget, url_params ) {
   var wmaGlobeLoadTiles = null;
 
   var hasCanvas = "HTMLCanvasElement" in window;
+
+var labelcaption;
 
   function setupWidget()
   {
@@ -544,6 +546,7 @@ function wikiminiatlasInstall( wma_widget, url_params ) {
 
     l = strings.dyk[UILang];
     var news = $('<div></div>').html(l[Math.floor(Math.random()*l.length)]).addClass('news');
+labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60px', zIndex:100, fontSize:'40px', color:'white', textShadow:'1px 1px 5px black', fontWeight:'bold'}).appendTo('#wma_widget');
     //var news = $('<div></div>').html('<b>New:</b> More Zoom and new data by OpenStreetMap.').addClass('news');
     $('#wma_widget').append(news);
     news.click( function() { news.fadeOut(); } )
@@ -979,7 +982,9 @@ function wikiminiatlasInstall( wma_widget, url_params ) {
      {
       thistile.url = tileurl;
       //thistile.div.css( 'backgroundImage', tileurl );
-      thistile.img.fadeOut(0).attr( 'src', tileurl );
+      if( thistile.img.attr('src') != tileurl ) { // catch mere label language change
+        thistile.img.fadeOut(0).attr( 'src', tileurl );
+      }
 
       if( thistile.xhr !== null ) {
        thistile.xhr.abort();
@@ -1143,8 +1148,15 @@ function wikiminiatlasInstall( wma_widget, url_params ) {
       wmaSelectTileset( (wma_tileset+1) % wma_tilesets.length );
       break;
     case 76 :
-      var n, alllang = ['ar','bg','ca','ceb','commons','cs','da','de','el','en','eo','es','et','eu','fa','fi','fr','gl','he','hi','hr','ht','hu','id','it','ja','ko','lt','ms','new','nl','nn','no','pl','pt','ro','ru','simple','sk','sl','sr','sv','sw','te','th','tr','uk','vi','vo','war','zh'];
-      wmaLabelSet( alllang[($.inArray(wma_site,alllang)+1)%alllang.length], true )
+      var ns, n
+        //, alllang = ['ar','bg','ca','ceb','commons','cs','da','de','el','en','eo','es','et','eu','fa','fi','fr','gl','he','hi','hr','ht','hu','id','it','ja','ko','lt','ms','new','nl','nn','no','pl','pt','ro','ru','simple','sk','sl','sr','sv','sw','te','th','tr','uk','vi','vo','war','zh'];
+        , alllang = ['en','de','fr','ru','ar','he', 'ko','ja','ml','fa','commons'];//,'cs','da','de','el','en','eo','es','et','eu','fa','fi','fr','gl','he','hi','hr','ht','hu','id','it','ja','ko','lt','ms','new','nl','nn','no','pl','pt','ro','ru','simple','sk','sl','sr','sv','sw','te','th','tr','uk','vi','vo','war','zh'];
+      ns = alllang[($.inArray(wma_site,alllang)+1)%alllang.length];
+      labelcaption.text( wikiminiatlas_sites[ns]);
+      wmaLabelSet(ns, true )
+      break;
+    case 67:
+      wmaLabelSet( 'commons', true );
       break;
     default: ret=true;
    }
@@ -1415,7 +1427,7 @@ function wikiminiatlasInstall( wma_widget, url_params ) {
     wmaci_image.src = '//commons.wikimedia.org/wiki/Special:FilePath/' + name;
 
    wmaci_link.href = '//commons.wikimedia.org/wiki/Image:' + name;
-   wmaci_link_text.nodeValue = '[[:commons:Image:' + decodeURI(name) + ']]';
+   wmaci_link_text.nodeValue = '[[:commons:Image:' + decodeURIComponent(name) + ']]';
 
    wmaci_panel.style.visibility = 'visible';
   }
@@ -1472,7 +1484,7 @@ function wikiminiatlasInstall( wma_widget, url_params ) {
         m = { obj: null, lat: d.coords[i].lat, lon: d.coords[i].lon };
         if( Math.abs(m.lat-marker.lat) > 0.0001 || Math.abs(m.lon-marker.lon) > 0.0001 ) {
           m.obj = $('<div></div>')
-            .attr( 'title', d.coords[i].title )
+            .attr( 'title', decodeURIComponent(d.coords[i].title) )
             .addClass('emarker')
             .mouseover( extraMarkerMessage(i,'highlight') )
             .mouseout( extraMarkerMessage(i,'unhighlight') )
