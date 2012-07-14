@@ -29,14 +29,17 @@ var wikiminiatlas_sites = {
 var strings =
 {
  mapIo : {
-   en: 'Io'
+   en: 'Io',
+   fa: 'یو'
  },
  mapVenus : {
-   en: 'Venus'
+   en: 'Venus',
+   fa: 'زهره'
  },
  mapMercury : {
    en: 'Mercury',
-   de: 'Merkur'
+   de: 'Merkur',
+   fa: 'عطارد'
  },
  mapMars : {
   af:'Mars',
@@ -286,6 +289,7 @@ var strings =
   eo:'Elsatelita bildo',
   eu:'Landsat',
   es:'Landsat',
+  fa:'ماهواره',
   fr:'Vue de satellite',
   fur:'Viodude dal satelit',
   fy:'Satelytbyld',
@@ -976,6 +980,7 @@ var strings =
   dsb:'Wšedna módrina',
   eo:'Taga akvo',
   es:'Día-Acuático',
+  fa:'آب روزانه',
   fr:'Jour aquatique',
   fy:'Deistich akva',
   gl:'Día acuático',
@@ -1001,6 +1006,7 @@ var strings =
   en:'Daily terra',
   eo:'Taga tero',
   es:'Día-Terrestre',
+  fa:'زمین روزانه',
   fr:'Jour terrestre',
   gl:'Día terrestre',
   hi:'दैनिक टेर्रा',
@@ -1266,4 +1272,3 @@ var strings =
   pl: { site:'pl', list:['Polska'] }
  }
 };
-
