@@ -234,6 +234,11 @@ function parseParams(url) {
   return map;
 }
 
+// check if a language given by language code lang is right to left (RTL)
+function isRTL(lang) {
+  return ( $.inArray( lang, ['ar','he','fa'] ) >= 0 );
+}
+
 //
 // Insert the map Widget into the page.
 //
@@ -267,6 +272,7 @@ function wikiminiatlasInstall( wma_widget, url_params ) {
   var wma_language = 'de';
   var wma_site = '';
   var UILang = 'en';
+  var UIrtl = false;
 
   // this block of variables is set by setTileSet
   var wma_tileset = 0;
@@ -453,6 +459,7 @@ var labelcaption;
 
     UILang = wma_language;
     if( UILang == 'co' || UILang == 'commons' ) UILang = 'en';
+    UIrtl = isRTL(UILang);
 
     // Fill missing i18n items
     for( i in strings )
@@ -530,7 +537,7 @@ var labelcaption;
 
     wma_widget.html( WikiMiniAtlasHTML );
     // build and hook-up dropdown menu
-    var menu = new wmaMenu();
+    var menu = new wmaMenu(UIrtl);
     menu.addGroup( (function(){ 
       var list = [];
       for( i = 0; i < wma_tilesets.length; i++ ) {
@@ -597,12 +604,9 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
           l = RegExp.$1;
           t = RegExp.$2;
           $('#synopsistext').load( '/~dschwen/synopsis/?l=' + l + '&t=' + t, function() { 
-            if( l == 'ar' || l == 'fa' || l == 'he' ) {
-              $('#synopsistext').css('direction','rtl');
-            } else {
-              $('#synopsistext').css('direction','ltr');
-            }
-            $('#synopsistext').find('a').attr('target','_top');
+            $('#synopsistext')
+              .css('direction',isRTL(l)?'rtl':'ltr')
+              .find('a').attr('target','_top');
             $('#synopsis').fadeIn('slow');
             setTimeout( function() { 
               var h = $('#synopsistext').outerHeight(true),
@@ -934,7 +938,7 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
               .css( {
                 top:  ( l[i].ty - iy[l[i].style] ) + 'px',
                 left: ( l[i].tx - ix[l[i].style] ) + 'px',
-                direction: ( l[i].lang == 'ar' || l[i].lang == 'fa' || l[i].lang == 'he' ) ? 'rtl' : 'ltr'
+                direction: isRTL(l[i].lang) ? 'rtl' : 'ltr'
               } ) 
              .text(l[i].name);
           }
@@ -1658,14 +1662,15 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
 
 
 // drop down menu class
-function wmaMenu() {
-  this.div = $('<div></div>').addClass('wmamenu');
+function wmaMenu(rtl) {
+  this.div = $('<div></div>').addClass('wmamenu').css('direction',(rtl===true?'rtl':''));
   this.parent = null;
   this.shown = false;
 }
-wmaMenu.prototype.addItem = function(html,func) {
+wmaMenu.prototype.addItem = function(html,func,rtl) {
   func = func || (function(){});
   var that = this, item = $('<div></div>').addClass('wmamenuitem').html(html)
+    .css('direction',(rtl===true)?'rtl':'')
     .mouseenter(function(){ item.css('background-color', '#AAA'); })
     .mouseleave(function(){ item.css('background-color', ''); })
     .click( function() { func(); that.close() } )
@@ -1673,7 +1678,10 @@ wmaMenu.prototype.addItem = function(html,func) {
   return item;
 }
 wmaMenu.prototype.addMenu = function(html,menu,rtl) {
-  var item = $('<div></div>').addClass('wmasubmenu').html(html).css('direction',(rtl===true)?'rtl':'ltr')
+  var item = $('<div></div>')
+    .addClass('wmasubmenu')
+    .html(html)
+    .css('direction',(rtl===true)?'rtl':'')
     .mouseenter(function(){ item.css('background-color', '#AAA'); })
     .mouseleave(function(){ item.css('background-color', ''); menu.hide(); })
     .click(function(){
@@ -1685,7 +1693,7 @@ wmaMenu.prototype.addMenu = function(html,menu,rtl) {
   menu.parent = this;
   return item;
 }
-wmaMenu.prototype.addCheck = function(html,func,selected) {
+wmaMenu.prototype.addCheck = function(html,func,selected,rtl) {
   function check() {
     if( selected ) { item.addClass('wmamenuchecked'); } 
     else { item.removeClass('wmamenuchecked'); }
@@ -1695,7 +1703,7 @@ wmaMenu.prototype.addCheck = function(html,func,selected) {
     check();
     func(selected);
   }
-  var item = this.addItem(html,click);
+  var item = this.addItem(html,click,rtl);
   func = func || (function(){});
   check();
   return {
@@ -1708,7 +1716,7 @@ wmaMenu.prototype.addCheck = function(html,func,selected) {
     check : check, item: item
   }
 }
-wmaMenu.prototype.addGroup = function(options,func,selected) {
+wmaMenu.prototype.addGroup = function(options,func,selected,rtl) {
   var items = [], that = this, current = -1;
   function select(n) {
     if( n === current ) { return; }
@@ -1722,7 +1730,7 @@ wmaMenu.prototype.addGroup = function(options,func,selected) {
   func = func || (function(){});
   for( var i=0; i<options.length; ++i ) {
     (function(n){
-      items[n] = that.addItem( options[n], function() { select(n); func(n); } );
+      items[n] = that.addItem( options[n], function() { select(n); func(n); }, rtl );
     })(i);
   }
   select(selected);
