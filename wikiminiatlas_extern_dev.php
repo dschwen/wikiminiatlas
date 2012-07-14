@@ -539,7 +539,7 @@ var labelcaption;
       return list;
     })(), wmaSelectTileset, wma_tileset );
     menu.addSep();
-    menu.addItem('Settings',toggleSettings);
+    menu.addItem(strings.settings[UILang],toggleSettings);
     $('#button_menu').click( function(){menu.toggle();} );
     $('#button_fs').click( wmaFullscreen );
     $('#wma_widget').append(menu.div.css({ right: '40px', top: '26px',zIndex: 50, fontSize: '90%' }));
@@ -933,7 +933,8 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
               } )
               .css( {
                 top:  ( l[i].ty - iy[l[i].style] ) + 'px',
-                left: ( l[i].tx - ix[l[i].style] ) + 'px'
+                left: ( l[i].tx - ix[l[i].style] ) + 'px',
+                direction: ( l[i].lang == 'ar' || l[i].lang == 'fa' || l[i].lang == 'he' ) ? 'rtl' : 'ltr'
               } ) 
              .text(l[i].name);
           }
@@ -1671,8 +1672,8 @@ wmaMenu.prototype.addItem = function(html,func) {
     .appendTo(this.div);
   return item;
 }
-wmaMenu.prototype.addMenu = function(html,menu) {
-  var item = $('<div></div>').addClass('wmasubmenu').html(html)
+wmaMenu.prototype.addMenu = function(html,menu,rtl) {
+  var item = $('<div></div>').addClass('wmasubmenu').html(html).css('direction',(rtl===true)?'rtl':'ltr')
     .mouseenter(function(){ item.css('background-color', '#AAA'); })
     .mouseleave(function(){ item.css('background-color', ''); menu.hide(); })
     .click(function(){
