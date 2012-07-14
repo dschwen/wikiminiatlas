@@ -234,6 +234,11 @@ function parseParams(url) {
   return map;
 }
 
+// check if a language given by language code lang is right to left (RTL)
+function isRTL(lang) {
+  return ( $.inArray( lang, ['ar','he','fa'] ) >= 0 );
+}
+
 //
 // Insert the map Widget into the page.
 //
@@ -267,6 +272,7 @@ function wikiminiatlasInstall( wma_widget, url_params ) {
   var wma_language = 'de';
   var wma_site = '';
   var UILang = 'en';
+  var UIrtl = false;
 
   // this block of variables is set by setTileSet
   var wma_tileset = 0;
@@ -451,6 +457,7 @@ function wikiminiatlasInstall( wma_widget, url_params ) {
 
     UILang = wma_language;
     if( UILang == 'co' || UILang == 'commons' ) UILang = 'en';
+    UIrtl = isRTL(UILang);
 
     // Fill missing i18n items
     for( i in strings )
@@ -528,7 +535,7 @@ function wikiminiatlasInstall( wma_widget, url_params ) {
 
     wma_widget.html( WikiMiniAtlasHTML );
     // build and hook-up dropdown menu
-    var menu = new wmaMenu();
+    var menu = new wmaMenu(UIrtl);
     menu.addGroup( (function(){ 
       var list = [];
       for( i = 0; i < wma_tilesets.length; i++ ) {
@@ -594,12 +601,9 @@ function wikiminiatlasInstall( wma_widget, url_params ) {
           l = RegExp.$1;
           t = RegExp.$2;
           $('#synopsistext').load( '/~dschwen/synopsis/?l=' + l + '&t=' + t, function() { 
-            if( l == 'ar' || l == 'fa' || l == 'he' ) {
-              $('#synopsistext').css('direction','rtl');
-            } else {
-              $('#synopsistext').css('direction','ltr');
-            }
-            $('#synopsistext').find('a').attr('target','_top');
+            $('#synopsistext')
+              .css('direction',isRTL(l)?'rtl':'ltr')
+              .find('a').attr('target','_top');
             $('#synopsis').fadeIn('slow');
             setTimeout( function() { 
               var h = $('#synopsistext').outerHeight(true),
@@ -920,7 +924,7 @@ function wikiminiatlasInstall( wma_widget, url_params ) {
               .css( {
                 top:  ( l[i].ty - iy[l[i].style] ) + 'px',
                 left: ( l[i].tx - ix[l[i].style] ) + 'px',
-                direction: ( l[i].lang == 'ar' || l[i].lang == 'fa' || l[i].lang == 'he' ) ? 'rtl' : 'ltr'
+                direction: isRTL(l[i].lang) ? 'rtl' : 'ltr'
               } ) 
              .text(l[i].name);
           }
@@ -1623,8 +1627,8 @@ function wikiminiatlasInstall( wma_widget, url_params ) {
 
 
 // drop down menu class
-function wmaMenu() {
-  this.div = $('<div></div>').addClass('wmamenu');
+function wmaMenu(rtl) {
+  this.div = $('<div></div>').addClass('wmamenu').css('direction',(rtl===true?'rtl':''));
   this.parent = null;
   this.shown = false;
 }
