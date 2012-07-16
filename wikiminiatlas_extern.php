@@ -48,7 +48,7 @@ var wma_tilesets = [
    me = wma_tilesets[0];
 
    // rotating tile severs (yes/no)
-   if(norot) {
+   if( norot || document.location.protocol=='https:' ) {
      if( z >= 7 ) {
       return wma_imgbase + 'mapnik/' +
              z + '/' + y + '/tile_' + y + '_' + ( x % ( wma_zoomsize[z] * 2 ) ) + '.png';
