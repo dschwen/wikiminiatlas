@@ -1163,6 +1163,21 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
     case 67:
       wmaLabelSet( 'commons', true );
       break;
+    case 27 : // ESC
+      // remove size comp overlay
+      if( wmasize.shown ) {
+        wmasize.shown=false;
+        wmasize.canvas.fadeOut(200);
+      }
+      // quit commons preview
+      if( wmaci_panel && wmaci_panel.style.visibility == 'visible' ) {
+        wmaCommonsImageClose();
+      }
+      // quit settings
+      if( wma_settings.style.visibility != "hidden" ) {
+        wma_settings.style.visibility="hidden";
+      }
+      break;
     default: ret=true;
    }
 
