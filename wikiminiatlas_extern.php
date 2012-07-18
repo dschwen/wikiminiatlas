@@ -48,7 +48,7 @@ var wma_tilesets = [
    me = wma_tilesets[0];
 
    // rotating tile severs (yes/no)
-   if( norot || document.location.protocol=='https:' ) {
+   if( norot  || document.location.protocol=='https:' ) {
      if( z >= 7 ) {
       return wma_imgbase + 'mapnik/' +
              z + '/' + y + '/tile_' + y + '_' + ( x % ( wma_zoomsize[z] * 2 ) ) + '.png';
@@ -83,17 +83,6 @@ var wma_tilesets = [
   minzoom: 0
  },
  {
-  name: "mapCoastline", //"Minimal basemap (coastlines)",
-  globe: "Earth",
-  getTileURL: function(y,x,z) {
-   return wma_imgbase + 'plain/' + z + '/tile_' + y + '_' + ( x % ( wma_zoomsize[z] * 2 ) ) + '.png';
-  },
-  linkcolor: [ "#2255aa", "white 0pt 0pt 2pt" ],
-  equator: 40075.0, // equatorial circumfence in km
-  maxzoom: 7,
-  minzoom: 0
- },
- {
   name: "mapLandsat",
   globe: "Earth",
   getTileURL: function(y,x,z, norot) {
@@ -110,6 +99,17 @@ var wma_tilesets = [
   linkcolor: [ "white", "black 0pt 0pt 2pt" ],
   equator: 40075.0, // equatorial circumfence in km
   maxzoom: 13,
+  minzoom: 0
+ },
+ {
+  name: "mapCoastline", //"Minimal basemap (coastlines)",
+  globe: "Earth",
+  getTileURL: function(y,x,z) {
+   return wma_imgbase + 'plain/' + z + '/tile_' + y + '_' + ( x % ( wma_zoomsize[z] * 2 ) ) + '.png';
+  },
+  linkcolor: [ "#2255aa", "white 0pt 0pt 2pt" ],
+  equator: 40075.0, // equatorial circumfence in km
+  maxzoom: 7,
   minzoom: 0
  },
  /*{
@@ -300,6 +300,8 @@ function wikiminiatlasInstall( wma_widget, url_params ) {
   var wmaGlobeLoadTiles = null;
 
   var hasCanvas = "HTMLCanvasElement" in window;
+
+var labelcaption;
 
   function setupWidget()
   {
@@ -533,6 +535,7 @@ function wikiminiatlasInstall( wma_widget, url_params ) {
      '</div>';
 
     wma_widget.html( WikiMiniAtlasHTML );
+   
     // build and hook-up dropdown menu
     var menu = new wmaMenu(UIrtl);
     menu.addGroup( (function(){ 
@@ -550,6 +553,7 @@ function wikiminiatlasInstall( wma_widget, url_params ) {
 
     l = strings.dyk[UILang];
     var news = $('<div></div>').html(l[Math.floor(Math.random()*l.length)]).addClass('news');
+labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60px', zIndex:100, fontSize:'40px', color:'white', textShadow:'1px 1px 5px black', fontWeight:'bold'}).appendTo('#wma_widget');
     //var news = $('<div></div>').html('<b>New:</b> More Zoom and new data by OpenStreetMap.').addClass('news');
     $('#wma_widget').append(news);
     news.click( function() { news.fadeOut(); } )
@@ -659,8 +663,19 @@ function wikiminiatlasInstall( wma_widget, url_params ) {
   }
 
   function wmaNewTile() {
+    var d = $('<div></div>').addClass('wmatile').mousedown(mouseDownWikiMiniAtlasMap);
     var t = {
-      div : $('<div></div>').addClass('wmatile').mousedown(mouseDownWikiMiniAtlasMap),
+      div : d,
+      img : $('<img>')
+        .load(function(){
+          $(this).fadeIn(100);
+        })
+        .error(function(){
+          //console.log('onerror for tile ' + $(this).attr('src') );
+          $(this).attr("src",$(this).attr('src') + "?" + Math.random() );
+        })
+        .appendTo(d),
+      span : $('<span></span>').appendTo(d),
       url : '',
       xhr : null
     }
@@ -884,7 +899,7 @@ function wikiminiatlasInstall( wma_widget, url_params ) {
   function moveWikiMiniAtlasMapTo()
   {
     function parseLabels(tile,data) {
-      var w,a,i,l,io, ix=[0,0,5,0,0,2,3,4,5,6,6], iy=[0,0,8,0,0,2,3,4,5,6,6];
+      var w,a, i,l,io, ix=[0,0,5,0,0,2,3,4,5,6,6], iy=[0,0,8,0,0,2,3,4,5,6,6];
       try {
         l = JSON.parse(data).label;
         tile.text('');
@@ -943,7 +958,7 @@ function wikiminiatlasInstall( wma_widget, url_params ) {
      ly = Math.floor(wma_gy/tsy) % wma_ny,
      fx = wma_gx % tsx,
      fy = wma_gy % tsy,
-     i,j,dx, dy, n, thistile, tileurl, dataurl;
+     i, j, dx, dy, n, thistile, tileurl, dataurl;
 
    wmaUpdateScalebar();
    //document.getElementById('debugbox').innerHTML='';
@@ -957,7 +972,8 @@ function wikiminiatlasInstall( wma_widget, url_params ) {
      dx = (Math.floor(wma_gx/tsx)+i);
      dy = (Math.floor(wma_gy/tsy)+j);
      
-     tileurl = 'url("' + wma_tilesets[wma_tileset].getTileURL( dy, dx, wma_zoom) + '")';
+     //tileurl = 'url("' + wma_tilesets[wma_tileset].getTileURL( dy, dx, wma_zoom) + '")';
+     tileurl = wma_tilesets[wma_tileset].getTileURL( dy, dx, wma_zoom);
      dataurl = wmaGetDataURL( dy, dx, wma_zoom );
 
      // move tile
@@ -970,20 +986,26 @@ function wikiminiatlasInstall( wma_widget, url_params ) {
      if( thistile.url != tileurl )
      {
       thistile.url = tileurl;
-      thistile.div.css( 'backgroundImage', tileurl );
+      //thistile.div.css( 'backgroundImage', tileurl );
+      if( thistile.img.attr('src') != tileurl ) { // catch mere label language change
+        thistile.img.fadeOut(0).attr( 'src', tileurl );
+      }
 
       if( thistile.xhr !== null ) {
        thistile.xhr.abort();
       }
 
-      thistile.div.html('<span class="loading">' + strings.labelLoading[UILang] + '</span>');
+      //thistile.div.html('<span class="loading">' + strings.labelLoading[UILang] + '</span>');
+      thistile.span.html('<span class="loading">' + strings.labelLoading[UILang] + '</span>');
 
       // TODO: instead of launching the XHR here, gather the needed coords and ...
       if( window.sessionStorage && ((data=sessionStorage.getItem(dataurl))!==null) ) {
-        parseLabels(thistile.div,data);
+        //parseLabels(thistile.div,data);
+        parseLabels(thistile.span,data);
       } else {
         (function(turl){// closure to retain access to dataurl in sucess callback
-        thistile.xhr = $.ajax( { url : turl, context : thistile.div } )
+        //thistile.xhr = $.ajax( { url : turl, context : thistile.div } )
+        thistile.xhr = $.ajax( { url : turl, context : thistile.span } )
           .success( function(data) { 
             if( window.sessionStorage ) {
               sessionStorage.setItem(turl,data);
@@ -1126,6 +1148,20 @@ function wikiminiatlasInstall( wma_widget, url_params ) {
       } else { 
         wmaLoadSizeOverlay( strings.sover[UILang].site, strings.sover[UILang].list[0] );
       }
+      break;
+    case 84 :
+      wmaSelectTileset( (wma_tileset+1) % wma_tilesets.length );
+      break;
+    case 76 :
+      var ns, n
+        //, alllang = ['ar','bg','ca','ceb','commons','cs','da','de','el','en','eo','es','et','eu','fa','fi','fr','gl','he','hi','hr','ht','hu','id','it','ja','ko','lt','ms','new','nl','nn','no','pl','pt','ro','ru','simple','sk','sl','sr','sv','sw','te','th','tr','uk','vi','vo','war','zh'];
+        , alllang = ['en','de','fr','ru','ar','he', 'ko','ja','ml','fa','commons'];//,'cs','da','de','el','en','eo','es','et','eu','fa','fi','fr','gl','he','hi','hr','ht','hu','id','it','ja','ko','lt','ms','new','nl','nn','no','pl','pt','ro','ru','simple','sk','sl','sr','sv','sw','te','th','tr','uk','vi','vo','war','zh'];
+      ns = alllang[($.inArray(wma_site,alllang)+1)%alllang.length];
+      labelcaption.text( wikiminiatlas_sites[ns]);
+      wmaLabelSet(ns, true )
+      break;
+    case 67:
+      wmaLabelSet( 'commons', true );
       break;
     case 27 : // ESC
       // remove size comp overlay
@@ -1278,13 +1314,13 @@ function wikiminiatlasInstall( wma_widget, url_params ) {
     return false;
   }
 
-  function wmaLabelSet(s) {
+  function wmaLabelSet(s,noset) {
    wma_site = s;
    for( var n = 0; n < wma_nx * wma_ny; n++) {
      wma_tile[n].url='';
    }
    moveWikiMiniAtlasMapTo();
-   toggleSettings();
+   if(noset !== true ) { toggleSettings(); }
    return false;
   }
 
@@ -1411,7 +1447,7 @@ function wikiminiatlasInstall( wma_widget, url_params ) {
     wmaci_image.src = '//commons.wikimedia.org/wiki/Special:FilePath/' + name;
 
    wmaci_link.href = '//commons.wikimedia.org/wiki/Image:' + name;
-   wmaci_link_text.nodeValue = '[[:commons:Image:' + decodeURI(name) + ']]';
+   wmaci_link_text.nodeValue = '[[:commons:Image:' + decodeURIComponent(name) + ']]';
 
    wmaci_panel.style.visibility = 'visible';
   }
@@ -1468,7 +1504,7 @@ function wikiminiatlasInstall( wma_widget, url_params ) {
         m = { obj: null, lat: d.coords[i].lat, lon: d.coords[i].lon };
         if( Math.abs(m.lat-marker.lat) > 0.0001 || Math.abs(m.lon-marker.lon) > 0.0001 ) {
           m.obj = $('<div></div>')
-            .attr( 'title', d.coords[i].title )
+            .attr( 'title', decodeURIComponent(d.coords[i].title) )
             .addClass('emarker')
             .mouseover( extraMarkerMessage(i,'highlight') )
             .mouseout( extraMarkerMessage(i,'unhighlight') )
@@ -1646,9 +1682,10 @@ function wmaMenu(rtl) {
   this.parent = null;
   this.shown = false;
 }
-wmaMenu.prototype.addItem = function(html,func) {
+wmaMenu.prototype.addItem = function(html,func,rtl) {
   func = func || (function(){});
   var that = this, item = $('<div></div>').addClass('wmamenuitem').html(html)
+    .css('direction',(rtl===true)?'rtl':'')
     .mouseenter(function(){ item.css('background-color', '#AAA'); })
     .mouseleave(function(){ item.css('background-color', ''); })
     .click( function() { func(); that.close() } )
@@ -1656,7 +1693,10 @@ wmaMenu.prototype.addItem = function(html,func) {
   return item;
 }
 wmaMenu.prototype.addMenu = function(html,menu,rtl) {
-  var item = $('<div></div>').addClass('wmasubmenu').html(html).css('direction',(rtl===true)?'rtl':'ltr')
+  var item = $('<div></div>')
+    .addClass('wmasubmenu')
+    .html(html)
+    .css('direction',(rtl===true)?'rtl':'')
     .mouseenter(function(){ item.css('background-color', '#AAA'); })
     .mouseleave(function(){ item.css('background-color', ''); menu.hide(); })
     .click(function(){
@@ -1668,7 +1708,7 @@ wmaMenu.prototype.addMenu = function(html,menu,rtl) {
   menu.parent = this;
   return item;
 }
-wmaMenu.prototype.addCheck = function(html,func,selected) {
+wmaMenu.prototype.addCheck = function(html,func,selected,rtl) {
   function check() {
     if( selected ) { item.addClass('wmamenuchecked'); } 
     else { item.removeClass('wmamenuchecked'); }
@@ -1678,7 +1718,7 @@ wmaMenu.prototype.addCheck = function(html,func,selected) {
     check();
     func(selected);
   }
-  var item = this.addItem(html,click);
+  var item = this.addItem(html,click,rtl);
   func = func || (function(){});
   check();
   return {
@@ -1691,7 +1731,7 @@ wmaMenu.prototype.addCheck = function(html,func,selected) {
     check : check, item: item
   }
 }
-wmaMenu.prototype.addGroup = function(options,func,selected) {
+wmaMenu.prototype.addGroup = function(options,func,selected,rtl) {
   var items = [], that = this, current = -1;
   function select(n) {
     if( n === current ) { return; }
@@ -1705,7 +1745,7 @@ wmaMenu.prototype.addGroup = function(options,func,selected) {
   func = func || (function(){});
   for( var i=0; i<options.length; ++i ) {
     (function(n){
-      items[n] = that.addItem( options[n], function() { select(n); func(n); } );
+      items[n] = that.addItem( options[n], function() { select(n); func(n); }, rtl );
     })(i);
   }
   select(selected);
