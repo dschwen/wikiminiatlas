@@ -663,8 +663,9 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
   }
 
   function wmaNewTile() {
-    var d = $('<div></div>').addClass('wmatile').mousedown(mouseDownWikiMiniAtlasMap);
-    var t = {
+    var d = $('<div></div>').addClass('wmatile').mousedown(mouseDownWikiMiniAtlasMap)
+      , h = null
+      , t = {
       div : d,
       img : $('<img>')
         .load(function(){
@@ -672,7 +673,9 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
         })
         .error(function(){
           //console.log('onerror for tile ' + $(this).attr('src') );
-          $(this).attr("src",$(this).attr('src') + "?" + Math.random() );
+          h = setTimeout( function() {
+            t.img.attr("src",t.img.attr('src') + "?" + Math.random() );
+          }, 1000 );
         })
         .appendTo(d),
       span : $('<span></span>').appendTo(d),
