@@ -530,7 +530,6 @@ function wikiminiatlasInstall( wma_widget, url_params ) {
      '</select></p>' +
      //'<p class="option" style="font-size: 50%; color:gray">Debug info:<br>marker: ' + typeof(marker.lat) + ', ' + marker.lon + '<br>site:'+wma_site+', uilang'+wma_language+'</p>' +
      '<a href="//wiki.toolserver.org/" target="_top"><img src="//toolserver.org/images/wikimedia-toolserver-button.png" border="0"></a>' +
-     '</div>' +
      '</div>';
 
     wma_widget.html( WikiMiniAtlasHTML );
