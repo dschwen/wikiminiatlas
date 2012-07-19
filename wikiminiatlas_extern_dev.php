@@ -566,7 +566,7 @@ var labelcaption;
     menu.addItem(strings.settings[UILang],toggleSettings);
     $('#button_menu').click( function(){menu.toggle();} );
     $('#button_fs').click( wmaFullscreen );
-    $('#wma_widget').append(menu.div.css({ right: '40px', top: '26px',zIndex: 50, fontSize: '90%' }));
+    $('#wma_widget').append(menu.div.css({ right: '40px', top: '26px' }));
 
     l = strings.dyk[UILang];
     var news = $('<div></div>').html(l[Math.floor(Math.random()*l.length)]).addClass('news');
