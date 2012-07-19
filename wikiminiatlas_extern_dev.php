@@ -538,6 +538,23 @@ var labelcaption;
    
     // build and hook-up dropdown menu
     var menu = new wmaMenu(UIrtl);
+    menu.addTitle(strings.labelSet[UILang],UIrtl);
+    WikiMiniAtlasHTML = '<select id="wmaLabelSet">';
+    for( i in wikiminiatlas_sites ) {
+     if( i !== 'commons' ) {
+       WikiMiniAtlasHTML += '<option value="' + i + '"';
+        if( i == wma_site ) { WikiMiniAtlasHTML += 'selected="selected"'; }
+       WikiMiniAtlasHTML += '>' + wikiminiatlas_sites[i] + '</option>';
+     }
+    } 
+    WikiMiniAtlasHTML += '</select>';
+    menu.addGroup([
+      WikiMiniAtlasHTML,
+      "Commons"
+    ]);
+    menu.addSep();
+
+    menu.addTitle(strings.mode[UILang],UIrtl);
     menu.addGroup( (function(){ 
       var list = [];
       for( i = 0; i < wma_tilesets.length; i++ ) {
@@ -672,7 +689,8 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
           $(this).fadeIn(100);
         })
         .error(function(){
-          //console.log('onerror for tile ' + $(this).attr('src') );
+          // tile is probably not ready yet, try again in one second
+          // TODO: add max tries
           h = setTimeout( function() {
             t.img.attr("src",t.img.attr('src') + "?" + Math.random() );
           }, 1000 );
@@ -1684,6 +1702,12 @@ function wmaMenu(rtl) {
   this.div = $('<div></div>').addClass('wmamenu').css('direction',(rtl===true?'rtl':''));
   this.parent = null;
   this.shown = false;
+}
+wmaMenu.prototype.addTitle = function(html,rtl) {
+  var item = $('<div></div>').addClass('wmamenutitle').html(html)
+    .css('direction',(rtl===true)?'rtl':'')
+    .appendTo(this.div);
+  return item;
 }
 wmaMenu.prototype.addItem = function(html,func,rtl) {
   func = func || (function(){});

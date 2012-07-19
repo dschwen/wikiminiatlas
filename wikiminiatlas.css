@@ -293,6 +293,10 @@ div.wmatile {
   width:128px; 
   height:128px;
 }
+div.wmatile>img, div.wmatile>span {
+  position: absolute;
+  top: 0; left: 0;
+}
 
 canvas.wmakml {
   position: absolute;
@@ -322,6 +326,10 @@ div.wmamenu {
   border: 1px solid black;
   box-shadow: 2px 2px 5px rgba(0,0,0,0.3);
   -webkit-user-select: none; -moz-user-select: none; user-select: none;
+}
+div.wmamenutitle {
+  padding: 10px 2px 2px 1em;
+  font-weight: bold;
 }
 div.wmamenuitem {
   padding: 2px 2px 2px 1em;

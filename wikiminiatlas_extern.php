@@ -672,7 +672,8 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
           $(this).fadeIn(100);
         })
         .error(function(){
-          //console.log('onerror for tile ' + $(this).attr('src') );
+          // tile is probably not ready yet, try again in one second
+          // TODO: add max tries
           h = setTimeout( function() {
             t.img.attr("src",t.img.attr('src') + "?" + Math.random() );
           }, 1000 );
