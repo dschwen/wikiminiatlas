@@ -88,7 +88,7 @@ var wma_tilesets = [
   getTileURL: function(y,x,z, norot) {
    var x1 = x % (wma_zoomsize[z]*2);
    if( x1<0 ) x1+=(wma_zoomsize[z]*2);
-   if(norot) {
+   if( norot || document.location.protocol=='https:' ) {
     return wma_imgbase + 'mapnik/sat/' +
              z + '/' + y + '/' + y + '_' + ( x1 % ( wma_zoomsize[z] * 2 ) ) + '.png';
    } else {
@@ -254,8 +254,6 @@ function wikiminiatlasInstall( wma_widget, url_params ) {
   var wma_ny;
   var wma_tile;
   var wma_tileurl = [];
-  var wma_old_onmouseup;
-  var wma_old_onmousemove;
   var wma_dragging = null;
   var wma_mdcoord = { x: -1, y: -1 };
   var wma_gx = 0;
@@ -513,14 +511,8 @@ var labelcaption;
     }
 
     WikiMiniAtlasHTML +=
-     '</select></p>' +
-     '<p class="option">' + strings.linkColor[UILang] + ' <select id="wmaLinkColor">' +
-     '<option value="#2255aa">'+ strings.blue[UILang ] +'</option>' +
-     '<option value="red">'    + strings.red[UILang]   +'</option>' +
-     '<option value="white">'  + strings.white[UILang] +'</option>' + 
-     '<option value="black">'  + strings.black[UILang] +'</option></select></p>' +
+     '</select></p><p class="option">' + 'Size Comparison' + ' <select id="wmaSetSizeOverlay">';
 
-     '<p class="option">' + 'Size Comparison' + ' <select id="wmaSetSizeOverlay">';
     l = strings.sover[UILang].list;
     WikiMiniAtlasHTML += '<option value="-" class="bg" selected="selected">-</option>';
     WikiMiniAtlasHTML += '<option value="+" class="bg">'+strings.other[UILang]+'</option>';
@@ -583,7 +575,6 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
     wma_settings = document.getElementById('wma_settings');
 
     $('#wmaLabelSet').change( function() { wmaLabelSet( this.value ) } );
-    $('#wmaLinkColor').change( function() { wmaLinkColor( this.value ) } );
     $('#wmaSetSizeOverlay').change( function() { wmaSetSizeOverlay( strings.sover[UILang].site, this.value ) } );
    
     $('#button_plus').bind('mousedown', wmaZoomIn );
@@ -602,10 +593,6 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
         if( r.x != wma_mdcoord.x || 
             r.y != wma_mdcoord.y ) return false; 
       } );
-
-
-    wma_old_onmouseup = document.onmouseup || null;
-    wma_old_onmousemove = document.onmousemove || null;
 
     initializeWikiMiniAtlasMap();
     moveWikiMiniAtlasMapTo();
@@ -709,7 +696,9 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
     var i, j;
     if(wma_map === null)
     {
-      $(document).mousemove(mouseMoveWikiMiniAtlasMap).mouseup(mouseUpWikiMiniAtlasMap);
+      $(document)
+        .mousemove(mouseMoveWikiMiniAtlasMap)
+        .mouseup( function(){ wma_dragging = null; } );
       $('#wma_map').dblclick(wmaDblclick).mousedown(mouseDownWikiMiniAtlasMap);
       wma_map = document.getElementById('wma_map');
 
@@ -1051,32 +1040,22 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
 
   // position marker
   function updateMarker(m) {
-   var newcoords = wmaLatLonToXY( m.lat, m.lon );
-   var newx = ( newcoords.x - wma_gx );
+   var newcoords = wmaLatLonToXY( m.lat, m.lon )
+     , newx = ( newcoords.x - wma_gx );
    if( newx < -100 ) newx += ( wma_zoomsize[wma_zoom] * 256 );
    m.obj.css( 'left', (newx-6)+'px' );
    m.obj.css( 'top',  (newcoords.y-wma_gy-6)+'px' );
   }
 
   // Mouse down handler (start map-drag)
-  function mouseDownWikiMiniAtlasMap(ev)
-  {
-   ev = ev || window.event;
-   wma_mdcoord = wma_dragging = wmaMouseCoords(ev);
-  }
-
-  // Mouse up handler (finish map-drag)
-  function mouseUpWikiMiniAtlasMap()
-  {
-   wma_dragging = null;
-   if( wma_old_onmouseup !== null ) wma_old_onmouseup();
+  function mouseDownWikiMiniAtlasMap(ev) {
+    wma_mdcoord = wma_dragging = wmaMouseCoords(ev);
   }
 
   // Mouse move handler
   function mouseMoveWikiMiniAtlasMap(ev) {
     window.scrollTo(0,0);
-    var newev = ev || window.event
-      , newcoords = wmaMouseCoords(newev);
+    var newcoords = wmaMouseCoords(ev);
 
     if( wma_dragging !== null )
     {
@@ -1101,13 +1080,9 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
     //rotate globe
     var mapcenter = wmaXYToLatLon(wma_gx+wma_width/2,wma_gy+wma_height/2);
     wmaGlobe && wmaGlobe.setLatLon(mapcenter.lat,mapcenter.lon);
-   
-    // call old handler (should never happen)
-    if( wma_old_onmousemove !== null ) { wma_old_onmousemove(ev); } 
   }
 
   function wmaDblclick(ev) {
-   ev = ev || window.event;
    var test = wmaMouseCoords(ev);
 
    wma_gx += test.x - wma_width/2;
@@ -1325,14 +1300,6 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
    moveWikiMiniAtlasMapTo();
    //toggleSettings();
    wmaGlobeLoadTiles();
-  }
-
-  function wmaLinkColor(c,s) {
-    wmaLinkStyle.color = c;
-    s && ( wmaLinkStyle.textShadow = s );
-    $('a.label').css(wmaLinkStyle);
-    toggleSettings();
-    return false;
   }
 
   function wmaLabelSet(s,noset) {

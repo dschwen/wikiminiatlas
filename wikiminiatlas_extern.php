@@ -88,7 +88,7 @@ var wma_tilesets = [
   getTileURL: function(y,x,z, norot) {
    var x1 = x % (wma_zoomsize[z]*2);
    if( x1<0 ) x1+=(wma_zoomsize[z]*2);
-   if(norot) {
+   if( norot || document.location.protocol=='https:' ) {
     return wma_imgbase + 'mapnik/sat/' +
              z + '/' + y + '/' + y + '_' + ( x1 % ( wma_zoomsize[z] * 2 ) ) + '.png';
    } else {
