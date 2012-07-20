@@ -529,33 +529,45 @@ var labelcaption;
     wma_widget.html( WikiMiniAtlasHTML );
    
     // build and hook-up dropdown menu
+    
     var menu = new wmaMenu(UIrtl);
-    menu.addTitle(strings.labelSet[UILang],UIrtl);
-    WikiMiniAtlasHTML = '<select id="wmaLabelSet">';
-    for( i in wikiminiatlas_sites ) {
-     if( i !== 'commons' ) {
-       WikiMiniAtlasHTML += '<option value="' + i + '"';
-        if( i == wma_site ) { WikiMiniAtlasHTML += 'selected="selected"'; }
-       WikiMiniAtlasHTML += '>' + wikiminiatlas_sites[i] + '</option>';
-     }
-    } 
-    WikiMiniAtlasHTML += '</select>';
-    menu.addGroup([
-      WikiMiniAtlasHTML,
-      "Commons"
-    ]);
-    menu.addSep();
+    (function(){
+      var i,g;
 
-    menu.addTitle(strings.mode[UILang],UIrtl);
-    menu.addGroup( (function(){ 
-      var list = [];
-      for( i = 0; i < wma_tilesets.length; i++ ) {
-        list.push(strings[wma_tilesets[i].name][UILang] || '');
-      }
-      return list;
-    })(), wmaSelectTileset, wma_tileset );
-    menu.addSep();
-    menu.addItem(strings.settings[UILang],toggleSettings);
+      menu.addTitle(strings.labelSet[UILang],UIrtl);
+      WikiMiniAtlasHTML = '<select id="wmaLabelSet">';
+      for( i in wikiminiatlas_sites ) {
+       if( i !== 'commons' ) {
+         WikiMiniAtlasHTML += '<option value="' + i + '"';
+          if( i == wma_site ) { WikiMiniAtlasHTML += 'selected="selected"'; }
+         WikiMiniAtlasHTML += '>' + wikiminiatlas_sites[i] + '</option>';
+       }
+      } 
+      WikiMiniAtlasHTML += '</select>';
+      g = menu.addGroup([
+        WikiMiniAtlasHTML,
+        "Commons"
+      ]);
+      g.items[0].find('select')
+        .click(function(e){
+          e.stopPropagation();
+        })
+        .change(function(e){
+          g.items[0].click();
+        });
+      menu.addSep();
+
+      menu.addTitle(strings.mode[UILang],UIrtl);
+      menu.addGroup( (function(){ 
+        var list = [];
+        for( i = 0; i < wma_tilesets.length; i++ ) {
+          list.push(strings[wma_tilesets[i].name][UILang] || '');
+        }
+        return list;
+      })(), wmaSelectTileset, wma_tileset );
+      menu.addSep();
+      menu.addItem(strings.settings[UILang],toggleSettings);
+    })();
     $('#button_menu').click( function(){menu.toggle();} );
     $('#button_fs').click( wmaFullscreen );
     $('#wma_widget').append(menu.div.css({ right: '40px', top: '26px' }));
