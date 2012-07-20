@@ -324,6 +324,8 @@ div.wmamenu {
   padding: 2px;
   background-color: white;
   border: 1px solid black;
+  font-size: 80%;
+  z-index: 50;
   box-shadow: 2px 2px 5px rgba(0,0,0,0.3);
   -webkit-user-select: none; -moz-user-select: none; user-select: none;
 }
@@ -332,8 +334,12 @@ div.wmamenutitle {
   font-weight: bold;
 }
 div.wmamenuitem {
-  padding: 2px 2px 2px 1em;
+  padding: 3px 2px 3px 1em;
   cursor: pointer;
+}
+div.wmamenuitem > select {
+  background-color: white;
+  border: 1px solid lightgray;
 }
 div.wmasubmenu {
   padding: 2px 20px 2px 1em;
