@@ -545,15 +545,20 @@ var labelcaption;
       } 
       WikiMiniAtlasHTML += '</select>';
       g = menu.addGroup([
-        WikiMiniAtlasHTML,
-        "Commons"
-      ]);
-      g.items[0].find('select')
+        ['LANG',WikiMiniAtlasHTML],
+        ['commons',wikiminiatlas_sites['commons']]
+      ],function(s) {
+        if(s=='LANG') {
+          s=g.items['LANG'].find('select option:selected').val();
+        }
+        wmaLabelSet(s);
+      },wma_site=='commons'?'commons':'LANG',UIrtl);
+      g.items['LANG'].find('select')
         .click(function(e){
           e.stopPropagation();
         })
         .change(function(e){
-          g.items[0].click();
+          g.items['LANG'].click();
         });
       menu.addSep();
 
@@ -1314,14 +1319,12 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
    wmaGlobeLoadTiles();
   }
 
-  function wmaLabelSet(s,noset) {
-   wma_site = s;
-   for( var n = 0; n < wma_nx * wma_ny; n++) {
-     wma_tile[n].url='';
-   }
-   moveWikiMiniAtlasMapTo();
-   if(noset !== true ) { toggleSettings(); }
-   return false;
+  function wmaLabelSet(s) {
+    wma_site = s;
+    for( var n = 0; n < wma_nx * wma_ny; n++) {
+      wma_tile[n].url='';
+    }
+    moveWikiMiniAtlasMapTo();
   }
 
   function wmaUpdateScalebar() {
@@ -1738,25 +1741,36 @@ wmaMenu.prototype.addCheck = function(html,func,selected,rtl) {
   }
 }
 wmaMenu.prototype.addGroup = function(options,func,selected,rtl) {
-  var items = [], that = this, current = -1;
+  var items = {}, that = this, current = -1;
   function select(n) {
     if( n === current ) { return; }
-    for( var i = 0; i<items.length; ++i ) {
+    for( var i in items ) {
       if( i===n ) { items[i].addClass('wmamenuselected'); } 
       else { items[i].removeClass('wmamenuselected'); }
     }
     current = n;
   }
+  function addOption(n,t){
+    items[n] = that.addItem( t, function() { select(n); func(n); }, rtl );
+  }
   selected = selected || 0;
   func = func || (function(){});
   for( var i=0; i<options.length; ++i ) {
-    (function(n){
-      items[n] = that.addItem( options[n], function() { select(n); func(n); }, rtl );
-    })(i);
+    if( typeof(options[i])==='object' ) {
+      addOption(options[i][0],options[i][1]);
+    } else {
+      addOption(i,options[i]);
+    }
   }
   select(selected);
   return {
-    items: items, select: select
+    items: items, select: select,
+    hide: function() {
+      for( var i in items ) { items[i].hide(); }
+    },
+    show: function() {
+      for( var i in items ) { items[i].show(); }
+    }
   }
 }
 wmaMenu.prototype.addSep = function() { 
