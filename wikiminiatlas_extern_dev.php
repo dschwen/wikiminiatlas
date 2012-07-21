@@ -337,7 +337,7 @@ var labelcaption;
           tmap = $('<canvas></canvas>').attr( { width: 6*128, height: 3*128 } ).css( { display: 'none' } ),
           omap = $('<canvas></canvas>').attr( { width: 6*128, height: 3*128 } ).css( { display: 'none' } ),
           shadow =  $('<div></div>')
-            .css( { position: 'absolute', width: '80px', height: '80px', bottom: '20px', right: '5px', zIndex: 50, display: 'none', borderRadius: '40px', '-moz-border-radius': '40px', boxShadow:'5px 5px 25px rgba(0,0,0,0.3)' } );
+            .css( { position: 'absolute', width: '80px', height: '80px', bottom: '20px', right: '5px', zIndex: 50, display: 'none', borderRadius: '40px', '-moz-border-radius': '40px', boxShadow:'5px 5px 25px rgba(0,0,0,0.3)' } ),
           globe = $('<canvas></canvas>')
             .attr( { width: 160, height: 160 } )
             .css( { position: 'absolute', width: '80px', height: '80px', bottom: '20px', right: '5px', zIndex: 51, display: 'none' } );
@@ -576,27 +576,28 @@ var labelcaption;
       } 
       WikiMiniAtlasHTML += '</select>';
       menu.addTitle('Solar system',UIrtl);
-      i = menu.addItem(WikiMiniAtlasHTML,undefined,UIrtl);
-      i.find('select')
+      var gmenu = menu.addItem(WikiMiniAtlasHTML,undefined,UIrtl);
+      gmenu.find('select')
         .click(function(e){ e.stopPropagation(); })
-        .change(function(e){ i.click(); });
+        .change(function(e){ 
+          var n = $(this).find('option:selected').val();
+          globes[globe].hide();
+          globes[n].show();
+          globe = n;
+          gmenu.click(); 
+        });
       menu.addSep();
 
       // insert a group for every globe
       menu.addTitle(strings.mode[UILang],UIrtl);
       for( i in globes ) {
-        globes[i] = menu.addGroup( (function(){ 
-          var list = [];
-          for( j = 0; j < globes[i].length; j++ ) {
-            list.push([globes[i][j][0],globes[i][j][1]]);
-          }
-          return list;
-        })(), wmaSelectTileset, globes[i][0] );
+        globes[i] = menu.addGroup( globes[i], wmaSelectTileset, globes[i][0][0], UIrtl );
+        if( i !== globe ) { globes[i].hide(); }
         menu.addSep();
       }
-      menu.addSep();
       menu.addItem(strings.settings[UILang],toggleSettings);
     })();
+
     $('#button_menu').click( function(){menu.toggle();} );
     $('#button_fs').click( wmaFullscreen );
     $('#wma_widget').append(menu.div.css({ right: '40px', top: '26px' }));
