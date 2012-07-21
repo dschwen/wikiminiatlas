@@ -278,6 +278,7 @@ function wikiminiatlasInstall( wma_widget, url_params ) {
 
   var scalelabel = null;
   var scalebar = null;
+  var globe = null;
 
   var synopsis = null;
   var synopsis_filter = null;
@@ -309,8 +310,9 @@ var labelcaption;
     var coord_params = url_params['wma'] || (window.location.search).substr(1)
       , page = url_params['page']
       , lang = url_params['lang']
-      , globe = url_params['globe'] || "Earth"
       , synopsis_current = '';
+
+    globe = url_params['globe'] || "Earth"
 
     // launch the WIWOSM request (if a page was passed)
     if( page && hasCanvas ) {
@@ -532,8 +534,9 @@ var labelcaption;
     
     var menu = new wmaMenu(UIrtl);
     (function(){
-      var i,g;
+      var i,j,l=[],g;
 
+      // Label selection menu section
       menu.addTitle(strings.labelSet[UILang],UIrtl);
       WikiMiniAtlasHTML = '<select id="wmaLabelSet">';
       for( i in wikiminiatlas_sites ) {
@@ -554,22 +557,43 @@ var labelcaption;
         wmaLabelSet(s);
       },wma_site=='commons'?'commons':'LANG',UIrtl);
       g.items['LANG'].find('select')
-        .click(function(e){
-          e.stopPropagation();
-        })
-        .change(function(e){
-          g.items['LANG'].click();
-        });
+        .click(function(e){ e.stopPropagation(); })
+        .change(function(e){ g.items['LANG'].click(); });
       menu.addSep();
 
+      // Globe and layer selection sections
+      var globes = {};
+      for( i = 0; i < wma_tilesets.length; i++ ) {
+        j = wma_tilesets[i].globe;
+        globes[j] = globes[j] || [];
+        globes[j].push( [i, strings[wma_tilesets[i].name][UILang] || ''] );
+      }
+      WikiMiniAtlasHTML = '<select id="wmaGlobeSet">';
+      for( i in globes ) {
+         WikiMiniAtlasHTML += '<option value="' + i + '"';
+          if( i == globe ) { WikiMiniAtlasHTML += 'selected="selected"'; }
+         WikiMiniAtlasHTML += '>' + i + '</option>';
+      } 
+      WikiMiniAtlasHTML += '</select>';
+      menu.addTitle('Solar system',UIrtl);
+      i = menu.addItem(WikiMiniAtlasHTML,undefined,UIrtl);
+      i.find('select')
+        .click(function(e){ e.stopPropagation(); })
+        .change(function(e){ i.click(); });
+      menu.addSep();
+
+      // insert a group for every globe
       menu.addTitle(strings.mode[UILang],UIrtl);
-      menu.addGroup( (function(){ 
-        var list = [];
-        for( i = 0; i < wma_tilesets.length; i++ ) {
-          list.push(strings[wma_tilesets[i].name][UILang] || '');
-        }
-        return list;
-      })(), wmaSelectTileset, wma_tileset );
+      for( i in globes ) {
+        globes[i] = menu.addGroup( (function(){ 
+          var list = [];
+          for( j = 0; j < globes[i].length; j++ ) {
+            list.push([globes[i][j][0],globes[i][j][1]]);
+          }
+          return list;
+        })(), wmaSelectTileset, globes[i][0] );
+        menu.addSep();
+      }
       menu.addSep();
       menu.addItem(strings.settings[UILang],toggleSettings);
     })();
