@@ -133,7 +133,7 @@ var wma_tilesets = [
   minzoom: 0
  },*/
  {
-  name: "mapMoon",
+  name: "mapPhysical",
   globe: "Moon",
   getTileURL: function(y,x,z) 
   { 
@@ -148,7 +148,7 @@ var wma_tilesets = [
   minzoom: 0
  },
  {
-  name: "mapMoon",
+  name: "mapLandsat",
   globe: "Moon",
   getTileURL: function(y,x,z) 
   { 
@@ -163,7 +163,7 @@ var wma_tilesets = [
   minzoom: 0
  },
  {
-  name: "mapMars",
+  name: "mapLandsat",
   globe: "Mars",
   getTileURL: function(y,x,z) 
   { 
@@ -178,7 +178,7 @@ var wma_tilesets = [
   minzoom: 0
  },
  {
-  name: "mapVenus",
+  name: "mapPhysical",
   globe: "Venus",
   getTileURL: function(y,x,z) 
   { 
@@ -193,7 +193,7 @@ var wma_tilesets = [
   minzoom: 0
  },
  {
-  name: "mapMercury",
+  name: "mapLandsat",
   globe: "Mercury",
   getTileURL: function(y,x,z) 
   { 
@@ -208,7 +208,7 @@ var wma_tilesets = [
   minzoom: 0
  },
  {
-  name: "mapIo",
+  name: "mapLandsat",
   globe: "Io",
   getTileURL: function(y,x,z) 
   { 
@@ -337,7 +337,7 @@ var labelcaption;
           tmap = $('<canvas></canvas>').attr( { width: 6*128, height: 3*128 } ).css( { display: 'none' } ),
           omap = $('<canvas></canvas>').attr( { width: 6*128, height: 3*128 } ).css( { display: 'none' } ),
           shadow =  $('<div></div>')
-            .css( { position: 'absolute', width: '80px', height: '80px', bottom: '20px', right: '5px', zIndex: 50, display: 'none', borderRadius: '40px', '-moz-border-radius': '40px', boxShadow:'5px 5px 25px rgba(0,0,0,0.3)' } );
+            .css( { position: 'absolute', width: '80px', height: '80px', bottom: '20px', right: '5px', zIndex: 50, display: 'none', borderRadius: '40px', '-moz-border-radius': '40px', boxShadow:'5px 5px 25px rgba(0,0,0,0.3)' } ),
           globe = $('<canvas></canvas>')
             .attr( { width: 160, height: 160 } )
             .css( { position: 'absolute', width: '80px', height: '80px', bottom: '20px', right: '5px', zIndex: 51, display: 'none' } );
@@ -498,22 +498,7 @@ var labelcaption;
     WikiMiniAtlasHTML += 
      '<div id="wma_settings">' +
      '<h4>' + strings.settings[UILang] + '</h4>' +
-     '<p class="option">' + strings.labelSet[UILang] + ' <select id="wmaLabelSet">';
-
-    for( i in wikiminiatlas_sites )
-    {
-     WikiMiniAtlasHTML +=
-      '<option value="' + i + '"';
-
-     if( i == wma_site ) 
-      WikiMiniAtlasHTML += 'selected="selected"'; 
-
-     WikiMiniAtlasHTML +=
-      '>' + wikiminiatlas_sites[i] + '</option>';
-    }
-
-    WikiMiniAtlasHTML +=
-     '</select></p><p class="option">' + 'Size Comparison' + ' <select id="wmaSetSizeOverlay">';
+     '<p class="option">' + 'Size Comparison' + ' <select id="wmaSetSizeOverlay">';
 
     l = strings.sover[UILang].list;
     WikiMiniAtlasHTML += '<option value="-" class="bg" selected="selected">-</option>';
@@ -572,31 +557,33 @@ var labelcaption;
       for( i in globes ) {
          WikiMiniAtlasHTML += '<option value="' + i + '"';
           if( i == globe ) { WikiMiniAtlasHTML += 'selected="selected"'; }
-         WikiMiniAtlasHTML += '>' + i + '</option>';
+         WikiMiniAtlasHTML += '>' + strings['map'+i][UILang] + '</option>';
       } 
       WikiMiniAtlasHTML += '</select>';
       menu.addTitle('Solar system',UIrtl);
-      i = menu.addItem(WikiMiniAtlasHTML,undefined,UIrtl);
-      i.find('select')
+      var gmenu = menu.addItem(WikiMiniAtlasHTML,undefined,UIrtl);
+      gmenu.find('select')
         .click(function(e){ e.stopPropagation(); })
-        .change(function(e){ i.click(); });
+        .change(function(e){ 
+          var n = $(this).find('option:selected').val();
+          globes[globe].hide();
+          globes[n].show();
+          globe = n;
+          gmenu.click(); 
+          wmaSelectTileset(globes[n].current());
+        });
       menu.addSep();
 
       // insert a group for every globe
       menu.addTitle(strings.mode[UILang],UIrtl);
       for( i in globes ) {
-        globes[i] = menu.addGroup( (function(){ 
-          var list = [];
-          for( j = 0; j < globes[i].length; j++ ) {
-            list.push([globes[i][j][0],globes[i][j][1]]);
-          }
-          return list;
-        })(), wmaSelectTileset, globes[i][0] );
+        globes[i] = menu.addGroup( globes[i], wmaSelectTileset, globes[i][0][0], UIrtl );
+        if( i !== globe ) { globes[i].hide(); }
         menu.addSep();
       }
-      menu.addSep();
-      menu.addItem(strings.settings[UILang],toggleSettings);
+      menu.addItem(strings.sizeRef[UILang],toggleSettings);
     })();
+
     $('#button_menu').click( function(){menu.toggle();} );
     $('#button_fs').click( wmaFullscreen );
     $('#wma_widget').append(menu.div.css({ right: '40px', top: '26px' }));
@@ -1767,9 +1754,9 @@ wmaMenu.prototype.addCheck = function(html,func,selected,rtl) {
 wmaMenu.prototype.addGroup = function(options,func,selected,rtl) {
   var items = {}, that = this, current = -1;
   function select(n) {
-    if( n === current ) { return; }
+    if( n == current ) { return; }
     for( var i in items ) {
-      if( i===n ) { items[i].addClass('wmamenuselected'); } 
+      if( i==n ) { items[i].addClass('wmamenuselected'); } 
       else { items[i].removeClass('wmamenuselected'); }
     }
     current = n;
@@ -1789,6 +1776,9 @@ wmaMenu.prototype.addGroup = function(options,func,selected,rtl) {
   select(selected);
   return {
     items: items, select: select,
+    current : function() {
+      return current;
+    },
     hide: function() {
       for( var i in items ) { items[i].hide(); }
     },
