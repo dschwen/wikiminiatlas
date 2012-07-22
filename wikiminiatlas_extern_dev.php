@@ -133,7 +133,7 @@ var wma_tilesets = [
   minzoom: 0
  },*/
  {
-  name: "mapMoon",
+  name: "mapPhysical",
   globe: "Moon",
   getTileURL: function(y,x,z) 
   { 
@@ -148,7 +148,7 @@ var wma_tilesets = [
   minzoom: 0
  },
  {
-  name: "mapMoon",
+  name: "mapLandsat",
   globe: "Moon",
   getTileURL: function(y,x,z) 
   { 
@@ -163,7 +163,7 @@ var wma_tilesets = [
   minzoom: 0
  },
  {
-  name: "mapMars",
+  name: "mapLandsat",
   globe: "Mars",
   getTileURL: function(y,x,z) 
   { 
@@ -178,7 +178,7 @@ var wma_tilesets = [
   minzoom: 0
  },
  {
-  name: "mapVenus",
+  name: "mapPhysical",
   globe: "Venus",
   getTileURL: function(y,x,z) 
   { 
@@ -193,7 +193,7 @@ var wma_tilesets = [
   minzoom: 0
  },
  {
-  name: "mapMercury",
+  name: "mapLandsat",
   globe: "Mercury",
   getTileURL: function(y,x,z) 
   { 
@@ -208,7 +208,7 @@ var wma_tilesets = [
   minzoom: 0
  },
  {
-  name: "mapIo",
+  name: "mapLandsat",
   globe: "Io",
   getTileURL: function(y,x,z) 
   { 
@@ -498,22 +498,7 @@ var labelcaption;
     WikiMiniAtlasHTML += 
      '<div id="wma_settings">' +
      '<h4>' + strings.settings[UILang] + '</h4>' +
-     '<p class="option">' + strings.labelSet[UILang] + ' <select id="wmaLabelSet">';
-
-    for( i in wikiminiatlas_sites )
-    {
-     WikiMiniAtlasHTML +=
-      '<option value="' + i + '"';
-
-     if( i == wma_site ) 
-      WikiMiniAtlasHTML += 'selected="selected"'; 
-
-     WikiMiniAtlasHTML +=
-      '>' + wikiminiatlas_sites[i] + '</option>';
-    }
-
-    WikiMiniAtlasHTML +=
-     '</select></p><p class="option">' + 'Size Comparison' + ' <select id="wmaSetSizeOverlay">';
+     '<p class="option">' + 'Size Comparison' + ' <select id="wmaSetSizeOverlay">';
 
     l = strings.sover[UILang].list;
     WikiMiniAtlasHTML += '<option value="-" class="bg" selected="selected">-</option>';
@@ -572,7 +557,7 @@ var labelcaption;
       for( i in globes ) {
          WikiMiniAtlasHTML += '<option value="' + i + '"';
           if( i == globe ) { WikiMiniAtlasHTML += 'selected="selected"'; }
-         WikiMiniAtlasHTML += '>' + i + '</option>';
+         WikiMiniAtlasHTML += '>' + strings['map'+i][UILang] + '</option>';
       } 
       WikiMiniAtlasHTML += '</select>';
       menu.addTitle('Solar system',UIrtl);
@@ -585,6 +570,7 @@ var labelcaption;
           globes[n].show();
           globe = n;
           gmenu.click(); 
+          wmaSelectTileset(globes[n].current());
         });
       menu.addSep();
 
@@ -1768,9 +1754,9 @@ wmaMenu.prototype.addCheck = function(html,func,selected,rtl) {
 wmaMenu.prototype.addGroup = function(options,func,selected,rtl) {
   var items = {}, that = this, current = -1;
   function select(n) {
-    if( n === current ) { return; }
+    if( n == current ) { return; }
     for( var i in items ) {
-      if( i===n ) { items[i].addClass('wmamenuselected'); } 
+      if( i==n ) { items[i].addClass('wmamenuselected'); } 
       else { items[i].removeClass('wmamenuselected'); }
     }
     current = n;
@@ -1790,6 +1776,9 @@ wmaMenu.prototype.addGroup = function(options,func,selected,rtl) {
   select(selected);
   return {
     items: items, select: select,
+    current : function() {
+      return current;
+    },
     hide: function() {
       for( var i in items ) { items[i].hide(); }
     },
