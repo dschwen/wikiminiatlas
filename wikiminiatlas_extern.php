@@ -534,7 +534,7 @@ var labelcaption;
       WikiMiniAtlasHTML += '</select>';
       g = menu.addGroup([
         ['LANG',WikiMiniAtlasHTML],
-        ['commons',wikiminiatlas_sites['commons']]
+        ['commons',strings['commons'][UILang]]
       ],function(s) {
         if(s=='LANG') {
           s=g.items['LANG'].find('select option:selected').val();
@@ -560,7 +560,7 @@ var labelcaption;
          WikiMiniAtlasHTML += '>' + strings['map'+i][UILang] + '</option>';
       } 
       WikiMiniAtlasHTML += '</select>';
-      menu.addTitle('Solar system',UIrtl);
+      menu.addTitle(strings.solarSystem[UILang],UIrtl);
       var gmenu = menu.addItem(WikiMiniAtlasHTML,undefined,UIrtl);
       gmenu.find('select')
         .click(function(e){ e.stopPropagation(); })

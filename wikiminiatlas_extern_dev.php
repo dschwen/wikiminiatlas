@@ -509,7 +509,7 @@ var labelcaption;
     }
     WikiMiniAtlasHTML +=
      '</select></p>' +
-     //'<p class="option" style="font-size: 50%; color:gray">Debug info:<br>marker: ' + typeof(marker.lat) + ', ' + marker.lon + '<br>site:'+wma_site+', uilang'+wma_language+'</p>' +
+     //'<p class="option" style="font-size: 50%; color:gray">Debug info:<br>marker: ' + (typeof marker.lat) + ', ' + marker.lon + '<br>site:'+wma_site+', uilang'+wma_language+'</p>' +
      '<a href="//wiki.toolserver.org/" target="_top"><img src="//toolserver.org/images/wikimedia-toolserver-button.png" border="0"></a>' +
      '</div>';
 
@@ -534,7 +534,7 @@ var labelcaption;
       WikiMiniAtlasHTML += '</select>';
       g = menu.addGroup([
         ['LANG',WikiMiniAtlasHTML],
-        ['commons',wikiminiatlas_sites['commons']]
+        ['commons',strings['commons'][UILang]]
       ],function(s) {
         if(s=='LANG') {
           s=g.items['LANG'].find('select option:selected').val();
@@ -560,7 +560,7 @@ var labelcaption;
          WikiMiniAtlasHTML += '>' + strings['map'+i][UILang] + '</option>';
       } 
       WikiMiniAtlasHTML += '</select>';
-      menu.addTitle('Solar system',UIrtl);
+      menu.addTitle(strings.solarSystem[UILang],UIrtl);
       var gmenu = menu.addItem(WikiMiniAtlasHTML,undefined,UIrtl);
       gmenu.find('select')
         .click(function(e){ e.stopPropagation(); })
@@ -1767,7 +1767,7 @@ wmaMenu.prototype.addGroup = function(options,func,selected,rtl) {
   selected = selected || 0;
   func = func || (function(){});
   for( var i=0; i<options.length; ++i ) {
-    if( typeof(options[i])==='object' ) {
+    if( typeof options[i] === 'object' ) {
       addOption(options[i][0],options[i][1]);
     } else {
       addOption(i,options[i]);
