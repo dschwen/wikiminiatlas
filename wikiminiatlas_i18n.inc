@@ -28,6 +28,10 @@ var wikiminiatlas_sites = {
 
 var strings =
 {
+ sizeRef : {
+   en: 'Size reference',
+   de: 'Größenvergleich'
+ },
  mapEarth : {
    'en': 'Earth',
    'ace': 'Bumoë',
