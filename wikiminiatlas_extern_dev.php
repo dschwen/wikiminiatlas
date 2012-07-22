@@ -581,7 +581,7 @@ var labelcaption;
         if( i !== globe ) { globes[i].hide(); }
         menu.addSep();
       }
-      menu.addItem(strings.settings[UILang],toggleSettings);
+      menu.addItem(strings.sizeRef[UILang],toggleSettings);
     })();
 
     $('#button_menu').click( function(){menu.toggle();} );
