@@ -133,7 +133,7 @@ var wma_tilesets = [
   minzoom: 0
  },*/
  {
-  name: "mapMoon",
+  name: "mapPhysical",
   globe: "Moon",
   getTileURL: function(y,x,z) 
   { 
@@ -148,7 +148,7 @@ var wma_tilesets = [
   minzoom: 0
  },
  {
-  name: "mapMoon",
+  name: "mapLandsat",
   globe: "Moon",
   getTileURL: function(y,x,z) 
   { 
@@ -163,7 +163,7 @@ var wma_tilesets = [
   minzoom: 0
  },
  {
-  name: "mapMars",
+  name: "mapLandsat",
   globe: "Mars",
   getTileURL: function(y,x,z) 
   { 
@@ -178,7 +178,7 @@ var wma_tilesets = [
   minzoom: 0
  },
  {
-  name: "mapVenus",
+  name: "mapPhysical",
   globe: "Venus",
   getTileURL: function(y,x,z) 
   { 
@@ -193,7 +193,7 @@ var wma_tilesets = [
   minzoom: 0
  },
  {
-  name: "mapMercury",
+  name: "mapLandsat",
   globe: "Mercury",
   getTileURL: function(y,x,z) 
   { 
@@ -208,7 +208,7 @@ var wma_tilesets = [
   minzoom: 0
  },
  {
-  name: "mapIo",
+  name: "mapLandsat",
   globe: "Io",
   getTileURL: function(y,x,z) 
   { 
@@ -254,8 +254,6 @@ function wikiminiatlasInstall( wma_widget, url_params ) {
   var wma_ny;
   var wma_tile;
   var wma_tileurl = [];
-  var wma_old_onmouseup;
-  var wma_old_onmousemove;
   var wma_dragging = null;
   var wma_mdcoord = { x: -1, y: -1 };
   var wma_gx = 0;
@@ -280,6 +278,7 @@ function wikiminiatlasInstall( wma_widget, url_params ) {
 
   var scalelabel = null;
   var scalebar = null;
+  var globe = null;
 
   var synopsis = null;
   var synopsis_filter = null;
@@ -311,8 +310,9 @@ var labelcaption;
     var coord_params = url_params['wma'] || (window.location.search).substr(1)
       , page = url_params['page']
       , lang = url_params['lang']
-      , globe = url_params['globe'] || "Earth"
       , synopsis_current = '';
+
+    globe = url_params['globe'] || "Earth"
 
     // launch the WIWOSM request (if a page was passed)
     if( page && hasCanvas ) {
@@ -337,7 +337,7 @@ var labelcaption;
           tmap = $('<canvas></canvas>').attr( { width: 6*128, height: 3*128 } ).css( { display: 'none' } ),
           omap = $('<canvas></canvas>').attr( { width: 6*128, height: 3*128 } ).css( { display: 'none' } ),
           shadow =  $('<div></div>')
-            .css( { position: 'absolute', width: '80px', height: '80px', bottom: '20px', right: '5px', zIndex: 50, display: 'none', borderRadius: '40px', '-moz-border-radius': '40px', boxShadow:'5px 5px 25px rgba(0,0,0,0.3)' } );
+            .css( { position: 'absolute', width: '80px', height: '80px', bottom: '20px', right: '5px', zIndex: 50, display: 'none', borderRadius: '40px', '-moz-border-radius': '40px', boxShadow:'5px 5px 25px rgba(0,0,0,0.3)' } ),
           globe = $('<canvas></canvas>')
             .attr( { width: 160, height: 160 } )
             .css( { position: 'absolute', width: '80px', height: '80px', bottom: '20px', right: '5px', zIndex: 51, display: 'none' } );
@@ -498,29 +498,8 @@ var labelcaption;
     WikiMiniAtlasHTML += 
      '<div id="wma_settings">' +
      '<h4>' + strings.settings[UILang] + '</h4>' +
-     '<p class="option">' + strings.labelSet[UILang] + ' <select id="wmaLabelSet">';
-
-    for( i in wikiminiatlas_sites )
-    {
-     WikiMiniAtlasHTML +=
-      '<option value="' + i + '"';
-
-     if( i == wma_site ) 
-      WikiMiniAtlasHTML += 'selected="selected"'; 
-
-     WikiMiniAtlasHTML +=
-      '>' + wikiminiatlas_sites[i] + '</option>';
-    }
-
-    WikiMiniAtlasHTML +=
-     '</select></p>' +
-     '<p class="option">' + strings.linkColor[UILang] + ' <select id="wmaLinkColor">' +
-     '<option value="#2255aa">'+ strings.blue[UILang ] +'</option>' +
-     '<option value="red">'    + strings.red[UILang]   +'</option>' +
-     '<option value="white">'  + strings.white[UILang] +'</option>' + 
-     '<option value="black">'  + strings.black[UILang] +'</option></select></p>' +
-
      '<p class="option">' + 'Size Comparison' + ' <select id="wmaSetSizeOverlay">';
+
     l = strings.sover[UILang].list;
     WikiMiniAtlasHTML += '<option value="-" class="bg" selected="selected">-</option>';
     WikiMiniAtlasHTML += '<option value="+" class="bg">'+strings.other[UILang]+'</option>';
@@ -537,19 +516,77 @@ var labelcaption;
     wma_widget.html( WikiMiniAtlasHTML );
    
     // build and hook-up dropdown menu
+    
     var menu = new wmaMenu(UIrtl);
-    menu.addGroup( (function(){ 
-      var list = [];
+    (function(){
+      var i,j,l=[],g;
+
+      // Label selection menu section
+      menu.addTitle(strings.labelSet[UILang],UIrtl);
+      WikiMiniAtlasHTML = '<select id="wmaLabelSet">';
+      for( i in wikiminiatlas_sites ) {
+       if( i !== 'commons' ) {
+         WikiMiniAtlasHTML += '<option value="' + i + '"';
+          if( i == wma_site ) { WikiMiniAtlasHTML += 'selected="selected"'; }
+         WikiMiniAtlasHTML += '>' + wikiminiatlas_sites[i] + '</option>';
+       }
+      } 
+      WikiMiniAtlasHTML += '</select>';
+      g = menu.addGroup([
+        ['LANG',WikiMiniAtlasHTML],
+        ['commons',wikiminiatlas_sites['commons']]
+      ],function(s) {
+        if(s=='LANG') {
+          s=g.items['LANG'].find('select option:selected').val();
+        }
+        wmaLabelSet(s);
+      },wma_site=='commons'?'commons':'LANG',UIrtl);
+      g.items['LANG'].find('select')
+        .click(function(e){ e.stopPropagation(); })
+        .change(function(e){ g.items['LANG'].click(); });
+      menu.addSep();
+
+      // Globe and layer selection sections
+      var globes = {};
       for( i = 0; i < wma_tilesets.length; i++ ) {
-        list.push(strings[wma_tilesets[i].name][UILang] || '');
+        j = wma_tilesets[i].globe;
+        globes[j] = globes[j] || [];
+        globes[j].push( [i, strings[wma_tilesets[i].name][UILang] || ''] );
       }
-      return list;
-    })(), wmaSelectTileset, wma_tileset );
-    menu.addSep();
-    menu.addItem(strings.settings[UILang],toggleSettings);
+      WikiMiniAtlasHTML = '<select id="wmaGlobeSet">';
+      for( i in globes ) {
+         WikiMiniAtlasHTML += '<option value="' + i + '"';
+          if( i == globe ) { WikiMiniAtlasHTML += 'selected="selected"'; }
+         WikiMiniAtlasHTML += '>' + strings['map'+i][UILang] + '</option>';
+      } 
+      WikiMiniAtlasHTML += '</select>';
+      menu.addTitle('Solar system',UIrtl);
+      var gmenu = menu.addItem(WikiMiniAtlasHTML,undefined,UIrtl);
+      gmenu.find('select')
+        .click(function(e){ e.stopPropagation(); })
+        .change(function(e){ 
+          var n = $(this).find('option:selected').val();
+          globes[globe].hide();
+          globes[n].show();
+          globe = n;
+          gmenu.click(); 
+          wmaSelectTileset(globes[n].current());
+        });
+      menu.addSep();
+
+      // insert a group for every globe
+      menu.addTitle(strings.mode[UILang],UIrtl);
+      for( i in globes ) {
+        globes[i] = menu.addGroup( globes[i], wmaSelectTileset, globes[i][0][0], UIrtl );
+        if( i !== globe ) { globes[i].hide(); }
+        menu.addSep();
+      }
+      menu.addItem(strings.sizeRef[UILang],toggleSettings);
+    })();
+
     $('#button_menu').click( function(){menu.toggle();} );
     $('#button_fs').click( wmaFullscreen );
-    $('#wma_widget').append(menu.div.css({ right: '40px', top: '26px',zIndex: 50, fontSize: '90%' }));
+    $('#wma_widget').append(menu.div.css({ right: '40px', top: '26px' }));
 
     l = strings.dyk[UILang];
     var news = $('<div></div>').html(l[Math.floor(Math.random()*l.length)]).addClass('news');
@@ -566,7 +603,6 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
     wma_settings = document.getElementById('wma_settings');
 
     $('#wmaLabelSet').change( function() { wmaLabelSet( this.value ) } );
-    $('#wmaLinkColor').change( function() { wmaLinkColor( this.value ) } );
     $('#wmaSetSizeOverlay').change( function() { wmaSetSizeOverlay( strings.sover[UILang].site, this.value ) } );
    
     $('#button_plus').bind('mousedown', wmaZoomIn );
@@ -585,10 +621,6 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
         if( r.x != wma_mdcoord.x || 
             r.y != wma_mdcoord.y ) return false; 
       } );
-
-
-    wma_old_onmouseup = document.onmouseup || null;
-    wma_old_onmousemove = document.onmousemove || null;
 
     initializeWikiMiniAtlasMap();
     moveWikiMiniAtlasMapTo();
@@ -692,7 +724,9 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
     var i, j;
     if(wma_map === null)
     {
-      $(document).mousemove(mouseMoveWikiMiniAtlasMap).mouseup(mouseUpWikiMiniAtlasMap);
+      $(document)
+        .mousemove(mouseMoveWikiMiniAtlasMap)
+        .mouseup( function(){ wma_dragging = null; } );
       $('#wma_map').dblclick(wmaDblclick).mousedown(mouseDownWikiMiniAtlasMap);
       wma_map = document.getElementById('wma_map');
 
@@ -1034,32 +1068,22 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
 
   // position marker
   function updateMarker(m) {
-   var newcoords = wmaLatLonToXY( m.lat, m.lon );
-   var newx = ( newcoords.x - wma_gx );
+   var newcoords = wmaLatLonToXY( m.lat, m.lon )
+     , newx = ( newcoords.x - wma_gx );
    if( newx < -100 ) newx += ( wma_zoomsize[wma_zoom] * 256 );
    m.obj.css( 'left', (newx-6)+'px' );
    m.obj.css( 'top',  (newcoords.y-wma_gy-6)+'px' );
   }
 
   // Mouse down handler (start map-drag)
-  function mouseDownWikiMiniAtlasMap(ev)
-  {
-   ev = ev || window.event;
-   wma_mdcoord = wma_dragging = wmaMouseCoords(ev);
-  }
-
-  // Mouse up handler (finish map-drag)
-  function mouseUpWikiMiniAtlasMap()
-  {
-   wma_dragging = null;
-   if( wma_old_onmouseup !== null ) wma_old_onmouseup();
+  function mouseDownWikiMiniAtlasMap(ev) {
+    wma_mdcoord = wma_dragging = wmaMouseCoords(ev);
   }
 
   // Mouse move handler
   function mouseMoveWikiMiniAtlasMap(ev) {
     window.scrollTo(0,0);
-    var newev = ev || window.event
-      , newcoords = wmaMouseCoords(newev);
+    var newcoords = wmaMouseCoords(ev);
 
     if( wma_dragging !== null )
     {
@@ -1084,13 +1108,9 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
     //rotate globe
     var mapcenter = wmaXYToLatLon(wma_gx+wma_width/2,wma_gy+wma_height/2);
     wmaGlobe && wmaGlobe.setLatLon(mapcenter.lat,mapcenter.lon);
-   
-    // call old handler (should never happen)
-    if( wma_old_onmousemove !== null ) { wma_old_onmousemove(ev); } 
   }
 
   function wmaDblclick(ev) {
-   ev = ev || window.event;
    var test = wmaMouseCoords(ev);
 
    wma_gx += test.x - wma_width/2;
@@ -1310,22 +1330,12 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
    wmaGlobeLoadTiles();
   }
 
-  function wmaLinkColor(c,s) {
-    wmaLinkStyle.color = c;
-    s && ( wmaLinkStyle.textShadow = s );
-    $('a.label').css(wmaLinkStyle);
-    toggleSettings();
-    return false;
-  }
-
-  function wmaLabelSet(s,noset) {
-   wma_site = s;
-   for( var n = 0; n < wma_nx * wma_ny; n++) {
-     wma_tile[n].url='';
-   }
-   moveWikiMiniAtlasMapTo();
-   if(noset !== true ) { toggleSettings(); }
-   return false;
+  function wmaLabelSet(s) {
+    wma_site = s;
+    for( var n = 0; n < wma_nx * wma_ny; n++) {
+      wma_tile[n].url='';
+    }
+    moveWikiMiniAtlasMapTo();
   }
 
   function wmaUpdateScalebar() {
@@ -1686,6 +1696,12 @@ function wmaMenu(rtl) {
   this.parent = null;
   this.shown = false;
 }
+wmaMenu.prototype.addTitle = function(html,rtl) {
+  var item = $('<div></div>').addClass('wmamenutitle').html(html)
+    .css('direction',(rtl===true)?'rtl':'')
+    .appendTo(this.div);
+  return item;
+}
 wmaMenu.prototype.addItem = function(html,func,rtl) {
   func = func || (function(){});
   var that = this, item = $('<div></div>').addClass('wmamenuitem').html(html)
@@ -1736,25 +1752,39 @@ wmaMenu.prototype.addCheck = function(html,func,selected,rtl) {
   }
 }
 wmaMenu.prototype.addGroup = function(options,func,selected,rtl) {
-  var items = [], that = this, current = -1;
+  var items = {}, that = this, current = -1;
   function select(n) {
-    if( n === current ) { return; }
-    for( var i = 0; i<items.length; ++i ) {
-      if( i===n ) { items[i].addClass('wmamenuselected'); } 
+    if( n == current ) { return; }
+    for( var i in items ) {
+      if( i==n ) { items[i].addClass('wmamenuselected'); } 
       else { items[i].removeClass('wmamenuselected'); }
     }
     current = n;
   }
+  function addOption(n,t){
+    items[n] = that.addItem( t, function() { select(n); func(n); }, rtl );
+  }
   selected = selected || 0;
   func = func || (function(){});
   for( var i=0; i<options.length; ++i ) {
-    (function(n){
-      items[n] = that.addItem( options[n], function() { select(n); func(n); }, rtl );
-    })(i);
+    if( typeof(options[i])==='object' ) {
+      addOption(options[i][0],options[i][1]);
+    } else {
+      addOption(i,options[i]);
+    }
   }
   select(selected);
   return {
-    items: items, select: select
+    items: items, select: select,
+    current : function() {
+      return current;
+    },
+    hide: function() {
+      for( var i in items ) { items[i].hide(); }
+    },
+    show: function() {
+      for( var i in items ) { items[i].show(); }
+    }
   }
 }
 wmaMenu.prototype.addSep = function() { 
