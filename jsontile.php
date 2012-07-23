@@ -9,18 +9,26 @@ $z = intval($_GET['z']);
 // only reply for high zoomlevels!
 if( $z < 12 ) exit;
 
+// size of zoom level in tiles
+$mx = 3 * ( 2 << $z );
+$my = $mx/2;
+
+// drop illegal requests
+if( $x<0 || $y<0 || $x>$mx || $y>$my ) exit;
+
 // padding in pixels
 $pad = 10;
 
 // coordinates of upper right and lower left corners
-$urx = 11.0;
+/*$urx = 11.0;
 $ury = 49.01;
 $llx = 10.99;
-$lly = 49.0;
+$lly = 49.0;*/
 
-// size of zoom level in tiles
-$mx = 3 * ( 2 << $z );
-$my = $mx/2;
+$llx = $x*60.0/(1<<$z);
+$lly = 90.0 - ( (($y+1.0)*60.0) / (1<<$z) );
+$urx = ($x+1) * 60.0 / (1<<$z);
+$ury = 90.0 - ( ($y*60.0) / (1<<$z) );
 
 // build query for the cropped data
 $query = "
@@ -46,8 +54,11 @@ if( !$result ) {
   exit;
 }
 
+$geo = array();
 while ($row = pg_fetch_row($result)) {
-  echo "$row[0]<br/>\n";
+  $geo[] = array( "geo" => json_decode($row[0]), "type" => "line" );
+  //echo "$row[0]<br/>\n";
 }
 
+echo json_encode($geo);
 ?>
