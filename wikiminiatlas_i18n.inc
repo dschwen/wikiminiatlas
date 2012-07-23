@@ -30,7 +30,14 @@ var strings =
 {
  sizeRef : {
    en: 'Size reference',
-   de: 'Größenvergleich'
+   ar: 'حجم المقارنة',
+   de: 'Größenvergleich',
+   es: 'Comparación de tamaño',
+   fa: 'مقایسه اندازه',
+   fr: 'Comparaison Taille',
+   he: 'גודל השוואה',
+   nl: 'Grootte Vergelijking',
+   ru: 'Размер сравнения'
  },
  commons : {
    'en': 'Wikimedia Commons',
