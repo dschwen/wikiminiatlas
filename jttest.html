@@ -1,0 +1,71 @@
+<html>
+<head>
+  <title>Client-side tile rendering test</title>
+  <script type="text/javascript" src="jquery-1.5.1.min.js"></script>
+</head>
+<body>
+  <h1>Client-side tile rendering test</h1>
+  <canvas width="128" height="128" id="tile"></canvas>
+
+  <script>
+    var 
+  </script>
+</body>
+</html>
+<html>
+  <head>
+    <title>Drawing GeoJSON</title>
+    <script type="text/javascript" src="jquery-1.5.1.min.js"></script>
+    <link href="wikiminiatlas.css" rel="stylesheet" type="text/css" />
+    <style>
+      #canvas {
+        border: 1px solid black; 
+        width: 512px; 
+        height: 512px;
+        position: relative;
+      }
+      div.tile { 
+        width: 128px;
+        height: 128px;
+        position: absolute;
+      }
+    </style>
+  </head>
+  <body>
+    <script>
+      var canvas,c,w,h;
+
+      // draw the data
+      function drawGeoJSON(d) {
+        var i, j;
+        c.lineWidth = 4.0;
+        c.strokeStyle = "rgb(0,0,255)";
+        c.beginPath();
+        
+        for(i =0; i<way.length; ++i ) {
+          if( way[i].length > 0 ) {
+            c.moveTo(d.way[i][0].x,d.way[i][0].y);
+            for( j=1; j<way[i].length; ++j ) {
+              c.lineTo(d.way[i][0].x,d.way[i][0].y);
+            }
+          }
+        }
+        c.endPath();
+        c.stroke();
+      }
+
+      // return path element at screen coordinates
+      function pathAt(x,y) {
+      }
+
+      $(function(){
+        canvas = $('#canvas');
+        w = canvas[0].width;
+        h = canvas[0].height;
+        c = canvas[0].getContext('2d');
+
+        drawGeoJSON( { } );
+      });
+    </script>
+  </body>
+</html>
