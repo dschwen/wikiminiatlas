@@ -10,41 +10,64 @@
 </head>
 <body>
   <h1>Client-side tile rendering test</h1>
-  <img src="http://6.www.toolserver.org/~dschwen/wma/tiles/mapnik/12/2898/tile_2898_660.png"/>
+  <!--<img src="http://6.www.toolserver.org/~dschwen/wma/tiles/mapnik/12/2898/tile_2898_660.png"/>-->
+  <div style="display: inline-block; position: relative">
+    <img src="http://6.www.toolserver.org/~dschwen/wma/tiles/mapnik/12/3488/tile_3488_19316.png"/>
+    <div style="background-color: red; opacity: 0.5; position: absolute; width: 32px; height: 32px; top: 0; left: 0; pointer-events: none"></div>
+  </div>
+
   <div style="display: inline-block; position: relative">
     <canvas width="128" height="128" id="tile"></canvas>
     <div id="hilight" style="background-color: red; display: none; position: absolute; width: 64px; height: 64px; pointer-events: none"></div>
   </div>
   <p>Bounding box: <span id="bbox"></span></p>
+  <p>
+    Click on the right square to zoom in. The red area area on the left square highlights the initial field of view on a prerendered tite at the currently maximum zoom level in WikiMiniAtlas. The area shown is north east of Dupont Square in Washington DC, USA. Raw map data is pulled from osm and rendered in your browser. Reload to zoom out.
+  </p>
   <script>
     var canvas,c,w,h
       , bx1, by1, bx2, by2, bw, bh, d=[]
-      , x=660, y=2898, z=12
-      //, x=660*2+1, y=2898*2, z=13
+      , x=19316*4, y=3488*4, z=14
+      //, x=19316, y=3488, z=12
+      //, x=660, y=2898, z=12
       ;
 
     // top right: lindau
     //http://6.www.toolserver.org/~dschwen/wma/tiles/mapnik/12/2898/tile_2898_660.png
+    // dupont circle DC
+    //http://4.www.toolserver.org/~dschwen/wma/tiles/mapnik/12/3488/tile_3488_19316.png
 
     // draw the data
     function drawGeoJSON() {
-      var i, j, k, g;
+      var i, j, k, g, s
+        , style = {
+          Polygon: "rgb(0,0,255)",
+          LineString: "rgb(255,0,0)"
+        };  
       c.lineWidth = 1.0;
-      c.strokeStyle = "rgb(0,0,255)";
+
       c.clearRect(0,0,128,128);
-      c.beginPath();
-      
-      for(i =0; i<d.length; ++i ) {
-        g = d[i].geo.coordinates[0];
-        if( g.length > 0 ) {
-          c.moveTo((g[0][0]-bx1)*128/bw,128-(g[0][1]-by1)*128/bh);
-          for( j=1; j<g.length; ++j ) {
-            c.lineTo((g[j][0]-bx1)*128/bw,128-(g[j][1]-by1)*128/bh);
-            //c.lineTo(g[j][0],g[j][1]);
+      for( s in style ) {
+        c.strokeStyle = style[s];
+        c.beginPath();
+        
+        for(i =0; i<d.length; ++i ) {
+          if( d[i].geo.type != s ) continue;
+          if( s == 'Polygon' ) {
+            g = d[i].geo.coordinates[0];
+          } else {
+            g = d[i].geo.coordinates;
+          }
+          if( g.length > 0 ) {
+            c.moveTo((g[0][0]-bx1)*128/bw,128-(g[0][1]-by1)*128/bh);
+            for( j=1; j<g.length; ++j ) {
+              c.lineTo((g[j][0]-bx1)*128/bw,128-(g[j][1]-by1)*128/bh);
+              //c.lineTo(g[j][0],g[j][1]);
+            }
           }
         }
+        c.stroke();
       }
-      c.stroke();
     }
 
     // return path element at screen coordinates
@@ -65,6 +88,8 @@
       bh = by2-by1;
 
       $('#bbox').text(bx1+' '+by1+', '+bx2+' '+by2);
+      if(bx1>180.0) bx1-=360;
+
       drawGeoJSON();
     }
 
@@ -87,10 +112,13 @@
           y = y*2 + Math.floor(e.offsetY/64);
           update();
         })
+        .mouseenter(function(e){
+          $('#hilight').fadeTo(200,0.5);
+        })
         .mousemove(function(e){
           var x = Math.floor(e.offsetX/64)
             , y =  Math.floor(e.offsetY/64);
-          $('#hilight').fadeTo(200,0.5).css({
+          $('#hilight').css({
             top: (y>0?64:0) + 'px',
             left: (x>0?64:0) + 'px'
           });

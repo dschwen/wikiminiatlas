@@ -6,6 +6,8 @@ $x = intval($_GET['x']);
 $y = intval($_GET['y']);
 $z = intval($_GET['z']);
 
+$a = intval($_GET['action']);
+
 // only reply for high zoomlevels!
 if( $z < 12 ) exit;
 
@@ -30,34 +32,43 @@ $lly = 90.0 - ( (($y+1.0)*60.0) / (1<<$z) );
 $urx = ($x+1) * 60.0 / (1<<$z);
 $ury = 90.0 - ( ($y*60.0) / (1<<$z) );
 
-// build query for the cropped data
-$query = "
-  select 
-    ST_AsGeoJSON(
-      transform(
-        ST_Intersection( 
-          way,
-          transform( ST_GeomFromText('POLYGON(($llx $ury, $urx $ury, $urx $lly, $llx $lly, $llx $ury))', 4326 ), 900913 )
-        )
-      ,4326),9) from planet_polygon
-  where
-    ST_Intersects(
-      way, 
-      transform( ST_GeomFromText('POLYGON(($llx $ury, $urx $ury, $urx $lly, $llx $lly, $llx $ury))', 4326 ), 900913 ) 
-    );
-";
-
-// perform query
-$result = pg_query($dbconn, $query);
-if( !$result ) {
-  echo pg_last_error($dbconn);
-  exit;
-}
-
+$table = array( 'planet_polygon', 'planet_line' );
 $geo = array();
-while ($row = pg_fetch_row($result)) {
-  $geo[] = array( "geo" => json_decode($row[0]), "type" => "line" );
-  //echo "$row[0]<br/>\n";
+
+for( $i=0; $i<2; $i++ ) {
+  // build query for the cropped data
+  $query = "
+    select 
+      ST_AsGeoJSON(
+        transform(
+          ST_Intersection( 
+            way,
+            transform( ST_GeomFromText('POLYGON(($llx $ury, $urx $ury, $urx $lly, $llx $lly, $llx $ury))', 4326 ), 900913 )
+          )
+        ,4326),9) from $table[$i]
+    where
+      ST_Intersects(
+        way, 
+        transform( ST_GeomFromText('POLYGON(($llx $ury, $urx $ury, $urx $lly, $llx $lly, $llx $ury))', 4326 ), 900913 ) 
+      );
+  ";
+
+  // debug
+  /*if( $a == "query" ) {
+    echo $query;
+    exit;
+  }*/
+
+  // perform query
+  $result = pg_query($dbconn, $query);
+  if( !$result ) {
+    echo pg_last_error($dbconn);
+    exit;
+  }
+
+  while ($row = pg_fetch_row($result)) {
+    $geo[] = array( "geo" => json_decode($row[0]), "type" => "line" );
+  }
 }
 
 echo json_encode($geo);
