@@ -66,6 +66,11 @@
             }
           }
         }
+        c.lineWidth = 3.0;
+        c.strokeStyle = 'rgb(128,128,128)';
+        c.stroke();
+        c.lineWidth = 1.0;
+        c.strokeStyle = style[s];
         c.stroke();
       }
     }
@@ -100,7 +105,7 @@
       c = canvas[0].getContext('2d');
 
       $.ajax({
-        url: 'jsontile.php?x='+x+'&y='+y+'&z='+z,
+        url: 'jsontile_dev.php?x='+x+'&y='+y+'&z='+z,
         dataType: 'json',
         success: gotData
       });
