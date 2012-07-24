@@ -22,7 +22,7 @@
   </div>
   <p>Bounding box: <span id="bbox"></span></p>
   <p>
-    Click on the right square to zoom in. The red area area on the left square highlights the initial field of view on a prerendered tite at the currently maximum zoom level in WikiMiniAtlas. The area shown is north east of Dupont Square in Washington DC, USA. Raw map data is pulled from OpenStreetMap and rendered in your browser. Reload to zoom out.
+    Click on the right square to zoom in. The red area area on the left square highlights the initial field of view on a prerendered tite at the currently maximum zoom level in WikiMiniAtlas. The area shown is north east of Washington Circle in Washington DC, USA. Raw map data is pulled from OpenStreetMap and rendered in your browser. Reload to zoom out.
   </p>
   <script>
     var canvas,c,w,h
@@ -46,12 +46,22 @@
               forrest:1,recreation_ground:1,dog_park:1,garden:1,pitch:1,stadium:1},
               [ { fillStyle: "rgb(200,224,200)" } ]
             ],
+            ['amenity',{university:1},
+              [ { lineWidth:0.5, strokeStyle: "rgb(240,225,183)" } ]
+            ],
+            ['amenity',{parking:1},
+              [ { fillStyle: "rgb(240,235,193)" } ]
+            ],
             ['building',{yes:1},
               [ { fillStyle: "rgb(200,200,200)" },
                 { lineWidth: 1, strokeStyle: "rgb(127,127,127)" } ]
             ]
           ],
           LineString: [
+            ['highway',{service:1,path:1,track:1},
+              [ { lineWidth: 4, strokeStyle: "rgb(168,168,168)" },
+                { lineWidth: 3, strokeStyle: "rgb(208,208,208)" } ]
+            ],
             ['highway',{residential:1},
               [ { lineWidth: 4, strokeStyle: "rgb(200,200,200)" },
                 { lineWidth: 3, strokeStyle: "rgb(255,255,255)" } ]

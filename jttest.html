@@ -22,7 +22,7 @@
   </div>
   <p>Bounding box: <span id="bbox"></span></p>
   <p>
-    Click on the right square to zoom in. The red area area on the left square highlights the initial field of view on a prerendered tite at the currently maximum zoom level in WikiMiniAtlas. The area shown is north east of Dupont Square in Washington DC, USA. Raw map data is pulled from OpenStreetMap and rendered in your browser. Reload to zoom out.
+    Click on the right square to zoom in. The red area area on the left square highlights the initial field of view on a prerendered tite at the currently maximum zoom level in WikiMiniAtlas. The area shown is north east of Washington Circle in Washington DC, USA. Raw map data is pulled from OpenStreetMap and rendered in your browser. Reload to zoom out.
   </p>
   <script>
     var canvas,c,w,h
@@ -39,34 +39,83 @@
 
     // draw the data
     function drawGeoJSON() {
-      var i, j, k, g, s
+      var i, j, k, g, s, o
         , style = {
-          Polygon: "rgb(0,0,255)",
-          LineString: "rgb(255,0,0)"
+          Polygon: [
+            ['leisure',{park:1,cemetary:1,orchard:1,meadow:1,village_green:1,
+              forrest:1,recreation_ground:1,dog_park:1,garden:1,pitch:1,stadium:1},
+              [ { fillStyle: "rgb(200,224,200)" } ]
+            ],
+            ['amenity',{university:1},
+              [ { lineWidth:0.5, strokeStyle: "rgb(240,225,183)" } ]
+            ],
+            ['amenity',{parking:1},
+              [ { fillStyle: "rgb(240,235,193)" } ]
+            ],
+            ['building',{yes:1},
+              [ { fillStyle: "rgb(200,200,200)" },
+                { lineWidth: 1, strokeStyle: "rgb(127,127,127)" } ]
+            ]
+          ],
+          LineString: [
+            ['highway',{service:1,path:1,track:1},
+              [ { lineWidth: 4, strokeStyle: "rgb(168,168,168)" },
+                { lineWidth: 3, strokeStyle: "rgb(208,208,208)" } ]
+            ],
+            ['highway',{residential:1},
+              [ { lineWidth: 4, strokeStyle: "rgb(200,200,200)" },
+                { lineWidth: 3, strokeStyle: "rgb(255,255,255)" } ]
+            ],
+            ['highway',{secondary:1,primary:1,primary_link:1,secondary_link:1},
+              [ { lineWidth: 6, strokeStyle: "rgb(171,158,137)" },
+                { lineWidth: 5, strokeStyle: "rgb(255,250,115)" } ]
+            ]
+          ]
         };  
       c.lineWidth = 1.0;
 
-      c.clearRect(0,0,128,128);
+      // TODO: handle coastlines properly!!
+      c.fillStyle = 'rgb(250, 250, 208)';
+      c.fillRect(0,0,128,128);
+
       for( s in style ) {
-        c.strokeStyle = style[s];
-        c.beginPath();
-        
-        for(i =0; i<d.length; ++i ) {
-          if( d[i].geo.type != s ) continue;
-          if( s == 'Polygon' ) {
-            g = d[i].geo.coordinates[0];
-          } else {
-            g = d[i].geo.coordinates;
+        for( o=0; o < style[s].length; o++ ) {
+          c.beginPath();
+          
+          for(i =0; i<d.length; ++i ) {
+            // check against shape type and tags
+            if( d[i].geo.type != s || 
+                !( style[s][o][0] in d[i].tags ) ||
+                !( d[i].tags[style[s][o][0]] in style[s][o][1] ) ) continue;
+
+            // quick hack for shape type
+            if( s == 'Polygon' ) {
+              g = d[i].geo.coordinates[0];
+            } else {
+              g = d[i].geo.coordinates;
+            }
+
+            // iterate over all nodes
+            if( g.length > 0 ) {
+              c.moveTo((g[0][0]-bx1)*128/bw,128-(g[0][1]-by1)*128/bh);
+              for( j=1; j<g.length; ++j ) {
+                c.lineTo((g[j][0]-bx1)*128/bw,128-(g[j][1]-by1)*128/bh);
+              }
+            }
           }
-          if( g.length > 0 ) {
-            c.moveTo((g[0][0]-bx1)*128/bw,128-(g[0][1]-by1)*128/bh);
-            for( j=1; j<g.length; ++j ) {
-              c.lineTo((g[j][0]-bx1)*128/bw,128-(g[j][1]-by1)*128/bh);
-              //c.lineTo(g[j][0],g[j][1]);
+
+          // iterate over the style components
+          g = style[s][o][2]
+          for( i=0; i<g.length; i++ ) {
+            for( j in g[i] ) { c[j] = g[i][j]; }
+            if( 'strokeStyle' in g[i] ) {
+              c.stroke();
+            }
+            if( 'fillStyle' in g[i] ) {
+              c.fill();
             }
           }
         }
-        c.stroke();
       }
     }
 
@@ -100,7 +149,7 @@
       c = canvas[0].getContext('2d');
 
       $.ajax({
-        url: 'jsontile.php?x='+x+'&y='+y+'&z='+z,
+        url: 'jsontile_dev.php?x='+x+'&y='+y+'&z='+z,
         dataType: 'json',
         success: gotData
       });

@@ -6,7 +6,7 @@ $x = intval($_GET['x']);
 $y = intval($_GET['y']);
 $z = intval($_GET['z']);
 
-$a = intval($_GET['action']);
+$a = $_GET['action'];
 
 // only reply for high zoomlevels!
 if( $z < 12 ) exit;
@@ -32,6 +32,9 @@ $lly = 90.0 - ( (($y+1.0)*60.0) / (1<<$z) );
 $urx = ($x+1) * 60.0 / (1<<$z);
 $ury = 90.0 - ( ($y*60.0) / (1<<$z) );
 
+$tags = array( "highway", "railway", "waterway", "landuse", "leisure", "building", "natural", "amenity", "name", "boundary" );
+$taglist = '"'.implode($tags,'", "').'"';
+$tagnum = count($tags);
 $table = array( 'planet_polygon', 'planet_line' );
 $geo = array();
 
@@ -45,7 +48,9 @@ for( $i=0; $i<2; $i++ ) {
             way,
             transform( ST_GeomFromText('POLYGON(($llx $ury, $urx $ury, $urx $lly, $llx $lly, $llx $ury))', 4326 ), 900913 )
           )
-        ,4326),9) from $table[$i]
+        ,4326),9),
+      $taglist
+      from $table[$i]
     where
       ST_Intersects(
         way, 
@@ -54,10 +59,10 @@ for( $i=0; $i<2; $i++ ) {
   ";
 
   // debug
-  /*if( $a == "query" ) {
+  if( $a === "query" ) {
     echo $query;
     exit;
-  }*/
+  }
 
   // perform query
   $result = pg_query($dbconn, $query);
@@ -67,7 +72,14 @@ for( $i=0; $i<2; $i++ ) {
   }
 
   while ($row = pg_fetch_row($result)) {
-    $geo[] = array( "geo" => json_decode($row[0]), "type" => "line" );
+    // copy the OSM tags
+    $type = array();
+    for($j=0; $j<$tagnum; $j++) {
+      if( $row[$j+1] !== null ) {
+        $type[$tags[$j]]=$row[$j+1];
+      }
+    } 
+    $geo[] = array( "geo" => json_decode($row[0]), "tags" => $type );
   }
 }
 
