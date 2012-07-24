@@ -39,39 +39,73 @@
 
     // draw the data
     function drawGeoJSON() {
-      var i, j, k, g, s
+      var i, j, k, g, s, o
         , style = {
-          Polygon: "rgb(0,0,255)",
-          LineString: "rgb(255,0,0)"
+          Polygon: [
+            ['leisure',{park:1,cemetary:1,orchard:1,meadow:1,village_green:1,
+              forrest:1,recreation_ground:1,dog_park:1,garden:1,pitch:1,stadium:1},
+              [ { fillStyle: "rgb(200,224,200)" } ]
+            ],
+            ['building',{yes:1},
+              [ { fillStyle: "rgb(200,200,200)" },
+                { lineWidth: 1, strokeStyle: "rgb(127,127,127)" } ]
+            ]
+          ],
+          LineString: [
+            ['highway',{residential:1},
+              [ { lineWidth: 4, strokeStyle: "rgb(200,200,200)" },
+                { lineWidth: 3, strokeStyle: "rgb(255,255,255)" } ]
+            ],
+            ['highway',{secondary:1,primary:1,primary_link:1,secondary_link:1},
+              [ { lineWidth: 6, strokeStyle: "rgb(171,158,137)" },
+                { lineWidth: 5, strokeStyle: "rgb(255,250,115)" } ]
+            ]
+          ]
         };  
       c.lineWidth = 1.0;
 
-      c.clearRect(0,0,128,128);
+      // TODO: handle coastlines properly!!
+      c.fillStyle = 'rgb(250, 250, 208)';
+      c.fillRect(0,0,128,128);
+
       for( s in style ) {
-        c.strokeStyle = style[s];
-        c.beginPath();
-        
-        for(i =0; i<d.length; ++i ) {
-          if( d[i].geo.type != s ) continue;
-          if( s == 'Polygon' ) {
-            g = d[i].geo.coordinates[0];
-          } else {
-            g = d[i].geo.coordinates;
+        for( o=0; o < style[s].length; o++ ) {
+          c.beginPath();
+          
+          for(i =0; i<d.length; ++i ) {
+            // check against shape type and tags
+            if( d[i].geo.type != s || 
+                !( style[s][o][0] in d[i].tags ) ||
+                !( d[i].tags[style[s][o][0]] in style[s][o][1] ) ) continue;
+
+            // quick hack for shape type
+            if( s == 'Polygon' ) {
+              g = d[i].geo.coordinates[0];
+            } else {
+              g = d[i].geo.coordinates;
+            }
+
+            // iterate over all nodes
+            if( g.length > 0 ) {
+              c.moveTo((g[0][0]-bx1)*128/bw,128-(g[0][1]-by1)*128/bh);
+              for( j=1; j<g.length; ++j ) {
+                c.lineTo((g[j][0]-bx1)*128/bw,128-(g[j][1]-by1)*128/bh);
+              }
+            }
           }
-          if( g.length > 0 ) {
-            c.moveTo((g[0][0]-bx1)*128/bw,128-(g[0][1]-by1)*128/bh);
-            for( j=1; j<g.length; ++j ) {
-              c.lineTo((g[j][0]-bx1)*128/bw,128-(g[j][1]-by1)*128/bh);
-              //c.lineTo(g[j][0],g[j][1]);
+
+          // iterate over the style components
+          g = style[s][o][2]
+          for( i=0; i<g.length; i++ ) {
+            for( j in g[i] ) { c[j] = g[i][j]; }
+            if( 'strokeStyle' in g[i] ) {
+              c.stroke();
+            }
+            if( 'fillStyle' in g[i] ) {
+              c.fill();
             }
           }
         }
-        c.lineWidth = 3.0;
-        c.strokeStyle = 'rgb(128,128,128)';
-        c.stroke();
-        c.lineWidth = 1.0;
-        c.strokeStyle = style[s];
-        c.stroke();
       }
     }
 
