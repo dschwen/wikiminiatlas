@@ -21,13 +21,16 @@
     <div id="hilight" style="background-color: red; display: none; position: absolute; width: 64px; height: 64px; pointer-events: none"></div>
   </div>
   <p>Bounding box: <span id="bbox"></span></p>
+  <p>Render time: <span id="rtime">-</span>ms</p>
   <p>
     Click on the right square to zoom in. The red area area on the left square highlights the initial field of view on a prerendered tite at the currently maximum zoom level in WikiMiniAtlas. The area shown is north east of Washington Circle in Washington DC, USA. Raw map data is pulled from OpenStreetMap and rendered in your browser. Reload to zoom out.
   </p>
   <script>
     var canvas,c,w,h
-      , bx1, by1, bx2, by2, bw, bh, d=[]
+      , bx1, by1, bx2, by2, bw, bh
       , x=19316*4, y=3488*4, z=14
+      , minzoom = 13, buildingzoom = 14
+      , cache = {}
       //, x=19316, y=3488, z=12
       //, x=660, y=2898, z=12
       ;
@@ -38,13 +41,26 @@
     //http://4.www.toolserver.org/~dschwen/wma/tiles/mapnik/12/3488/tile_3488_19316.png
 
     // draw the data
-    function drawGeoJSON() {
+    function drawGeoJSON(d) {
       var i, j, k, g, s, o
+        , t1 = new Date(), t2
         , style = {
           Polygon: [
             ['leisure',{park:1,cemetary:1,orchard:1,meadow:1,village_green:1,
               forrest:1,recreation_ground:1,dog_park:1,garden:1,pitch:1,stadium:1},
               [ { fillStyle: "rgb(200,224,200)" } ]
+            ],
+            ['waterway',{riverbank:1,dock:1},
+              [ { fillStyle: "rgb(200,200,224)" } ]
+            ],
+            ['natural',{water:1,bay:1,wetland:1},
+              [ { fillStyle: "rgb(200,200,234)" } ]
+            ],
+            ['natural',{grassland:1,fell:1},
+              [ { fillStyle: "rgb(200,224,200)" } ]
+            ],
+            ['natural',{wood:1},
+              [ { fillStyle: "rgb(190,234,190)" } ]
             ],
             ['amenity',{university:1},
               [ { lineWidth:0.5, strokeStyle: "rgb(240,225,183)" } ]
@@ -58,6 +74,9 @@
             ]
           ],
           LineString: [
+            ['highway',{footway:1},
+              [ { lineWidth: 2, strokeStyle: "rgb(168,148,148)" } ]
+            ],
             ['highway',{service:1,path:1,track:1},
               [ { lineWidth: 4, strokeStyle: "rgb(168,168,168)" },
                 { lineWidth: 3, strokeStyle: "rgb(208,208,208)" } ]
@@ -66,9 +85,22 @@
               [ { lineWidth: 4, strokeStyle: "rgb(200,200,200)" },
                 { lineWidth: 3, strokeStyle: "rgb(255,255,255)" } ]
             ],
-            ['highway',{secondary:1,primary:1,primary_link:1,secondary_link:1},
-              [ { lineWidth: 6, strokeStyle: "rgb(171,158,137)" },
-                { lineWidth: 5, strokeStyle: "rgb(255,250,115)" } ]
+            // border
+            ['highway',{secondary:1,secondary_link:1,primary:1,primary_link:1},
+              [ { lineWidth: 6, strokeStyle: "rgb(171,158,137)" } ]
+            ],
+            ['highway',{motorway:1,motorway_link:1,trunk:1,trunk_link:1},
+              [ { lineWidth: 7, strokeStyle: "rgb(188,149,28)" } ]
+            ],
+            // fill
+            ['highway',{secondary:1,secondary_link:1},
+              [ { lineWidth: 5, strokeStyle: "rgb(255,250,115)" } ]
+            ],
+            ['highway',{primary:1,primary_link:1},
+              [ { lineWidth: 5, strokeStyle: "rgb(255,230,95)" } ]
+            ],
+            ['highway',{motorway:1,motorway_link:1,trunk:1,trunk_link:1},
+              [ { lineWidth: 6, strokeStyle: "rgb(242,191,36)" } ]
             ]
           ]
         };  
@@ -117,14 +149,21 @@
           }
         }
       }
+
+      t2 = new Date();
+      $('#rtime').text(t2.getTime()-t1.getTime());
     }
 
     // return path element at screen coordinates
     function pathAt(x,y) {
     }
 
+    function hash(x,y,z) {
+      return x+'_'+y+'_'+z;
+    }
+
     function gotData(data) {
-      d = data;
+      cache[hash(data.x,data.y,data.z)]=data.data;
       update();
     }
 
@@ -139,7 +178,23 @@
       $('#bbox').text(bx1+' '+by1+', '+bx2+' '+by2);
       if(bx1>180.0) bx1-=360;
 
-      drawGeoJSON();
+      // seach cache for data
+      var zz, xx=x, yy=y;
+      for( zz=z; zz>=minzoom; zz-- ) {
+        if( cache[hash(xx,yy,zz)] ) {
+          drawGeoJSON(cache[hash(xx,yy,zz)]);
+          return;
+        }
+        xx=Math.floor(xx/2);
+        yy=Math.floor(yy/2);
+      } 
+
+      // request data
+      $.ajax({
+        url: 'jsontile_dev.php?x='+x+'&y='+y+'&z='+z,
+        dataType: 'json',
+        success: gotData
+      });
     }
 
     $(function(){
@@ -148,11 +203,7 @@
       h = canvas[0].height;
       c = canvas[0].getContext('2d');
 
-      $.ajax({
-        url: 'jsontile_dev.php?x='+x+'&y='+y+'&z='+z,
-        dataType: 'json',
-        success: gotData
-      });
+      update();
 
       canvas
         .click(function(e){
