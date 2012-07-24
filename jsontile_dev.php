@@ -32,7 +32,7 @@ $lly = 90.0 - ( (($y+1.0)*60.0) / (1<<$z) );
 $urx = ($x+1) * 60.0 / (1<<$z);
 $ury = 90.0 - ( ($y*60.0) / (1<<$z) );
 
-$tags = array( "highway", "railway", "waterway", "landuse", "leisure", "building", "natural", "amenity", "name", "boundary", "osm_id" );
+$tags = array( "highway", "railway", "waterway", "landuse", "leisure", "building", "natural", "amenity", "name", "boundary", "osm_id","layer" );
 $taglist = '"'.implode($tags,'", "').'"';
 $tagnum = count($tags);
 $intersect = "

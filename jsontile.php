@@ -32,26 +32,33 @@ $lly = 90.0 - ( (($y+1.0)*60.0) / (1<<$z) );
 $urx = ($x+1) * 60.0 / (1<<$z);
 $ury = 90.0 - ( ($y*60.0) / (1<<$z) );
 
-$tags = array( "highway", "railway", "waterway", "landuse", "leisure", "building", "natural", "amenity", "name", "boundary" );
+$tags = array( "highway", "railway", "waterway", "landuse", "leisure", "building", "natural", "amenity", "name", "boundary", "osm_id" );
 $taglist = '"'.implode($tags,'", "').'"';
 $tagnum = count($tags);
-$table = array( 'planet_polygon', 'planet_line' );
-$geo = array();
-
-for( $i=0; $i<2; $i++ ) {
-  // build query for the cropped data
-  $query = "
-    select 
-      ST_AsGeoJSON(
-        transform(
+$intersect = "
           ST_Intersection( 
             way,
             transform( ST_GeomFromText('POLYGON(($llx $ury, $urx $ury, $urx $lly, $llx $lly, $llx $ury))', 4326 ), 900913 )
-          )
-        ,4326),9),
+          )";
+$table = array( 
+  array('planet_polygon','building IS NULL AND',$intersect), 
+  array('planet_line','',$intersect)
+);
+
+// also return buildings for large zoom levels
+if( $z>12 ) $table[] = array('planet_polygon','building IS NOT NULL AND','way');
+
+$geo = array();
+
+for( $i=0; $i<count($table); $i++ ) {
+  // build query for the cropped data without buildings
+  $query = "
+    select 
+      ST_AsGeoJSON( transform(".$table[$i][2].",4326), 9 ),
       $taglist
-      from $table[$i]
+      from ".$table[$i][0]."
     where
+      ".$table[$i][1]."
       ST_Intersects(
         way, 
         transform( ST_GeomFromText('POLYGON(($llx $ury, $urx $ury, $urx $lly, $llx $lly, $llx $ury))', 4326 ), 900913 ) 
@@ -83,5 +90,5 @@ for( $i=0; $i<2; $i++ ) {
   }
 }
 
-echo json_encode($geo);
+echo json_encode( array( "data" => $geo, "x" => $x, "y" => $y, "z" => $z ) );
 ?>

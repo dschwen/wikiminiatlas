@@ -6,6 +6,11 @@
     canvas {
       border: 1px solid black; 
     }
+    button {
+      width: 30px;
+      height: 20px;
+      margin: -10px -15px -10px -15px;
+    }
   </style>
 </head>
 <body>
@@ -20,6 +25,15 @@
     <canvas width="128" height="128" id="tile"></canvas>
     <div id="hilight" style="background-color: red; display: none; position: absolute; width: 64px; height: 64px; pointer-events: none"></div>
   </div>
+
+  <div style="display: inline-block; position: relative; width: 128px; height: 128px">
+    <button id="butN" style="position: absolute; top: 10px; left: 64px;">N</button>
+    <button id="butS" style="position: absolute; bottom: 10px; left: 64px;">S</button>
+    <button id="butW" style="position: absolute; top: 64px; left: 15px;">W</button>
+    <button id="butE" style="position: absolute; top: 64px; right: 15px;">E</button>
+    <button id="butZ" style="position: absolute; top: 64px; right: 64px;">-</button>
+  </div>
+
   <p>Bounding box: <span id="bbox"></span></p>
   <p>Render time: <span id="rtime">-</span>ms</p>
   <p>
@@ -46,7 +60,10 @@
         , t1 = new Date(), t2
         , style = {
           Polygon: [
-            ['leisure',{park:1,cemetary:1,orchard:1,meadow:1,village_green:1,
+            ['landuse',{cemetery:1},
+              [ { fillStyle: "rgb(190,214,190)" } ]
+            ],
+            ['leisure',{park:1,orchard:1,meadow:1,village_green:1,
               forrest:1,recreation_ground:1,dog_park:1,garden:1,pitch:1,stadium:1},
               [ { fillStyle: "rgb(200,224,200)" } ]
             ],
@@ -60,7 +77,7 @@
               [ { fillStyle: "rgb(200,224,200)" } ]
             ],
             ['natural',{wood:1},
-              [ { fillStyle: "rgb(190,234,190)" } ]
+              [ { fillStyle: "rgb(100,204,100)" } ]
             ],
             ['amenity',{university:1},
               [ { lineWidth:0.5, strokeStyle: "rgb(240,225,183)" } ]
@@ -74,7 +91,10 @@
             ]
           ],
           LineString: [
-            ['highway',{footway:1},
+            ['highway',{pedestrian:1},
+              [ { lineWidth: 5, strokeStyle: "rgb(255,255,255)" } ]
+            ],
+            ['highway',{footway:1,pedestrian:1},
               [ { lineWidth: 2, strokeStyle: "rgb(168,148,148)" } ]
             ],
             ['highway',{service:1,path:1,track:1},
@@ -227,6 +247,25 @@
           $('#hilight').fadeOut(200);
         });
 
+      $('#butW').click( function(){
+        x--; update();
+      });
+      $('#butE').click( function(){
+        x++; update();
+      });
+      $('#butN').click( function(){
+        y--; update();
+      });
+      $('#butS').click( function(){
+        y++; update();
+      });
+      $('#butZ').click( function(){
+        if( z>minzoom ) {
+          x = Math.floor(x/2);
+          y = Math.floor(y/2);
+          z--; update();
+        }
+      });
     });
   </script>
 </body>
