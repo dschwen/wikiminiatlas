@@ -57,7 +57,7 @@
 
     // draw the data
     function drawGeoJSON(d) {
-      var i, j, k, g, s, o
+      var i, j, k, g, s, o, ds
         , t1 = new Date(), t2
         , style = {
           Polygon: [
@@ -167,12 +167,38 @@
             } else {
               g = d[i].geo.coordinates;
             }
+  
+            if('dash' in style[s][o][2]) {
+              // iterate over all nodes
+              if( g.length > 0 ) {
+                var px = (g[0][0]-bx1)*128/bw
+                  , py = 128-(g[0][1]-by1)*128/bh)
+                  , dx, dy, ds=0,ds=style[s][o][2].dash,di=0,dl=ds.length
+                  , mx, my, r;
+                for( j=1; j<g.length; ++j ) {
+                  // destination point   
+                  dx = (g[j][0]-bx1)*128/bw;
+                  dy = 128-(g[j][1]-by1)*128/bh);
 
-            // iterate over all nodes
-            if( g.length > 0 ) {
-              c.moveTo((g[0][0]-bx1)*128/bw,128-(g[0][1]-by1)*128/bh);
-              for( j=1; j<g.length; ++j ) {
-                c.lineTo((g[j][0]-bx1)*128/bw,128-(g[j][1]-by1)*128/bh);
+                  // stepvector and length
+                  mx = dx-px;
+                  my = dy-py;
+                  r = Math.sqrt(mx*mx+my*my);
+                  mx /= r;
+                  my /= r;
+
+                  // new starting point
+                  px=dx;
+                  py=dy;
+                }
+              }
+            } else {
+              // iterate over all nodes
+              if( g.length > 0 ) {
+                c.moveTo((g[0][0]-bx1)*128/bw,128-(g[0][1]-by1)*128/bh);
+                for( j=1; j<g.length; ++j ) {
+                  c.lineTo((g[j][0]-bx1)*128/bw,128-(g[j][1]-by1)*128/bh);
+                }
               }
             }
           }
@@ -180,7 +206,7 @@
           // iterate over the style components
           g = style[s][o][2]
           for( i=0; i<g.length; i++ ) {
-            for( j in g[i] ) { c[j] = g[i][j]; }
+            for( j in g[i] ) { if(j!='dash') { c[j] = g[i][j]; } }
             if( 'strokeStyle' in g[i] ) {
               c.stroke();
             }
