@@ -1087,10 +1087,10 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
       } else { // zooming beyond maximum label zoom
         // use labeldata from wma_maxlabel zoomlevel
         var mlx = Math.floor(dx/(1<<(wma_zoom-wma_maxlabel)))
-          , mlx = Math.floor(dx/(1<<(wma_zoom-wma_maxlabel)))
+          , mly = Math.floor(dy/(1<<(wma_zoom-wma_maxlabel)))
           ;
         dataurl = wmaGetDataURL( mly, mlx, wma_maxlabel );
-
+        thistile.span.html('<span class="loading">coming soon...</span>');
       }
      }
     }
