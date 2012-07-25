@@ -41,7 +41,7 @@ var wmajt = (function(){
     }
 
     // (re-)draw the tile
-    update(this.x,this.y,this.z,this);
+    update(this.csx,this.csy,this.csz,this);
   }
 
   function update(x,y,z,tile) {
@@ -280,9 +280,6 @@ var wmajt = (function(){
           }
         }
       }
-
-      t2 = new Date();
-      $('#rtime').text(t2.getTime()-t1.getTime());
     }
 
     // store coords in tile context
@@ -291,11 +288,12 @@ var wmajt = (function(){
     tile.csz = z;
 
     // seach cache for data
-    xx=x, yy=y, ca;
+    var zz, xx=x, yy=y, ca;
     for( zz=z; zz>=minzoom; zz-- ) {
       ca = cache[hash(xx,yy,zz)];
       if( ca && ca.data  ) {
         drawGeoJSON(ca.data);
+        tile.can.show();
         if( z< buildingzoom || zz >= buildingzoom ) return;
       }
       xx=Math.floor(xx/2);
@@ -312,6 +310,6 @@ var wmajt = (function(){
   }
 
   return {
-    update: update;
+    update: update
   }
 })();
