@@ -173,9 +173,13 @@
               if( g.length > 0 ) {
                 var px = (g[0][0]-bx1)*128/bw
                   , py = 128-(g[0][1]-by1)*128/bh)
-                  , dx, dy, ds=0,ds=style[s][o][2].dash,di=0,dl=ds.length
-                  , mx, my, r;
+                  , dx, dy, ds=0,ds=style[s][o][2].dash,di=0,dl=ds.length,dc=0.0
+                  , mx, my, r, rr;
                 for( j=1; j<g.length; ++j ) {
+                  // move to start
+                  c.moveTo(px,py);
+                  rr = -dc;
+
                   // destination point   
                   dx = (g[j][0]-bx1)*128/bw;
                   dy = 128-(g[j][1]-by1)*128/bh);
@@ -186,6 +190,20 @@
                   r = Math.sqrt(mx*mx+my*my);
                   mx /= r;
                   my /= r;
+
+                  // loop over segment
+                  var done = false;
+                  while(true) {
+                    rr += ds[di];
+                    if( rr>r ) {
+                      done=true;
+                      dc = rr-r;
+                      rr = r;
+                    }
+                    c[di%2?'moveTo':'lineTo'](rr*mx+px,rr*my+dy);
+                    if(done) break;
+                    di=(di+1)%dl;
+                  }
 
                   // new starting point
                   px=dx;
