@@ -52,7 +52,7 @@
 
     // top right: lindau
     //http://6.www.toolserver.org/~dschwen/wma/tiles/mapnik/12/2898/tile_2898_660.png
-    // dupont circle DC
+    // washington circle DC
     //http://4.www.toolserver.org/~dschwen/wma/tiles/mapnik/12/3488/tile_3488_19316.png
 
     // draw the data
@@ -127,6 +127,9 @@
                 { lineWidth: 3.5, strokeStyle: "rgb(255,255,235)" } ]
             ],
             // border
+            ['railway',{rail:1,preserved:1},
+              [ { lineWidth: 3, strokeStyle: "rgb(100,100,100)" } ]
+            ],
             ['highway',{secondary:1,secondary_link:1,primary:1,primary_link:1},
               [ { lineWidth: 6, strokeStyle: "rgb(171,158,137)" } ]
             ],
@@ -134,6 +137,12 @@
               [ { lineWidth: 7, strokeStyle: "rgb(188,149,28)" } ]
             ],
             // fill
+            ['railway',{rail:1},
+              [ { dash: [3,3], lineWidth: 1.5, strokeStyle: "rgb(255,255,255)" } ]
+            ],
+            ['railway',{preserved:1},
+              [ { dash: [3,3], lineWidth: 1.5, strokeStyle: "rgb(200,200,200)" } ]
+            ],
             ['highway',{secondary:1,secondary_link:1},
               [ { lineWidth: 4.5, strokeStyle: "rgb(255,250,115)" } ]
             ],
@@ -168,12 +177,12 @@
               g = d[i].geo.coordinates;
             }
   
-            if('dash' in style[s][o][2]) {
+            if('dash' in style[s][o][2][0]) {
               // iterate over all nodes
               if( g.length > 0 ) {
-                var px = (g[0][0]-bx1)*128/bw
-                  , py = 128-(g[0][1]-by1)*128/bh)
-                  , dx, dy, ds=0,ds=style[s][o][2].dash,di=0,dl=ds.length,dc=0.0
+                var px = (g[0][0]-bx1)*128.0/bw
+                  , py = 128.0-(g[0][1]-by1)*128.0/bh
+                  , dx, dy, ds=0,ds=style[s][o][2][0].dash,di=0,dl=ds.length,dc=0.0
                   , mx, my, r, rr;
                 for( j=1; j<g.length; ++j ) {
                   // move to start
@@ -181,8 +190,8 @@
                   rr = -dc;
 
                   // destination point   
-                  dx = (g[j][0]-bx1)*128/bw;
-                  dy = 128-(g[j][1]-by1)*128/bh);
+                  dx = (g[j][0]-bx1)*128.0/bw;
+                  dy = 128.0-(g[j][1]-by1)*128.0/bh;
 
                   // stepvector and length
                   mx = dx-px;
@@ -200,7 +209,7 @@
                       dc = rr-r;
                       rr = r;
                     }
-                    c[di%2?'moveTo':'lineTo'](rr*mx+px,rr*my+dy);
+                    c[di%2?'moveTo':'lineTo'](rr*mx+px,rr*my+py);
                     if(done) break;
                     di=(di+1)%dl;
                   }
