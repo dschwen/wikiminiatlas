@@ -64,14 +64,15 @@ $murx = deg2rad($urx>180?($urx-360.0):$urx)*6378137.0;
 $mury = log(tan(M_PI_4 + deg2rad($ury) / 2.0)) * 6378137.0;
 
 
-$tags = array( "highway", "railway", "waterway", "landuse", "leisure", "building", "natural", "amenity", "name", "boundary", "osm_id","layer","access" );
+$tags = array( "highway", "railway", "waterway", "landuse", "leisure", "building", "natural", "amenity", "name", "boundary", "osm_id","layer","access","route" );
 $taglist = '"'.implode($tags,'", "').'"';
 $tagnum = count($tags);
 $intersect = "
           ST_Intersection( 
             way,
-            transform( ST_GeomFromText('POLYGON(($llx $ury, $urx $ury, $urx $lly, $llx $lly, $llx $ury))', 4326 ), 900913 )
+            SetSRID('BOX3D($mllx $mlly, $murx $mury)'::box3d,900913)
           )";
+//transform( ST_GeomFromText('POLYGON(($llx $ury, $urx $ury, $urx $lly, $llx $lly, $llx $ury))', 4326 ), 900913 )
 $table = array( 
   array('planet_polygon','building IS NULL AND',$intersect), 
   array('planet_line','',$intersect)
@@ -153,6 +154,33 @@ for( $i=0; $i<count($table); $i++ ) {
     } 
     $geo[] = array( "geo" => json_decode($row[0]), "tags" => $type );
   }
+}
+
+// get ocean data
+$query = "
+  select 
+    ST_AsGeoJSON( transform( 
+      ST_Intersection( 
+        the_geom,
+        SetSRID('BOX3D($mllx $mlly, $murx $mury)'::box3d,900913)
+      ) ,4326), 9 )
+    from coastlines
+  where
+    the_geom && SetSRID('BOX3D($mllx $mlly, $murx $mury)'::box3d,900913);
+";
+//transform( ST_GeomFromText('POLYGON(($llx $ury, $urx $ury, $urx $lly, $llx $lly, $llx $ury))', 4326 ), 900913 )
+
+// perform query
+$result = pg_query($dbconn, $query);
+if( !$result ) {
+  echo pg_last_error($dbconn);
+  exit;
+}
+
+// get result, set tag natural=>ocean
+$type = array( "natural" => "ocean" );
+while ($row = pg_fetch_row($result)) {
+  $geo[] = array( "geo" => json_decode($row[0]), "tags" => $type );
 }
 
 $s = json_encode( array( "data" => $geo, "x" => $x, "y" => $y, "z" => $z ) );

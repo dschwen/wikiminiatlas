@@ -61,6 +61,10 @@
         , t1 = new Date(), t2
         , style = {
           Polygon: [
+            ['natural',{ocean:1}, // actually it's land!
+              [ { fillStyle: "rgb(250,250,208)" },
+                { lineWidth: 1, strokeStyle: "rgb(125,125,104)"} ]
+            ],
             ['railway',{platform:1},
               [ { fillStyle: "rgb(220,220,220)" } ]
             ],
@@ -174,6 +178,7 @@
 
       // TODO: handle coastlines properly!!
       c.fillStyle = 'rgb(250, 250, 208)';
+      c.fillStyle = 'rgb(158,199,243)';
       c.fillRect(0,0,128,128);
 
       function makePath(g) {
