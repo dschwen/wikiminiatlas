@@ -16,9 +16,9 @@
 <body>
   <h1>Client-side tile rendering test</h1>
   <!--<img src="http://6.www.toolserver.org/~dschwen/wma/tiles/mapnik/12/2898/tile_2898_660.png"/>-->
-  <div style="display: inline-block; position: relative">
+  <div style="display: inline-block; position: relative; width: 128px; height: 128px">
     <img src="http://6.www.toolserver.org/~dschwen/wma/tiles/mapnik/12/3488/tile_3488_19316.png"/>
-    <div style="background-color: red; opacity: 0.5; position: absolute; width: 32px; height: 32px; top: 0; left: 0; pointer-events: none"></div>
+    <div id="zoommark" style="background-color: red; opacity: 0.5; position: absolute; width: 32px; height: 32px; top: 0; left: 0; pointer-events: none"></div>
   </div>
 
   <div style="display: inline-block; position: relative">
@@ -42,9 +42,10 @@
   <script>
     var canvas,c,w,h
       , bx1, by1, bx2, by2, bw, bh
-      , x=19316*4, y=3488*4, z=14
+      , x=24149, y=2502, z=12
       , minzoom = 12, buildingzoom = 14
       , cache = {}
+      //, x=19316*4, y=3488*4, z=14
       //, x=19316, y=3488, z=12
       //, x=660, y=2898, z=12
       ;
@@ -233,8 +234,23 @@
       $('#bbox').text(bx1+' '+by1+', '+bx2+' '+by2);
       if(bx1>180.0) bx1-=360;
 
+      // update img
+      var zz, xx=x, yy=y, ss=128, ox=0, oy=0, ca;
+      for( zz=z; zz>minzoom; zz-- ) {
+        ox = ox/2 + (xx%2)*64;
+        oy = oy/2 + (yy%2)*64;
+        xx=Math.floor(xx/2);
+        yy=Math.floor(yy/2);
+        ss/=2;
+      }  
+      $('img').attr('src','http://6.www.toolserver.org/~dschwen/wma/tiles/mapnik/12/'+yy+'/tile_'+yy+'_'+xx+'.png');
+      $('#zoommark').css({
+        width: ss+'px', height: ss+'px',
+        left: ox+'px', top: oy+'px'
+      });
+
       // seach cache for data
-      var zz, xx=x, yy=y, ca;
+      xx=x, yy=y, ca;
       for( zz=z; zz>=minzoom; zz-- ) {
         ca = cache[hash(xx,yy,zz)];
         if( ca && ca.data  ) {
