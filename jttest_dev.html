@@ -52,7 +52,7 @@
 
     // top right: lindau
     //http://6.www.toolserver.org/~dschwen/wma/tiles/mapnik/12/2898/tile_2898_660.png
-    // dupont circle DC
+    // washington circle DC
     //http://4.www.toolserver.org/~dschwen/wma/tiles/mapnik/12/3488/tile_3488_19316.png
 
     // draw the data
@@ -61,6 +61,10 @@
         , t1 = new Date(), t2
         , style = {
           Polygon: [
+            ['natural',{ocean:1}, // actually it's land!
+              [ { fillStyle: "rgb(250,250,208)" },
+                { lineWidth: 1, strokeStyle: "rgb(125,125,104)"} ]
+            ],
             ['railway',{platform:1},
               [ { fillStyle: "rgb(220,220,220)" } ]
             ],
@@ -106,7 +110,16 @@
           ],
           LineString: [
             ['waterway',{canal:1},
-              [ { lineWidth: 3, strokeStyle: "rgb(158,199,243)" } ]
+              [ { lineCap: 'butt', lineWidth: 3, strokeStyle: "rgb(158,199,243)" } ]
+            ],
+            ['waterway',{river:1},
+              [ { lineWidth: 1.5, strokeStyle: "rgb(126,159,194)" } ]
+            ],
+            ['waterway',{stream:1},
+              [ { dash: [2,2], lineWidth: 1.5, strokeStyle: "rgb(126,159,194)" } ]
+            ],
+            ['route',{ferry:1},
+              [ { dash: [4,4], lineWidth: 2, strokeStyle: "rgb(126,159,194)" } ]
             ],
             ['highway',{pedestrian:1},
               [ { lineWidth: 5, strokeStyle: "rgb(255,255,255)" } ]
@@ -127,6 +140,9 @@
                 { lineWidth: 3.5, strokeStyle: "rgb(255,255,235)" } ]
             ],
             // border
+            ['railway',{rail:1,preserved:1},
+              [ { lineWidth: 3, strokeStyle: "rgb(100,100,100)" } ]
+            ],
             ['highway',{secondary:1,secondary_link:1,primary:1,primary_link:1},
               [ { lineWidth: 6, strokeStyle: "rgb(171,158,137)" } ]
             ],
@@ -134,14 +150,27 @@
               [ { lineWidth: 7, strokeStyle: "rgb(188,149,28)" } ]
             ],
             // fill
+            ['railway',{rail:1},
+              [ { dash: [3,3], lineWidth: 1.5, strokeStyle: "rgb(255,255,255)" } ]
+            ],
+            ['railway',{preserved:1},
+              [ { dash: [3,3], lineWidth: 1.5, strokeStyle: "rgb(200,200,200)" } ]
+            ],
             ['highway',{secondary:1,secondary_link:1},
-              [ { lineWidth: 4.5, strokeStyle: "rgb(255,250,115)" } ]
+              [ { lineCap: 'round', lineWidth: 4.5, strokeStyle: "rgb(255,250,115)" } ]
             ],
             ['highway',{primary:1,primary_link:1},
               [ { lineWidth: 4, strokeStyle: "rgb(255,230,95)" } ]
             ],
             ['highway',{motorway:1,motorway_link:1,trunk:1,trunk_link:1},
               [ { lineWidth: 5, strokeStyle: "rgb(242,191,36)" } ]
+            ],
+            // access overlay
+            ['access',{permissive:1},
+              [ { dash: [1,2], lineWidth: 1, strokeStyle: "rgb(100,200,100)" } ]
+            ],
+            ['access',{'private':1},
+              [ { dash: [1,2], lineWidth: 1, strokeStyle: "rgb(200,100,100)" } ]
             ]
           ]
         };  
@@ -149,7 +178,62 @@
 
       // TODO: handle coastlines properly!!
       c.fillStyle = 'rgb(250, 250, 208)';
+      c.fillStyle = 'rgb(158,199,243)';
       c.fillRect(0,0,128,128);
+
+      function makePath(g) {
+        if('dash' in style[s][o][2][0]) {
+          // iterate over all nodes
+          if( g.length > 0 ) {
+            var px = (g[0][0]-bx1)*128.0/bw
+              , py = 128.0-(g[0][1]-by1)*128.0/bh
+              , dx, dy, ds=0,ds=style[s][o][2][0].dash,di=0,dl=ds.length,dc=0.0
+              , mx, my, r, rr;
+            for( j=1; j<g.length; ++j ) {
+              // move to start
+              c.moveTo(px,py);
+              rr = -dc;
+
+              // destination point   
+              dx = (g[j][0]-bx1)*128.0/bw;
+              dy = 128.0-(g[j][1]-by1)*128.0/bh;
+
+              // stepvector and length
+              mx = dx-px;
+              my = dy-py;
+              r = Math.sqrt(mx*mx+my*my);
+              mx /= r;
+              my /= r;
+
+              // loop over segment
+              var done = false;
+              while(true) {
+                rr += ds[di];
+                if( rr>r ) {
+                  done=true;
+                  dc = rr-r;
+                  rr = r;
+                }
+                c[di%2?'moveTo':'lineTo'](rr*mx+px,rr*my+py);
+                if(done) break;
+                di=(di+1)%dl;
+              }
+
+              // new starting point
+              px=dx;
+              py=dy;
+            }
+          }
+        } else {
+          // iterate over all nodes
+          if( g.length > 0 ) {
+            c.moveTo((g[0][0]-bx1)*128/bw,128-(g[0][1]-by1)*128/bh);
+            for( j=1; j<g.length; ++j ) {
+              c.lineTo((g[j][0]-bx1)*128/bw,128-(g[j][1]-by1)*128/bh);
+            }
+          }
+        }
+      }
 
       for( s in style ) {
         for( o=0; o < style[s].length; o++ ) {
@@ -157,68 +241,32 @@
           
           for(i =0; i<d.length; ++i ) {
             // check against shape type and tags
-            if( d[i].geo.type != s || 
+            if( ( s != d[i].geo.type && ("Multi"+s) != d[i].geo.type ) ||
+                ( s=='LineString' && ( d[i].geo.type == "Polygon" || d[i].geo.type == "MultiPolygon" ) ) ||
                 !( style[s][o][0] in d[i].tags ) ||
                 !( d[i].tags[style[s][o][0]] in style[s][o][1] ) ) continue;
 
             // quick hack for shape type
-            if( s == 'Polygon' ) {
-              g = d[i].geo.coordinates[0];
-            } else {
-              g = d[i].geo.coordinates;
+            switch(d[i].geo.type) {
+              case 'Polygon':
+                // TODO 
+                makePath( d[i].geo.coordinates[0] );
+                break;
+              case 'LineString':
+                makePath( d[i].geo.coordinates );
+                break;
+              case 'MultiLineString':
+                for(k=0; k<d[i].geo.coordinates.length; k++ ) {
+                  makePath( d[i].geo.coordinates[k] );
+                }
+                break;
+              case 'MultiPolygon':
+                for(k=0; k<d[i].geo.coordinates.length; k++ ) {
+                  makePath( d[i].geo.coordinates[k][0] );
+                }
+                break;
             }
   
-            if('dash' in style[s][o][2]) {
-              // iterate over all nodes
-              if( g.length > 0 ) {
-                var px = (g[0][0]-bx1)*128/bw
-                  , py = 128-(g[0][1]-by1)*128/bh)
-                  , dx, dy, ds=0,ds=style[s][o][2].dash,di=0,dl=ds.length,dc=0.0
-                  , mx, my, r, rr;
-                for( j=1; j<g.length; ++j ) {
-                  // move to start
-                  c.moveTo(px,py);
-                  rr = -dc;
-
-                  // destination point   
-                  dx = (g[j][0]-bx1)*128/bw;
-                  dy = 128-(g[j][1]-by1)*128/bh);
-
-                  // stepvector and length
-                  mx = dx-px;
-                  my = dy-py;
-                  r = Math.sqrt(mx*mx+my*my);
-                  mx /= r;
-                  my /= r;
-
-                  // loop over segment
-                  var done = false;
-                  while(true) {
-                    rr += ds[di];
-                    if( rr>r ) {
-                      done=true;
-                      dc = rr-r;
-                      rr = r;
-                    }
-                    c[di%2?'moveTo':'lineTo'](rr*mx+px,rr*my+dy);
-                    if(done) break;
-                    di=(di+1)%dl;
-                  }
-
-                  // new starting point
-                  px=dx;
-                  py=dy;
-                }
-              }
-            } else {
-              // iterate over all nodes
-              if( g.length > 0 ) {
-                c.moveTo((g[0][0]-bx1)*128/bw,128-(g[0][1]-by1)*128/bh);
-                for( j=1; j<g.length; ++j ) {
-                  c.lineTo((g[j][0]-bx1)*128/bw,128-(g[j][1]-by1)*128/bh);
-                }
-              }
-            }
           }
 
           // iterate over the style components

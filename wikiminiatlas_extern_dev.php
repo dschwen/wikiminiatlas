@@ -28,13 +28,16 @@
 <? require( 'glMatrix-0.9.5.custom.js' ); ?>
 <? require( 'webgl-utils_min.js' ); ?>
 <? require( 'wmaglobe3d_min.js' ); ?>
+<? require( 'wmajt.js' ); ?>
 
 
 // global settings
 var wma_imgbase = '//toolserver.org/~dschwen/wma/tiles/';
 var wma_database = '//toolserver.org/~dschwen/wma/label.php';
 var wma_tilebase = '.www.toolserver.org/~dschwen/wma/tiles/';
-var wma_zoomsize = [ 3, 6 ,12 ,24 ,48, 96, 192, 384, 768, 1536,  3072, 6144, 12288, 24576, 49152, 98304 ];
+var i, wma_zoomsize = [3];
+for(i=1; i<40; i++) { wma_zoomsize[i]=2*wma_zoomsize[i-1]; }
+
 
 // include documentation strings
 <? require( 'wikiminiatlas_i18n.inc' ); ?>
@@ -68,7 +71,7 @@ var wma_tilesets = [
   },
   linkcolor: [ "#2255aa", "white 0pt 0pt 2pt" ],
   equator: 40075.0, // equatorial circumfence in km
-  maxzoom: 12,
+  maxzoom: 20,
   minzoom: 0
  },
  {
@@ -711,9 +714,17 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
           }, 1000 );
         })
         .appendTo(d),
+      can : $('<canvas></canvas>').appendTo(d),
+      ctx : null,
+      csrender: false,
+      csx:0,csy:0,csz:20,
       span : $('<span></span>').appendTo(d),
       url : '',
       xhr : null
+    }
+    if( hasCanvas ) {
+      t.can.attr({width:128,height:128});
+      t.ctx = t.can[0].getContext('2d');
     }
     $(wma_map).append(t.div);
     return t;
@@ -1024,9 +1035,26 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
      if( thistile.url != tileurl )
      {
       thistile.url = tileurl;
-      //thistile.div.css( 'backgroundImage', tileurl );
-      if( thistile.img.attr('src') != tileurl ) { // catch mere label language change
-        thistile.img.fadeOut(0).attr( 'src', tileurl );
+      if( wma_tileset==0 && wma_zoom>12 ) {
+        // client side render
+        if( !thistile.csrender ) {
+          thistile.csrender =true;
+          thistile.img.attr('src','tiles/dummy.png').fadeOut(0);
+        }
+        if( thistile.csx != dx || thistile.csy != dy || thistile.csz != wma_zoom ) {
+          thistile.can.hide();
+          wmajt.update(dx,dy,wma_zoom,thistile);
+        }
+      } else {
+        // regular image tiles
+        if( thistile.img.attr('src') != tileurl || thistile.csrender ) { // catch mere label language change
+          thistile.img.fadeOut(0).attr( 'src', tileurl );
+        }
+        thistile.csz = wma_zoom;
+        if( thistile.csrender ) {
+          thistile.csrender = false;
+          thistile.can.fadeOut(200);
+        }
       }
 
       if( thistile.xhr !== null ) {

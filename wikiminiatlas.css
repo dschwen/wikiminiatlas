@@ -293,9 +293,12 @@ div.wmatile {
   width:128px; 
   height:128px;
 }
-div.wmatile>img, div.wmatile>span {
+div.wmatile>img, div.wmatile>span, div.wmatile>canvas {
   position: absolute;
   top: 0; left: 0;
+}
+div.wmatile>canvas {
+  display: none;
 }
 
 canvas.wmakml {

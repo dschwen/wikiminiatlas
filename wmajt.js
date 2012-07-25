@@ -1,64 +1,63 @@
-<html>
-<head>
-  <title>Client-side tile rendering test</title>
-  <script type="text/javascript" src="jquery-1.5.1.min.js"></script>
-  <style>
-    canvas {
-      border: 1px solid black; 
+var wmajt = (function(){
+  var w=128,h=128
+    , minzoom = 12, buildingzoom = 14
+    , cache = {};
+
+  // return path element at screen coordinates
+  function pathAt(x,y) {
+  }
+
+  function hash(x,y,z) {
+    return x+'_'+y+'_'+z;
+  }
+
+  function gotData(data) {
+    // insert response into cache
+    cache[hash(data.x,data.y,data.z)] = { data: data.data, building: {} };
+
+    // propagate buildings to low zoom levels above the building threshold
+    var d=data.data, i, zz, xx=data.x, yy=data.y, ca;
+    if( data.z >= buildingzoom ) {
+      for( zz=data.z; zz>=minzoom; zz-- ) {
+        ca = cache[hash(xx,yy,zz)];
+        if( zz<buildingzoom && ca && ca.data  ) {
+          // iterate over all data entries and insert buildings into higher cache level
+          for(i =0; i<d.length; ++i ) {
+            // check against shape type and tags
+            if( 'osm_id' in d[i].tags && 
+                'building' in d[i].tags &&
+                !(d[i].tags['osm_id'] in ca.building) ) {
+              ca.data.push(d[i]);
+              ca.building[d[i].tags['osm_id']] = 1;
+            }
+          }
+        }
+        xx=Math.floor(xx/2);
+        yy=Math.floor(yy/2);
+      }
+    } else {
+      // TODO: look for lower zoom levels with building data, but there may be A LOT!
+      // SOLUTION: just look at building zoom
     }
-    button {
-      width: 30px;
-      height: 20px;
-      margin: -10px -15px -10px -15px;
-    }
-  </style>
-</head>
-<body>
-  <h1>Client-side tile rendering test</h1>
-  <!--<img src="http://6.www.toolserver.org/~dschwen/wma/tiles/mapnik/12/2898/tile_2898_660.png"/>-->
-  <div style="display: inline-block; position: relative; width: 128px; height: 128px">
-    <img src="http://6.www.toolserver.org/~dschwen/wma/tiles/mapnik/12/3488/tile_3488_19316.png"/>
-    <div id="zoommark" style="background-color: red; opacity: 0.5; position: absolute; width: 32px; height: 32px; top: 0; left: 0; pointer-events: none"></div>
-  </div>
 
-  <div style="display: inline-block; position: relative">
-    <canvas width="128" height="128" id="tile"></canvas>
-    <div id="hilight" style="background-color: red; display: none; position: absolute; width: 64px; height: 64px; pointer-events: none"></div>
-  </div>
+    // (re-)draw the tile
+    update(this.csx,this.csy,this.csz,this);
+  }
 
-  <div style="display: inline-block; position: relative; width: 128px; height: 128px">
-    <button id="butN" style="position: absolute; top: 10px; left: 64px;">N</button>
-    <button id="butS" style="position: absolute; bottom: 10px; left: 64px;">S</button>
-    <button id="butW" style="position: absolute; top: 64px; left: 15px;">W</button>
-    <button id="butE" style="position: absolute; top: 64px; right: 15px;">E</button>
-    <button id="butZ" style="position: absolute; top: 64px; right: 64px;">-</button>
-  </div>
+  function update(x,y,z,tile) {
+    var bx1 = x*60.0/(1<<z)
+      , by1 = 90.0 - ( ((y+1.0)*60.0) / (1<<z) )
+      , bx2 = (x+1) * 60.0 / (1<<z)
+      , by2 = 90.0 - ( (y*60.0) / (1<<z) )
+      , bw = bx2-bx1
+      , bh = by2-by1
+      , c = tile.ctx;
 
-  <p>Bounding box: <span id="bbox"></span></p>
-  <p>Render time: <span id="rtime">-</span>ms</p>
-  <p>
-    Click on the right square to zoom in. The red area area on the left square highlights the current field of view on a prerendered tite at the currently maximum zoom level in WikiMiniAtlas. The area shown is near the city center of Dublin in Ireland. Raw map data is pulled from OpenStreetMap and rendered in your browser. Use the five buttons on the right to pan and zoom out.
-  </p>
-  <script>
-    var canvas,c,w,h
-      , bx1, by1, bx2, by2, bw, bh
-      , x=24149, y=2502, z=12
-      , minzoom = 12, buildingzoom = 14
-      , cache = {}
-      //, x=19316*4, y=3488*4, z=14
-      //, x=19316, y=3488, z=12
-      //, x=660, y=2898, z=12
-      ;
-
-    // top right: lindau
-    //http://6.www.toolserver.org/~dschwen/wma/tiles/mapnik/12/2898/tile_2898_660.png
-    // washington circle DC
-    //http://4.www.toolserver.org/~dschwen/wma/tiles/mapnik/12/3488/tile_3488_19316.png
+    if(bx1>180.0) bx1-=360;
 
     // draw the data
     function drawGeoJSON(d) {
       var i, j, k, g, s, o, ds
-        , t1 = new Date(), t2
         , style = {
           Polygon: [
             ['natural',{ocean:1}, // actually it's land!
@@ -177,7 +176,6 @@
       c.lineWidth = 1.0;
 
       // TODO: handle coastlines properly!!
-      c.fillStyle = 'rgb(250, 250, 208)';
       c.fillStyle = 'rgb(158,199,243)';
       c.fillRect(0,0,128,128);
 
@@ -266,7 +264,7 @@
                 }
                 break;
             }
-  
+
           }
 
           // iterate over the style components
@@ -282,153 +280,36 @@
           }
         }
       }
-
-      t2 = new Date();
-      $('#rtime').text(t2.getTime()-t1.getTime());
     }
 
-    // return path element at screen coordinates
-    function pathAt(x,y) {
-    }
+    // store coords in tile context
+    tile.csx = x;
+    tile.csy = y;
+    tile.csz = z;
 
-    function hash(x,y,z) {
-      return x+'_'+y+'_'+z;
-    }
-
-    function gotData(data) {
-      // insert response into cache
-      cache[hash(data.x,data.y,data.z)] = { data: data.data, building: {} };
-
-      // propagate buildings to low zoom levels above the building threshold
-      var d=data.data, i, zz, xx=data.x, yy=data.y, ca;
-      if( data.z >= buildingzoom ) {
-        for( zz=data.z; zz>=minzoom; zz-- ) {
-          ca = cache[hash(xx,yy,zz)];
-          if( zz<buildingzoom && ca && ca.data  ) {
-            // iterate over all data entries and insert buildings into higher cache level
-            for(i =0; i<d.length; ++i ) {
-              // check against shape type and tags
-              if( 'osm_id' in d[i].tags && 
-                  'building' in d[i].tags &&
-                  !(d[i].tags['osm_id'] in ca.building) ) {
-                ca.data.push(d[i]);
-                ca.building[d[i].tags['osm_id']] = 1;
-              }
-            }
-          }
-          xx=Math.floor(xx/2);
-          yy=Math.floor(yy/2);
-        }
-      } else {
-        // TODO: look for lower zoom levels with building data, but there may be A LOT!
-        // SOLUTION: just look at building zoom
+    // seach cache for data
+    var zz, xx=x, yy=y, ca;
+    for( zz=z; zz>=minzoom; zz-- ) {
+      ca = cache[hash(xx,yy,zz)];
+      if( ca && ca.data  ) {
+        drawGeoJSON(ca.data);
+        tile.can.show();
+        if( z< buildingzoom || zz >= buildingzoom ) return;
       }
+      xx=Math.floor(xx/2);
+      yy=Math.floor(yy/2);
+    } 
 
-      // (re-)draw the tile
-      update();
-    }
-
-    function update() {
-      bx1 = x*60.0/(1<<z);
-      by1 = 90.0 - ( ((y+1.0)*60.0) / (1<<z) );
-      bx2 = (x+1) * 60.0 / (1<<z);
-      by2 = 90.0 - ( (y*60.0) / (1<<z) );
-      bw = bx2-bx1;
-      bh = by2-by1;
-
-      $('#bbox').text(bx1+' '+by1+', '+bx2+' '+by2);
-      if(bx1>180.0) bx1-=360;
-
-      // update img
-      var zz, xx=x, yy=y, ss=128, ox=0, oy=0, ca;
-      for( zz=z; zz>minzoom; zz-- ) {
-        ox = ox/2 + (xx%2)*64;
-        oy = oy/2 + (yy%2)*64;
-        xx=Math.floor(xx/2);
-        yy=Math.floor(yy/2);
-        ss/=2;
-      }  
-      $('img').attr('src','http://6.www.toolserver.org/~dschwen/wma/tiles/mapnik/12/'+yy+'/tile_'+yy+'_'+xx+'.png');
-      if( z==minzoom ) {
-        $('#zoommark').fadeOut(200);
-      } else {
-        $('#zoommark').fadeIn(200);
-      }
-      $('#zoommark').css({
-        width: ss+'px', height: ss+'px',
-        left: ox+'px', top: oy+'px'
-      });
-
-      // seach cache for data
-      xx=x, yy=y, ca;
-      for( zz=z; zz>=minzoom; zz-- ) {
-        ca = cache[hash(xx,yy,zz)];
-        if( ca && ca.data  ) {
-          drawGeoJSON(ca.data);
-          if( z< buildingzoom || zz >= buildingzoom ) return;
-        }
-        xx=Math.floor(xx/2);
-        yy=Math.floor(yy/2);
-      } 
-
-      // request data
-      $.ajax({
-        url: 'tiles/jsontile_dev.php?x='+x+'&y='+y+'&z='+z,
-        dataType: 'json',
-        success: gotData
-      });
-    }
-
-    $(function(){
-      canvas = $('#tile');
-      w = canvas[0].width;
-      h = canvas[0].height;
-      c = canvas[0].getContext('2d');
-
-      update();
-
-      canvas
-        .click(function(e){
-          z++;
-          x = x*2 + Math.floor(e.offsetX/64);
-          y = y*2 + Math.floor(e.offsetY/64);
-          update();
-        })
-        .mouseenter(function(e){
-          $('#hilight').fadeTo(200,0.5);
-        })
-        .mousemove(function(e){
-          var x = Math.floor(e.offsetX/64)
-            , y =  Math.floor(e.offsetY/64);
-          $('#hilight').css({
-            top: (y>0?64:0) + 'px',
-            left: (x>0?64:0) + 'px'
-          });
-        })
-        .mouseleave( function(e) {
-          $('#hilight').fadeOut(200);
-        });
-
-      $('#butW').click( function(){
-        x--; update();
-      });
-      $('#butE').click( function(){
-        x++; update();
-      });
-      $('#butN').click( function(){
-        y--; update();
-      });
-      $('#butS').click( function(){
-        y++; update();
-      });
-      $('#butZ').click( function(){
-        if( z>minzoom ) {
-          x = Math.floor(x/2);
-          y = Math.floor(y/2);
-          z--; update();
-        }
-      });
+    // request data
+    $.ajax({
+      url: 'tiles/jsontile_dev.php?x='+x+'&y='+y+'&z='+z,
+      dataType: 'json',
+      success: gotData,
+      context: tile
     });
-  </script>
-</body>
-</html>
+  }
+
+  return {
+    update: update
+  }
+})();
