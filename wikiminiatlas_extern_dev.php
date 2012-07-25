@@ -1040,7 +1040,7 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
         // client side render
         if( !thistile.csrender ) {
           thistile.csrender =true;
-          thistile.img.attr('src','tiles/dummy.png').fadeOut(0);
+          thistile.img.fadeOut(200);
         }
         if( thistile.csx != dx || thistile.csy != dy || thistile.csz != wma_zoom ) {
           thistile.can.hide();
@@ -1048,8 +1048,10 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
         }
       } else {
         // regular image tiles
-        if( thistile.img.attr('src') != tileurl || thistile.csrender ) { // catch mere label language change
+        if( thistile.img.attr('src') != tileurl ) { // catch mere label language change
           thistile.img.fadeOut(0).attr( 'src', tileurl );
+        } else {
+          if( thistile.csrender ) { thistile.img.fadeIn(200); }
         }
         thistile.csz = wma_zoom;
         if( thistile.csrender ) {
@@ -1062,25 +1064,33 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
        thistile.xhr.abort();
       }
 
-      //thistile.div.html('<span class="loading">' + strings.labelLoading[UILang] + '</span>');
-      thistile.span.html('<span class="loading">' + strings.labelLoading[UILang] + '</span>');
+      if( wma_zoom < wma_maxlabel ) {
+        thistile.span.html('<span class="loading">' + strings.labelLoading[UILang] + '</span>');
 
-      // TODO: instead of launching the XHR here, gather the needed coords and ...
-      if( window.sessionStorage && ((data=sessionStorage.getItem(dataurl))!==null) ) {
-        //parseLabels(thistile.div,data);
-        parseLabels(thistile.span,data);
-      } else {
-        (function(turl){// closure to retain access to dataurl in sucess callback
-        //thistile.xhr = $.ajax( { url : turl, context : thistile.div } )
-        thistile.xhr = $.ajax( { url : turl, context : thistile.span } )
-          .success( function(data) { 
-            if( window.sessionStorage ) {
-              sessionStorage.setItem(turl,data);
-            }
-            parseLabels(this,data);
-          } ) 
-          .error( function() { this.text(''); } );
-        })(dataurl);
+        // TODO: instead of launching the XHR here, gather the needed coords and ...
+        if( window.sessionStorage && ((data=sessionStorage.getItem(dataurl))!==null) ) {
+          //parseLabels(thistile.div,data);
+          parseLabels(thistile.span,data);
+        } else {
+          (function(turl){// closure to retain access to dataurl in sucess callback
+          //thistile.xhr = $.ajax( { url : turl, context : thistile.div } )
+          thistile.xhr = $.ajax( { url : turl, context : thistile.span } )
+            .success( function(data) { 
+              if( window.sessionStorage ) {
+                sessionStorage.setItem(turl,data);
+              }
+              parseLabels(this,data);
+            } ) 
+            .error( function() { this.text(''); } );
+          })(dataurl);
+        }
+      } else { // zooming beyond maximum label zoom
+        // use labeldata from wma_maxlabel zoomlevel
+        var mlx = Math.floor(dx/(1<<(wma_zoom-wma_maxlabel)))
+          , mlx = Math.floor(dx/(1<<(wma_zoom-wma_maxlabel)))
+          ;
+        dataurl = wmaGetDataURL( mly, mlx, wma_maxlabel );
+
       }
      }
     }
