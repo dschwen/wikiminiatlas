@@ -16,9 +16,9 @@
 <body>
   <h1>Client-side tile rendering test</h1>
   <!--<img src="http://6.www.toolserver.org/~dschwen/wma/tiles/mapnik/12/2898/tile_2898_660.png"/>-->
-  <div style="display: inline-block; position: relative">
+  <div style="display: inline-block; position: relative; width: 128px; height: 128px">
     <img src="http://6.www.toolserver.org/~dschwen/wma/tiles/mapnik/12/3488/tile_3488_19316.png"/>
-    <div style="background-color: red; opacity: 0.5; position: absolute; width: 32px; height: 32px; top: 0; left: 0; pointer-events: none"></div>
+    <div id="zoommark" style="background-color: red; opacity: 0.5; position: absolute; width: 32px; height: 32px; top: 0; left: 0; pointer-events: none"></div>
   </div>
 
   <div style="display: inline-block; position: relative">
@@ -42,9 +42,10 @@
   <script>
     var canvas,c,w,h
       , bx1, by1, bx2, by2, bw, bh
-      , x=19316*4, y=3488*4, z=14
-      , minzoom = 13, buildingzoom = 14
+      , x=24149, y=2502, z=12
+      , minzoom = 12, buildingzoom = 14
       , cache = {}
+      //, x=19316*4, y=3488*4, z=14
       //, x=19316, y=3488, z=12
       //, x=660, y=2898, z=12
       ;
@@ -60,18 +61,31 @@
         , t1 = new Date(), t2
         , style = {
           Polygon: [
-            ['landuse',{cemetery:1},
+            ['railway',{platform:1},
+              [ { fillStyle: "rgb(220,220,220)" } ]
+            ],
+            ['landuse',{industrial:1,retail:1,commercial:1,residential:1},
+              [ { fillStyle: "rgb(208,208,208)" } ]
+            ],
+            ['landuse',{military:1,railway:1},
+              [ { fillStyle: "rgb(224,200,200)" } ]
+            ],
+            ['landuse',{cemetery:1,recreation_ground:1},
               [ { fillStyle: "rgb(190,214,190)" } ]
             ],
-            ['leisure',{park:1,orchard:1,meadow:1,village_green:1,
+            ['leisure',{park:1,orchard:1,meadow:1,village_green:1,golf_course:1,track:1,
               forrest:1,recreation_ground:1,dog_park:1,garden:1,pitch:1,stadium:1},
               [ { fillStyle: "rgb(200,224,200)" } ]
             ],
             ['waterway',{riverbank:1,dock:1},
+              [ { fillStyle: "rgb(158,199,243)" } ]
+            ],
+            ['natural',{wetland:1},
               [ { fillStyle: "rgb(200,200,224)" } ]
             ],
-            ['natural',{water:1,bay:1,wetland:1},
-              [ { fillStyle: "rgb(200,200,234)" } ]
+            ['natural',{water:1,bay:1},
+              [ { fillStyle: "rgb(158,199,243)" },
+                { lineWidth: 1, strokeStyle: "rgb(158,199,243)"} ]
             ],
             ['natural',{grassland:1,fell:1},
               [ { fillStyle: "rgb(200,224,200)" } ]
@@ -91,6 +105,9 @@
             ]
           ],
           LineString: [
+            ['waterway',{canal:1},
+              [ { lineWidth: 3, strokeStyle: "rgb(158,199,243)" } ]
+            ],
             ['highway',{pedestrian:1},
               [ { lineWidth: 5, strokeStyle: "rgb(255,255,255)" } ]
             ],
@@ -99,11 +116,15 @@
             ],
             ['highway',{service:1,path:1,track:1},
               [ { lineWidth: 4, strokeStyle: "rgb(168,168,168)" },
-                { lineWidth: 3, strokeStyle: "rgb(208,208,208)" } ]
+                { lineWidth: 2.5, strokeStyle: "rgb(208,208,208)" } ]
             ],
-            ['highway',{residential:1},
+            ['highway',{residential:1,unclassified:1},
               [ { lineWidth: 4, strokeStyle: "rgb(200,200,200)" },
-                { lineWidth: 3, strokeStyle: "rgb(255,255,255)" } ]
+                { lineWidth: 2.5, strokeStyle: "rgb(255,255,255)" } ]
+            ],
+            ['highway',{tertiary:1},
+              [ { lineWidth: 5, strokeStyle: "rgb(200,200,200)" },
+                { lineWidth: 3.5, strokeStyle: "rgb(255,255,235)" } ]
             ],
             // border
             ['highway',{secondary:1,secondary_link:1,primary:1,primary_link:1},
@@ -117,10 +138,10 @@
               [ { lineWidth: 5, strokeStyle: "rgb(255,250,115)" } ]
             ],
             ['highway',{primary:1,primary_link:1},
-              [ { lineWidth: 5, strokeStyle: "rgb(255,230,95)" } ]
+              [ { lineWidth: 4.5, strokeStyle: "rgb(255,230,95)" } ]
             ],
             ['highway',{motorway:1,motorway_link:1,trunk:1,trunk_link:1},
-              [ { lineWidth: 6, strokeStyle: "rgb(242,191,36)" } ]
+              [ { lineWidth: 5.5, strokeStyle: "rgb(242,191,36)" } ]
             ]
           ]
         };  
@@ -183,7 +204,35 @@
     }
 
     function gotData(data) {
-      cache[hash(data.x,data.y,data.z)]=data.data;
+      // insert response into cache
+      cache[hash(data.x,data.y,data.z)] = { data: data.data, building: {} };
+
+      // propagate buildings to low zoom levels above the building threshold
+      var d=data.data, i, zz, xx=data.x, yy=data.y, ca;
+      if( data.z >= buildingzoom ) {
+        for( zz=data.z; zz>=minzoom; zz-- ) {
+          ca = cache[hash(xx,yy,zz)];
+          if( zz<buildingzoom && ca && ca.data  ) {
+            // iterate over all data entries and insert buildings into higher cache level
+            for(i =0; i<d.length; ++i ) {
+              // check against shape type and tags
+              if( 'osm_id' in d[i].tags && 
+                  'building' in d[i].tags &&
+                  !(d[i].tags['osm_id'] in ca.building) ) {
+                ca.data.push(d[i]);
+                ca.building[d[i].tags['osm_id']] = 1;
+              }
+            }
+          }
+          xx=Math.floor(xx/2);
+          yy=Math.floor(yy/2);
+        }
+      } else {
+        // TODO: look for lower zoom levels with building data, but there may be A LOT!
+        // SOLUTION: just look at building zoom
+      }
+
+      // (re-)draw the tile
       update();
     }
 
@@ -198,12 +247,33 @@
       $('#bbox').text(bx1+' '+by1+', '+bx2+' '+by2);
       if(bx1>180.0) bx1-=360;
 
+      // update img
+      var zz, xx=x, yy=y, ss=128, ox=0, oy=0, ca;
+      for( zz=z; zz>minzoom; zz-- ) {
+        ox = ox/2 + (xx%2)*64;
+        oy = oy/2 + (yy%2)*64;
+        xx=Math.floor(xx/2);
+        yy=Math.floor(yy/2);
+        ss/=2;
+      }  
+      $('img').attr('src','http://6.www.toolserver.org/~dschwen/wma/tiles/mapnik/12/'+yy+'/tile_'+yy+'_'+xx+'.png');
+      if( z==minzoom ) {
+        $('#zoommark').fadeOut(200);
+      } else {
+        $('#zoommark').fadeIn(200);
+      }
+      $('#zoommark').css({
+        width: ss+'px', height: ss+'px',
+        left: ox+'px', top: oy+'px'
+      });
+
       // seach cache for data
-      var zz, xx=x, yy=y;
+      xx=x, yy=y, ca;
       for( zz=z; zz>=minzoom; zz-- ) {
-        if( cache[hash(xx,yy,zz)] ) {
-          drawGeoJSON(cache[hash(xx,yy,zz)]);
-          return;
+        ca = cache[hash(xx,yy,zz)];
+        if( ca && ca.data  ) {
+          drawGeoJSON(ca.data);
+          if( z< buildingzoom || zz >= buildingzoom ) return;
         }
         xx=Math.floor(xx/2);
         yy=Math.floor(yy/2);
@@ -211,7 +281,7 @@
 
       // request data
       $.ajax({
-        url: 'jsontile.php?x='+x+'&y='+y+'&z='+z,
+        url: 'tiles/jsontile_dev.php?x='+x+'&y='+y+'&z='+z,
         dataType: 'json',
         success: gotData
       });

@@ -64,6 +64,12 @@
             ['railway',{platform:1},
               [ { fillStyle: "rgb(220,220,220)" } ]
             ],
+            ['landuse',{industrial:1,retail:1,commercial:1,residential:1},
+              [ { fillStyle: "rgb(208,208,208)" } ]
+            ],
+            ['landuse',{military:1,railway:1},
+              [ { fillStyle: "rgb(224,200,200)" } ]
+            ],
             ['landuse',{cemetery:1,recreation_ground:1},
               [ { fillStyle: "rgb(190,214,190)" } ]
             ],
@@ -72,10 +78,14 @@
               [ { fillStyle: "rgb(200,224,200)" } ]
             ],
             ['waterway',{riverbank:1,dock:1},
+              [ { fillStyle: "rgb(158,199,243)" } ]
+            ],
+            ['natural',{wetland:1},
               [ { fillStyle: "rgb(200,200,224)" } ]
             ],
-            ['natural',{water:1,bay:1,wetland:1},
-              [ { fillStyle: "rgb(200,200,234)" } ]
+            ['natural',{water:1,bay:1},
+              [ { fillStyle: "rgb(158,199,243)" },
+                { lineWidth: 1, strokeStyle: "rgb(158,199,243)"} ]
             ],
             ['natural',{grassland:1,fell:1},
               [ { fillStyle: "rgb(200,224,200)" } ]
@@ -95,6 +105,9 @@
             ]
           ],
           LineString: [
+            ['waterway',{canal:1},
+              [ { lineWidth: 3, strokeStyle: "rgb(158,199,243)" } ]
+            ],
             ['highway',{pedestrian:1},
               [ { lineWidth: 5, strokeStyle: "rgb(255,255,255)" } ]
             ],
@@ -105,7 +118,7 @@
               [ { lineWidth: 4, strokeStyle: "rgb(168,168,168)" },
                 { lineWidth: 2.5, strokeStyle: "rgb(208,208,208)" } ]
             ],
-            ['highway',{residential:1},
+            ['highway',{residential:1,unclassified:1},
               [ { lineWidth: 4, strokeStyle: "rgb(200,200,200)" },
                 { lineWidth: 2.5, strokeStyle: "rgb(255,255,255)" } ]
             ],
@@ -244,6 +257,11 @@
         ss/=2;
       }  
       $('img').attr('src','http://6.www.toolserver.org/~dschwen/wma/tiles/mapnik/12/'+yy+'/tile_'+yy+'_'+xx+'.png');
+      if( z==minzoom ) {
+        $('#zoommark').fadeOut(200);
+      } else {
+        $('#zoommark').fadeIn(200);
+      }
       $('#zoommark').css({
         width: ss+'px', height: ss+'px',
         left: ox+'px', top: oy+'px'
