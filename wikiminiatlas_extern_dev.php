@@ -35,6 +35,7 @@
 var wma_imgbase = '//toolserver.org/~dschwen/wma/tiles/';
 var wma_database = '//toolserver.org/~dschwen/wma/label.php';
 var wma_tilebase = '.www.toolserver.org/~dschwen/wma/tiles/';
+var wma_maxlabel = 13;
 var i, wma_zoomsize = [3];
 for(i=1; i<40; i++) { wma_zoomsize[i]=2*wma_zoomsize[i-1]; }
 
@@ -1284,11 +1285,11 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
    } 
 
    if( rightclick ) {
-    wma_zoom = wma_tilesets[wma_tileset].maxzoom;
+    wma_zoom = ( wma_tileset==0 && hasCanvas ) ? 15 : wma_tilesets[wma_tileset].maxzoom;
    }
    else {
     if( wma_zoom >= wma_tilesets[wma_tileset].maxzoom ) {
-     tilesetUpgrade();
+     //tilesetUpgrade();
     }
     else wma_zoom++;
    }

@@ -83,11 +83,11 @@ if( $r != NULL ) {
     echo "Requesting too many tiles!";
     exit;
   }
-  $query = "select p.page_title as title, l.name as name, l.lat as lat, l.lon as lon, l.style as style, t.x as dx, t.y as dy from  page p, u_dschwen.wma_tile t, u_dschwen.wma_connect c, u_dschwen.wma_label l  WHERE l.lang_id='$l' AND l.globe='$g' AND c.rev='$rev' AND c.tile_id=t.id AND ( ".implode(" OR ",$q)." ) AND c.label_id=l.id AND t.z='$z' AND p.page_id = l.page_id AND c.tile_id = t.id AND page_namespace='$namespace' AND l.page_id=p.page_id;";
+  $query = "select p.page_title as title, l.name as name, l.lat as lat, l.lon as lon, l.style as style, t.x as dx, t.y as dy, l.weight as wg from  page p, u_dschwen.wma_tile t, u_dschwen.wma_connect c, u_dschwen.wma_label l  WHERE l.lang_id='$l' AND l.globe='$g' AND c.rev='$rev' AND c.tile_id=t.id AND ( ".implode(" OR ",$q)." ) AND c.label_id=l.id AND t.z='$z' AND p.page_id = l.page_id AND c.tile_id = t.id AND page_namespace='$namespace' AND l.page_id=p.page_id;";
   //echo $query,"\n";
   //exit;
 } else {
-  $query = "select p.page_title as title, l.name as name, l.lat as lat, l.lon as lon, l.style as style, t.x as dx, t.y as dy from  page p, u_dschwen.wma_tile t, u_dschwen.wma_connect c, u_dschwen.wma_label l  WHERE l.lang_id='$l' AND  l.globe='$g' AND c.rev='$rev' AND c.tile_id=t.id AND t.x='$x' AND c.label_id=l.id  AND t.y='$y' AND t.z='$z' AND p.page_id = l.page_id AND c.tile_id = t.id AND page_namespace='$namespace' AND l.page_id=p.page_id;";
+  $query = "select p.page_title as title, l.name as name, l.lat as lat, l.lon as lon, l.style as style, t.x as dx, t.y as dy, l.weight as wg from  page p, u_dschwen.wma_tile t, u_dschwen.wma_connect c, u_dschwen.wma_label l  WHERE l.lang_id='$l' AND  l.globe='$g' AND c.rev='$rev' AND c.tile_id=t.id AND t.x='$x' AND c.label_id=l.id  AND t.y='$y' AND t.z='$z' AND p.page_id = l.page_id AND c.tile_id = t.id AND page_namespace='$namespace' AND l.page_id=p.page_id;";
 }
 $res = mysql_query( $query );
 
@@ -103,6 +103,8 @@ while( $row = mysql_fetch_array( $res) )
 
   $ty = intval( ( ( $ymax - $row["lat"] ) * $wikiminiatlas_zoomsize[$z] * 128) / 180.0 );
   $tx = intval( ( ( $row["lon"] - $xmin ) * $wikiminiatlas_zoomsize[$z] * 128) / 180.0 );
+  $fy = ( ( ( $ymax - $row["lat"] ) * $wikiminiatlas_zoomsize[$z] * 128) / 180.0 ) - $ty;
+  $fx = ( ( ( $row["lon"] - $xmin ) * $wikiminiatlas_zoomsize[$z] * 128) / 180.0 ) - $tx;
   $s = $row['style'];
 
   if( $lang == "commons" ) {
@@ -119,7 +121,10 @@ while( $row = mysql_fetch_array( $res) )
       "h" => $n[1],
       "head"  => $n[2],
       "dx"  => $x,
-      "dy"  => $y
+      "dy"  => $y,
+      "wg" => intval($row["wg"]),
+      "fx"  => $fx,
+      "fy"  => $fy
     );
   } else {
     $items[] = array( 
@@ -130,11 +135,15 @@ while( $row = mysql_fetch_array( $res) )
       "ty"    => $ty,
       "name"  => $row['name'],
       "dx"  => $x,
-      "dy"  => $y
+      "dy"  => $y,
+      "wg" => intval($row["wg"]),
+      "fx"  => $fx,
+      "fy"  => $fy
     );
   }
-}
+} // TODO only send fx,fy,wg for max label zoom!
 mysql_close( $db );
 //header("Content-type: application/json");
 echo json_encode( array( "label" => $items, "z" => $z ) );
+//echo json_encode( array( "label" => $items, "z" => $z, "q" => $query ) );
 ?>
