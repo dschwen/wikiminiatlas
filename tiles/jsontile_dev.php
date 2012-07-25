@@ -1,12 +1,26 @@
 <?php
 
-$dbconn = pg_connect("host=sql-mapnik dbname=osm_mapnik");
 
 $x = intval($_GET['x']);
 $y = intval($_GET['y']);
 $z = intval($_GET['z']);
 
 $a = $_GET['action'];
+
+ob_start("ob_gzhandler");
+header( 'Content-type: application/json' );
+
+// check cache first
+if( $a !== 'purge' ) {
+  $tfile = "jsontile/$z/$y/$x";
+  if( file_exists( $tfile ) ) {
+    readfile( $tfile );
+    exit;
+  }
+}
+
+$dbconn = pg_connect("host=sql-mapnik dbname=osm_mapnik");
+
 
 // only reply for high zoomlevels!
 if( $z < 12 ) exit;
@@ -46,7 +60,7 @@ $table = array(
 );
 
 // also return buildings for large zoom levels
-if( $z>12 ) $table[] = array('planet_polygon','building IS NOT NULL AND','way');
+if( $z>=14 ) $table[] = array('planet_polygon','building IS NOT NULL AND','way');
 
 $geo = array();
 
@@ -66,7 +80,7 @@ for( $i=0; $i<count($table); $i++ ) {
   ";
 
   // debug
-  if( $a === "query" ) {
+  if( $a === 'query' ) {
     echo $query;
     exit;
   }
@@ -90,5 +104,15 @@ for( $i=0; $i<count($table); $i++ ) {
   }
 }
 
-echo json_encode( array( "data" => $geo, "x" => $x, "y" => $y, "z" => $z ) );
+$s = json_encode( array( "data" => $geo, "x" => $x, "y" => $y, "z" => $z ) );
+
+// write to cache
+if( !is_dir( "jsontile/$z/$y" ) ) {
+  $oldumask = umask(0);
+  mkdir("jsontile/$z/$y",0755); 
+  umask($oldumask);
+}
+file_put_contents ( $tfile , $s );
+
+echo $s;
 ?>

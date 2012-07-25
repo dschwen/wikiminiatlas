@@ -43,7 +43,7 @@
     var canvas,c,w,h
       , bx1, by1, bx2, by2, bw, bh
       , x=19316*4, y=3488*4, z=14
-      , minzoom = 13, buildingzoom = 14
+      , minzoom = 12, buildingzoom = 14
       , cache = {}
       //, x=19316, y=3488, z=12
       //, x=660, y=2898, z=12
@@ -60,10 +60,13 @@
         , t1 = new Date(), t2
         , style = {
           Polygon: [
-            ['landuse',{cemetery:1},
+            ['railway',{platform:1},
+              [ { fillStyle: "rgb(220,220,220)" } ]
+            ],
+            ['landuse',{cemetery:1,recreation_ground:1},
               [ { fillStyle: "rgb(190,214,190)" } ]
             ],
-            ['leisure',{park:1,orchard:1,meadow:1,village_green:1,
+            ['leisure',{park:1,orchard:1,meadow:1,village_green:1,golf_course:1,track:1,
               forrest:1,recreation_ground:1,dog_park:1,garden:1,pitch:1,stadium:1},
               [ { fillStyle: "rgb(200,224,200)" } ]
             ],
@@ -99,11 +102,15 @@
             ],
             ['highway',{service:1,path:1,track:1},
               [ { lineWidth: 4, strokeStyle: "rgb(168,168,168)" },
-                { lineWidth: 3, strokeStyle: "rgb(208,208,208)" } ]
+                { lineWidth: 2.5, strokeStyle: "rgb(208,208,208)" } ]
             ],
             ['highway',{residential:1},
               [ { lineWidth: 4, strokeStyle: "rgb(200,200,200)" },
-                { lineWidth: 3, strokeStyle: "rgb(255,255,255)" } ]
+                { lineWidth: 2.5, strokeStyle: "rgb(255,255,255)" } ]
+            ],
+            ['highway',{tertiary:1},
+              [ { lineWidth: 5, strokeStyle: "rgb(200,200,200)" },
+                { lineWidth: 3.5, strokeStyle: "rgb(255,255,235)" } ]
             ],
             // border
             ['highway',{secondary:1,secondary_link:1,primary:1,primary_link:1},
@@ -117,10 +124,10 @@
               [ { lineWidth: 5, strokeStyle: "rgb(255,250,115)" } ]
             ],
             ['highway',{primary:1,primary_link:1},
-              [ { lineWidth: 5, strokeStyle: "rgb(255,230,95)" } ]
+              [ { lineWidth: 4.5, strokeStyle: "rgb(255,230,95)" } ]
             ],
             ['highway',{motorway:1,motorway_link:1,trunk:1,trunk_link:1},
-              [ { lineWidth: 6, strokeStyle: "rgb(242,191,36)" } ]
+              [ { lineWidth: 5.5, strokeStyle: "rgb(242,191,36)" } ]
             ]
           ]
         };  
@@ -183,7 +190,35 @@
     }
 
     function gotData(data) {
-      cache[hash(data.x,data.y,data.z)]=data.data;
+      // insert response into cache
+      cache[hash(data.x,data.y,data.z)] = { data: data.data, building: {} };
+
+      // propagate buildings to low zoom levels above the building threshold
+      var d=data.data, i, zz, xx=data.x, yy=data.y, ca;
+      if( data.z >= buildingzoom ) {
+        for( zz=data.z; zz>=minzoom; zz-- ) {
+          ca = cache[hash(xx,yy,zz)];
+          if( zz<buildingzoom && ca && ca.data  ) {
+            // iterate over all data entries and insert buildings into higher cache level
+            for(i =0; i<d.length; ++i ) {
+              // check against shape type and tags
+              if( 'osm_id' in d[i].tags && 
+                  'building' in d[i].tags &&
+                  !(d[i].tags['osm_id'] in ca.building) ) {
+                ca.data.push(d[i]);
+                ca.building[d[i].tags['osm_id']] = 1;
+              }
+            }
+          }
+          xx=Math.floor(xx/2);
+          yy=Math.floor(yy/2);
+        }
+      } else {
+        // TODO: look for lower zoom levels with building data, but there may be A LOT!
+        // SOLUTION: just look at building zoom
+      }
+
+      // (re-)draw the tile
       update();
     }
 
@@ -199,11 +234,12 @@
       if(bx1>180.0) bx1-=360;
 
       // seach cache for data
-      var zz, xx=x, yy=y;
+      var zz, xx=x, yy=y, ca;
       for( zz=z; zz>=minzoom; zz-- ) {
-        if( cache[hash(xx,yy,zz)] ) {
-          drawGeoJSON(cache[hash(xx,yy,zz)]);
-          return;
+        ca = cache[hash(xx,yy,zz)];
+        if( ca && ca.data  ) {
+          drawGeoJSON(ca.data);
+          if( z< buildingzoom || zz >= buildingzoom ) return;
         }
         xx=Math.floor(xx/2);
         yy=Math.floor(yy/2);
@@ -211,7 +247,7 @@
 
       // request data
       $.ajax({
-        url: 'jsontile_dev.php?x='+x+'&y='+y+'&z='+z,
+        url: 'tiles/jsontile_dev.php?x='+x+'&y='+y+'&z='+z,
         dataType: 'json',
         success: gotData
       });
