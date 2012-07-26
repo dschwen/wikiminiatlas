@@ -719,6 +719,7 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
       ctx : null,
       csrender: false,
       csx:0,csy:0,csz:20,
+      lx:0,ly:0,lz:20,
       span : $('<span></span>').appendTo(d),
       url : '',
       xhr : null
@@ -1004,7 +1005,7 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
 
     // zooming beyond maximum label zoom
     function hizoomLabels( tile, data ) {
-      var x = tile.csx, y = tile.csy, z = tile.csz
+      var x = tile.lx, y = tile.ly, z = tile.lz
         , f = 1<<(z-wma_maxlabel), dx, dy
         , d, l, l2 = [], i, q=[[],[],[],[]];
       try {
@@ -1021,7 +1022,6 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
       for( i=0; i < l.length; i++ ) {
         dx = 128 * ( x/f - l[i].dx );
         dy = 128 * ( y/f - (wma_zoomsize[wma_maxlabel]-l[i].dy-1) ); // label.dy value is broken
-
         l[i].tx = Math.floor( (l[i].tx+l[i].fx-dx)*f );
         l[i].ty = Math.floor( (l[i].ty+l[i].fy-dy)*f );
         if( l[i].tx >=0 && l[i].tx<128 && l[i].ty >=0 && l[i].ty<128 ) {
@@ -1100,12 +1100,12 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
         }
       }
 
-      thistile.csx = dx; thistile.csy = dy; thistile.csz = wma_zoom;
 
       if( thistile.xhr !== null ) {
        thistile.xhr.abort();
       }
 
+      thistile.lx = dx; thistile.ly = dy; thistile.lz = wma_zoom;
       thistile.span.html('<span class="loading">' + strings.labelLoading[UILang] + '</span>');
 
       if( wma_zoom > wma_maxlabel ) {
@@ -1118,10 +1118,10 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
       if( window.sessionStorage && ((data=sessionStorage.getItem(dataurl))!==null) ) {
         ( wma_zoom < wma_maxlabel ) ? parseLabels(thistile.span,data) : hizoomLabels(thistile,data);
       } else {
-        (function(turl){// closure to retain access to dataurl in sucess callback
+        (function(turl,lo){// closure to retain access to dataurl in sucess callback
         //thistile.xhr = $.ajax( { url : turl, context : thistile.div } )
         thistile.xhr = $.ajax( { url : turl, context : thistile } )
-          .success( function(data,lo) { 
+          .success( function(data) { 
             if( window.sessionStorage ) {
               sessionStorage.setItem(turl,data);
             }
