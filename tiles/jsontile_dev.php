@@ -64,7 +64,7 @@ $murx = deg2rad($urx>180?($urx-360.0):$urx)*6378137.0;
 $mury = log(tan(M_PI_4 + deg2rad($ury) / 2.0)) * 6378137.0;
 
 
-$tags = array( "highway", "railway", "waterway", "landuse", "leisure", "building", "natural", "amenity", "name", "boundary", "osm_id","layer","access","route" );
+$tags = array( "highway", "railway", "waterway", "landuse", "leisure", "building", "natural", "amenity", "name", "boundary", "osm_id","layer","access","route", "historic", "tunnel" );
 $taglist = '"'.implode($tags,'", "').'"';
 $tagnum = count($tags);
 $intersect = "

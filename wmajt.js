@@ -70,6 +70,9 @@ var wmajt = (function(){
             ['landuse',{industrial:1,retail:1,commercial:1,residential:1},
               [ { fillStyle: "rgb(208,208,208)" } ]
             ],
+            ['landuse',{reservoir:1},
+              [ { fillStyle: "rgb(200,200,224)" } ]
+            ],
             ['landuse',{military:1,railway:1},
               [ { fillStyle: "rgb(224,200,200)" } ]
             ],
@@ -102,7 +105,12 @@ var wmajt = (function(){
             ['amenity',{parking:1},
               [ { fillStyle: "rgb(240,235,193)" } ]
             ],
-            ['building',{yes:1},
+            ['highway',{pedestrian:1},
+              [ { fillStyle: "rgb(255,255,255)" },
+                { lineWidth: 2, strokeStyle: "rgb(168,148,148)" } ]
+            ],
+            ['building',{yes:1,block:1,office:1,courthouse:1,church:1,school:1,cathedral:1,residential:1,house:1,hut:1,
+              university:1,hospital:1,bunker:1,train_station:1,chapel:1,industrial:1,commercial:1,retail:1,hotel:1},
               [ { fillStyle: "rgb(200,200,200)" },
                 { lineWidth: 1, strokeStyle: "rgb(127,127,127)" } ]
             ]
@@ -139,6 +147,10 @@ var wmajt = (function(){
                 { lineWidth: 3.5, strokeStyle: "rgb(255,255,235)" } ]
             ],
             // border
+            ['railway',{subway:1},
+              [ { globalAlpha: 0.2, lineWidth: 3, strokeStyle: "rgb(100,100,100)" },
+                { globalAlpha: 1 } ]
+            ],
             ['railway',{rail:1,preserved:1},
               [ { lineWidth: 3, strokeStyle: "rgb(100,100,100)" } ]
             ],
@@ -149,6 +161,10 @@ var wmajt = (function(){
               [ { lineWidth: 7, strokeStyle: "rgb(188,149,28)" } ]
             ],
             // fill
+            ['railway',{subway:1},
+              [ { globalAlpha: 0.3, dash: [3,3], lineWidth: 1.5, strokeStyle: "rgb(255,255,255)" },
+                { globalAlpha: 1 } ]
+            ],
             ['railway',{rail:1},
               [ { dash: [3,3], lineWidth: 1.5, strokeStyle: "rgb(255,255,255)" } ]
             ],
@@ -168,7 +184,7 @@ var wmajt = (function(){
             ['access',{permissive:1},
               [ { dash: [1,2], lineWidth: 1, strokeStyle: "rgb(100,200,100)" } ]
             ],
-            ['access',{'private':1},
+            ['access',{'private':1,residents:1},
               [ { dash: [1,2], lineWidth: 1, strokeStyle: "rgb(200,100,100)" } ]
             ]
           ]
