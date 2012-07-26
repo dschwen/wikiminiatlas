@@ -70,7 +70,7 @@ var wma_tilesets = [
      }
    }
   },
-  linkcolor: [ "#2255aa", "white 0pt 0pt 2pt" ],
+  linkcolor: [ "#2255aa", "1px 0px 2px white, 0px -1px 2px white,0px 1px 2px white,-1px 0px 2px white" ],
   equator: 40075.0, // equatorial circumfence in km
   maxzoom: 20,
   minzoom: 0
@@ -948,10 +948,12 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
   // Set new map Position (to wma_gx, wma_gy)
   function moveWikiMiniAtlasMapTo()
   {
-    function parseLabels(tile,data) {
-      var w,a, i,l,io, ix=[0,0,5,0,0,2,3,4,5,6,6], iy=[0,0,8,0,0,2,3,4,5,6,6];
+    function parseLabels(tile,data,l) {
+      var w,a, i,io, ix=[0,0,5,0,0,2,3,4,5,6,6], iy=[0,0,8,0,0,2,3,4,5,6,6];
       try {
-        l = JSON.parse(data).label;
+        if( l === undefined ) {
+          l = JSON.parse(data).label;
+        }
         tile.text('');
         for( i=0; i<l.length; ++i ) {
           a = $('<a></a>')
@@ -1000,15 +1002,53 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
       }
     } 
 
+    // zooming beyond maximum label zoom
+    function hizoomLabels( tile, data ) {
+      var x = tile.csx, y = tile.csy, z = tile.csz
+        , f = 1<<(z-wma_maxlabel), dx, dy
+        , d, l, l2 = [], i, q=[[],[],[],[]];
+      try {
+        d = JSON.parse(data);
+        l = d.label;
+      } catch(e) {
+        tile.span.text('');
+        return;
+      }
+        
+      // for every label
+      // ( wlmax coords - (dx,dy) + (fx,fy) ) * f
+
+      for( i=0; i < l.length; i++ ) {
+        dx = 128 * ( x/f - l[i].dx );
+        dy = 128 * ( y/f - (wma_zoomsize[wma_maxlabel]-l[i].dy-1) ); // label.dy value is broken
+
+        l[i].tx = Math.floor( (l[i].tx+l[i].fx-dx)*f );
+        l[i].ty = Math.floor( (l[i].ty+l[i].fy-dy)*f );
+        if( l[i].tx >=0 && l[i].tx<128 && l[i].ty >=0 && l[i].ty<128 ) {
+          q[Math.floor( l[i].tx/64) + 2*Math.floor(  l[i].ty/64 )].push(l[i]);
+        }
+      }
+      // sort into quadrants
+      for( i=0; i < 4; i++ ) {
+        if( q[i].length > 0 ) {
+          q[i].sort(function(a,b){return b.wg-a.wg});
+          l2.push(q[i][0]);
+        }
+      }
+      parseLabels(tile.span,'',l2);
+    }
+
+
    if(wma_gy<0) wma_gy=0;
    if(wma_gx<0) wma_gx+=Math.floor(wma_zoomsize[wma_zoom]*2*tsx); // TODO: Mercator is 1:1 not 2:1
    if(wma_gx>0) wma_gx%=Math.floor(wma_zoomsize[wma_zoom]*2*tsx);
 
-   var lx = Math.floor(wma_gx/tsx) % wma_nx,
-     ly = Math.floor(wma_gy/tsy) % wma_ny,
-     fx = wma_gx % tsx,
-     fy = wma_gy % tsy,
-     i, j, dx, dy, n, thistile, tileurl, dataurl;
+   var lx = Math.floor(wma_gx/tsx) % wma_nx
+     , ly = Math.floor(wma_gy/tsy) % wma_ny
+     , fx = wma_gx % tsx
+     , fy = wma_gy % tsy
+     , mlx, mly
+     , i, j, dx, dy, n, thistile, tileurl, dataurl;
 
    wmaUpdateScalebar();
    //document.getElementById('debugbox').innerHTML='';
@@ -1060,38 +1100,37 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
         }
       }
 
+      thistile.csx = dx; thistile.csy = dy; thistile.csz = wma_zoom;
+
       if( thistile.xhr !== null ) {
        thistile.xhr.abort();
       }
 
-      if( wma_zoom < wma_maxlabel ) {
-        thistile.span.html('<span class="loading">' + strings.labelLoading[UILang] + '</span>');
+      thistile.span.html('<span class="loading">' + strings.labelLoading[UILang] + '</span>');
 
-        // TODO: instead of launching the XHR here, gather the needed coords and ...
-        if( window.sessionStorage && ((data=sessionStorage.getItem(dataurl))!==null) ) {
-          //parseLabels(thistile.div,data);
-          parseLabels(thistile.span,data);
-        } else {
-          (function(turl){// closure to retain access to dataurl in sucess callback
-          //thistile.xhr = $.ajax( { url : turl, context : thistile.div } )
-          thistile.xhr = $.ajax( { url : turl, context : thistile.span } )
-            .success( function(data) { 
-              if( window.sessionStorage ) {
-                sessionStorage.setItem(turl,data);
-              }
-              parseLabels(this,data);
-            } ) 
-            .error( function() { this.text(''); } );
-          })(dataurl);
-        }
-      } else { // zooming beyond maximum label zoom
-        // use labeldata from wma_maxlabel zoomlevel
-        var mlx = Math.floor(dx/(1<<(wma_zoom-wma_maxlabel)))
-          , mly = Math.floor(dy/(1<<(wma_zoom-wma_maxlabel)))
-          ;
+      if( wma_zoom > wma_maxlabel ) {
+        mlx = Math.floor(dx/(1<<(wma_zoom-wma_maxlabel)));
+        mly = Math.floor(dy/(1<<(wma_zoom-wma_maxlabel)));
         dataurl = wmaGetDataURL( mly, mlx, wma_maxlabel );
-        thistile.span.html('<span class="loading">coming soon...</span>');
       }
+
+      // TODO: instead of launching the XHR here, gather the needed coords and ...
+      if( window.sessionStorage && ((data=sessionStorage.getItem(dataurl))!==null) ) {
+        ( wma_zoom < wma_maxlabel ) ? parseLabels(thistile.span,data) : hizoomLabels(thistile,data);
+      } else {
+        (function(turl){// closure to retain access to dataurl in sucess callback
+        //thistile.xhr = $.ajax( { url : turl, context : thistile.div } )
+        thistile.xhr = $.ajax( { url : turl, context : thistile } )
+          .success( function(data,lo) { 
+            if( window.sessionStorage ) {
+              sessionStorage.setItem(turl,data);
+            }
+            lo ? parseLabels(this.span,data) : hizoomLabels(this,data);
+          } ) 
+          .error( function() { this.span.text(''); } );
+        })( dataurl, wma_zoom < wma_maxlabel );
+      }
+      
      }
     }
     // ...request them here, all at once
