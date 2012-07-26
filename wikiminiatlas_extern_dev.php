@@ -1390,7 +1390,7 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
    // 2* and 5* a power of ten is also acceptable
    if( 5*slen2 < slen1 ) { slen2=slen2*5; skm2=skm2*5; }
    if( 2*slen2 < slen1 ) { slen2=slen2*2; skm2=skm2*2; }
-   scalelabel.text( skm2 + ' km' );
+   scalelabel.text( skm2<1 ? (skm2*1000)+' m' : skm2+' km' );
    scalebar.width(slen2);
   }
 
