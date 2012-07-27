@@ -968,7 +968,7 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
 
             if( l[i].head < 18 ) {
               a.addClass('dir dir'+l[i].head);
-              io = 0;
+              io = 8;
             } else {
               io = 6;
             }
