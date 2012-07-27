@@ -115,16 +115,17 @@ while( $row = mysql_fetch_array( $res) )
     $items[] = array( 
       "style" => $s,
       "img"  => urlencode($row["title"]),
-      "tx"    => $tx,
-      "ty"    => $ty,
+      "tx"   => $tx,
+      "ty"   => $ty,
       "w" => $n[0],
       "h" => $n[1],
       "head"  => $n[2],
-      "dx"  => $x,
-      "dy"  => $y,
+      "dx" => $x,
+      "dy" => $y,
       "wg" => intval($row["wg"]),
-      "fx"  => $fx,
-      "fy"  => $fy
+      "fx" => $fx,
+      "fy" => $fy,
+      "m5" => substr(md5($row["title"]),0,2)
     );
   } else {
     $items[] = array( 

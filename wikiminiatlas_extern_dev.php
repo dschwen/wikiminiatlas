@@ -968,7 +968,11 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
             w = ( parseInt(l[i].w) > parseInt(l[i].h) ) ? (l[i].style==-2?24:48) : Math.floor((l[i].style==-2?24:48)*l[i].w/l[i].h);
             
             a.addClass('cthumb')
-              .append( $('<img/>').attr('src','http://commons.wikimedia.org/w/thumb.php?w='+w+'&f='+l[i].img) );
+              .append( $('<img/>').attr('src',
+                'm5' in l[i] ?
+                    '//upload.wikimedia.org/wikipedia/commons/thumb/'+ l[i].m5[0] +'/'+ l[i].m5 +'/'+l[i].img+'/'+w+'px-'+l[i].img :
+                    '//commons.wikimedia.org/w/thumb.php?w='+w+'&f='+l[i].img
+              ) );
 
             if( l[i].head < 18 ) {
               a.addClass('dir dir'+l[i].head);
@@ -1534,7 +1538,7 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
    wmaci_image_span.appendChild( wmaci_image );
 
    if( imgw < w )
-    wmaci_image.src = '//commons.wikimedia.org/w/thumb.php?w=' + imgw + '&f=' + name;
+    wmaci_image.src = '//commons.wikimedia.org/w/thumb.php?w=' + Math.floor(imgw/10)*10 + '&f=' + name;
    else
     wmaci_image.src = '//commons.wikimedia.org/wiki/Special:FilePath/' + name;
 
