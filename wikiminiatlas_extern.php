@@ -28,13 +28,17 @@
 <? require( 'glMatrix-0.9.5.custom.js' ); ?>
 <? require( 'webgl-utils_min.js' ); ?>
 <? require( 'wmaglobe3d_min.js' ); ?>
+<? require( 'wmajt.js' ); ?>
 
 
 // global settings
 var wma_imgbase = '//toolserver.org/~dschwen/wma/tiles/';
 var wma_database = '//toolserver.org/~dschwen/wma/label.php';
 var wma_tilebase = '.www.toolserver.org/~dschwen/wma/tiles/';
-var wma_zoomsize = [ 3, 6 ,12 ,24 ,48, 96, 192, 384, 768, 1536,  3072, 6144, 12288, 24576, 49152, 98304 ];
+var wma_maxlabel = 13;
+var i, wma_zoomsize = [3];
+for(i=1; i<40; i++) { wma_zoomsize[i]=2*wma_zoomsize[i-1]; }
+
 
 // include documentation strings
 <? require( 'wikiminiatlas_i18n.inc' ); ?>
@@ -66,9 +70,9 @@ var wma_tilesets = [
      }
    }
   },
-  linkcolor: [ "#2255aa", "white 0pt 0pt 2pt" ],
+  linkcolor: [ "#2255aa", "1px 0px 2px white, 0px -1px 2px white,0px 1px 2px white,-1px 0px 2px white" ],
   equator: 40075.0, // equatorial circumfence in km
-  maxzoom: 12,
+  maxzoom: 20,
   minzoom: 0
  },
  {
@@ -284,11 +288,12 @@ function wikiminiatlasInstall( wma_widget, url_params ) {
   var synopsis_filter = null;
   var synopsistext = null;
 
-  var wmaci_panel = null;
-  var wmaci_image = null;
-  var wmaci_image_span = null;
-  var wmaci_link = null;
-  var wmaci_link_text = null;
+  var wmaci = {
+    shown: false,
+    panel: null,
+    image: null,
+    link: null
+  };
 
   url_params = url_params || parseParams(window.location.href);
   var wmasize = {}, wmakml = { shown: false, drawn: false, canvas: null, c: null, ways: null, areas: null, maxlat: -Infinity, minlat: Infinity };
@@ -509,7 +514,7 @@ var labelcaption;
     }
     WikiMiniAtlasHTML +=
      '</select></p>' +
-     //'<p class="option" style="font-size: 50%; color:gray">Debug info:<br>marker: ' + typeof(marker.lat) + ', ' + marker.lon + '<br>site:'+wma_site+', uilang'+wma_language+'</p>' +
+     //'<p class="option" style="font-size: 50%; color:gray">Debug info:<br>marker: ' + (typeof marker.lat) + ', ' + marker.lon + '<br>site:'+wma_site+', uilang'+wma_language+'</p>' +
      '<a href="//wiki.toolserver.org/" target="_top"><img src="//toolserver.org/images/wikimedia-toolserver-button.png" border="0"></a>' +
      '</div>';
 
@@ -681,11 +686,6 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
 
   function toggleSettings()
   {
-   if( wmaci_panel && wmaci_panel.style.visibility == 'visible' ) {
-    wmaCommonsImageClose();
-    return false; 
-   }
-
    if( wma_settings.style.visibility != "visible" ) {
     wma_settings.style.visibility="visible";
    } else {
@@ -711,9 +711,18 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
           }, 1000 );
         })
         .appendTo(d),
+      can : $('<canvas></canvas>').appendTo(d),
+      ctx : null,
+      csrender: false,
+      csx:0,csy:0,csz:20,
+      lx:0,ly:0,lz:20,
       span : $('<span></span>').appendTo(d),
       url : '',
       xhr : null
+    }
+    if( hasCanvas ) {
+      t.can.attr({width:128,height:128});
+      t.ctx = t.can[0].getContext('2d');
     }
     $(wma_map).append(t.div);
     return t;
@@ -936,24 +945,26 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
   // Set new map Position (to wma_gx, wma_gy)
   function moveWikiMiniAtlasMapTo()
   {
-    function parseLabels(tile,data) {
-      var w,a, i,l,io, ix=[0,0,5,0,0,2,3,4,5,6,6], iy=[0,0,8,0,0,2,3,4,5,6,6];
+    function parseLabels(tile,data,l) {
+      var w,a, i,io, ix=[0,0,5,0,0,2,3,4,5,6,6], iy=[0,0,8,0,0,2,3,4,5,6,6];
       try {
-        l = JSON.parse(data).label;
+        if( l === undefined ) {
+          l = JSON.parse(data).label;
+        }
         tile.text('');
         for( i=0; i<l.length; ++i ) {
           a = $('<a></a>')
 
           if( "img" in l[i] ) {
             // thumbnails
-            (function(n,w,h){
-              a.click( function() { wmaCommonsImage(n,w,h); } );
-            })(l[i].img,l[i].w,l[i].h);
+            (function(n,w,h,m5){
+              a.click( function() { wmaCommonsImage(n,w,h,m5); } );
+            })(l[i].img,l[i].w,l[i].h,l[i].m5);
 
             w = ( parseInt(l[i].w) > parseInt(l[i].h) ) ? (l[i].style==-2?24:48) : Math.floor((l[i].style==-2?24:48)*l[i].w/l[i].h);
             
             a.addClass('cthumb')
-              .append( $('<img/>').attr('src','http://commons.wikimedia.org/w/thumb.php?w='+w+'&f='+l[i].img) );
+              .append( $('<img/>').attr('src',wmaCommonsThumb( l[i].img, w, l[i].m5) ) );
 
             if( l[i].head < 18 ) {
               a.addClass('dir dir'+l[i].head);
@@ -988,15 +999,52 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
       }
     } 
 
+    // zooming beyond maximum label zoom
+    function hizoomLabels( tile, data ) {
+      var x = tile.lx, y = tile.ly, z = tile.lz
+        , f = 1<<(z-wma_maxlabel), dx, dy
+        , d, l, l2 = [], i, q=[[],[],[],[]];
+      try {
+        d = JSON.parse(data);
+        l = d.label;
+      } catch(e) {
+        tile.span.text('');
+        return;
+      }
+        
+      // for every label
+      // ( wlmax coords - (dx,dy) + (fx,fy) ) * f
+
+      for( i=0; i < l.length; i++ ) {
+        dx = 128 * ( x/f - l[i].dx );
+        dy = 128 * ( y/f - (wma_zoomsize[wma_maxlabel]-l[i].dy-1) ); // label.dy value is broken
+        l[i].tx = Math.floor( (l[i].tx+l[i].fx-dx)*f );
+        l[i].ty = Math.floor( (l[i].ty+l[i].fy-dy)*f );
+        if( l[i].tx >=0 && l[i].tx<128 && l[i].ty >=0 && l[i].ty<128 ) {
+          q[Math.floor( l[i].tx/64) + 2*Math.floor(  l[i].ty/64 )].push(l[i]);
+        }
+      }
+      // sort into quadrants
+      for( i=0; i < 4; i++ ) {
+        if( q[i].length > 0 ) {
+          q[i].sort(function(a,b){return b.wg-a.wg});
+          l2.push(q[i][0]);
+        }
+      }
+      parseLabels(tile.span,'',l2);
+    }
+
+
    if(wma_gy<0) wma_gy=0;
    if(wma_gx<0) wma_gx+=Math.floor(wma_zoomsize[wma_zoom]*2*tsx); // TODO: Mercator is 1:1 not 2:1
    if(wma_gx>0) wma_gx%=Math.floor(wma_zoomsize[wma_zoom]*2*tsx);
 
-   var lx = Math.floor(wma_gx/tsx) % wma_nx,
-     ly = Math.floor(wma_gy/tsy) % wma_ny,
-     fx = wma_gx % tsx,
-     fy = wma_gy % tsy,
-     i, j, dx, dy, n, thistile, tileurl, dataurl;
+   var lx = Math.floor(wma_gx/tsx) % wma_nx
+     , ly = Math.floor(wma_gy/tsy) % wma_ny
+     , fx = wma_gx % tsx
+     , fy = wma_gy % tsy
+     , mlx, mly
+     , i, j, dx, dy, n, thistile, tileurl, dataurl;
 
    wmaUpdateScalebar();
    //document.getElementById('debugbox').innerHTML='';
@@ -1024,35 +1072,61 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
      if( thistile.url != tileurl )
      {
       thistile.url = tileurl;
-      //thistile.div.css( 'backgroundImage', tileurl );
-      if( thistile.img.attr('src') != tileurl ) { // catch mere label language change
-        thistile.img.fadeOut(0).attr( 'src', tileurl );
+      if( wma_tileset==0 && wma_zoom>12 ) {
+        // client side render
+        if( !thistile.csrender ) {
+          thistile.csrender =true;
+          thistile.img.fadeOut(200);
+        }
+        if( thistile.csx != dx || thistile.csy != dy || thistile.csz != wma_zoom ) {
+          thistile.can.hide();
+          wmajt.update(dx,dy,wma_zoom,thistile);
+        }
+      } else {
+        // regular image tiles
+        if( thistile.img.attr('src') != tileurl ) { // catch mere label language change
+          thistile.img.fadeOut(0).attr( 'src', tileurl );
+        } else {
+          if( thistile.csrender ) { thistile.img.fadeIn(200); }
+        }
+        thistile.csz = wma_zoom;
+        if( thistile.csrender ) {
+          thistile.csrender = false;
+          thistile.can.fadeOut(200);
+        }
       }
+
 
       if( thistile.xhr !== null ) {
        thistile.xhr.abort();
       }
 
-      //thistile.div.html('<span class="loading">' + strings.labelLoading[UILang] + '</span>');
+      thistile.lx = dx; thistile.ly = dy; thistile.lz = wma_zoom;
       thistile.span.html('<span class="loading">' + strings.labelLoading[UILang] + '</span>');
+
+      if( wma_zoom > wma_maxlabel ) {
+        mlx = Math.floor(dx/(1<<(wma_zoom-wma_maxlabel)));
+        mly = Math.floor(dy/(1<<(wma_zoom-wma_maxlabel)));
+        dataurl = wmaGetDataURL( mly, mlx, wma_maxlabel );
+      }
 
       // TODO: instead of launching the XHR here, gather the needed coords and ...
       if( window.sessionStorage && ((data=sessionStorage.getItem(dataurl))!==null) ) {
-        //parseLabels(thistile.div,data);
-        parseLabels(thistile.span,data);
+        ( wma_zoom < wma_maxlabel ) ? parseLabels(thistile.span,data) : hizoomLabels(thistile,data);
       } else {
-        (function(turl){// closure to retain access to dataurl in sucess callback
+        (function(turl,lo){// closure to retain access to dataurl in sucess callback
         //thistile.xhr = $.ajax( { url : turl, context : thistile.div } )
-        thistile.xhr = $.ajax( { url : turl, context : thistile.span } )
+        thistile.xhr = $.ajax( { url : turl, context : thistile } )
           .success( function(data) { 
             if( window.sessionStorage ) {
               sessionStorage.setItem(turl,data);
             }
-            parseLabels(this,data);
+            lo ? parseLabels(this.span,data) : hizoomLabels(this,data);
           } ) 
-          .error( function() { this.text(''); } );
-        })(dataurl);
+          .error( function() { this.span.text(''); } );
+        })( dataurl, wma_zoom < wma_maxlabel );
       }
+      
      }
     }
     // ...request them here, all at once
@@ -1194,7 +1268,7 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
         wmasize.canvas.fadeOut(200);
       }
       // quit commons preview
-      if( wmaci_panel && wmaci_panel.style.visibility == 'visible' ) {
+      if( wmaci.shown ) {
         wmaCommonsImageClose();
       }
       // quit settings
@@ -1256,11 +1330,15 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
    } 
 
    if( rightclick ) {
-    wma_zoom = wma_tilesets[wma_tileset].maxzoom;
+     if( hasCanvas && false ) {
+       wma_zoom = ( wma_tileset==0 ) ? 15 : wma_tilesets[wma_tileset].maxzoom;
+     } else {
+       wma_zoom = ( wma_tileset==0 ) ? 12 : wma_tilesets[wma_tileset].maxzoom;
+     }
    }
    else {
-    if( wma_zoom >= wma_tilesets[wma_tileset].maxzoom ) {
-     tilesetUpgrade();
+    if( wma_zoom >= ( ( wma_tileset==0 && ( !hasCanvas || true ) ) ? 12 : wma_tilesets[wma_tileset].maxzoom ) ) {
+     //tilesetUpgrade();
     }
     else wma_zoom++;
    }
@@ -1351,7 +1429,7 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
    // 2* and 5* a power of ten is also acceptable
    if( 5*slen2 < slen1 ) { slen2=slen2*5; skm2=skm2*5; }
    if( 2*slen2 < slen1 ) { slen2=slen2*2; skm2=skm2*2; }
-   scalelabel.text( skm2 + ' km' );
+   scalelabel.text( skm2<1 ? (skm2*1000)+' m' : skm2+' km' );
    scalebar.width(slen2);
   }
 
@@ -1399,71 +1477,70 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
    //document.getElementById('debugbox').innerHTML+=text+'<br />';
   }
 
+  function wmaCommonsThumb(img,w,m5) {
+   return m5 ? 
+     '//upload.wikimedia.org/wikipedia/commons/thumb/'+ m5[0] +'/'+ m5 +'/'+ img +'/'+ w +'px-'+ img :
+     '//commons.wikimedia.org/w/thumb.php?w='+w+'&f='+img;
+  }
+
   function wmaCommonsImageClose() {
-   wmaci_panel.style.visibility = 'hidden';
+    wmaci.shown = false;
+    wmaci.panel.fadeOut(200);
   }
 
   function wmaCommonsImageBuild() {
-   wmaci_panel = document.createElement('DIV');
-   wmaci_panel.id = 'wma_wmaci_panel';
-
-   var wmaci_panel_sub = document.createElement('DIV');
-   wmaci_panel_sub.id = 'wma_wmaci_panel_sub';
-   wmaci_panel.appendChild( wmaci_panel_sub );
-
-   wmaci_image_span = document.createElement('SPAN');
-   wmaci_image = document.createElement('IMG');
-   wmaci_image_span.appendChild( wmaci_image );
-   wmaci_panel_sub.appendChild( wmaci_image_span );
-
-   wmaci_panel_sub.appendChild( document.createElement('BR') ); 
-
-   wmaci_link = document.createElement('A');
-   wmaci_link.id = 'wma_wmaci_link';
-   wmaci_link.target = '_top';
-   wmaci_link_text = document.createTextNode('');
-   wmaci_link.appendChild( wmaci_link_text );
-   wmaci_panel_sub.appendChild( wmaci_link );
-
-   wma_widget.append( wmaci_panel );
+   wmaci.panel = $('<div></div>', { id: 'wma_wmaci_panel' } )
+     .append( 
+       $('<div></div>', { id: 'wma_wmaci_panel_sub' } ) 
+        .append( wmaci.span = $('<span></span>') )
+        .append( $('<br/>') )
+        .append( wmaci.link =  $('<a></a>', { id: 'wma_wmaci_link', target: '_top' } ) 
+          .click( function(e) { e.stopPropagation(); } )
+        )
+     )
+     .css('visibility','visible') // TODO, remove once CSS is updated in clients
+     .hide()
+     .click(wmaCommonsImageClose)
+     .appendTo(wma_widget);
   }
 
-  function wmaCommonsImage( name, w, h )
+  function wmaCommonsImage( name, w, h, m5 )
   {
-   if( wmaci_panel == null ) {
-     wmaCommonsImageBuild();
-   }
-   var maxw = wma_width - 30;
-   var maxh = wma_height - 80;
-   var imgw = w;
-   var imgh = h;
+    // first time viewing an image?
+    if( wmaci.panel == null ) {
+      wmaCommonsImageBuild();
+    }
 
-   if( imgw > maxw ) {
-    imgh = Math.round( ( imgh * maxw ) / imgw );
-    imgw = maxw;
-   }
-   if( imgh > maxh ) {
-    imgw = Math.round( ( imgw * maxh ) / imgh );
-    imgh = maxh;
-   }
+    var maxw = wma_width - 30;
+    var maxh = wma_height - 80;
+    var imgw = w;
+    var imgh = h;
 
-   // rebuild element to avoid old pic showing up
-   wmaci_image_span.removeChild( wmaci_image );
-   wmaci_image = document.createElement('IMG');
-   wmaci_image.onclick = wmaCommonsImageClose;
-   wmaci_image.id = 'wma_wmaci_image';
-   wmaci_image.title = 'click to close';
-   wmaci_image_span.appendChild( wmaci_image );
+    if( imgw > maxw ) {
+      imgh = Math.round( ( imgh * maxw ) / imgw );
+      imgw = maxw;
+    }
+    if( imgh > maxh ) {
+      imgw = Math.round( ( imgw * maxh ) / imgh );
+      imgh = maxh;
+    }
 
-   if( imgw < w )
-    wmaci_image.src = '//commons.wikimedia.org/w/thumb.php?w=' + imgw + '&f=' + name;
-   else
-    wmaci_image.src = '//commons.wikimedia.org/wiki/Special:FilePath/' + name;
+    // rebuild element to avoid old pic showing up
+    wmaci.span.find('img').remove();
+    var img = $('<img/>', { id: 'wma_wmaci_image' } ).appendTo(wmaci.span);
 
-   wmaci_link.href = '//commons.wikimedia.org/wiki/Image:' + name;
-   wmaci_link_text.nodeValue = '[[:commons:Image:' + decodeURIComponent(name) + ']]';
+    if( imgw < w ) {
+      img.attr( 'src', wmaCommonsThumb( name, Math.floor(imgw/10)*10, m5) );
+    } else {
+      img.attr( 'src', '//commons.wikimedia.org/wiki/Special:FilePath/' + name );
+    }
 
-   wmaci_panel.style.visibility = 'visible';
+    wmaci.link
+      .attr('href','//commons.wikimedia.org/wiki/Image:' + name )
+      .text('[[:commons:Image:' + decodeURIComponent(name) + ']]');
+
+    wmaci.panel.fadeIn(200);
+    wmaci.shown = true;
   }
 
   function wmaFullscreen() {
@@ -1767,7 +1844,7 @@ wmaMenu.prototype.addGroup = function(options,func,selected,rtl) {
   selected = selected || 0;
   func = func || (function(){});
   for( var i=0; i<options.length; ++i ) {
-    if( typeof(options[i])==='object' ) {
+    if( typeof options[i] === 'object' ) {
       addOption(options[i][0],options[i][1]);
     } else {
       addOption(i,options[i]);
