@@ -79,6 +79,9 @@ var wmajt = (function(){
             ['landuse',{cemetery:1,recreation_ground:1},
               [ { fillStyle: "rgb(190,214,190)" } ]
             ],
+            ['landuse',{grass:1},
+              [ { globalAlpha: 0.3, fillStyle: "rgb(0,160,0)" }, { globalAlpha:1} ]
+            ],
             ['leisure',{park:1,orchard:1,meadow:1,village_green:1,golf_course:1,track:1,
               forrest:1,recreation_ground:1,dog_park:1,garden:1,pitch:1,stadium:1},
               [ { fillStyle: "rgb(200,224,200)" } ]
@@ -90,7 +93,7 @@ var wmajt = (function(){
               [ { fillStyle: "rgb(224,224,200)" } ]
             ],
             ['natural',{wetland:1},
-              [ { fillStyle: "rgb(200,200,224)" } ]
+              [ { fillStyle: "rgb(200,218,224)" } ]
             ],
             ['natural',{water:1,bay:1},
               [ { fillStyle: "rgb(158,199,243)" },
