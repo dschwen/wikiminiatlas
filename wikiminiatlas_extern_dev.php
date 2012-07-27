@@ -1330,10 +1330,14 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
    } 
 
    if( rightclick ) {
-    wma_zoom = ( wma_tileset==0 && hasCanvas ) ? 15 : wma_tilesets[wma_tileset].maxzoom;
+     if( hasCanvas ) {
+       wma_zoom = ( wma_tileset==0 ) ? 15 : wma_tilesets[wma_tileset].maxzoom;
+     } else {
+       wma_zoom = ( wma_tileset==0 ) ? 12 : wma_tilesets[wma_tileset].maxzoom;
+     }
    }
    else {
-    if( wma_zoom >= wma_tilesets[wma_tileset].maxzoom ) {
+    if( wma_zoom >= ( ( wma_tileset==0 && !hasCanvas ) ? 12 : wma_tilesets[wma_tileset].maxzoom ) ) {
      //tilesetUpgrade();
     }
     else wma_zoom++;
