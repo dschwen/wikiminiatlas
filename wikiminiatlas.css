@@ -1,13 +1,14 @@
 a { text-decoration:none; color:#2255aa; text-shadow: white 0pt 0pt 2pt; }
 a:hover { color:white; text-shadow: black 0pt 0pt 2pt; }
 a.label { 
-   font-size:7pt; 
-   z-index:20; 
-   position: absolute;  
-   background-image:url('symbols/label_corner_ul.png');
-   background-repeat: no-repeat;
-   padding-left:5px;
-   cursor:pointer;
+  line-height: 1em;
+  font-size:7pt; 
+  z-index:20; 
+  position: absolute;  
+  background-image:url('symbols/label_corner_ul.png');
+  background-repeat: no-repeat;
+  padding-left:5px;
+  cursor:pointer;
 }
 a.label:hover {
   z-index:21;
@@ -66,6 +67,10 @@ a.cthumb img {
   -moz-opacity: 0.8; 
   opacity: 0.8;
   border: none;
+  background:white;
+  padding:2px;
+  border:gray solid;
+  border-width: 0 1px 1px 0;
 }
 a.cthumb:hover img {
   filter:alpha(opacity=100);   
@@ -193,8 +198,9 @@ p.option {
    margin:0px;
    padding: 0px;
    font-family: sans-serif;
-   background-image:url('tiles/white80.png');
-   visibility: hidden;
+   /*background-image:url('tiles/white80.png');*/
+   background-color:white /*Fallback*/;
+   background-color:rgba(255,255,255,.8);
    z-index:40;
    text-align: center;
    display:table; 

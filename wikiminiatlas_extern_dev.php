@@ -288,11 +288,12 @@ function wikiminiatlasInstall( wma_widget, url_params ) {
   var synopsis_filter = null;
   var synopsistext = null;
 
-  var wmaci_panel = null;
-  var wmaci_image = null;
-  var wmaci_image_span = null;
-  var wmaci_link = null;
-  var wmaci_link_text = null;
+  var wmaci = {
+    shown: false,
+    panel: null,
+    image: null,
+    link: null
+  };
 
   url_params = url_params || parseParams(window.location.href);
   var wmasize = {}, wmakml = { shown: false, drawn: false, canvas: null, c: null, ways: null, areas: null, maxlat: -Infinity, minlat: Infinity };
@@ -685,11 +686,6 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
 
   function toggleSettings()
   {
-   if( wmaci_panel && wmaci_panel.style.visibility == 'visible' ) {
-    wmaCommonsImageClose();
-    return false; 
-   }
-
    if( wma_settings.style.visibility != "visible" ) {
     wma_settings.style.visibility="visible";
    } else {
@@ -1276,7 +1272,7 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
         wmasize.canvas.fadeOut(200);
       }
       // quit commons preview
-      if( wmaci_panel && wmaci_panel.style.visibility == 'visible' ) {
+      if( wmaci.shown ) {
         wmaCommonsImageClose();
       }
       // quit settings
@@ -1482,70 +1478,65 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
   }
 
   function wmaCommonsImageClose() {
-   wmaci_panel.style.visibility = 'hidden';
+    wmaci.shown = false;
+    wmaci.panel.fadeOut(200);
   }
 
   function wmaCommonsImageBuild() {
-   wmaci_panel = document.createElement('DIV');
-   wmaci_panel.id = 'wma_wmaci_panel';
-
-   var wmaci_panel_sub = document.createElement('DIV');
-   wmaci_panel_sub.id = 'wma_wmaci_panel_sub';
-   wmaci_panel.appendChild( wmaci_panel_sub );
-
-   wmaci_image_span = document.createElement('SPAN');
-   wmaci_image = document.createElement('IMG');
-   wmaci_image_span.appendChild( wmaci_image );
-   wmaci_panel_sub.appendChild( wmaci_image_span );
-
-   wmaci_panel_sub.appendChild( document.createElement('BR') ); 
-
-   wmaci_link = document.createElement('A');
-   wmaci_link.id = 'wma_wmaci_link';
-   wmaci_link.target = '_top';
-   wmaci_link_text = document.createTextNode('');
-   wmaci_link.appendChild( wmaci_link_text );
-   wmaci_panel_sub.appendChild( wmaci_link );
-
-   wma_widget.append( wmaci_panel );
+   wmaci.panel = $('<div></div>', { id: 'wma_wmaci_panel' } )
+     .append( 
+       $('<div></div>', { id: 'wma_wmaci_panel_sub' } ) 
+        .append( wmaci.span = $('<span></span>') )
+        .append( $('<br/>') )
+        .append( wmaci.link =  $('<a></a>', { id: 'wma_wmaci_link', target: '_top' } ) 
+          .click( function(e) { e.stopPropagation(); } )
+        )
+     )
+     .css('visibility','visible') // TODO, remove once CSS is updated in clients
+     .hide()
+     .click(wmaCommonsImageClose)
+     .appendTo(wma_widget);
   }
 
-  function wmaCommonsImage( name, w, h )
+  function wmaCommonsImage( name, w, h, m5 )
   {
-   if( wmaci_panel == null ) {
-     wmaCommonsImageBuild();
-   }
-   var maxw = wma_width - 30;
-   var maxh = wma_height - 80;
-   var imgw = w;
-   var imgh = h;
+    // first time viewing an image?
+    if( wmaci.panel == null ) {
+      wmaCommonsImageBuild();
+    }
 
-   if( imgw > maxw ) {
-    imgh = Math.round( ( imgh * maxw ) / imgw );
-    imgw = maxw;
-   }
-   if( imgh > maxh ) {
-    imgw = Math.round( ( imgw * maxh ) / imgh );
-    imgh = maxh;
-   }
+    var maxw = wma_width - 30;
+    var maxh = wma_height - 80;
+    var imgw = w;
+    var imgh = h;
 
-   // rebuild element to avoid old pic showing up
-   wmaci_image_span.removeChild( wmaci_image );
-   wmaci_image = document.createElement('IMG');
-   wmaci_image.onclick = wmaCommonsImageClose;
-   wmaci_image.id = 'wma_wmaci_image';
-   wmaci_image.title = 'click to close';
-   wmaci_image_span.appendChild( wmaci_image );
+    if( imgw > maxw ) {
+      imgh = Math.round( ( imgh * maxw ) / imgw );
+      imgw = maxw;
+    }
+    if( imgh > maxh ) {
+      imgw = Math.round( ( imgw * maxh ) / imgh );
+      imgh = maxh;
+    }
 
-   if( imgw < w )
-    wmaci_image.src = '//commons.wikimedia.org/w/thumb.php?w=' + Math.floor(imgw/10)*10 + '&f=' + name;
-   else
-    wmaci_image.src = '//commons.wikimedia.org/wiki/Special:FilePath/' + name;
+    // rebuild element to avoid old pic showing up
+    wmaci.span.find('img').remove();
+    var img = $('<img/>', { id: 'wma_wmaci_image' } ).appendTo(wmaci.span);
 
-   wmaci_link.href = '//commons.wikimedia.org/wiki/Image:' + name;
-   wmaci_link_text.nodeValue = '[[:commons:Image:' + decodeURIComponent(name) + ']]';
+    if( imgw < w ) {
+      m5 ? 
+        '' : 
+        img.attr( 'src', '//commons.wikimedia.org/w/thumb.php?w=' + Math.floor(imgw/10)*10 + '&f=' + name );
+    } else {
+      img.attr( 'src', '//commons.wikimedia.org/wiki/Special:FilePath/' + name );
+    }
 
-   wmaci_panel.style.visibility = 'visible';
+    wmaci.link
+      .attr('href','//commons.wikimedia.org/wiki/Image:' + name )
+      .text('[[:commons:Image:' + decodeURIComponent(name) + ']]');
+
+    wmaci.panel.fadeIn(200);
+    wmaci.shown = true;
   }
 
   function wmaFullscreen() {
