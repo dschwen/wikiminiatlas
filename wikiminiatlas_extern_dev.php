@@ -959,9 +959,18 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
             // thumbnails
             (function(n,w,h,m5){
               a.click( function(e) {
-                if( e.which == 1 ) {
-                  wmaCommonsImage(n,w,h,m5); 
-                  e.preventDefault();
+                // this is necessary to allow dragging the map on thumbnails in Firefox
+                var r = wmaMouseCoords(e.originalEvent);
+                if( r.x != wma_mdcoord.x || 
+                    r.y != wma_mdcoord.y ) {
+                   e.preventDefault(); 
+                } else {
+                  // open the wmaci preview on left click
+                  if( e.which == 1 ) {
+                    wmaCommonsImage(n,w,h,m5); 
+                    e.preventDefault();
+                  }
+                  // otherwise follow the link (allows for middle click opening the commons page)
                 }
               } ).attr( 'href', '//commons.wikimedia.org/wiki/Image:' + l[i].img );
             })(l[i].img,l[i].w,l[i].h,l[i].m5);
