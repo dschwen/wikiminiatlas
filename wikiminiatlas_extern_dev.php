@@ -305,13 +305,13 @@ function wikiminiatlasInstall( wma_widget, url_params ) {
 
   var hasCanvas = "HTMLCanvasElement" in window;
 
-var labelcaption;
+  var labelcaption;
 
   function setupWidget()
   {
     var newcoords;
 
-    //document.getElementById('debugbox').innerHTML='';
+    // parse parameters
     var coord_params = url_params['wma'] || (window.location.search).substr(1)
       , page = url_params['page']
       , lang = url_params['lang']
@@ -342,7 +342,11 @@ var labelcaption;
           tmap = $('<canvas></canvas>').attr( { width: 6*128, height: 3*128 } ).css( { display: 'none' } ),
           omap = $('<canvas></canvas>').attr( { width: 6*128, height: 3*128 } ).css( { display: 'none' } ),
           shadow =  $('<div></div>')
-            .css( { position: 'absolute', width: '80px', height: '80px', bottom: '20px', right: '5px', zIndex: 50, display: 'none', borderRadius: '40px', '-moz-border-radius': '40px', boxShadow:'5px 5px 25px rgba(0,0,0,0.3)' } ),
+            .css( { position: 'absolute', 
+                    width: '80px', height: '80px', bottom: '20px', right: '5px', 
+                    zIndex: 50, display: 'none', 
+                    borderRadius: '40px', '-moz-border-radius': '40px', 
+                    boxShadow:'5px 5px 25px rgba(0,0,0,0.3)' } ),
           globe = $('<canvas></canvas>')
             .attr( { width: 160, height: 160 } )
             .css( { position: 'absolute', width: '80px', height: '80px', bottom: '20px', right: '5px', zIndex: 51, display: 'none' } );
@@ -414,17 +418,17 @@ var labelcaption;
     var coord_filter = /([\d+-.]+)_([\d+-.]+)_([\d]+)_([\d]+)/;
     if(coord_filter.test(coord_params))
     {
-     coord_filter.exec(coord_params);
-     marker.lat = parseFloat( RegExp.$1 );
-     marker.lon = parseFloat( RegExp.$2 );
-     wma_width = $(window).width();
-     wma_height= $(window).height();
-
-     coord_filter = /([\d+-.]+)_([\d+-.]+)_([\d]+)_([\d]+)_([a-z]+)/;
-     if( coord_filter.test(coord_params) ) {
       coord_filter.exec(coord_params);
-      wma_site = RegExp.$5;
-     }
+      marker.lat = parseFloat( RegExp.$1 );
+      marker.lon = parseFloat( RegExp.$2 );
+      wma_width = $(window).width();
+      wma_height= $(window).height();
+
+      coord_filter = /([\d+-.]+)_([\d+-.]+)_([\d]+)_([\d]+)_([a-z]+)/;
+      if( coord_filter.test(coord_params) ) {
+        coord_filter.exec(coord_params);
+        wma_site = RegExp.$5;
+      }
      
      coord_filter = /([\d+-.]+)_([\d+-.]+)_([\d]+)_([\d]+)_([a-z]+)_([\d]+)/;
      if( coord_filter.test(coord_params) ) {
@@ -440,22 +444,18 @@ var labelcaption;
      if(coord_filter.test(coord_params)) {
       coord_filter.exec(coord_params);
       wma_language = RegExp.$7;
-     }
-     else {
+     } else {
       wma_language = wma_site;
      }
 
      coord_filter = /([\d+-.]+)_([\d+-.]+)_([\d]+)_([\d]+)_([a-z]+)_([\d]+)_([a-z]+)_([\d+-.]+)_([\d+-.]+)/;
-     if(coord_filter.test(coord_params))
-     {
-      newcoords = wmaLatLonToXY( RegExp.$8, RegExp.$9 );
-      wma_marker_locked = false;
-      wma_own_close = true;
-     }
-     else
-     {
-      newcoords = wmaLatLonToXY( marker.lat, marker.lon );
-      wma_marker_locked = true;
+     if(coord_filter.test(coord_params)) {
+       newcoords = wmaLatLonToXY( RegExp.$8, RegExp.$9 );
+       wma_marker_locked = false;
+       wma_own_close = true;
+     } else {
+       newcoords = wmaLatLonToXY( marker.lat, marker.lon );
+       wma_marker_locked = true;
      }
 
      wma_gx = newcoords.x-wma_width/2;
@@ -467,8 +467,9 @@ var labelcaption;
     UIrtl = isRTL(UILang);
 
     // Fill missing i18n items
-    for( i in strings )
+    for( i in strings ) {
      if( !strings[i][UILang] ) strings[i][UILang] = strings[i].en;
+    }
 
     WikiMiniAtlasHTML = 
      '<div class="bsprite" id="button_plus" title="' + strings.zoomIn[UILang] + '"></div>' +
@@ -514,7 +515,6 @@ var labelcaption;
     }
     WikiMiniAtlasHTML +=
      '</select></p>' +
-     //'<p class="option" style="font-size: 50%; color:gray">Debug info:<br>marker: ' + (typeof marker.lat) + ', ' + marker.lon + '<br>site:'+wma_site+', uilang'+wma_language+'</p>' +
      '<a href="//wiki.toolserver.org/" target="_top"><img src="//toolserver.org/images/wikimedia-toolserver-button.png" border="0"></a>' +
      '</div>';
 
@@ -1474,7 +1474,7 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
   }
 
   function wmaDebug(text) {
-   //document.getElementById('debugbox').innerHTML+=text+'<br />';
+    $('#debugbox').append( $('<div></div>').text(text) );
   }
 
   function wmaCommonsThumb(img,w,m5) {
