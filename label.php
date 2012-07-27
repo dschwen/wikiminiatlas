@@ -145,6 +145,7 @@ while( $row = mysql_fetch_array( $res) )
 } // TODO only send fx,fy,wg for max label zoom!
 mysql_close( $db );
 //header("Content-type: application/json");
+header("Cache-Control: public, max-age=3600");
 echo json_encode( array( "label" => $items, "z" => $z ) );
 //echo json_encode( array( "label" => $items, "z" => $z, "q" => $query ) );
 ?>

@@ -8,6 +8,7 @@ $z = intval($_GET['z']);
 $a = $_GET['action'];
 
 ob_start("ob_gzhandler");
+header("Cache-Control: public, max-age=3600");
 if( $a!=='query' ) {
   // set content type
   header( 'Content-type: application/json' );
@@ -64,7 +65,7 @@ $murx = deg2rad($urx>180?($urx-360.0):$urx)*6378137.0;
 $mury = log(tan(M_PI_4 + deg2rad($ury) / 2.0)) * 6378137.0;
 
 
-$tags = array( "highway", "railway", "waterway", "landuse", "leisure", "building", "natural", "amenity", "name", "boundary", "osm_id","layer","access","route", "historic", "tunnel" );
+$tags = array( "highway", "railway", "waterway", "landuse", "leisure", "building", "natural", "amenity", "name", "boundary", "osm_id","layer","access","route", "historic", "tunnel", "aeroway", "aerialway" );
 $taglist = '"'.implode($tags,'", "').'"';
 $tagnum = count($tags);
 $intersect = "
@@ -106,7 +107,7 @@ $table = array(
 if( $z>=14 ) $table[] = array('planet_polygon','building IS NOT NULL AND','way',$tags);
 
 $geo = array();
-
+$tagfound = array();
 for( $i=0; $i<count($table); $i++ ) {
   // build query for the cropped data without buildings
   //$taglist = '"'.implode($table[$i][3],'", "').'"';
@@ -150,6 +151,7 @@ for( $i=0; $i<count($table); $i++ ) {
       if( $row[$j+1] !== null ) {
         //$type[$table[$i][3][$j]]=$row[$j+1];
         $type[$tags[$j]]=$row[$j+1];
+        $tagfound[$tags[$j]]++;
       }
     } 
     $geo[] = array( "geo" => json_decode($row[0]), "tags" => $type );
@@ -181,9 +183,10 @@ if( !$result ) {
 $type = array( "natural" => "ocean" );
 while ($row = pg_fetch_row($result)) {
   $geo[] = array( "geo" => json_decode($row[0]), "tags" => $type );
+  $tagfound['natural']++;
 }
 
-$s = json_encode( array( "data" => $geo, "x" => $x, "y" => $y, "z" => $z ) );
+$s = json_encode( array( "data" => $geo, "x" => $x, "y" => $y, "z" => $z, "f" => $tagfound ) );
 
 // write to cache
 if( !is_dir( "jsontile/$z/$y" ) ) {
