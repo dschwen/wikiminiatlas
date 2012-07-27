@@ -958,13 +958,21 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
           if( "img" in l[i] ) {
             // thumbnails
             (function(n,w,h,m5){
-              a.click( function() { wmaCommonsImage(n,w,h,m5); } );
+              a.click( function(e) {
+                if( e.which == 1 ) {
+                  wmaCommonsImage(n,w,h,m5); 
+                  e.preventDefault();
+                }
+              } ).attr( 'href', '//commons.wikimedia.org/wiki/Image:' + l[i].img );
             })(l[i].img,l[i].w,l[i].h,l[i].m5);
 
             w = ( parseInt(l[i].w) > parseInt(l[i].h) ) ? (l[i].style==-2?24:48) : Math.floor((l[i].style==-2?24:48)*l[i].w/l[i].h);
             
             a.addClass('cthumb')
-              .append( $('<img/>').attr('src',wmaCommonsThumb( l[i].img, w, l[i].m5) ) );
+              .append( $('<img/>', { 
+                src: wmaCommonsThumb( l[i].img, w, l[i].m5),
+                title: decodeURIComponent( l[i].img )
+              } ) );
 
             if( l[i].head < 18 ) {
               a.addClass('dir dir'+l[i].head);
