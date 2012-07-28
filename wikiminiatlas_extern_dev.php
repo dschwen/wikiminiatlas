@@ -981,9 +981,11 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
           
           a.addClass('cthumb')
             .append( $('<img/>', { 
-              src: wmaCommonsThumb( l[i].img, w, l[i].m5),
-              title: decodeURIComponent( l[i].img )
-            } ) );
+                title: decodeURIComponent( l[i].img )
+              } )
+              .error(function(){ $(this).parent().hide() } )
+              .attr('src', wmaCommonsThumb( l[i].img, w, l[i].m5) )
+            );
 
           if( l[i].head < 18 ) {
             a.addClass('dir dir'+l[i].head);
@@ -1087,7 +1089,8 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
       if( wma_tileset==0 && wma_zoom>12 ) { // client side render
         // just zoomed into client side render zoom range
         if( !thistile.csrender ) {
-          thistile.csrender =true;
+          thistile.csrender = true;
+          // TODO: bug where imgs that are still loading now will fade back in below the canvas tiles!
           thistile.img.fadeOut(200);
         }
 
@@ -1100,7 +1103,6 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
         // just zoomed out of client-side render zoom range
         thistile.csz = wma_zoom;
         if( thistile.csrender ) {
-          thistile.csrender = false;
           thistile.can.fadeOut(200);
         }
 
@@ -1115,7 +1117,10 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
         if( thistile.img.attr('src') != tileurl ) { // catch mere label language change
           thistile.img.fadeOut(0).attr( 'src', tileurl );
         } else {
-          if( thistile.csrender ) { thistile.img.fadeIn(200); }
+          if( thistile.csrender ) { 
+            thistile.img.fadeIn(200);
+            thistile.csrender = false;
+          }
         }
       }
 

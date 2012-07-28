@@ -56,8 +56,8 @@ var wmajt = (function(){
     if(bx1>180.0) bx1-=360;
 
     // draw the data
-    function drawGeoJSON(d) {
-      var i, j, k, g, s, o, ds
+    function drawGeoJSON(ca) {
+      var i, j, k, g, s, o, ds, d = ca.data
         , style = {
           Polygon: [
             ['natural',{ocean:1}, // actually it's land!
@@ -95,15 +95,18 @@ var wmajt = (function(){
             ['natural',{wetland:1},
               [ { fillStyle: "rgb(200,218,224)" } ]
             ],
-            ['natural',{water:1,bay:1},
-              [ { fillStyle: "rgb(158,199,243)" },
-                { lineWidth: 1, strokeStyle: "rgb(158,199,243)"} ]
-            ],
             ['natural',{grassland:1,fell:1},
               [ { fillStyle: "rgb(200,224,200)" } ]
             ],
+            ['natural',{scrub:1},
+              [ { fillStyle: "rgb(150,214,150)" } ]
+            ],
             ['natural',{wood:1},
               [ { fillStyle: "rgb(100,204,100)" } ]
+            ],
+            ['natural',{water:1,bay:1},
+              [ { fillStyle: "rgb(158,199,243)" },
+                { lineWidth: 1, strokeStyle: "rgb(158,199,243)"} ]
             ],
             ['amenity',{university:1},
               [ { lineWidth:0.5, strokeStyle: "rgb(240,225,183)" } ]
@@ -114,6 +117,10 @@ var wmajt = (function(){
             ['highway',{pedestrian:1},
               [ { fillStyle: "rgb(255,255,255)" },
                 { lineWidth: 2, strokeStyle: "rgb(168,148,148)" } ]
+            ],
+            ['aeroway',{terminal:1},
+              [ { fillStyle: "rgb(190,210,190)" },
+                { lineWidth: 1, strokeStyle: "rgb(127,137,127)" } ]
             ],
             ['building',{yes:1,block:1,office:1,courthouse:1,church:1,school:1,cathedral:1,residential:1,house:1,hut:1,
               university:1,hospital:1,bunker:1,train_station:1,chapel:1,industrial:1,commercial:1,retail:1,hotel:1},
@@ -140,6 +147,9 @@ var wmajt = (function(){
             ['highway',{footway:1,pedestrian:1},
               [ { lineWidth: 2, strokeStyle: "rgb(168,148,148)" } ]
             ],
+            ['highway',{steps:1},
+              [ { dash:[1.5,1.5], lineWidth: 3, strokeStyle: "rgb(168,148,148)" } ]
+            ],
             ['highway',{service:1,path:1,track:1},
               [ { lineWidth: 4, strokeStyle: "rgb(168,168,168)" },
                 { lineWidth: 2.5, strokeStyle: "rgb(208,208,208)" } ]
@@ -157,18 +167,24 @@ var wmajt = (function(){
               [ { globalAlpha: 0.2, lineWidth: 3, strokeStyle: "rgb(100,100,100)" },
                 { globalAlpha: 1 } ]
             ],
-            ['railway',{rail:1,preserved:1},
+            ['railway',{rail:1,preserved:1,monorail:1},
               [ { lineWidth: 3, strokeStyle: "rgb(100,100,100)" } ]
             ],
             ['highway',{secondary:1,secondary_link:1,primary:1,primary_link:1},
-              [ { lineWidth: 6, strokeStyle: "rgb(171,158,137)" } ]
+              [ { lineCap: 'round', lineWidth: 6, strokeStyle: "rgb(171,158,137)" } ]
             ],
             ['highway',{motorway:1,motorway_link:1,trunk:1,trunk_link:1},
               [ { lineWidth: 7, strokeStyle: "rgb(188,149,28)" } ]
             ],
+            ['aeroway',{runway:1},
+              [ { lineWidth: 10, strokeStyle: "rgb(100,130,100)" } ]
+            ],
+            ['aeroway',{taxiway:1},
+              [ { lineWidth: 4.5, strokeStyle: "rgb(100,130,100)" } ]
+            ],
             // fill
             ['railway',{subway:1},
-              [ { globalAlpha: 0.3, dash: [3,3], lineWidth: 1.5, strokeStyle: "rgb(255,255,255)" },
+              [ { lineCap: 'butt', globalAlpha: 0.3, dash: [3,3], lineWidth: 1.5, strokeStyle: "rgb(255,255,255)" },
                 { globalAlpha: 1 } ]
             ],
             ['railway',{rail:1},
@@ -176,6 +192,9 @@ var wmajt = (function(){
             ],
             ['railway',{preserved:1},
               [ { dash: [3,3], lineWidth: 1.5, strokeStyle: "rgb(200,200,200)" } ]
+            ],
+            ['railway',{monorail:1},
+              [ { dash: [1,2,4,2], lineWidth: 1.5, strokeStyle: "rgb(200,200,200)" } ]
             ],
             ['highway',{secondary:1,secondary_link:1},
               [ { lineCap: 'round', lineWidth: 4.5, strokeStyle: "rgb(255,250,115)" } ]
@@ -185,6 +204,12 @@ var wmajt = (function(){
             ],
             ['highway',{motorway:1,motorway_link:1,trunk:1,trunk_link:1},
               [ { lineWidth: 5, strokeStyle: "rgb(242,191,36)" } ]
+            ],
+            ['aeroway',{runway:1},
+              [ { lineWidth: 8, strokeStyle: "rgb(150,180,150)" } ]
+            ],
+            ['aeroway',{taxiway:1},
+              [ { lineWidth: 2.5, strokeStyle: "rgb(150,180,150)" } ]
             ],
             // access overlay
             ['access',{permissive:1},
@@ -258,7 +283,11 @@ var wmajt = (function(){
       for( s in style ) {
         for( o=0; o < style[s].length; o++ ) {
           c.beginPath();
-          
+         
+          // skip styles whose tag does not occur
+          if( ca.f && !(style[s][o][0] in ca.f) ) continue;
+
+          // loop over all objects 
           for(i =0; i<d.length; ++i ) {
             // check against shape type and tags
             if( ( s != d[i].geo.type && ("Multi"+s) != d[i].geo.type ) ||
@@ -314,7 +343,7 @@ var wmajt = (function(){
     for( zz=z; zz>=minzoom; zz-- ) {
       ca = cache[hash(xx,yy,zz)];
       if( ca && ca.data  ) {
-        drawGeoJSON(ca.data);
+        drawGeoJSON(ca);
         tile.can.show();
         if( z< buildingzoom || zz >= buildingzoom ) return;
       }

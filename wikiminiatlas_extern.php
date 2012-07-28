@@ -1026,12 +1026,13 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
       for( i=0; i < l.length; i++ ) {
         dx = 128 * ( x/f - l[i].dx );
         dy = 128 * ( y/f - (wma_zoomsize[wma_maxlabel]-l[i].dy-1) ); // label.dy value is broken
-        tx = Math.floor( (l[i].tx+l[i].fx-dx)*f );
-        ty = Math.floor( (l[i].ty+l[i].fy-dy)*f );
+        tx = (l[i].tx+l[i].fx-dx)*f;
+        ty = (l[i].ty+l[i].fy-dy)*f;
         if( tx >=0 && tx<128 && ty >=0 && ty<128 ) {
           // make a clone of the old label object (TODO: sort first, clone later )
           d = jQuery.extend( true, {}, l[i] );
-          d.tx = tx; d.ty = ty;
+          d.tx = Math.floor(tx); d.ty = Math.floor(ty);
+          d.fx = tx-d.tx; d.fy = ty-d.ty;
           q[ Math.floor( tx/64) + 2*Math.floor( ty/64 ) ].push(d);
         }
       }
@@ -1153,8 +1154,11 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
                 if( Math.floor(lc[ht].label[k].tx/64) === (dx%2) &&
                     Math.floor(lc[ht].label[k].ty/64) === (dy%2) ) {
                   d = jQuery.extend( true, {}, lc[ht].label[k] );
-                  d.tx = Math.floor( (d.tx+d.fx)*2 - (dx%2)*128 );
-                  d.ty = Math.floor( (d.ty+d.fy)*2 - (dy%2)*128 );
+                  d.tx = (d.tx+d.fx)*2 - (dx%2)*128;
+                  d.ty = (d.ty+d.fy)*2 - (dy%2)*128;
+                  d.fx = d.tx - Math.floor(d.tx);
+                  d.fy = d.ty - Math.floor(d.ty);
+                  d.tx = Math.floor(d.tx); d.ty = Math.floor(d.ty);
                   lc[hash].label.push(d);
                 }
               }
