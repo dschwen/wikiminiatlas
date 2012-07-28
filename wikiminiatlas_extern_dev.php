@@ -39,6 +39,8 @@ var wma_maxlabel = 13;
 var i, wma_zoomsize = [3];
 for(i=1; i<40; i++) { wma_zoomsize[i]=2*wma_zoomsize[i-1]; }
 
+// label cache (formerly sessionStorage)
+var lc = {};
 
 // include documentation strings
 <? require( 'wikiminiatlas_i18n.inc' ); ?>
@@ -700,10 +702,10 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
       , t = {
       div : d,
       img : $('<img>')
-        .load(function(){
+        .load(function(e){
           $(this).fadeIn(100);
         })
-        .error(function(){
+        .error(function(e){
           // tile is probably not ready yet, try again in one second
           // TODO: add max tries
           h = setTimeout( function() {
@@ -945,102 +947,94 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
   // Set new map Position (to wma_gx, wma_gy)
   function moveWikiMiniAtlasMapTo()
   {
-    function parseLabels(tile,data,l) {
-      var w,a, i,io, ix=[0,0,5,0,0,2,3,4,5,6,6], iy=[0,0,8,0,0,2,3,4,5,6,6];
-      try {
-        if( l === undefined ) {
-          l = JSON.parse(data).label;
-        }
-        tile.text('');
-        for( i=0; i<l.length; ++i ) {
-          a = $('<a></a>')
+    function parseLabels(tile,l) {
+      var w,a, i,io
+        , ix=[0,0,5,0,0,2,3,4,5,6,6]
+        , iy=[0,0,8,0,0,2,3,4,5,6,6];
 
-          if( "img" in l[i] ) {
-            // thumbnails
-            (function(n,w,h,m5){
-              a.click( function(e) {
-                // this is necessary to allow dragging the map on thumbnails in Firefox
-                var r = wmaMouseCoords(e.originalEvent);
-                if( r.x != wma_mdcoord.x || 
-                    r.y != wma_mdcoord.y ) {
-                   e.preventDefault(); 
-                } else {
-                  // open the wmaci preview on left click
-                  if( e.which == 1 ) {
-                    wmaCommonsImage(n,w,h,m5); 
-                    e.preventDefault();
-                  }
-                  // otherwise follow the link (allows for middle click opening the commons page)
+      tile.text('');
+      for( i=0; i<l.length; ++i ) {
+        a = $('<a></a>')
+
+        if( "img" in l[i] ) {
+          // thumbnails
+          (function(n,w,h,m5){
+            a.click( function(e) {
+              // this is necessary to allow dragging the map on thumbnails in Firefox
+              var r = wmaMouseCoords(e.originalEvent);
+              if( r.x != wma_mdcoord.x || 
+                  r.y != wma_mdcoord.y ) {
+                 e.preventDefault(); 
+              } else {
+                // open the wmaci preview on left click
+                if( e.which == 1 ) {
+                  wmaCommonsImage(n,w,h,m5); 
+                  e.preventDefault();
                 }
-              } ).attr( 'href', '//commons.wikimedia.org/wiki/Image:' + l[i].img );
-            })(l[i].img,l[i].w,l[i].h,l[i].m5);
+                // otherwise follow the link (allows for middle click opening the commons page)
+              }
+            } ).attr( 'href', '//commons.wikimedia.org/wiki/Image:' + l[i].img );
+          })(l[i].img,l[i].w,l[i].h,l[i].m5);
 
-            w = ( parseInt(l[i].w) > parseInt(l[i].h) ) ? (l[i].style==-2?24:48) : Math.floor((l[i].style==-2?24:48)*l[i].w/l[i].h);
-            
-            a.addClass('cthumb')
-              .append( $('<img/>', { 
-                src: wmaCommonsThumb( l[i].img, w, l[i].m5),
-                title: decodeURIComponent( l[i].img )
-              } ) );
+          w = ( parseInt(l[i].w) > parseInt(l[i].h) ) ? (l[i].style==-2?24:48) : Math.floor((l[i].style==-2?24:48)*l[i].w/l[i].h);
+          
+          a.addClass('cthumb')
+            .append( $('<img/>', { 
+              src: wmaCommonsThumb( l[i].img, w, l[i].m5),
+              title: decodeURIComponent( l[i].img )
+            } ) );
 
-            if( l[i].head < 18 ) {
-              a.addClass('dir dir'+l[i].head);
-              io = 8;
-            } else {
-              io = 6;
-            }
-
-            a.css( {
-              top:  ( l[i].ty - io ) + 'px',
-              left: ( l[i].tx - io ) + 'px'
-            } );
+          if( l[i].head < 18 ) {
+            a.addClass('dir dir'+l[i].head);
+            io = 8;
           } else {
-            // text labels
-            a.addClass('label').addClass( 'label' + l[i].style ).css(wmaLinkStyle)
-              .attr( { 
-                href: '//' + l[i].lang + '.wikipedia.org/wiki/' + l[i].page,
-                target: '_top' 
-              } )
-              .css( {
-                top:  ( l[i].ty - iy[l[i].style] ) + 'px',
-                left: ( l[i].tx - ix[l[i].style] ) + 'px',
-                direction: isRTL(l[i].lang) ? 'rtl' : 'ltr'
-              } ) 
-             .text(l[i].name);
+            io = 6;
           }
 
-          tile.append(a);
+          a.css( {
+            top:  ( l[i].ty - io ) + 'px',
+            left: ( l[i].tx - io ) + 'px'
+          } );
+        } else {
+          // text labels
+          a.addClass('label').addClass( 'label' + l[i].style ).css(wmaLinkStyle)
+            .attr( { 
+              href: '//' + l[i].lang + '.wikipedia.org/wiki/' + l[i].page,
+              target: '_top' 
+            } )
+            .css( {
+              top:  ( l[i].ty - iy[l[i].style] ) + 'px',
+              left: ( l[i].tx - ix[l[i].style] ) + 'px',
+              direction: isRTL(l[i].lang) ? 'rtl' : 'ltr'
+            } ) 
+           .text(l[i].name);
         }
-      } catch(e) {
-        tile.html(data); 
+
+        tile.append(a);
       }
     } 
 
     // zooming beyond maximum label zoom
-    function hizoomLabels( tile, data ) {
+    function hizoomLabels( tile, l ) {
       var x = tile.lx, y = tile.ly, z = tile.lz
         , f = 1<<(z-wma_maxlabel), dx, dy
-        , d, l, l2 = [], i, q=[[],[],[],[]];
-      try {
-        d = JSON.parse(data);
-        l = d.label;
-      } catch(e) {
-        tile.span.text('');
-        return;
-      }
+        , d, tx, ty, l2 = [], i, q=[[],[],[],[]];
         
       // for every label
       // ( wlmax coords - (dx,dy) + (fx,fy) ) * f
-
       for( i=0; i < l.length; i++ ) {
         dx = 128 * ( x/f - l[i].dx );
         dy = 128 * ( y/f - (wma_zoomsize[wma_maxlabel]-l[i].dy-1) ); // label.dy value is broken
-        l[i].tx = Math.floor( (l[i].tx+l[i].fx-dx)*f );
-        l[i].ty = Math.floor( (l[i].ty+l[i].fy-dy)*f );
-        if( l[i].tx >=0 && l[i].tx<128 && l[i].ty >=0 && l[i].ty<128 ) {
-          q[Math.floor( l[i].tx/64) + 2*Math.floor(  l[i].ty/64 )].push(l[i]);
+        tx = Math.floor( (l[i].tx+l[i].fx-dx)*f );
+        ty = Math.floor( (l[i].ty+l[i].fy-dy)*f );
+        if( tx >=0 && tx<128 && ty >=0 && ty<128 ) {
+          // make a clone of the old label object (TODO: sort first, clone later )
+          d = jQuery.extend( true, {}, l[i] );
+          d.tx = tx; d.ty = ty;
+          q[ Math.floor( tx/64) + 2*Math.floor( ty/64 ) ].push(d);
         }
       }
+
       // sort into quadrants
       for( i=0; i < 4; i++ ) {
         if( q[i].length > 0 ) {
@@ -1048,7 +1042,7 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
           l2.push(q[i][0]);
         }
       }
-      parseLabels(tile.span,'',l2);
+      parseLabels(tile.span,l2);
     }
 
 
@@ -1060,8 +1054,8 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
      , ly = Math.floor(wma_gy/tsy) % wma_ny
      , fx = wma_gx % tsx
      , fy = wma_gy % tsy
-     , mlx, mly
-     , i, j, dx, dy, n, thistile, tileurl, dataurl;
+     , mlx, mly, hash, ht, d
+     , i, j, k, dx, dy, n, thistile, tileurl, dataurl;
 
    wmaUpdateScalebar();
    //document.getElementById('debugbox').innerHTML='';
@@ -1077,7 +1071,6 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
      
      //tileurl = 'url("' + wma_tilesets[wma_tileset].getTileURL( dy, dx, wma_zoom) + '")';
      tileurl = wma_tilesets[wma_tileset].getTileURL( dy, dx, wma_zoom);
-     dataurl = wmaGetDataURL( dy, dx, wma_zoom );
 
      // move tile
      thistile = wma_tile[n];
@@ -1113,7 +1106,6 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
         }
       }
 
-
       if( thistile.xhr !== null ) {
        thistile.xhr.abort();
       }
@@ -1125,23 +1117,59 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
         mlx = Math.floor(dx/(1<<(wma_zoom-wma_maxlabel)));
         mly = Math.floor(dy/(1<<(wma_zoom-wma_maxlabel)));
         dataurl = wmaGetDataURL( mly, mlx, wma_maxlabel );
+        hash = lHash( mly, mlx, wma_maxlabel );
+      } else {
+        dataurl = wmaGetDataURL( dy, dx, wma_zoom );
+        hash = lHash( dy, dx, wma_zoom );
       }
 
       // TODO: instead of launching the XHR here, gather the needed coords and ...
-      if( window.sessionStorage && ((data=sessionStorage.getItem(dataurl))!==null) ) {
-        ( wma_zoom < wma_maxlabel ) ? parseLabels(thistile.span,data) : hizoomLabels(thistile,data);
+      if( lc[hash] && !('filler' in lc[hash]) ) {
+        ( wma_zoom < wma_maxlabel ) ? parseLabels(thistile.span,lc[hash].label) : hizoomLabels(thistile,lc[hash].label);
       } else {
-        (function(turl,lo){// closure to retain access to dataurl in sucess callback
-        //thistile.xhr = $.ajax( { url : turl, context : thistile.div } )
-        thistile.xhr = $.ajax( { url : turl, context : thistile } )
-          .success( function(data) { 
-            if( window.sessionStorage ) {
-              sessionStorage.setItem(turl,data);
+        // prefill lower zoom from above zoom
+        if( lc[hash] && 'filler' in lc[hash] ) {
+          parseLabels( thistile.span, lc[hash].label );
+        } else { 
+          // cannot fill outside of this range
+          if( wma_zoom <= wma_maxlabel && wma_zoom > 0 ) {
+            ht = lHash( Math.floor(dy/2), Math.floor(dx/2), wma_zoom-1 );
+            if( lc[ht] ) {
+              mlx = dx%2;
+              lc[hash] = { label: [], filler: 1 }
+              for( k=0; k<lc[ht].label.length; k++ ) {
+                if( Math.floor(lc[ht].label[k].tx/64) === (dx%2) &&
+                    Math.floor(lc[ht].label[k].ty/64) === (dy%2) ) {
+                  d = jQuery.extend( true, {}, lc[ht].label[k] );
+                  d.tx = Math.floor( (d.tx+d.fx)*2 - (dx%2)*128 );
+                  d.ty = Math.floor( (d.ty+d.fy)*2 - (dy%2)*128 );
+                  lc[hash].label.push(d);
+                }
+              }
+              parseLabels( thistile.span, lc[hash].label );
             }
-            lo ? parseLabels(this.span,data) : hizoomLabels(this,data);
-          } ) 
-          .error( function() { this.span.text(''); } );
-        })( dataurl, wma_zoom < wma_maxlabel );
+          }
+        }
+
+        // or higher zoom 
+        /*  for( k=0; k<4; k++ ) {
+            ht=lHash(Math.floor(dx/2)
+          }*/
+
+        // TODO 
+        (function(hash,turl,lo){// closure to retain access to dataurl in sucess callback
+          //thistile.xhr = $.ajax( { url : turl, context : thistile.div } )
+          thistile.xhr = $.ajax( { url : turl, context : thistile } )
+            .success( function(data) { 
+              try {
+                lc[hash] = JSON.parse(data);
+                lo ? parseLabels( this.span, lc[hash].label ) : hizoomLabels( this, lc[hash].label );
+              } catch(e) {
+                this.span.html(data);
+              }
+            } ) 
+            .error( function() { this.span.text(''); } );
+        })( hash, dataurl, wma_zoom < wma_maxlabel );
       }
       
      }
@@ -1310,6 +1338,9 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
    return {x:ev.pageX, y:ev.pageY};
   }
 
+  function lHash(y,x,z) {
+   return wma_site + '_' + (wma_zoomsize[z]-y-1) + '_' + (x % (wma_zoomsize[z]*2) ) + '_' + z + '_' + wma_tilesets[wma_tileset].globe;
+  }
   function wmaGetDataURL(y,x,z) {
    return wma_database + '?l=' + wma_site + '&a=' + (wma_zoomsize[z]-y-1) + '&b=' + (x % (wma_zoomsize[z]*2) ) + '&z=' + z + '&g=' + wma_tilesets[wma_tileset].globe;
   }
