@@ -30,6 +30,7 @@
 <? require( 'wmaglobe3d_min.js' ); ?>
 <? require( 'wmajt.js' ); ?>
 
+var wma_highzoom_activated = true;
 
 // global settings
 var wma_imgbase = '//toolserver.org/~dschwen/wma/tiles/';
@@ -1082,27 +1083,38 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
      if( thistile.url != tileurl )
      {
       thistile.url = tileurl;
-      if( wma_tileset==0 && wma_zoom>12 ) {
-        // client side render
+      if( wma_tileset==0 && wma_zoom>12 ) { // client side render
+        // just zoomed into client side render zoom range
         if( !thistile.csrender ) {
           thistile.csrender =true;
           thistile.img.fadeOut(200);
         }
+
+        // need to re-render this tile
         if( thistile.csx != dx || thistile.csy != dy || thistile.csz != wma_zoom ) {
           thistile.can.hide();
           wmajt.update(dx,dy,wma_zoom,thistile);
         }
-      } else {
-        // regular image tiles
-        if( thistile.img.attr('src') != tileurl ) { // catch mere label language change
-          thistile.img.fadeOut(0).attr( 'src', tileurl );
-        } else {
-          if( thistile.csrender ) { thistile.img.fadeIn(200); }
-        }
+      } else { // regular image tiles
+        // just zoomed out of client-side render zoom range
         thistile.csz = wma_zoom;
         if( thistile.csrender ) {
           thistile.csrender = false;
           thistile.can.fadeOut(200);
+        }
+
+        // off the world
+        if( dy >= wma_zoomsize[wma_zoom] ) {
+          thistile.img.fadeOut(0);
+          thistile.span.text('');
+          continue;
+        }
+
+        // set or display tile image
+        if( thistile.img.attr('src') != tileurl ) { // catch mere label language change
+          thistile.img.fadeOut(0).attr( 'src', tileurl );
+        } else {
+          if( thistile.csrender ) { thistile.img.fadeIn(200); }
         }
       }
 
@@ -1378,14 +1390,14 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
    } 
 
    if( rightclick ) {
-     if( hasCanvas ) {
+     if( hasCanvas && wma_highzoom_activated ) {
        wma_zoom = ( wma_tileset==0 ) ? 15 : wma_tilesets[wma_tileset].maxzoom;
      } else {
        wma_zoom = ( wma_tileset==0 ) ? 12 : wma_tilesets[wma_tileset].maxzoom;
      }
    }
    else {
-    if( wma_zoom >= ( ( wma_tileset==0 && !hasCanvas ) ? 12 : wma_tilesets[wma_tileset].maxzoom ) ) {
+    if( wma_zoom >= ( ( wma_tileset==0 && !( hasCanvas && wma_highzoom_activated ) ) ? 12 : wma_tilesets[wma_tileset].maxzoom ) ) {
      //tilesetUpgrade();
     }
     else wma_zoom++;
