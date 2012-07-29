@@ -196,6 +196,11 @@ if( !is_dir( "jsontile/$z/$y" ) ) {
 }
 file_put_contents ( $tfile , $s );
 
-header("Cache-Control: public, max-age=3600");
+// do not cache purge action
+if( $a !== 'purge' ) {
+  header("Cache-Control: public, max-age=3600");
+}
+
+// output JSON data
 echo $s;
 ?>

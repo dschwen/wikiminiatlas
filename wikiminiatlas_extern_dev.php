@@ -31,6 +31,7 @@
 <? require( 'wmajt.js' ); ?>
 
 var wma_highzoom_activated = true;
+var wma_highzoom_purge = false;
 
 // global settings
 var wma_imgbase = '//toolserver.org/~dschwen/wma/tiles/';
@@ -1083,7 +1084,7 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
        top  : (j*tsy-fy) + 'px'
      } );
 
-     if( thistile.url != tileurl )
+     if( thistile.url != tileurl || wma_highzoom_purge )
      {
       thistile.url = tileurl;
       if( wma_tileset==0 && wma_zoom>12 ) { // client side render
@@ -1095,10 +1096,10 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
         }
 
         // need to re-render this tile
-        if( thistile.csx != dx || thistile.csy != dy || thistile.csz != wma_zoom ) {
+        if( thistile.csx != dx || thistile.csy != dy || thistile.csz != wma_zoom || wma_highzoom_purge ) {
           thistile.can.hide();
           thistile.img.hide();
-          wmajt.update(dx,dy,wma_zoom,thistile);
+          wmajt.update(dx,dy,wma_zoom,thistile,wma_highzoom_purge);
         }
       } else { // regular image tiles
         // just zoomed out of client-side render zoom range
@@ -1204,6 +1205,8 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
      updateMarker(extramarkers[n]);
     }
 
+    wma_highzoom_purge = false;
+
     wmaDrawKML();
   }
 
@@ -1306,6 +1309,11 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
     case 107 : wmaZoomIn(); break;
     case 189 :
     case 109 : wmaZoomOut(); break;
+    case 80 :
+      wma_highzoom_purge = true;
+      console.log('purging current viewport'); 
+      moveWikiMiniAtlasMapTo();
+      break;
     case 79 : // o
       if( wmasize.shown ) {
         wmasize.shown=false;

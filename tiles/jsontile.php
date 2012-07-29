@@ -8,7 +8,6 @@ $z = intval($_GET['z']);
 $a = $_GET['action'];
 
 ob_start("ob_gzhandler");
-header("Cache-Control: public, max-age=3600");
 if( $a!=='query' ) {
   // set content type
   header( 'Content-type: application/json' );
@@ -17,6 +16,7 @@ if( $a!=='query' ) {
   if( $a !== 'purge' ) {
     $tfile = "jsontile/$z/$y/$x";
     if( file_exists( $tfile ) ) {
+      header("Cache-Control: public, max-age=3600");
       readfile( $tfile );
       exit;
     }
@@ -196,5 +196,11 @@ if( !is_dir( "jsontile/$z/$y" ) ) {
 }
 file_put_contents ( $tfile , $s );
 
+// do not cache purge action
+if( $a !== 'purge' ) {
+  header("Cache-Control: public, max-age=3600");
+}
+
+// output JSON data
 echo $s;
 ?>

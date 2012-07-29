@@ -44,7 +44,7 @@ var wmajt = (function(){
     update(this.csx,this.csy,this.csz,this);
   }
 
-  function update(x,y,z,tile) {
+  function update(x,y,z,tile,purge) {
     var bx1 = x*60.0/(1<<z)
       , by1 = 90.0 - ( ((y+1.0)*60.0) / (1<<z) )
       , bx2 = (x+1) * 60.0 / (1<<z)
@@ -357,7 +357,7 @@ var wmajt = (function(){
     var zz, xx=x, yy=y, ca;
     for( zz=z; zz>=minzoom; zz-- ) {
       ca = cache[hash(xx,yy,zz)];
-      if( ca && ca.data  ) {
+      if( ca && ca.data && !purge ) {
         drawGeoJSON(ca);
         tile.can.show();
         if( z< buildingzoom || zz >= buildingzoom ) return;
@@ -368,7 +368,7 @@ var wmajt = (function(){
 
     // request data
     $.ajax({
-      url: 'tiles/jsontile_dev.php?x='+x+'&y='+y+'&z='+z,
+      url: 'tiles/jsontile_dev.php?x='+x+'&y='+y+'&z='+z+(purge===true?'&action=purge':''),
       dataType: 'json',
       success: gotData,
       context: tile
