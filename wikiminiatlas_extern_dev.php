@@ -1097,6 +1097,7 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
         // need to re-render this tile
         if( thistile.csx != dx || thistile.csy != dy || thistile.csz != wma_zoom ) {
           thistile.can.hide();
+          thistile.img.hide();
           wmajt.update(dx,dy,wma_zoom,thistile);
         }
       } else { // regular image tiles
