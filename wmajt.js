@@ -122,6 +122,17 @@ var wmajt = (function(){
               [ { fillStyle: "rgb(190,210,190)" },
                 { lineWidth: 1, strokeStyle: "rgb(127,137,127)" } ]
             ],
+            ['historic',{memorial:1,monument:1,fort:1,castle:1},
+              [ { fillStyle: "rgb(255,190,190)" },
+                { lineWidth: 1, strokeStyle: "rgb(167,120,120)" } ]
+            ],
+            ['historic',{ship:1,wreck:1},
+              [ { fillStyle: "rgb(255,190,235)" } ]
+            ],
+            ['railway',{station:1},
+              [ { fillStyle: "rgb(210,195,195)" },
+                { lineWidth: 1, strokeStyle: "rgb(127,127,127)" } ]
+            ],
             ['building',{yes:1,block:1,office:1,courthouse:1,church:1,school:1,cathedral:1,residential:1,house:1,hut:1,
               university:1,hospital:1,bunker:1,train_station:1,chapel:1,industrial:1,commercial:1,retail:1,hotel:1},
               [ { fillStyle: "rgb(200,200,200)" },
@@ -210,6 +221,10 @@ var wmajt = (function(){
             ],
             ['aeroway',{taxiway:1},
               [ { lineWidth: 2.5, strokeStyle: "rgb(150,180,150)" } ]
+            ],
+            ['railway',{tram:1},
+              [ { globalAlpha: 0.4, dash: [3,3], lineWidth: 1.5, strokeStyle: "rgb(0,0,0)" },
+                { globalAlpha: 1 } ]
             ],
             // access overlay
             ['access',{permissive:1},
