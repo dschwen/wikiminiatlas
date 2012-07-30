@@ -368,7 +368,7 @@ var wmajt = (function(){
 
     // request data
     $.ajax({
-      url: 'tiles/jsontile_dev.php?x='+x+'&y='+y+'&z='+z+(purge===true?'&action=purge':''),
+      url: 'tiles/jsontile.php?x='+x+'&y='+y+'&z='+z+(purge===true?'&action=purge':''),
       dataType: 'json',
       success: gotData,
       context: tile

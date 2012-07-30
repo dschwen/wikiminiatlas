@@ -8,7 +8,7 @@ $z = intval($_GET['z']);
 $a = $_GET['action'];
 
 ob_start("ob_gzhandler");
-if( $a!=='query' ) {
+if( $a!=='query' && $a!=='print' ) {
   // set content type
   header( 'Content-type: application/json' );
 
@@ -21,6 +21,10 @@ if( $a!=='query' ) {
       exit;
     }
   }
+}
+
+function beginsWith($str, $sub) {
+  return (strncmp($str, $sub, strlen($sub)) == 0);
 }
 
 $dbconn = pg_connect("host=sql-mapnik dbname=osm_mapnik");
@@ -115,7 +119,7 @@ for( $i=0; $i<count($table); $i++ ) {
   $query = "
     select 
       ST_AsGeoJSON( transform(".$table[$i][2].",4326), 9 ),
-      $taglist
+      tags, $taglist
       from ".$table[$i][0]."
     where
       ".$table[$i][1]."
@@ -145,18 +149,39 @@ for( $i=0; $i<count($table); $i++ ) {
   }
 
   while ($row = pg_fetch_row($result)) {
+    // decode geometry 
+    $thisgeo = json_decode($row[0]);
+
+    // is the geometry empty? then fetch next
+    if( $thisgeo->type == 'GeometryCollection' &&
+        empty($thisgeo->geometries) ) continue;
+
     // copy the OSM tags
     $type = array();
     for($j=0; $j<$tagnum; $j++) {
-      if( $row[$j+1] !== null ) {
+      if( $row[$j+2] !== null ) {
         //$type[$table[$i][3][$j]]=$row[$j+1];
-        $type[$tags[$j]]=$row[$j+1];
+        $type[$tags[$j]]=$row[$j+2];
         $tagfound[$tags[$j]]++;
       }
-    } 
-    $geo[] = array( "geo" => json_decode($row[0]), "tags" => $type );
+    }
+
+    // filter the tags hstore
+    if( $row[1] !== null ) {
+      $hstore = json_decode('{' . str_replace('"=>"', '":"', $row[1]) . '}', true);
+      foreach( $hstore as $j => $val ) {
+        if( beginsWith($j,'name:') ||  beginsWith($j,'tiger:') ) continue;   
+        $type[$j]=$val;
+        $tagfound[$j]++;
+      }
+    }
+
+    // append geometry
+    $geo[] = array( "geo" => $thisgeo, "tags" => $type );
   }
 }
+
+if( $a === 'print' ) exit;
 
 // get ocean data
 $query = "
@@ -186,7 +211,7 @@ while ($row = pg_fetch_row($result)) {
   $tagfound['natural']++;
 }
 
-$s = json_encode( array( "data" => $geo, "x" => $x, "y" => $y, "z" => $z, "f" => $tagfound ) );
+$s = json_encode( array( "data" => $geo, "x" => $x, "y" => $y, "z" => $z, "f" => $tagfound, "v" => 1 ) );
 
 // write to cache
 if( !is_dir( "jsontile/$z/$y" ) ) {
