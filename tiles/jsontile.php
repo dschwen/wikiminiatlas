@@ -164,6 +164,12 @@ for( $i=0; $i<count($table); $i++ ) {
         //$type[$table[$i][3][$j]]=$row[$j+1];
         $type[$tags[$j]]=$row[$j+2];
         $tagfound[$tags[$j]]++;
+        // server side index
+        if( array_key_exists($tags[$j], $idx) ) {
+          $idx[$tags[$j]][] = count($geo);
+        } else {
+          $idx[$tags[$j]] = array( count($geo) );
+        }
       }
     }
 
@@ -171,7 +177,7 @@ for( $i=0; $i<count($table); $i++ ) {
     if( $row[1] !== null ) {
       $hstore = json_decode('{' . str_replace('"=>"', '":"', $row[1]) . '}', true);
       foreach( $hstore as $j => $val ) {
-        if( beginsWith($j,'name:') ||  beginsWith($j,'tiger:') ) continue;   
+        if( beginsWith($j,'name:') ||  beginsWith($j,'tiger:')  ||  beginsWith($j,'nist:') ) continue;   
         $type[$j]=$val;
         $tagfound[$j]++;
         // server side index
@@ -214,7 +220,6 @@ if( !$result ) {
 // get result, set tag natural=>ocean
 $type = array( "natural" => "ocean" );
 while ($row = pg_fetch_row($result)) {
-  $geo[] = array( "geo" => json_decode($row[0]), "tags" => $type );
   $tagfound['natural']++;
 
   // server side index
@@ -223,9 +228,11 @@ while ($row = pg_fetch_row($result)) {
   } else {
     $idx['natural'] = array( count($geo) );
   }
+
+  $geo[] = array( "geo" => json_decode($row[0]), "tags" => $type );
 }
 
-$s = json_encode( array( "data" => $geo, "x" => $x, "y" => $y, "z" => $z, "f" => $tagfound, "v" => 1, "idx" => $idx ) );
+$s = json_encode( array( "data" => $geo, "x" => $x, "y" => $y, "z" => $z, "f" => $tagfound, "v" => 2, "idx" => $idx ) );
 
 // write to cache
 if( !is_dir( "jsontile/$z/$y" ) ) {

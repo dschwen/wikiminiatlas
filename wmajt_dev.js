@@ -15,8 +15,10 @@ var wmajt = (function(){
 
   function gotData(data) {
     // insert response into cache
+    if( data === null ) return; // server error
+
     var idx, d, i, j;
-    if( data.idx ) {
+    if( data.v && data.v >= 2 ) {
       idx = data.idx;
     } else {
       // generate index client side
@@ -137,6 +139,10 @@ var wmajt = (function(){
               [ { fillStyle: "rgb(255,255,255)" },
                 { lineWidth: 2, strokeStyle: "rgb(168,148,148)" } ]
             ],
+            ['tourism',true,
+              [ { fillStyle: "rgb(255,255,0)" },
+                { lineWidth: 2, strokeStyle: "rgb(148,148,0)" } ]
+            ],
             ['aeroway',{terminal:1},
               [ { fillStyle: "rgb(190,210,190)" },
                 { lineWidth: 1, strokeStyle: "rgb(127,137,127)" } ]
@@ -151,6 +157,10 @@ var wmajt = (function(){
             ['railway',{station:1},
               [ { fillStyle: "rgb(210,195,195)" },
                 { lineWidth: 1, strokeStyle: "rgb(127,127,127)" } ]
+            ],
+            ['natural',{water:1,bay:1},
+              [ { fillStyle: "rgb(158,199,243)" },
+                { lineWidth: 1, strokeStyle: "rgb(158,199,243)"} ]
             ],
             /*['building',{yes:1,block:1,office:1,courthouse:1,church:1,school:1,cathedral:1,residential:1,house:1,hut:1,
               university:1,hospital:1,bunker:1,train_station:1,chapel:1,industrial:1,commercial:1,retail:1,hotel:1,
