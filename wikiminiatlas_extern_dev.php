@@ -28,10 +28,11 @@
 <? require( 'glMatrix-0.9.5.custom.js' ); ?>
 <? require( 'webgl-utils_min.js' ); ?>
 <? require( 'wmaglobe3d_min.js' ); ?>
-<? require( 'wmajt.js' ); ?>
+<? require( 'wmajt_dev.js' ); ?>
 
 var wma_highzoom_activated = true;
 var wma_highzoom_purge = false;
+var bldg3d;
 
 // global settings
 var wma_imgbase = '//toolserver.org/~dschwen/wma/tiles/';
@@ -600,6 +601,11 @@ function wikiminiatlasInstall( wma_widget, url_params ) {
     l = strings.dyk[UILang];
     var news = $('<div></div>').html(l[Math.floor(Math.random()*l.length)]).addClass('news');
 labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60px', zIndex:100, fontSize:'40px', color:'white', textShadow:'1px 1px 5px black', fontWeight:'bold'}).appendTo('#wma_widget');
+    
+    // 3d building outlines
+    bldg3d = $('<canvas class="wmakml"></canvas>').appendTo('#wma_widget');
+    bldg3dc = bldg3d[0].getContext('2d');
+
     //var news = $('<div></div>').html('<b>New:</b> More Zoom and new data by OpenStreetMap.').addClass('news');
     $('#wma_widget').append(news);
     news.click( function() { news.fadeOut(); } )
@@ -1207,6 +1213,16 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
 
     wma_highzoom_purge = false;
 
+    // draw buildings
+    if( wma_zoom > 14 ) {
+      var ref = wmajt.ref_z()
+        , bui = wmajt.zbuild();
+
+      for( i in ref ) {
+        //console.log( bui[i].tags.name );
+        //bldg3dc
+      }
+    }
     wmaDrawKML();
   }
 

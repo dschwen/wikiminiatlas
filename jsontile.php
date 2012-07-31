@@ -7,6 +7,7 @@ $z = intval($_GET['z']);
 
 $a = $_GET['action'];
 
+$tfile = "jsontile/$z/$y/$x";
 ob_start("ob_gzhandler");
 if( $a!=='query' && $a!=='print' ) {
   // set content type
@@ -14,7 +15,6 @@ if( $a!=='query' && $a!=='print' ) {
 
   // check cache first
   if( $a !== 'purge' ) {
-    $tfile = "jsontile/$z/$y/$x";
     if( file_exists( $tfile ) ) {
       header("Cache-Control: public, max-age=3600");
       readfile( $tfile );
