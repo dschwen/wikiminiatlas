@@ -32,7 +32,7 @@
 
 var wma_highzoom_activated = true;
 var wma_highzoom_purge = false;
-var bldg3d;
+var bldg3d, bldg3dc, bldg3dtimer = null;
 
 // global settings
 var wma_imgbase = '//toolserver.org/~dschwen/wma/tiles/';
@@ -602,10 +602,6 @@ function wikiminiatlasInstall( wma_widget, url_params ) {
     var news = $('<div></div>').html(l[Math.floor(Math.random()*l.length)]).addClass('news');
 labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60px', zIndex:100, fontSize:'40px', color:'white', textShadow:'1px 1px 5px black', fontWeight:'bold'}).appendTo('#wma_widget');
     
-    // 3d building outlines
-    bldg3d = $('<canvas class="wmakml"></canvas>').appendTo('#wma_widget');
-    bldg3dc = bldg3d[0].getContext('2d');
-
     //var news = $('<div></div>').html('<b>New:</b> More Zoom and new data by OpenStreetMap.').addClass('news');
     $('#wma_widget').append(news);
     news.click( function() { news.fadeOut(); } )
@@ -638,11 +634,19 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
       } );
 
     initializeWikiMiniAtlasMap();
+
+    // 3d building outlines
+    bldg3d = $('<canvas class="wmakml"></canvas>')
+        .attr( { width: wma_width, height: wma_height } )
+        .css('z-index',19)
+        .appendTo( $(wma_map) );
+    bldg3dc = bldg3d[0].getContext('2d');
+
+    $(window).resize(wmaResize);
+
     moveWikiMiniAtlasMapTo();
     wmaUpdateTargetButton();
 
-    $(window).resize(wmaResize);
-    
     synopsis_filter = /https?:\/\/([a-z-]+)\.wikipedia\.org\/wiki\/(.*)/;
     $('#wma_widget').mouseover( function(e){
       var l,t;
@@ -771,10 +775,17 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
         ny =  Math.floor(nh/tsy)+2, i;
     wma_width = nw;
     wma_height = nh;
-    // resize kml canvas, if it exists
-    if( wmakml.canvas !== null ) {
-      wmakml.canvas.attr( { width: nw, height: nh } );
+
+    if( hasCanvas ) {
+      // resize kml canvas, if it exists
+      if( wmakml.canvas !== null ) {
+        wmakml.canvas.attr( { width: nw, height: nh } );
+      }
+      // 3D building canvas
+      bldg3d.canvas.attr( { width: nw, height: nh } );
+      // TODO: resize overlay canvas!
     }
+
     if( nx != wma_nx || ny != wma_ny ) {
       wma_nx = nx;
       wma_ny = ny;
@@ -1206,8 +1217,6 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
      }
     }
 
-    var t2 = new Date;
-    console.log('map rendering: ', t2.getTime()-t1.getTime(), 'ms' );
     // ...request them here, all at once
 
     // update markers
@@ -1219,16 +1228,59 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
     wma_highzoom_purge = false;
 
     // draw buildings
-    if( wma_zoom > 14 ) {
-      var ref = wmajt.ref_z()
-        , bui = wmajt.zbuild();
+    update3dBuildings();
 
-      for( i in ref ) {
-        //console.log( bui[i].tags.name );
-        //bldg3dc
-      }
-    }
+    // update KML overlay
     wmaDrawKML();
+
+    var t2 = new Date;
+    //console.log('map rendering: ', t2.getTime()-t1.getTime(), 'ms' );
+  }
+
+  function update3dBuildings() {
+    if( hasCanvas && wma_zoom > 14 ) {
+      var ref = wmajt.ref_z()
+        , bui = wmajt.zbuild()
+        , dx = wma_width/2, dy = wma_height/2
+        , f1 = (128*1<<wma_zoom)/60.0
+        , c = bldg3dc
+        , ll = wmaXYToLatLon(wma_gx+dx,wma_gy+dy);
+
+      if( ll.lon > 180 ) { ll.lon -= 360.0 };
+
+      c.lineWidth = 1;
+      c.strokeStyle = 'rgb(0,0,0)';
+      c.beginPath();
+
+      bldg3dc.clearRect(0,0,wma_width,wma_height);
+      for( i in ref ) {
+        (function(d,h){
+          var i, j, k
+            , f2 = f1*(1+h/150)
+       
+          for(i=0; i<d.length; i++ ) { // loop over sub polygons
+            /*c.moveTo( (d[i][0][0]-ll.lon)*f1+dx, dy-(d[i][0][1]-ll.lat)*f1 );
+            for(j=1; j<d[i].length; j++ ) { // loop over remaining points
+              c.lineTo( (d[i][j][0]-ll.lon)*f1+dx, dy-(d[i][j][1]-ll.lat)*f1 );
+            }*/
+            for(j=0; j<d[i].length-1; j++ ) { // loop over all points
+              c.moveTo( (d[i][j][0]-ll.lon)*f1+dx, dy-(d[i][j][1]-ll.lat)*f1 );
+              c.lineTo( (d[i][j][0]-ll.lon)*f2+dx, dy-(d[i][j][1]-ll.lat)*f2 );
+              c.lineTo( (d[i][j+1][0]-ll.lon)*f2+dx, dy-(d[i][j+1][1]-ll.lat)*f2 );
+            }
+          }
+        })( bui[i].geo.coordinates, bui[i].tags['building:levels'] );
+      }
+      c.stroke();
+      bldg3d.show();
+
+      if( bldg3dtimer !== null ) {
+        clearTimeout(bldg3dtimer);
+      }
+      setTimeout(update3dBuildings,1500);
+    } else {
+      bldg3d.hide();
+    }
   }
 
   // position marker
