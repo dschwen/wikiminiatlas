@@ -25,6 +25,7 @@
 // include minified jquery
 <? require( 'jquery-1.5.1.min.js' ); ?>
 <? require( 'json2min.js' ); ?>
+<? require( 'underscore-min.js' ); ?>
 <? require( 'glMatrix-0.9.5.custom.js' ); ?>
 <? require( 'webgl-utils_min.js' ); ?>
 <? require( 'wmaglobe3d_min.js' ); ?>
@@ -638,7 +639,7 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
     // 3d building outlines
     bldg3d = $('<canvas class="wmakml"></canvas>')
         .attr( { width: wma_width, height: wma_height } )
-        .css('z-index',19)
+        .css( { zIndex:19, opacity: 0.75 } )
         .appendTo( $(wma_map) );
     bldg3dc = bldg3d[0].getContext('2d');
 
@@ -782,7 +783,7 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
         wmakml.canvas.attr( { width: nw, height: nh } );
       }
       // 3D building canvas
-      bldg3d.canvas.attr( { width: nw, height: nh } );
+      bldg3d.attr( { width: nw, height: nh } );
       // TODO: resize overlay canvas!
     }
 
@@ -1242,34 +1243,38 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
       var ref = wmajt.ref_z()
         , bui = wmajt.zbuild()
         , dx = wma_width/2, dy = wma_height/2
-        , f1 = (128*1<<wma_zoom)/60.0
-        , c = bldg3dc
+        , f0 = (128*1<<wma_zoom)/60.0, f1, f2
+        , c = bldg3dc, h, m, d, i, j
         , ll = wmaXYToLatLon(wma_gx+dx,wma_gy+dy);
 
       if( ll.lon > 180 ) { ll.lon -= 360.0 };
 
-      c.lineWidth = 1;
+      c.lineWidth = 0.5;
       c.strokeStyle = 'rgb(0,0,0)';
       c.beginPath();
 
       bldg3dc.clearRect(0,0,wma_width,wma_height);
       for( i in ref ) {
-        (function(d,h){
-          var i, j, k
-            , f2 = f1*(1+h/150)
-       
-          for(i=0; i<d.length; i++ ) { // loop over sub polygons
-            /*c.moveTo( (d[i][0][0]-ll.lon)*f1+dx, dy-(d[i][0][1]-ll.lat)*f1 );
+        d = bui[i].geo.coordinates;
+        h = (bui[i].tags['building:levels']*3)||bui[i].tags['height'];
+        m = (bui[i].tags['building:min_level']*3)||bui[i].tags['min_height']||0;
+        f1 = f0*(1+m/450);
+        f2 = f0*(1+h/450);
+        for(i=0; i<d.length; i++ ) { // loop over sub polygons
+          // for elevated parts draw the base
+          if( m> 0 ) {
+            c.moveTo( (d[i][0][0]-ll.lon)*f1+dx, dy-(d[i][0][1]-ll.lat)*f1 );
             for(j=1; j<d[i].length; j++ ) { // loop over remaining points
               c.lineTo( (d[i][j][0]-ll.lon)*f1+dx, dy-(d[i][j][1]-ll.lat)*f1 );
-            }*/
-            for(j=0; j<d[i].length-1; j++ ) { // loop over all points
-              c.moveTo( (d[i][j][0]-ll.lon)*f1+dx, dy-(d[i][j][1]-ll.lat)*f1 );
-              c.lineTo( (d[i][j][0]-ll.lon)*f2+dx, dy-(d[i][j][1]-ll.lat)*f2 );
-              c.lineTo( (d[i][j+1][0]-ll.lon)*f2+dx, dy-(d[i][j+1][1]-ll.lat)*f2 );
             }
           }
-        })( bui[i].geo.coordinates, bui[i].tags['building:levels'] );
+          // draw risers and top
+          for(j=0; j<d[i].length-1; j++ ) { // loop over all points
+            c.moveTo( (d[i][j][0]-ll.lon)*f1+dx, dy-(d[i][j][1]-ll.lat)*f1 );
+            c.lineTo( (d[i][j][0]-ll.lon)*f2+dx, dy-(d[i][j][1]-ll.lat)*f2 );
+            c.lineTo( (d[i][j+1][0]-ll.lon)*f2+dx, dy-(d[i][j+1][1]-ll.lat)*f2 );
+          }
+        }
       }
       c.stroke();
       bldg3d.show();
@@ -1701,7 +1706,7 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
       , globe = wma_tilesets[wma_tileset].globe
       , mapcenter = wmaXYToLatLon( wma_gx + wma_width / 2, wma_gy + wma_height / 2 );
 
-    fs.document.location = 'iframe.html' + '?' + marker.lat + '_' + marker.lon + '_' + 0 + '_' + 0 + '_' + 
+    fs.document.location = 'iframe_dev.html' + '?' + marker.lat + '_' + marker.lon + '_' + 0 + '_' + 0 + '_' + 
       wma_site + '_' + wma_zoom + '_' + wma_language + '_' + mapcenter.lat + '_' + mapcenter.lon + 
       '&globe=' + globe + '&page=' + page + '&lang=' + lang;
   }
