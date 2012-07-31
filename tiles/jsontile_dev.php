@@ -69,7 +69,7 @@ $murx = deg2rad($urx>180?($urx-360.0):$urx)*6378137.0;
 $mury = log(tan(M_PI_4 + deg2rad($ury) / 2.0)) * 6378137.0;
 
 
-$tags = array( "highway", "railway", "waterway", "landuse", "leisure", "building", "natural", "amenity", "name", "boundary", "osm_id","layer","access","route", "historic", "tunnel", "aeroway", "aerialway" );
+$tags = array( "highway", "railway", "waterway", "landuse", "leisure", "building", "natural", "amenity", "name", "boundary", "osm_id","layer","access","route", "historic", "tunnel", "aeroway", "aerialway", "tourism" );
 $taglist = '"'.implode($tags,'", "').'"';
 $tagnum = count($tags);
 $intersect = "
@@ -112,6 +112,7 @@ if( $z>=14 ) $table[] = array('planet_polygon','building IS NOT NULL AND','way',
 
 $geo = array();
 $tagfound = array();
+$idx = array();
 for( $i=0; $i<count($table); $i++ ) {
   // build query for the cropped data without buildings
   //$taglist = '"'.implode($table[$i][3],'", "').'"';
@@ -173,6 +174,12 @@ for( $i=0; $i<count($table); $i++ ) {
         if( beginsWith($j,'name:') ||  beginsWith($j,'tiger:') ) continue;   
         $type[$j]=$val;
         $tagfound[$j]++;
+        // server side index
+        if( array_key_exists($j, $idx) ) {
+          $idx[$j][] = count($geo);
+        } else {
+          $idx[$j] = array( count($geo) );
+        }
       }
     }
 
@@ -209,9 +216,16 @@ $type = array( "natural" => "ocean" );
 while ($row = pg_fetch_row($result)) {
   $geo[] = array( "geo" => json_decode($row[0]), "tags" => $type );
   $tagfound['natural']++;
+
+  // server side index
+  if( array_key_exists('natural', $idx) ) {
+    $idx['natural'][] = count($geo);
+  } else {
+    $idx['natural'] = array( count($geo) );
+  }
 }
 
-$s = json_encode( array( "data" => $geo, "x" => $x, "y" => $y, "z" => $z, "f" => $tagfound, "v" => 1 ) );
+$s = json_encode( array( "data" => $geo, "x" => $x, "y" => $y, "z" => $z, "f" => $tagfound, "v" => 1, "idx" => $idx ) );
 
 // write to cache
 if( !is_dir( "jsontile/$z/$y" ) ) {
