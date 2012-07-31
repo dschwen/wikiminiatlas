@@ -1071,6 +1071,8 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
    wmaUpdateScalebar();
    //document.getElementById('debugbox').innerHTML='';
 
+   var t1 = new Date;
+
    for(var j = 0; j < wma_ny; j++)
     for(var i = 0; i < wma_nx; i++)
     {
@@ -1203,6 +1205,9 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
       
      }
     }
+
+    var t2 = new Date;
+    console.log('map rendering: ', t2.getTime()-t1.getTime(), 'ms' );
     // ...request them here, all at once
 
     // update markers
@@ -1317,10 +1322,10 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
    ev = ev || window.event;
    switch( ev.keyCode || ev.which )
    {
-    case 37 : wma_gx -= wma_width/2; break; 
-    case 38 : wma_gy -= wma_height/2; break; 
-    case 39 : wma_gx += wma_width/2; break; 
-    case 40 : wma_gy += wma_height/2; break; 
+    case 37 : wma_gx -= wma_width/1; break; 
+    case 38 : wma_gy -= wma_height/1; break; 
+    case 39 : wma_gx += wma_width/1; break; 
+    case 40 : wma_gy += wma_height/1; break; 
     case 187 :
     case 107 : wmaZoomIn(); break;
     case 189 :
