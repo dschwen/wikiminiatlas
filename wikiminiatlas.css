@@ -9,6 +9,7 @@ a.label {
   background-repeat: no-repeat;
   padding-left:5px;
   cursor:pointer;
+  padding-bottom: 2px;
 }
 a.label:hover {
   z-index:21;
@@ -373,4 +374,11 @@ div.wmamenuselected {
   background-position: left center;
   background-repeat: no-repeat;
   background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAABmJLR0QA/wD/AP+gvaeTAAAAe0lEQVQYlY3PwQnCQBCF4U8FCdpAKsjdBjwHb8GLddhLCrCFFODFFBREEDwYD1lhWZaQBzMwwz+8eSzUJplL1DjghSF3dMETY6gPrilU4R1B//riCOsAnlBkXFZoYnA/k2MXg/0M+EgXbebHLthPLdI5/LvFHTdToOX6AaSjGA0r/PG9AAAAAElFTkSuQmCC');
+}
+
+#wmacredit {
+  z-index:11; position:absolute; bottom:3px; right: 10px; color:black; font-size:7pt;
+}
+#wmacredit a {
+  color:black;
 }

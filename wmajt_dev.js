@@ -46,8 +46,16 @@ var wmajt = (function(){
           for(i =0; i<d.length; ++i ) {
             // check against shape type and tags
             if( 'osm_id' in d[i].tags && 
-                'building' in d[i].tags &&
+                ( 'building' in d[i].tags || 'building:part' in d[i].tags ) &&
                 !(d[i].tags['osm_id'] in ca.building) ) {
+              // update the index
+              for( j in d[i].tags ) {
+                if( j in ca.idx ) {
+                  ca.idx[j].push(ca.data.length);
+                } else {
+                  ca.idx[j] = [ca.data.length];
+                }
+              }
               ca.data.push(d[i]);
               ca.building[d[i].tags['osm_id']] = 1;
             }
@@ -140,8 +148,7 @@ var wmajt = (function(){
                 { lineWidth: 2, strokeStyle: "rgb(168,148,148)" } ]
             ],
             ['tourism',true,
-              [ { fillStyle: "rgb(255,255,0)" },
-                { lineWidth: 2, strokeStyle: "rgb(148,148,0)" } ]
+              [ { dash: [3,3], lineWidth: 2, strokeStyle: "rgb(255,255,0)" } ]
             ],
             ['aeroway',{terminal:1},
               [ { fillStyle: "rgb(190,210,190)" },
@@ -169,6 +176,10 @@ var wmajt = (function(){
                 { lineWidth: 1, strokeStyle: "rgb(127,127,127)" } ]
             ],*/
             ['building',true,
+              [ { fillStyle: "rgb(200,200,200)" },
+                { lineWidth: 1, strokeStyle: "rgb(127,127,127)" } ]
+            ],
+            ['building:part',true,
               [ { fillStyle: "rgb(200,200,200)" },
                 { lineWidth: 1, strokeStyle: "rgb(127,127,127)" } ]
             ],
@@ -278,6 +289,9 @@ var wmajt = (function(){
             ],
             ['access',{'private':1,residents:1},
               [ { dash: [1,2], lineWidth: 1, strokeStyle: "rgb(200,100,100)" } ]
+            ],
+            ['building:part',true,
+              [ { lineWidth: 1, strokeStyle: "rgb(127,127,255)" } ]
             ],
             ['start_date',true,
               [ { dash: [2,5], lineWidth: 3, strokeStyle: "rgb(255,0,0)" } ]

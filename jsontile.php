@@ -79,7 +79,7 @@ $intersect = "
           )";
 //transform( ST_GeomFromText('POLYGON(($llx $ury, $urx $ury, $urx $lly, $llx $lly, $llx $ury))', 4326 ), 900913 )
 $table = array( 
-  array('planet_polygon','building IS NULL AND',$intersect), 
+  array('planet_polygon','building IS NULL AND  not exist(hstore(tags),\'building:part\') AND',$intersect), 
   array('planet_line','',$intersect)
 );
 
@@ -108,7 +108,7 @@ $table = array(
 */
 
 // also return buildings for large zoom levels
-if( $z>=14 ) $table[] = array('planet_polygon','building IS NOT NULL AND','way',$tags);
+if( $z>=14 ) $table[] = array('planet_polygon','(building IS NOT NULL OR exist(hstore(tags),\'building:part\')) AND','way',$tags);
 
 $geo = array();
 $tagfound = array();

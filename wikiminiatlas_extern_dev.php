@@ -34,6 +34,7 @@
 var wma_highzoom_activated = true;
 var wma_highzoom_purge = false;
 var bldg3d, bldg3dc, bldg3dtimer = null;
+var credit;
 
 // global settings
 var wma_imgbase = '//toolserver.org/~dschwen/wma/tiles/';
@@ -53,6 +54,8 @@ var wma_tilesets = [
  {
   name: "mapFull", //"Full basemap (VMAP0,OSM)",
   globe: "Earth",
+  //credit: ' / <a href="http://www.openstreetmap.org" title="Map data © OpenStreetMap contributors, CC BY-SA">OpenStreetMap</a>',
+  credit: ' / Map data © <a href="http://www.openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC BY-SA</a>',
   getTileURL: function( y, x, z, norot ) 
   { 
    me = wma_tilesets[0];
@@ -334,12 +337,6 @@ function wikiminiatlasInstall( wma_widget, url_params ) {
       });
     }
 
-    // select tileset compatible with globe parameter
-    var WikiMiniAtlasHTML,i,l;
-    for( i=0; i<wma_tilesets.length && wma_tilesets[i].globe!=globe; ++i );
-    wmaLinkStyle = { color: wma_tilesets[i].linkcolor[0], textShadow: wma_tilesets[i].linkcolor[1] };
-    wma_tileset = i;
-
     // setup the globe
     wmaGlobeLoadTiles = (function(){
       if( !hasCanvas ) { return function(){}; }
@@ -416,10 +413,10 @@ function wikiminiatlasInstall( wma_widget, url_params ) {
       }
 
       $('body').append(globe).append(map).append(shadow);
-      loadTiles();
+      //loadTiles();
       return loadTiles;
     })();
-
+    
     // parse coordinates
     var coord_filter = /([\d+-.]+)_([\d+-.]+)_([\d]+)_([\d]+)/;
     if(coord_filter.test(coord_params))
@@ -442,7 +439,7 @@ function wikiminiatlasInstall( wma_widget, url_params ) {
       wma_defaultzoom = parseInt( RegExp.$6, 10 );
       wma_zoom = wma_defaultzoom;
       // make sure zoom is in range
-      wma_zoom = Math.min( wma_zoom, wma_tilesets[wma_tileset].maxzoom );
+      wma_zoom = Math.min( wma_zoom, ( wma_tileset != 0 ? wma_tilesets[wma_tileset].maxzoom : ((hasCanvas&&wma_highzoom_activated)?15:12) ) );
       wma_zoom = Math.max( wma_zoom, wma_tilesets[wma_tileset].minzoom );
      }
 
@@ -492,9 +489,6 @@ function wikiminiatlasInstall( wma_widget, url_params ) {
       strings.fullscreen[UILang] + '">';
     }
 
-    WikiMiniAtlasHTML += '<a href="//meta.wikimedia.org/wiki/WikiMiniAtlas/' + wma_language + 
-     '" target="_top" style="z-index:11; position:absolute; bottom:3px; right: 10px; color:black; font-size:5pt">WikiMiniAtlas</a>';
-
     WikiMiniAtlasHTML += '<div id="wma_map" style="position:absolute; width:' + wma_width + 
      'px; height:' + wma_height + 'px; cursor: move; background-color: #aaaaaa;"></div>';
 
@@ -524,8 +518,17 @@ function wikiminiatlasInstall( wma_widget, url_params ) {
      '<a href="//wiki.toolserver.org/" target="_top"><img src="//toolserver.org/images/wikimedia-toolserver-button.png" border="0"></a>' +
      '</div>';
 
-    wma_widget.html( WikiMiniAtlasHTML );
-   
+    wma_widget
+      .html( WikiMiniAtlasHTML )
+      .append(
+        $('<span></span>', { id: 'wmacredit' } )
+          .append( $('<a></a>', { href: "//meta.wikimedia.org/wiki/WikiMiniAtlas/"+wma_language, target: '_top' } )
+                    .text('WikiMiniAtlas') )
+          .append( credit = $('<span></span>') )
+      );
+
+    // '" target="_top" style="z-index:11; position:absolute; bottom:3px; right: 10px; color:black; font-size:5pt">WikiMiniAtlas</a>';
+
     // build and hook-up dropdown menu
     
     var menu = new wmaMenu(UIrtl);
@@ -644,6 +647,11 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
     bldg3dc = bldg3d[0].getContext('2d');
 
     $(window).resize(wmaResize);
+
+    // select tileset compatible with globe parameter
+    var WikiMiniAtlasHTML,i,l;
+    for( i=0; i<wma_tilesets.length && wma_tilesets[i].globe!=globe; ++i );
+    wmaSelectTileset(i,true);
 
     moveWikiMiniAtlasMapTo();
     wmaUpdateTargetButton();
@@ -1244,10 +1252,27 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
         , bui = wmajt.zbuild()
         , dx = wma_width/2, dy = wma_height/2
         , f0 = (128*1<<wma_zoom)/60.0, f1, f2
-        , c = bldg3dc, h, m, d, i, j
+        , c = bldg3dc, h, m, d, i
         , ll = wmaXYToLatLon(wma_gx+dx,wma_gy+dy);
 
       if( ll.lon > 180 ) { ll.lon -= 360.0 };
+
+      function addPath(g) {
+        var j;
+        // for elevated parts draw the base
+        if( m> 0 ) {
+          c.moveTo( (g[0][0]-ll.lon)*f1+dx, dy-(g[0][1]-ll.lat)*f1 );
+          for(j=1; j<g.length; j++ ) { // loop over remaining points
+            c.lineTo( (g[j][0]-ll.lon)*f1+dx, dy-(g[j][1]-ll.lat)*f1 );
+          }
+        }
+        // draw risers and top
+        for(j=0; j<g.length-1; j++ ) { // loop over all points
+          c.moveTo( (g[j][0]-ll.lon)*f1+dx, dy-(g[j][1]-ll.lat)*f1 );
+          c.lineTo( (g[j][0]-ll.lon)*f2+dx, dy-(g[j][1]-ll.lat)*f2 );
+          c.lineTo( (g[j+1][0]-ll.lon)*f2+dx, dy-(g[j+1][1]-ll.lat)*f2 );
+        }
+      }
 
       c.lineWidth = 0.5;
       c.strokeStyle = 'rgb(0,0,0)';
@@ -1260,20 +1285,12 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
         m = (bui[i].tags['building:min_level']*3)||bui[i].tags['min_height']||0;
         f1 = f0*(1+m/450);
         f2 = f0*(1+h/450);
-        for(i=0; i<d.length; i++ ) { // loop over sub polygons
-          // for elevated parts draw the base
-          if( m> 0 ) {
-            c.moveTo( (d[i][0][0]-ll.lon)*f1+dx, dy-(d[i][0][1]-ll.lat)*f1 );
-            for(j=1; j<d[i].length; j++ ) { // loop over remaining points
-              c.lineTo( (d[i][j][0]-ll.lon)*f1+dx, dy-(d[i][j][1]-ll.lat)*f1 );
-            }
+        if( bui[i].geo.type === 'Polygon' ) {
+          for(i=0; i<d.length; i++ ) { // loop over sub polygons
+            addPath(d[i]);
           }
-          // draw risers and top
-          for(j=0; j<d[i].length-1; j++ ) { // loop over all points
-            c.moveTo( (d[i][j][0]-ll.lon)*f1+dx, dy-(d[i][j][1]-ll.lat)*f1 );
-            c.lineTo( (d[i][j][0]-ll.lon)*f2+dx, dy-(d[i][j][1]-ll.lat)*f2 );
-            c.lineTo( (d[i][j+1][0]-ll.lon)*f2+dx, dy-(d[i][j+1][1]-ll.lat)*f2 );
-          }
+        } else {
+          addPath(d);
         }
       }
       c.stroke();
@@ -1540,27 +1557,38 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
    return false;
   }
 
-  function wmaSelectTileset( n ) {
+  function wmaSelectTileset( n, init ) {
    var newz = wma_zoom;
 
-   if( newz > wma_tilesets[n].maxzoom ) newz = wma_tilesets[n].maxzoom;
-   if( newz < wma_tilesets[n].minzoom ) newz = wma_tilesets[n].minzoom;
-   
    wma_tileset = n;
 
-   if( wma_zoom != newz ) {
-    var mapcenter = wmaXYToLatLon(wma_gx+wma_width/2,wma_gy+wma_height/2);
-    wma_zoom = newz;
-    var newcoords = wmaLatLonToXY(mapcenter.lat,mapcenter.lon);
-    wma_gx = newcoords.x-wma_width/2;
-    wma_gy = newcoords.y-wma_height/2;
-   }
-
+   // set label style
    wmaLinkStyle = { color: wma_tilesets[n].linkcolor[0], textShadow: wma_tilesets[n].linkcolor[1] };
    $('a.label').css(wmaLinkStyle);
     
-   moveWikiMiniAtlasMapTo();
-   //toggleSettings();
+   // set attribution
+   credit.text('');
+   if( 'credit' in wma_tilesets[n] ) {
+     credit.html(wma_tilesets[n].credit);
+   }
+
+   if( !init ) {
+     if( newz > ( wma_tileset != 0 ? wma_tilesets[wma_tileset].maxzoom : ((hasCanvas&&wma_highzoom_activated)?15:12) ) )
+       newz = wma_tilesets[n].maxzoom;
+     if( newz < wma_tilesets[n].minzoom ) newz = wma_tilesets[n].minzoom;
+
+     if( wma_zoom != newz ) {
+      var mapcenter = wmaXYToLatLon(wma_gx+wma_width/2,wma_gy+wma_height/2);
+      wma_zoom = newz;
+      var newcoords = wmaLatLonToXY(mapcenter.lat,mapcenter.lon);
+      wma_gx = newcoords.x-wma_width/2;
+      wma_gy = newcoords.y-wma_height/2;
+     }
+
+     // update map
+     moveWikiMiniAtlasMapTo();
+   }
+
    wmaGlobeLoadTiles();
   }
 
