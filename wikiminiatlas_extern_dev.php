@@ -1559,38 +1559,38 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
   }
 
   function wmaSelectTileset( n, init ) {
-   var newz = wma_zoom;
+    var newz = wma_zoom;
+    wma_tileset = n;
 
-   wma_tileset = n;
-
-   // set label style
-   wmaLinkStyle = { color: wma_tilesets[n].linkcolor[0], textShadow: wma_tilesets[n].linkcolor[1] };
-   $('a.label').css(wmaLinkStyle);
+    // set label style
+    wmaLinkStyle = { color: wma_tilesets[n].linkcolor[0], textShadow: wma_tilesets[n].linkcolor[1] };
+    $('a.label').css(wmaLinkStyle);
     
-   // set attribution
-   credit.text('');
-   if( 'credit' in wma_tilesets[n] ) {
-     credit.html(wma_tilesets[n].credit);
-   }
+    // set attribution
+    credit.text('');
+    if( 'credit' in wma_tilesets[n] ) {
+      credit.html(wma_tilesets[n].credit);
+    }
 
-   if( !init ) {
-     if( newz > ( wma_tileset != 0 ? wma_tilesets[wma_tileset].maxzoom : ((hasCanvas&&wma_highzoom_activated)?15:12) ) )
-       newz = wma_tilesets[n].maxzoom;
-     if( newz < wma_tilesets[n].minzoom ) newz = wma_tilesets[n].minzoom;
+    // make sure we are in zoom range for the new tile set
+    if( newz > ( n != 0 ? wma_tilesets[n].maxzoom : ((hasCanvas&&wma_highzoom_activated)?15:12) ) )
+      newz = wma_tilesets[n].maxzoom;
+    if( newz < wma_tilesets[n].minzoom ) newz = wma_tilesets[n].minzoom;
 
-     if( wma_zoom != newz ) {
+    // keep map centered
+    if( wma_zoom != newz ) {
       var mapcenter = wmaXYToLatLon(wma_gx+wma_width/2,wma_gy+wma_height/2);
       wma_zoom = newz;
       var newcoords = wmaLatLonToXY(mapcenter.lat,mapcenter.lon);
       wma_gx = newcoords.x-wma_width/2;
       wma_gy = newcoords.y-wma_height/2;
-     }
+    }
 
-     // update map
-     moveWikiMiniAtlasMapTo();
-   }
-
-   wmaGlobeLoadTiles();
+    // update map
+    if( !init ) {
+      moveWikiMiniAtlasMapTo();
+    }
+    wmaGlobeLoadTiles();
   }
 
   function wmaLabelSet(s) {
