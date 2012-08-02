@@ -1,7 +1,9 @@
 var wmajt = (function(){
   var w=128,h=128
     , minzoom = 12, buildingzoom = 14
-    , cache = {};
+    , cache = {}
+    , ref_sd = {}, ref_z = {}
+    , zbuild = {};
 
   // return path element at screen coordinates
   function pathAt(x,y) {
@@ -13,10 +15,29 @@ var wmajt = (function(){
 
   function gotData(data) {
     // insert response into cache
-    cache[hash(data.x,data.y,data.z)] = { data: data.data, building: {} };
+    if( data === null ) return; // server error
+
+    var idx, d, i, j;
+    if( data.v && data.v >= 2 ) {
+      idx = data.idx;
+    } else {
+      // generate index client side
+      d = data.data;
+      idx = {};
+      for(i=0; i<d.length; ++i ) {
+        for( j in d[i].tags ) {
+          if( j in idx ) {
+            idx[j].push(i);
+          } else {
+            idx[j] = [i];
+          }
+        }
+      }
+    }
+    cache[hash(data.x,data.y,data.z)] = { data: data.data, building: {}, f: data.f||{}, idx: idx };
 
     // propagate buildings to low zoom levels above the building threshold
-    var d=data.data, i, zz, xx=data.x, yy=data.y, ca;
+    var d=data.data, zz, xx=data.x, yy=data.y, ca;
     if( data.z >= buildingzoom ) {
       for( zz=data.z; zz>=minzoom; zz-- ) {
         ca = cache[hash(xx,yy,zz)];
@@ -25,8 +46,16 @@ var wmajt = (function(){
           for(i =0; i<d.length; ++i ) {
             // check against shape type and tags
             if( 'osm_id' in d[i].tags && 
-                'building' in d[i].tags &&
+                ( 'building' in d[i].tags || 'building:part' in d[i].tags ) &&
                 !(d[i].tags['osm_id'] in ca.building) ) {
+              // update the index
+              for( j in d[i].tags ) {
+                if( j in ca.idx ) {
+                  ca.idx[j].push(ca.data.length);
+                } else {
+                  ca.idx[j] = [ca.data.length];
+                }
+              }
               ca.data.push(d[i]);
               ca.building[d[i].tags['osm_id']] = 1;
             }
@@ -57,7 +86,7 @@ var wmajt = (function(){
 
     // draw the data
     function drawGeoJSON(ca) {
-      var i, j, k, l, g, s, o, ds, d = ca.data
+      var i, j, k, g, s, o, ds, d = ca.data, m, idx
         , style = {
           Polygon: [
             ['natural',{ocean:1}, // actually it's land!
@@ -118,6 +147,9 @@ var wmajt = (function(){
               [ { fillStyle: "rgb(255,255,255)" },
                 { lineWidth: 2, strokeStyle: "rgb(168,148,148)" } ]
             ],
+            ['tourism',true,
+              [ { dash: [3,3], lineWidth: 2, strokeStyle: "rgb(255,255,0)" } ]
+            ],
             ['aeroway',{terminal:1},
               [ { fillStyle: "rgb(190,210,190)" },
                 { lineWidth: 1, strokeStyle: "rgb(127,137,127)" } ]
@@ -133,7 +165,21 @@ var wmajt = (function(){
               [ { fillStyle: "rgb(210,195,195)" },
                 { lineWidth: 1, strokeStyle: "rgb(127,127,127)" } ]
             ],
+            ['natural',{water:1,bay:1},
+              [ { fillStyle: "rgb(158,199,243)" },
+                { lineWidth: 1, strokeStyle: "rgb(158,199,243)"} ]
+            ],
+            /*['building',{yes:1,block:1,office:1,courthouse:1,church:1,school:1,cathedral:1,residential:1,house:1,hut:1,
+              university:1,hospital:1,bunker:1,train_station:1,chapel:1,industrial:1,commercial:1,retail:1,hotel:1,
+              apartments:1,synagogue:1},
+              [ { fillStyle: "rgb(200,200,200)" },
+                { lineWidth: 1, strokeStyle: "rgb(127,127,127)" } ]
+            ],*/
             ['building',true,
+              [ { fillStyle: "rgb(200,200,200)" },
+                { lineWidth: 1, strokeStyle: "rgb(127,127,127)" } ]
+            ],
+            ['building:part',true,
               [ { fillStyle: "rgb(200,200,200)" },
                 { lineWidth: 1, strokeStyle: "rgb(127,127,127)" } ]
             ]
@@ -231,6 +277,9 @@ var wmajt = (function(){
             ],
             ['access',{'private':1,residents:1},
               [ { dash: [1,2], lineWidth: 1, strokeStyle: "rgb(200,100,100)" } ]
+            ],
+            ['building:part',true,
+              [ { lineWidth: 1, strokeStyle: "rgb(127,127,255)" } ]
             ]
           ]
         };  
@@ -299,56 +348,61 @@ var wmajt = (function(){
           c.beginPath();
          
           // skip styles whose tag does not occur
-          if( ca.f && !(style[s][o][0] in ca.f) ) continue;
+          if( !(style[s][o][0] in ca.idx) ) continue;
 
-          // loop over all objects 
-          for(i =0; i<d.length; ++i ) {
+          // loop over tag index objects 
+          idx = ca.idx[style[s][o][0]];
+          for(i =0; i<idx.length; ++i ) {
+            m = d[idx[i]];
             // check against shape type and tags
-            if( ( s != d[i].geo.type && ("Multi"+s) != d[i].geo.type ) ||
-                ( s=='LineString' && ( d[i].geo.type == "Polygon" || d[i].geo.type == "MultiPolygon" ) ) ||
-                !( style[s][o][0] in d[i].tags ) ||
-                !( style[s][o][1]===true || d[i].tags[style[s][o][0]] in style[s][o][1] ) ) continue;
+            if( ( s !== m.geo.type && ("Multi"+s) !== m.geo.type && m.geo.type !== 'GeometryCollection' ) ||
+                !( style[s][o][1]===true || m.tags[style[s][o][0]] in style[s][o][1] ) ) continue;
 
             // quick hack for shape type
-            switch(d[i].geo.type) {
+            switch(m.geo.type) {
               case 'Polygon':
                 // TODO 
-                makePath( d[i].geo.coordinates[0] );
+                makePath( m.geo.coordinates[0] );
                 break;
               case 'LineString':
-                makePath( d[i].geo.coordinates );
+                makePath( m.geo.coordinates );
                 break;
               case 'MultiLineString':
-                for(k=0; k<d[i].geo.coordinates.length; k++ ) {
-                  makePath( d[i].geo.coordinates[k] );
+                for(k=0; k<m.geo.coordinates.length; k++ ) {
+                  makePath( m.geo.coordinates[k] );
                 }
                 break;
               case 'MultiPolygon':
-                for(k=0; k<d[i].geo.coordinates.length; k++ ) {
-                  makePath( d[i].geo.coordinates[k][0] );
+                for(k=0; k<m.geo.coordinates.length; k++ ) {
+                  makePath( m.geo.coordinates[k][0] );
                 }
                 break;
               case 'GeometryCollection':
-                g = d[i].geo.geometries;
+                g = m.geo.geometries;
                 for( l=0; l<g.length; l++ ) {
-                  switch(g[l].type) {
-                    case 'Polygon':
-                      // TODO 
-                      makePath( g[l].coordinates[0] );
-                      break;
-                    case 'LineString':
-                      makePath( g[l].coordinates );
-                      break;
-                    case 'MultiLineString':
-                      for(k=0; k<g[l].coordinates.length; k++ ) {
-                        makePath( g[l].coordinates[k] );
-                      }
-                      break;
-                    case 'MultiPolygon':
-                      for(k=0; k<g[l].coordinates.length; k++ ) {
-                        makePath( g[l].coordinates[k][0] );
-                      }
-                      break;
+                  if( s === 'Polygon' ) {
+                    switch(g[l].type) {
+                      case 'Polygon':
+                        // TODO 
+                        makePath( g[l].coordinates[0] );
+                        break;
+                      case 'MultiPolygon':
+                        for(k=0; k<g[l].coordinates.length; k++ ) {
+                          makePath( g[l].coordinates[k][0] );
+                        }
+                        break;
+                    }
+                  } else {
+                    switch(g[l].type) {
+                      case 'LineString':
+                        makePath( g[l].coordinates );
+                        break;
+                      case 'MultiLineString':
+                        for(k=0; k<g[l].coordinates.length; k++ ) {
+                          makePath( g[l].coordinates[k] );
+                        }
+                        break;
+                    }
                   }
                 }
                 break;
@@ -369,6 +423,7 @@ var wmajt = (function(){
           }
         }
       }
+
     }
 
     // store coords in tile context
@@ -377,11 +432,74 @@ var wmajt = (function(){
     tile.csz = z;
 
     // seach cache for data
-    var zz, xx=x, yy=y, ca;
+    var zz, xx=x, yy=y, ca, d,v, idx;
     for( zz=z; zz>=minzoom; zz-- ) {
       ca = cache[hash(xx,yy,zz)];
       if( ca && ca.data && !purge ) {
+        // subtract old tile from reference counters
+        if( tile.csca ) {
+          d = tile.csca.data;
+          if( 'start_date' in tile.csca.idx ) {
+            idx = tile.csca.idx['start_date']
+            for(i=0; i<idx.length; ++i ) {
+              v = d[idx[i]].tags['start_date'];
+              if( v in ref_sd ) {
+                ref_sd[v]--;
+                if(ref_sd[v]==0) delete ref_sd[v];
+              } 
+            }
+          }
+          // union index
+          if( z>buildingzoom ) {
+            idx = _.union( tile.csca.idx['building:levels']||[], tile.csca.idx['height']||[] );
+            //if( z>buildingzoom && 'building:levels' in tile.csca.idx ) {
+            //  idx = tile.csca.idx['building:levels']
+            for(i=0; i<idx.length; ++i ) {
+              if( 'osm_id' in d[idx[i]].tags ) {
+                v = d[idx[i]].tags['osm_id'];
+                if( v in ref_z ) {
+                  ref_z[v]--;
+                  if(ref_z[v]==0) delete ref_z[v];
+                } 
+              }
+            }
+          }
+        }
+
+        // draw tile contents
         drawGeoJSON(ca);
+
+        // link current cache object to current tile
+        tile.csca = ca;
+
+        // add to reference counters 
+        d = ca.data;
+        // this maintains a list of all distinct start dates in the current field of view
+        if( 'start_date' in ca.idx ) {
+          idx = ca.idx['start_date']
+          for(i=0; i<idx.length; ++i ) {
+            v = d[idx[i]].tags['start_date'];
+            ref_sd[v] = (ref_sd[v]||0) + 1;
+          }
+        }
+        // this maintains a list of all buildings with height data  in the field of view
+        // and a lookup table of buildings by osm_id
+        //if( z>buildingzoom && 'building:levels' in ca.idx ) {
+        // union index
+        if( z>buildingzoom ) {
+          idx = _.union( ca.idx['building:levels']||[], ca.idx['height']||[] );
+          //idx = ca.idx['building:levels']
+          for(i=0; i<idx.length; ++i ) {
+            if( 'osm_id' in d[idx[i]].tags ) {
+              v = d[idx[i]].tags['osm_id'];
+              ref_z[v] = (ref_z[v]||0) + 1;
+              if( !(v in zbuild ) ) {
+                zbuild[v] = d[idx[i]];
+              }
+            }
+          }
+        }
+        
         tile.can.show();
         if( z< buildingzoom || zz >= buildingzoom ) return;
       }
@@ -390,6 +508,7 @@ var wmajt = (function(){
     } 
 
     // request data
+    tile.debug.html('tiles/jsontile.php?x='+x+'&y='+y+'&z='+z);
     $.ajax({
       url: 'tiles/jsontile.php?x='+x+'&y='+y+'&z='+z+(purge===true?'&action=purge':''),
       dataType: 'json',
@@ -399,6 +518,13 @@ var wmajt = (function(){
   }
 
   return {
-    update: update
+    update: update,
+
+    ref_z : function() {
+      return ref_z;
+    },
+    zbuild : function() {
+      return zbuild;
+    }
   }
 })();

@@ -237,7 +237,7 @@ p.option {
 #scalebox {
    z-index:30; 
    position:absolute; 
-   left:10px; 
+   left:20px; 
    bottom: 5px; 
    width:90px;
 }

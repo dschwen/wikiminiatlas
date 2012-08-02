@@ -33,8 +33,10 @@
 
 var wma_highzoom_activated = true;
 var wma_highzoom_purge = false;
-var bldg3d, bldg3dc, bldg3dtimer = null;
-var credit;
+var bldg3d, bldg3dc, bldg3dtimer = null; // move to appropriate scope
+var credit; // move to appropriate scope
+var wmaNews = []; // array of news item actions (needs to be global)
+
 
 // global settings
 var wma_imgbase = '//toolserver.org/~dschwen/wma/tiles/';
@@ -606,6 +608,17 @@ function wikiminiatlasInstall( wma_widget, url_params ) {
     var news = $('<div></div>').html(l[Math.floor(Math.random()*l.length)]).addClass('news');
 labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60px', zIndex:100, fontSize:'40px', color:'white', textShadow:'1px 1px 5px black', fontWeight:'bold'}).appendTo('#wma_widget');
     
+    // add global news item actions
+    wmaNews[0] = function() { wmaSelectTileset(4); };
+    wmaNews[1] = function() { 
+      if( hasCanvas ) {
+        wma_gx=19039255; wma_gy=3363704; wma_zoom=15; wmaSelectTileset(0); 
+      } else {
+        news.text('Sorry, your browser does not support the canvas element! Try FireFox or Google Chrome.');
+      }
+    };
+    
+
     //var news = $('<div></div>').html('<b>New:</b> More Zoom and new data by OpenStreetMap.').addClass('news');
     $('#wma_widget').append(news);
     news.click( function() { news.fadeOut(); } )
