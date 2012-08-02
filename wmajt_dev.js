@@ -370,9 +370,7 @@ var wmajt = (function(){
           for(i =0; i<idx.length; ++i ) {
             m = d[idx[i]];
             // check against shape type and tags
-            if( ( s != m.geo.type && ("Multi"+s) != m.geo.type ) ||
-                //( s=='LineString' && ( m.geo.type == "Polygon" || m.geo.type == "MultiPolygon" ) ) ||
-                !( style[s][o][0] in m.tags ) ||
+            if( ( s !== m.geo.type && ("Multi"+s) !== m.geo.type && m.geo.type !== 'GeometryCollection' ) ||
                 !( style[s][o][1]===true || m.tags[style[s][o][0]] in style[s][o][1] ) ) continue;
 
             // quick hack for shape type
@@ -392,6 +390,35 @@ var wmajt = (function(){
               case 'MultiPolygon':
                 for(k=0; k<m.geo.coordinates.length; k++ ) {
                   makePath( m.geo.coordinates[k][0] );
+                }
+                break;
+              case 'GeometryCollection':
+                g = m.geo.geometries;
+                for( l=0; l<g.length; l++ ) {
+                  if( s === 'Polygon' ) {
+                    switch(g[l].type) {
+                      case 'Polygon':
+                        // TODO 
+                        makePath( g[l].coordinates[0] );
+                        break;
+                      case 'MultiPolygon':
+                        for(k=0; k<g[l].coordinates.length; k++ ) {
+                          makePath( g[l].coordinates[k][0] );
+                        }
+                        break;
+                    }
+                  } else {
+                    switch(g[l].type) {
+                      case 'LineString':
+                        makePath( g[l].coordinates );
+                        break;
+                      case 'MultiLineString':
+                        for(k=0; k<g[l].coordinates.length; k++ ) {
+                          makePath( g[l].coordinates[k] );
+                        }
+                        break;
+                    }
+                  }
                 }
                 break;
             }
@@ -496,6 +523,7 @@ var wmajt = (function(){
     } 
 
     // request data
+    tile.debug.html('tiles/jsontile.php?x='+x+'&y='+y+'&z='+z);
     $.ajax({
       url: 'tiles/jsontile.php?x='+x+'&y='+y+'&z='+z+(purge===true?'&action=purge':''),
       dataType: 'json',

@@ -740,6 +740,7 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
       csx:0,csy:0,csz:20,
       lx:0,ly:0,lz:20,
       span : $('<span></span>').appendTo(d),
+      debug : $('<span></span>').addClass('wmadbg').css('display','none').appendTo(d),
       url : '',
       xhr : null
     }

@@ -57,7 +57,7 @@ var wmajt = (function(){
 
     // draw the data
     function drawGeoJSON(ca) {
-      var i, j, k, g, s, o, ds, d = ca.data
+      var i, j, k, l, g, s, o, ds, d = ca.data
         , style = {
           Polygon: [
             ['natural',{ocean:1}, // actually it's land!
@@ -326,6 +326,30 @@ var wmajt = (function(){
               case 'MultiPolygon':
                 for(k=0; k<d[i].geo.coordinates.length; k++ ) {
                   makePath( d[i].geo.coordinates[k][0] );
+                }
+                break;
+              case 'GeometryCollection':
+                g = d[i].geo.geometries;
+                for( l=0; l<g.length; l++ ) {
+                  switch(g[l].type) {
+                    case 'Polygon':
+                      // TODO 
+                      makePath( g[l].coordinates[0] );
+                      break;
+                    case 'LineString':
+                      makePath( g[l].coordinates );
+                      break;
+                    case 'MultiLineString':
+                      for(k=0; k<g[l].coordinates.length; k++ ) {
+                        makePath( g[l].coordinates[k] );
+                      }
+                      break;
+                    case 'MultiPolygon':
+                      for(k=0; k<g[l].coordinates.length; k++ ) {
+                        makePath( g[l].coordinates[k][0] );
+                      }
+                      break;
+                  }
                 }
                 break;
             }
