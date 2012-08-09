@@ -95,6 +95,9 @@ var strings =
    'bat-smg': 'Vikitėka',
    'zh': '维基共享资源'
  },
+ mapTitan : {
+   'en': 'Titan',
+ },
  mapEarth : {
    'en': 'Earth',
    'ace': 'Bumoë',

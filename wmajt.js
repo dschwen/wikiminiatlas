@@ -223,7 +223,7 @@ var wmajt = (function(){
               [ { globalAlpha: 0.2, lineWidth: 3, strokeStyle: "rgb(100,100,100)" },
                 { globalAlpha: 1 } ]
             ],
-            ['railway',{rail:1,preserved:1,monorail:1},
+            ['railway',{rail:1,preserved:1,monorail:1,narrow_gauge:1},
               [ { lineWidth: 3, strokeStyle: "rgb(100,100,100)" } ]
             ],
             ['highway',{secondary:1,secondary_link:1,primary:1,primary_link:1},
@@ -243,7 +243,7 @@ var wmajt = (function(){
               [ { lineCap: 'butt', globalAlpha: 0.3, dash: [3,3], lineWidth: 1.5, strokeStyle: "rgb(255,255,255)" },
                 { globalAlpha: 1 } ]
             ],
-            ['railway',{rail:1},
+            ['railway',{rail:1,narrow_gauge:1},
               [ { dash: [3,3], lineWidth: 1.5, strokeStyle: "rgb(255,255,255)" } ]
             ],
             ['railway',{preserved:1},

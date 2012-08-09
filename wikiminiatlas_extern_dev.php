@@ -236,6 +236,21 @@ var wma_tilesets = [
   equator: 11443.6, // equatorial circumfence in km
   maxzoom: 4,
   minzoom: 0
+ },
+ {
+  name: "mapLandsat",
+  globe: "Titan",
+  getTileURL: function(y,x,z) 
+  { 
+   var x1 = x % (wma_zoomsize[z]*2);
+   if( x1<0 ) x1+=(wma_zoomsize[z]*2);
+
+   return wma_imgbase + 'titan/titan_'+('00'+(3-z))+'_'+('000'+x1).substr(-3)+'_'+('000'+y).substr(-3)+'.png'; 
+  },
+  linkcolor: [ "black", "white 0pt 0pt 2pt" ],
+  equator: 16190.3, // equatorial circumfence in km
+  maxzoom: 3,
+  minzoom: 0
  }
 ];
 

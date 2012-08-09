@@ -16,13 +16,16 @@ var wmajt = (function(){
   function gotData(data) {
     // insert response into cache
     if( data === null ) return; // server error
+    d = data.data;
 
-    var idx, d, i, j;
+    // TODO sort accorsing to layer and tunnel flag (but that kills the index!)
+    var idx, lay={0:1}, d, i, j;
+
+    // index of objects by tag
     if( data.v && data.v >= 2 ) {
       idx = data.idx;
     } else {
       // generate index client side
-      d = data.data;
       idx = {};
       for(i=0; i<d.length; ++i ) {
         for( j in d[i].tags ) {
@@ -34,7 +37,14 @@ var wmajt = (function(){
         }
       }
     }
-    cache[hash(data.x,data.y,data.z)] = { data: data.data, building: {}, f: data.f||{}, idx: idx };
+
+    // list of all layers in this tile
+    for(i=0; i<d.length; ++i ) {
+      if( 'layer' in d[i].tags ) { lay[d[i].tags['layer']]=1; }
+    }
+
+    // build cache entry
+    cache[hash(data.x,data.y,data.z)] = { data: data.data, building: {}, f: data.f||{}, idx: idx, lay: lay };
 
     // propagate buildings to low zoom levels above the building threshold
     var d=data.data, zz, xx=data.x, yy=data.y, ca;
@@ -137,6 +147,10 @@ var wmajt = (function(){
               [ { fillStyle: "rgb(158,199,243)" },
                 { lineWidth: 1, strokeStyle: "rgb(158,199,243)"} ]
             ],
+            ['natural',{glacier:1},
+              [ { fillStyle: "rgb(230,245,255)" },
+                { lineWidth: 1, strokeStyle: "rgb(255,255,255)"} ]
+            ],
             ['amenity',{university:1},
               [ { lineWidth:0.5, strokeStyle: "rgb(240,225,183)" } ]
             ],
@@ -235,7 +249,7 @@ var wmajt = (function(){
               [ { globalAlpha: 0.2, lineWidth: 3, strokeStyle: "rgb(100,100,100)" },
                 { globalAlpha: 1 } ]
             ],
-            ['railway',{rail:1,preserved:1,monorail:1},
+            ['railway',{rail:1,preserved:1,monorail:1,narrow_gauge:1},
               [ { lineWidth: 3, strokeStyle: "rgb(100,100,100)" } ]
             ],
             ['highway',{secondary:1,secondary_link:1,primary:1,primary_link:1},
@@ -255,7 +269,7 @@ var wmajt = (function(){
               [ { lineCap: 'butt', globalAlpha: 0.3, dash: [3,3], lineWidth: 1.5, strokeStyle: "rgb(255,255,255)" },
                 { globalAlpha: 1 } ]
             ],
-            ['railway',{rail:1},
+            ['railway',{rail:1,narrow_gauge:1},
               [ { dash: [3,3], lineWidth: 1.5, strokeStyle: "rgb(255,255,255)" } ]
             ],
             ['railway',{preserved:1},
