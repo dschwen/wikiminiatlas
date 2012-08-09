@@ -122,7 +122,7 @@ var wma_tilesets = [
   getTileURL: function(y,x,z) {
    return wma_imgbase + 'plain/' + z + '/tile_' + y + '_' + ( x % ( wma_zoomsize[z] * 2 ) ) + '.png';
   },
-  linkcolor: [ "#2255aa", "white 0pt 0pt 2pt" ],
+  linkcolor: [ "#2255aa", "1px 0px 2px white, 0px -1px 2px white,0px 1px 2px white,-1px 0px 2px white" ],
   equator: 40075.0, // equatorial circumfence in km
   maxzoom: 7,
   minzoom: 0
@@ -157,7 +157,7 @@ var wma_tilesets = [
 
    return wma_imgbase + 'lro_moon/lromoon_'+('00'+(5-z))+'_'+('000'+x1).substr(-3)+'_'+('000'+y).substr(-3)+'.png'; 
   },
-  linkcolor: [ "black", "white 0pt 0pt 2pt" ],
+  linkcolor: [ "black", "1px 0px 2px white, 0px -1px 2px white,0px 1px 2px white,-1px 0px 2px white" ],
   equator: 10940.475, // equatorial circumfence in km
   maxzoom: 5,
   minzoom: 0
@@ -172,7 +172,7 @@ var wma_tilesets = [
 
    return wma_imgbase + 'moon/'+z+'/'+y+'_'+x1+'.jpg'; 
   },
-  linkcolor: [ "white", "black 0pt 0pt 2pt" ],
+  linkcolor: [ "white", "1px 0px 2px black, 0px -1px 2px black,0px 1px 2px black,-1px 0px 2px black" ],
   equator: 10940.475, // equatorial circumfence in km
   maxzoom: 7,
   minzoom: 0
@@ -202,7 +202,7 @@ var wma_tilesets = [
 
    return wma_imgbase + 'venus/venus_'+('00'+(3-z))+'_'+('000'+x1).substr(-3)+'_'+('000'+y).substr(-3)+'.png'; 
   },
-  linkcolor: [ "white", "black 0pt 0pt 2pt" ],
+  linkcolor: [ "white", "1px 0px 2px black, 0px -1px 2px black,0px 1px 2px black,-1px 0px 2px black" ],
   equator: 38024.6, // equatorial circumfence in km
   maxzoom: 3,
   minzoom: 0
@@ -217,7 +217,7 @@ var wma_tilesets = [
    var z1 = 6-z;
    return wma_imgbase + 'mercury/'+((z1<3)?(z1+'/'):'')+((z1==0)?(Math.floor(x1/100)+'/'):'')+'merc_'+('00'+z1)+'_'+('000'+x1).substr(-3)+'_'+('000'+y).substr(-3)+'.png'; 
   },
-  linkcolor: [ "white", "black 0pt 0pt 2pt" ],
+  linkcolor: [ "white", "1px 0px 2px black, 0px -1px 2px black,0px 1px 2px black,-1px 0px 2px black" ],
   equator: 15329.1, // equatorial circumfence in km
   maxzoom: 6,
   minzoom: 0
@@ -232,7 +232,7 @@ var wma_tilesets = [
 
    return wma_imgbase + 'io/io_'+('00'+(4-z))+'_'+('000'+x1).substr(-3)+'_'+('000'+y).substr(-3)+'.png'; 
   },
-  linkcolor: [ "black", "white 0pt 0pt 2pt" ],
+  linkcolor: [ "black", "1px 0px 2px white, 0px -1px 2px white,0px 1px 2px white,-1px 0px 2px white" ],
   equator: 11443.6, // equatorial circumfence in km
   maxzoom: 4,
   minzoom: 0
@@ -247,7 +247,7 @@ var wma_tilesets = [
 
    return wma_imgbase + 'titan/titan_'+('00'+(3-z))+'_'+('000'+x1).substr(-3)+'_'+('000'+y).substr(-3)+'.png'; 
   },
-  linkcolor: [ "black", "white 0pt 0pt 2pt" ],
+  linkcolor: [ "black", "1px 0px 2px white, 0px -1px 2px white,0px 1px 2px white,-1px 0px 2px white" ],
   equator: 16190.3, // equatorial circumfence in km
   maxzoom: 3,
   minzoom: 0
