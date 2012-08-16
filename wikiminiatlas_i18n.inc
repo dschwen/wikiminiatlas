@@ -68,7 +68,9 @@ var strings =
  'uk': 'Титан',
  'zh-classical': '土衛六',
  'zh-yue': '土衞六',
- 'zh': '土卫六'
+ 'zh': '土卫六',
+ 'zh-cn': '土卫六',
+ 'zh-hant': '土衞六'
  },
  sizeRef : {
    en: 'Size reference',
@@ -135,7 +137,8 @@ var strings =
    'yi': 'וויקיקאמאנס',
    'zh-yue': '維基同享',
    'bat-smg': 'Vikitėka',
-   'zh': '维基共享资源'
+   'zh': '维基共享资源',
+   'zh-hans': '维基共享资源'
  },
  mapEarth : {
    'en': 'Earth',
@@ -346,7 +349,8 @@ var strings =
    'zh-yue': '地球',
    'diq': 'Dınya',
    'bat-smg': 'Žemė',
-   'zh': '地球'
+   'zh': '地球',
+   'zh-hans': '地球'
  },
  solarSystem : {
    'en': 'Solar System',
@@ -521,23 +525,30 @@ var strings =
    'zh-yue': '太陽系',
    'diq': 'Sistemê Roci',
    'bat-smg': 'Saulės sėstema',
-   'zh': '太阳系'
+   'zh': '太阳系',
+   'zh-hans': '太阳系'
  },
  mapIo : {
    en: 'Io',
    fa: 'یو',
-   he: 'איו'
+   he: 'איו',
+   zh: '木卫一',
+   'zh-hans': '木卫一'
  },
  mapVenus : {
    en: 'Venus',
    fa: 'زهره',
-   he: 'נוגה'
+   he: 'נוגה',
+   zh: '金星',
+   'zh-hans': '金星',
  },
  mapMercury : {
    en: 'Mercury',
    de: 'Merkur',
    fa: 'عطارد',
-   he: 'כוכב חמה'
+   he: 'כוכב חמה',
+   zh: '水星',
+   'zh-hans': '水星'
  },
  mapMars : {
   af:'Mars',
@@ -703,7 +714,8 @@ var strings =
   yi:'מאדים',
   yo:'Mársì',
   'zh-yue':'火星',
-  zh:'火星'
+  zh:'火星',
+  'zh-hans':'火星'
  },
  mapCoastline : {
   af:'Kuslyn',
@@ -1270,7 +1282,9 @@ var strings =
   sl:'nalagam',
   uk:'завантаження',
   vi:'đang tải',
-  vo:'lodön'
+  vo:'lodön',
+  zh:'载入中',
+  'zh-hans':'载入中'
  },
  close: {
   af:'Sluit',
@@ -1348,7 +1362,9 @@ var strings =
   lt:'visas ekranas',
   lv:'pa visu ekrānu',
   mk:'полн кран',
-  sk:'celá obrazovka'
+  sk:'celá obrazovka',
+  zh:'全屏',
+  'zh-hans':'全屏'
  },
  mapFull: {
   af:'Volledige basiskaart',
@@ -1387,7 +1403,9 @@ var strings =
   sl:'Celotni osnovni zemljevid',
   uk:'Повна основна карта',
   vi:'Bản đồ nền đầy đủ',
-  vo:'Stabakaed fulik'
+  vo:'Stabakaed fulik',
+  zh:'标准地图',
+  'zh-hans':'标准地图'
  },
  mapPhysical: {
   af:'Fisiese',
@@ -1426,7 +1444,9 @@ var strings =
   sl:'Fizična',
   uk:'Фізична',
   vi:'Vật lý',
-  vo:'füsüdik'
+  vo:'füsüdik',
+  zh:'地形图',
+  'zh-hans':'地形图'
  },
  mapMinimal: {
   ar:'خريطة أساسية أقل ما يمكن (أشرطة ساحلية)',
@@ -1464,7 +1484,9 @@ var strings =
   sl:'Minimalni osnovni zemljevid (obrisi obal)',
   uk:'Мінімальна основна (берегові лінії)',
   vi:'Bản đồ nền tối thiểu (bờ biển)',
-  vo:'Stabakaed balugikün (jolaliens)'
+  vo:'Stabakaed balugikün (jolaliens)',
+  zh:'最小地图 (海岸线)',
+  'zh-hans':'最小地图 (海岸线)'
   },
  DailyAqua: {
   ar:'مائي يوميا',
@@ -1560,8 +1582,10 @@ var strings =
   sl:'Mesec',
   uk:'Місяць',
   vi:'Mặt trăng',
-  vo:'Mun'
-  },
+  vo:'Mun',
+  zh:'月球',
+  'zh-hans':'月球'
+ },
  blue: {
   af:'Blou',
   ar:'أزرق',
@@ -1747,7 +1771,12 @@ var strings =
        'WikiMiniAtlas is now resizable. Just move the mouse in the bottom left corner!'],
   fr: ['Maintenir Ctrl ou ⌘ et survoler un lien pour lire un résumé de l\'article.',
        'Nouveau dans wikiminiatlas: <a href="#" onclick="wmaNews[1]()">bâtiments en trois dimensions</a>'],
-  eo: ['Tenu Stir aŭ ⌘ kaj ŝvebu super ligilo por legi resumon de artikolo.']
+  eo: ['Tenu Stir aŭ ⌘ kaj ŝvebu super ligilo por legi resumon de artikolo.'],
+  zh: ['按住Ctrl键或⌘键并把鼠标悬停在链接上可以阅读条目摘要。',
+       'Press "o" or go to the settings to activate a size-comparison overlay.',
+       '探索<a href="#" onclick="wmaNews[0]()">月球</a>！',
+       'WikiMiniAtlas新功能: <a href="#" onclick="wmaNews[1]()">3D-建筑</a>!',
+       'WikiMiniAtlas is now resizable. Just move the mouse in the bottom left corner!']
  },
  other: {
   ar: 'آخرون',
@@ -1764,7 +1793,9 @@ var strings =
   nl: 'anderen',
   pl: 'inne',
   pt: 'outros',
-  sv: 'andra'
+  sv: 'andra',
+  zh: '其他',
+  'zh-hans': '其他'
  },
  // list of objects that are offered for size comparison
  sover: {
