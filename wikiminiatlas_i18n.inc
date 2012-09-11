@@ -68,7 +68,9 @@ var strings =
  'uk': 'Титан',
  'zh-classical': '土衛六',
  'zh-yue': '土衞六',
- 'zh': '土卫六'
+ 'zh': '土卫六',
+ 'zh-cn': '土卫六',
+ 'zh-hant': '土衞六'
  },
  sizeRef : {
    en: 'Size reference',
@@ -78,8 +80,10 @@ var strings =
    fa: 'مقایسه اندازه',
    fr: 'Comparaison des dimensions',
    he: 'גודל השוואה',
+   kk: 'Салыстыру өлшемі',
    nl: 'Grootte Vergelijking',
-   ru: 'Размер сравнения'
+   ru: 'Размер сравнения',
+   sr: 'Поређење величина'
  },
  commons : {
    'en': 'Wikimedia Commons',
@@ -135,7 +139,8 @@ var strings =
    'yi': 'וויקיקאמאנס',
    'zh-yue': '維基同享',
    'bat-smg': 'Vikitėka',
-   'zh': '维基共享资源'
+   'zh': '维基共享资源',
+   'zh-hans': '维基共享资源'
  },
  mapEarth : {
    'en': 'Earth',
@@ -346,7 +351,8 @@ var strings =
    'zh-yue': '地球',
    'diq': 'Dınya',
    'bat-smg': 'Žemė',
-   'zh': '地球'
+   'zh': '地球',
+   'zh-hans': '地球'
  },
  solarSystem : {
    'en': 'Solar System',
@@ -521,23 +527,36 @@ var strings =
    'zh-yue': '太陽系',
    'diq': 'Sistemê Roci',
    'bat-smg': 'Saulės sėstema',
-   'zh': '太阳系'
+   'zh': '太阳系',
+   'zh-hans': '太阳系'
  },
  mapIo : {
    en: 'Io',
    fa: 'یو',
-   he: 'איו'
+   he: 'איו',
+   kk: 'Ио',
+   sr: 'Ио',
+   zh: '木卫一',
+   'zh-hans': '木卫一'
  },
  mapVenus : {
    en: 'Venus',
    fa: 'زهره',
-   he: 'נוגה'
+   he: 'נוגה',
+   kk: 'Шолпан',
+   sr: 'Венера',
+   zh: '金星',
+   'zh-hans': '金星'
  },
  mapMercury : {
    en: 'Mercury',
    de: 'Merkur',
    fa: 'عطارد',
-   he: 'כוכב חמה'
+   he: 'כוכב חמה',
+   kk: 'Меркурий',
+   sr: 'Меркур',
+   zh: '水星',
+   'zh-hans': '水星'
  },
  mapMars : {
   af:'Mars',
@@ -703,7 +722,8 @@ var strings =
   yi:'מאדים',
   yo:'Mársì',
   'zh-yue':'火星',
-  zh:'火星'
+  zh:'火星',
+  'zh-hans':'火星'
  },
  mapCoastline : {
   af:'Kuslyn',
@@ -741,6 +761,7 @@ var strings =
   is:'Strandlína',
   it:'Costa',
   ja:'地図',
+  kk:'Жағалық сызық',
   km:'ផែនទី',
   ko:'해안선',
   lt:'Kranto linija',
@@ -754,6 +775,7 @@ var strings =
   ru:'Векторная',
   sk:'Pobrežie',
   sl:'Obris obale',
+  sr:'обала',
   sq:'bregu',
   fi:'Rantaviiva',
   sv:'Kustlinje',
@@ -802,6 +824,7 @@ var strings =
   is:'Gervihnattarmynd',
   it:'Immagine satellitare',
   ja:'衛星写真',
+  kk:'Спутниктік түсірім',
   ko:'위성 지도',
   lt:'Palydovinė nuotrauka',
   lv:'Satelītaina',
@@ -814,6 +837,7 @@ var strings =
   ru:'Спутниковая фотография',
   sk:'Satelitná snímka',
   sl:'Satelitska slika',
+  sr:'сателитски снимци',
   sq:'Pamje satelitare',
   fi:'Satelliittikuva',
   sv:'Satellitfoto',
@@ -861,6 +885,7 @@ var strings =
   is:'Miðja við staðsetninguna',
   it:'Centro sul bersaglio',
   ja:'最初の地点へ移動',
+  kk:'Нысанды ортасына орналастыру',
   ko:'목표 지점',
   lt:'centruoti objektą',
   lv:'centrēt objektu',
@@ -921,6 +946,7 @@ var strings =
   is:'Stækka (hægri smella fyrir mestu stækkun)',
   it:'Ingrandire (tasto destro per zoom massimo)',
   ja:'ズームイン（右クリックで最大ズーム）',
+  kk:'Жақындату (оң батырмамен өлшемін үлкейту)',
   km:'ពង្រីក（ចុចកណ្តុរស្តាំសំរាប់ការពង្រីកអតិបរមា）',
   ko:'확대 (최대 크기로 확대하려면 마우스 오른쪽을 클릭하십시오)',
   lt:'Priartinti (dešiniu spragtelėjimu maksimaliai)',
@@ -981,6 +1007,7 @@ var strings =
   is:'Minka (hægri smella fyrir mestu minkun)',
   it:'Ridurre (tasto destro per zoom minimo)',
   ja:'ズームアウト（右クリックで最小ズーム）',
+  kk:'Алшақтату (сол батырмамен өлшемін кішірейту)',
   km:'បង្រួម（ចុចកណ្តុរស្តាំសំរាប់ការពង្រីកអប្បបរមា）',
   ko:'축소 (최소 크기로 축소하려면 마우스 오른쪽을 클릭하십시오)',
   lt:'Atitolinti (dešiniu spragtelėjimu minimaliai)',
@@ -1042,6 +1069,7 @@ var strings =
   is:'Stillingar',
   it:'Preferenze',
   ja:'設定',
+  kk:'Баптаулар',
   km:'កំនត់',
   ko:'설정',
   lt:'Nustatymai',
@@ -1102,6 +1130,7 @@ var strings =
   is:'Landakort',
   it:'Tipo di carta',
   ja:'表示モード',
+  kk:'Карта режимі',
   km:'ម៉ូដផែនទី',
   ko:'지도 모드',
   lt:'Žemėlapio režimas',
@@ -1162,6 +1191,7 @@ var strings =
   is:'Litir á hlekki',
   it:'Colore dei link',
   ja:'リンクの色',
+  kk:'Сілтеме түсі',
   km:'ពណ៌តំនភ្ជាប់',
   ko:'링크 색',
   lt:'Nuorodų spalva',
@@ -1216,6 +1246,7 @@ var strings =
   ilo:'Ipakita ti etiketa manipud idiay',
   is:'sýna merki frá',
   ja:'ラベルの表示形式',
+  kk:'Белгілерді мыннан бастап көрсету:',
   km:'បង្ហាញស្លាក់ (labels) ពី',
   lt:'Rodyti etiketes iš',
   lv:'Rādīt objektus no',
@@ -1259,6 +1290,7 @@ var strings =
   id:'memuat',
   ilo:'agkarkarga',
   ja:'読み込み中',
+  kk:'жүктелуде',
   km:'កំពុងផ្ទុក',
   lt:'kraunasi',
   lv:'ielādēšana',
@@ -1270,7 +1302,9 @@ var strings =
   sl:'nalagam',
   uk:'завантаження',
   vi:'đang tải',
-  vo:'lodön'
+  vo:'lodön',
+  zh:'载入中',
+  'zh-hans':'载入中'
  },
  close: {
   af:'Sluit',
@@ -1307,6 +1341,7 @@ var strings =
   is:'loka',
   it:'chiudi',
   ja:'閉じる',
+  kk:'жабу',
   km:'បិទ',
   lt:'uždaryti',
   lv:'aizvērt',
@@ -1341,14 +1376,18 @@ var strings =
   dsb:'połna wobrazowka',
   en:'fullscreen',
   fa:'نمایش تمام‌صفحه',
+  fi:'koko näyttö',
   ja:'フルスクリーン',
   hi:'पूर्ण स्क्रीन(पर्दा)',
   hsb:'połna wobrazowka',
   ilo:'dakkel a pagbuyaan',
+  kk:'толық экран',
   lt:'visas ekranas',
   lv:'pa visu ekrānu',
   mk:'полн кран',
-  sk:'celá obrazovka'
+  sk:'celá obrazovka',
+  zh:'全屏',
+  'zh-hans':'全屏'
  },
  mapFull: {
   af:'Volledige basiskaart',
@@ -1376,6 +1415,7 @@ var strings =
   hr:'Cijela osnovna karta',
   hsb:'Połna zakładna karta',
   hu:'Teljes alaptérkép',
+  kk:'Толық негізгі карта',
   pd:'Petadasar penuh',
   lt:'Pilnas pagrindinis žemėlapis',
   lv:'Pilnā pamatkarte',
@@ -1387,7 +1427,9 @@ var strings =
   sl:'Celotni osnovni zemljevid',
   uk:'Повна основна карта',
   vi:'Bản đồ nền đầy đủ',
-  vo:'Stabakaed fulik'
+  vo:'Stabakaed fulik',
+  zh:'标准地图',
+  'zh-hans':'标准地图'
  },
  mapPhysical: {
   af:'Fisiese',
@@ -1416,6 +1458,7 @@ var strings =
   hsb:'Fyziski',
   hu:'Fizikai',
   id:'Fisik',
+  kk:'Физикалық',
   lt:'Fizinis',
   lv:'Fiziskā',
   mk:'Физичка',
@@ -1426,7 +1469,9 @@ var strings =
   sl:'Fizična',
   uk:'Фізична',
   vi:'Vật lý',
-  vo:'füsüdik'
+  vo:'füsüdik',
+  zh:'地形图',
+  'zh-hans':'地形图'
  },
  mapMinimal: {
   ar:'خريطة أساسية أقل ما يمكن (أشرطة ساحلية)',
@@ -1454,6 +1499,7 @@ var strings =
   hsb:'Minimalna zakładna karta (pobrjóžna linija)',
   hu:'Minimális alatérkép (partvonalak)',
   id:'Petadasar minimal (garispantai)',
+  kk:'Минималды негізгі карта (жағалық сызықтар)',
   lt:'Minimalus pagrindinis žemėlapis',
   lv:'Minimālā pamatkarte',
   mk:'Минимална основна (крајбрежја)',
@@ -1464,7 +1510,9 @@ var strings =
   sl:'Minimalni osnovni zemljevid (obrisi obal)',
   uk:'Мінімальна основна (берегові лінії)',
   vi:'Bản đồ nền tối thiểu (bờ biển)',
-  vo:'Stabakaed balugikün (jolaliens)'
+  vo:'Stabakaed balugikün (jolaliens)',
+  zh:'最小地图 (海岸线)',
+  'zh-hans':'最小地图 (海岸线)'
   },
  DailyAqua: {
   ar:'مائي يوميا',
@@ -1538,6 +1586,7 @@ var strings =
   eo:'Luno',
   es:'Luna',
   fa:'ماه (تجربی)',
+  fi:'Kuu',
   fr:'Lune',
   fur:'Lune',
   fy:'Moanne',
@@ -1549,6 +1598,7 @@ var strings =
   hu:'Hold',
   id:'Bulan',
   ilo:'Bulan',
+  kk:'Ай',
   km:'ព្រះច័ន្ទ',
   lt:'Mėnulis',
   lv:'Mēness',
@@ -1560,8 +1610,10 @@ var strings =
   sl:'Mesec',
   uk:'Місяць',
   vi:'Mặt trăng',
-  vo:'Mun'
-  },
+  vo:'Mun',
+  zh:'月球',
+  'zh-hans':'月球'
+ },
  blue: {
   af:'Blou',
   ar:'أزرق',
@@ -1580,6 +1632,7 @@ var strings =
   eo:'blua',
   es:'azul',
   fa:'آبی',
+  fi:'sininen',
   fr:'bleu',
   fur:'blu',
   fy:'blau',
@@ -1591,6 +1644,7 @@ var strings =
   id:'biru',
   ilo:'asul',
   ja:'青',
+  kk:'көк',
   km:'ខៀវ',
   lt:'mėlynas',
   lv:'zila',
@@ -1622,6 +1676,7 @@ var strings =
   eo:'ruĝa',
   es:'rojo',
   fa:'سرخ',
+  fi:'punainen',
   fr:'rouge',
   fur:'ros',
   fy:'rea',
@@ -1633,6 +1688,7 @@ var strings =
   id:'merah',
   ilo:'nalabbaga',
   ja:'赤',
+  kk:'қызыл',
   km:'ក្រហម',
   lt:'raudonas',
   lv:'sarkana',
@@ -1664,6 +1720,7 @@ var strings =
   eo:'nigra',
   es:'negro',
   fa:'سیاه',
+  fi:'musta',
   fr:'noir',
   fur:'neri',
   fy:'swart',
@@ -1675,6 +1732,7 @@ var strings =
   id:'hitam',
   ilo:'nangisit',
   ja:'黒',
+  kk:'қара',
   km:'ខ្មៅ',
   lt:'juodas',
   lv:'melna',
@@ -1706,6 +1764,7 @@ var strings =
   eo:'blanka',
   es:'blanco',
   fa:'سفید',
+  fi:'valkoinen',
   fr:'blanc',
   fur:'blanc',
   fy:'wyt',
@@ -1717,6 +1776,7 @@ var strings =
   id:'putih',
   ilo:'puraw',
   ja:'白',
+  kk:'ақ',
   km:'ស',
   lt:'baltas',
   lv:'balta',
@@ -1747,7 +1807,12 @@ var strings =
        'WikiMiniAtlas is now resizable. Just move the mouse in the bottom left corner!'],
   fr: ['Maintenir Ctrl ou ⌘ et survoler un lien pour lire un résumé de l\'article.',
        'Nouveau dans wikiminiatlas: <a href="#" onclick="wmaNews[1]()">bâtiments en trois dimensions</a>'],
-  eo: ['Tenu Stir aŭ ⌘ kaj ŝvebu super ligilo por legi resumon de artikolo.']
+  eo: ['Tenu Stir aŭ ⌘ kaj ŝvebu super ligilo por legi resumon de artikolo.'],
+  zh: ['按住Ctrl键或⌘键并把鼠标悬停在链接上可以阅读条目摘要。',
+       'Press "o" or go to the settings to activate a size-comparison overlay.',
+       '探索<a href="#" onclick="wmaNews[0]()">月球</a>！',
+       'WikiMiniAtlas新功能: <a href="#" onclick="wmaNews[1]()">3D-建筑</a>!',
+       'WikiMiniAtlas is now resizable. Just move the mouse in the bottom left corner!']
  },
  other: {
   ar: 'آخرون',
@@ -1761,16 +1826,20 @@ var strings =
   fr: 'autres',
   he: 'אנדערע',
   ja: '他人',
+  kk: 'басқа',
   nl: 'anderen',
   pl: 'inne',
   pt: 'outros',
-  sv: 'andra'
+  sv: 'andra',
+  zh: '其他',
+  'zh-hans': '其他'
  },
  // list of objects that are offered for size comparison
  sover: {
   de: { site:'de', list:['Deutschland','Schweiz','Österreich','Niedersachsen','Berlin'] },
   en: { site:'en', list:['California','United Kingdom','Republic of Ireland','Australia','Rhode Island','Texas','Alaska'] },
   fr: { site:'fr', list:['France','Suisse','Guyane'] },
+  kk: { site:'kk', list:['Қазақстан'] },
   pl: { site:'pl', list:['Polska'] }
  }
 };
