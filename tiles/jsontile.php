@@ -27,8 +27,8 @@ function beginsWith($str, $sub) {
   return (strncmp($str, $sub, strlen($sub)) == 0);
 }
 
+//$dbconn = pg_connect("host=sql-mapnik dbname=osm_mapnik port=5433");
 $dbconn = pg_connect("host=sql-mapnik dbname=osm_mapnik");
-
 
 // only reply for high zoomlevels!
 if( $z < 12 ) exit;
@@ -124,7 +124,7 @@ for( $i=0; $i<count($table); $i++ ) {
       from ".$table[$i][0]."
     where
       ".$table[$i][1]."
-      way && SetSRID('BOX3D($mllx $mlly, $murx $mury)'::box3d,900913);
+      ST_IsValid(way) AND way && SetSRID('BOX3D($mllx $mlly, $murx $mury)'::box3d,900913);
   ";
 
 //      way && SetSRID('BOX3D($llx $lly, $urx $ury)'::box3d,4326);
@@ -206,7 +206,7 @@ $query = "
       ) ,4326), 9 )
     from coastlines
   where
-    the_geom && SetSRID('BOX3D($mllx $mlly, $murx $mury)'::box3d,900913);
+    ST_IsValid(the_geom) AND the_geom && SetSRID('BOX3D($mllx $mlly, $murx $mury)'::box3d,900913);
 ";
 //transform( ST_GeomFromText('POLYGON(($llx $ury, $urx $ury, $urx $lly, $llx $lly, $llx $ury))', 4326 ), 900913 )
 

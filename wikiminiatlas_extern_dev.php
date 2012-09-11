@@ -39,8 +39,8 @@ var wmaNews = []; // array of news item actions (needs to be global)
 
 
 // global settings
-var wma_imgbase = '//toolserver.org/~dschwen/wma/tiles/';
-var wma_database = '//toolserver.org/~dschwen/wma/label.php';
+var wma_imgbase = 'tiles/';
+var wma_database = 'label.php';
 var wma_tilebase = '.www.toolserver.org/~dschwen/wma/tiles/';
 var wma_maxlabel = 13;
 var i, wma_zoomsize = [3];
@@ -353,6 +353,11 @@ function wikiminiatlasInstall( wma_widget, url_params ) {
         success: processWIWOSM
       });
     }
+
+    // GeoIP request (sets global variable geoip)
+    $.getScript( '/~para/geoip.fcgi', function() {
+      // modify home button
+    } );
 
     // setup the globe
     wmaGlobeLoadTiles = (function(){
