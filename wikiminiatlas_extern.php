@@ -57,7 +57,7 @@ var wma_tilesets = [
   name: "mapFull", //"Full basemap (VMAP0,OSM)",
   globe: "Earth",
   //credit: ' / <a href="http://www.openstreetmap.org" title="Map data © OpenStreetMap contributors, CC BY-SA">OpenStreetMap</a>',
-  credit: ' / Map data © <a href="http://www.openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC BY-SA</a>',
+  credit: ' / Map data © <a href="http://www.openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://www.opendatacommons.org/licenses/odbl">License</a>',
   getTileURL: function( y, x, z, norot ) 
   { 
    me = wma_tilesets[0];
