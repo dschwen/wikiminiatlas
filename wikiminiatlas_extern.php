@@ -672,7 +672,7 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
         .attr( { width: wma_width, height: wma_height } )
         .css( { zIndex:19, opacity: 0.75 } )
         .appendTo( $(wma_map) );
-    bldg3dc = bldg3d[0].getContext('2d');
+    if( hasCanvas ) { bldg3dc = bldg3d[0].getContext('2d'); }
 
     $(window).resize(wmaResize);
 
