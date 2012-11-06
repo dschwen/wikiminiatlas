@@ -221,10 +221,6 @@ var wmajt = (function(){
       ]
     };  
 
-  // return path element at screen coordinates
-  function pathAt(x,y) {
-  }
-
   function hash(x,y,z) {
     return x+'_'+y+'_'+z;
   }
@@ -300,7 +296,7 @@ var wmajt = (function(){
   }
 
   // create path from coordinate data in g
-  function drawPath(g,c) {
+  function drawPath(s,g,c) {
     if('dash' in style[s][o][2][0]) {
       // iterate over all nodes
       if( g.length > 0 ) {
@@ -363,7 +359,7 @@ var wmajt = (function(){
       , d = tile.csca.data
       , m, i;
 
-    function detectPath(g,c,m) {
+    function detectPath(s,g,c,m) {
       var px, py, r;
 
       // iterate over all nodes
@@ -404,19 +400,19 @@ var wmajt = (function(){
     switch(m.geo.type) {
       case 'Polygon':
         // TODO 
-        path( m.geo.coordinates[0],c,m );
+        path( s,m.geo.coordinates[0],c,m );
         break;
       case 'LineString':
-        path( m.geo.coordinates,c,m );
+        path( s,m.geo.coordinates,c,m );
         break;
       case 'MultiLineString':
         for(k=0; k<m.geo.coordinates.length; k++ ) {
-          path( m.geo.coordinates[k],c,m );
+          path( s,m.geo.coordinates[k],c,m );
         }
         break;
       case 'MultiPolygon':
         for(k=0; k<m.geo.coordinates.length; k++ ) {
-          path( m.geo.coordinates[k][0],c,m );
+          path( s,m.geo.coordinates[k][0],c,m );
         }
         break;
       case 'GeometryCollection':
@@ -426,22 +422,22 @@ var wmajt = (function(){
             switch(g[l].type) {
               case 'Polygon':
                 // TODO 
-                path( g[l].coordinates[0],c,m );
+                path( s,g[l].coordinates[0],c,m );
                 break;
               case 'MultiPolygon':
                 for(k=0; k<g[l].coordinates.length; k++ ) {
-                  path( g[l].coordinates[k][0],c,m );
+                  path( s,g[l].coordinates[k][0],c,m );
                 }
                 break;
             }
           } else {
             switch(g[l].type) {
               case 'LineString':
-                path( g[l].coordinates,c,m );
+                path( s,g[l].coordinates,c,m );
                 break;
               case 'MultiLineString':
                 for(k=0; k<g[l].coordinates.length; k++ ) {
-                  path( g[l].coordinates[k],c,m );
+                  path( s,g[l].coordinates[k],c,m );
                 }
                 break;
             }
