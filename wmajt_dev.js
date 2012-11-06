@@ -4,6 +4,7 @@ var wmajt = (function(){
     , cache = {}
     , ref_sd = {}, ref_z = {}
     , zbuild = {}
+    , bx1,by1,bx2,by2,bw,bh // used by update and mouse pointer interaction (current tile coords)
     , style = {
       Polygon: [
         ['natural',{ocean:1}, // actually it's land!
@@ -354,8 +355,23 @@ var wmajt = (function(){
   }
 
   // detect mouse pointer proximity
-  function detectPath(g) {
+  function detectPath(mx,my) {
+    var rmax = null, omax = null;
+    return function(g,c,m) {
+      var px, py, r;
 
+      // iterate over all nodes
+      for( j=1; j<g.length; ++j ) {
+        px = (g[j][0]-bx1)*128/bw - mx;
+        py = 128-(g[j][1]-by1)*128/bh - my;
+        r = px*px + py*py;
+        if( rmax === null || r<rmax ) {
+          rmax = r;
+          omax = m;
+        }
+      }
+
+    }
   }
 
   // quick hack for shape type
@@ -364,19 +380,19 @@ var wmajt = (function(){
     switch(m.geo.type) {
       case 'Polygon':
         // TODO 
-        path( m.geo.coordinates[0],c );
+        path( m.geo.coordinates[0],c,m );
         break;
       case 'LineString':
-        path( m.geo.coordinates,c );
+        path( m.geo.coordinates,c,m );
         break;
       case 'MultiLineString':
         for(k=0; k<m.geo.coordinates.length; k++ ) {
-          path( m.geo.coordinates[k],c );
+          path( m.geo.coordinates[k],c,m );
         }
         break;
       case 'MultiPolygon':
         for(k=0; k<m.geo.coordinates.length; k++ ) {
-          path( m.geo.coordinates[k][0],c );
+          path( m.geo.coordinates[k][0],c,m );
         }
         break;
       case 'GeometryCollection':
@@ -386,22 +402,22 @@ var wmajt = (function(){
             switch(g[l].type) {
               case 'Polygon':
                 // TODO 
-                path( g[l].coordinates[0],c );
+                path( g[l].coordinates[0],c,m );
                 break;
               case 'MultiPolygon':
                 for(k=0; k<g[l].coordinates.length; k++ ) {
-                  path( g[l].coordinates[k][0],c );
+                  path( g[l].coordinates[k][0],c,m );
                 }
                 break;
             }
           } else {
             switch(g[l].type) {
               case 'LineString':
-                path( g[l].coordinates,c );
+                path( g[l].coordinates,c,m );
                 break;
               case 'MultiLineString':
                 for(k=0; k<g[l].coordinates.length; k++ ) {
-                  path( g[l].coordinates[k],c );
+                  path( g[l].coordinates[k],c,m );
                 }
                 break;
             }
@@ -412,14 +428,15 @@ var wmajt = (function(){
   }
 
   function update(x,y,z,tile,purge) {
-    var bx1 = x*60.0/(1<<z)
-      , by1 = 90.0 - ( ((y+1.0)*60.0) / (1<<z) )
-      , bx2 = (x+1) * 60.0 / (1<<z)
-      , by2 = 90.0 - ( (y*60.0) / (1<<z) )
-      , bw = bx2-bx1
-      , bh = by2-by1
-      , c = tile.ctx;
+    var c = tile.ctx;
 
+    // set globals for current tile coordinates
+    bx1 = x*60.0/(1<<z)
+    by1 = 90.0 - ( ((y+1.0)*60.0) / (1<<z) )
+    bx2 = (x+1) * 60.0 / (1<<z)
+    by2 = 90.0 - ( (y*60.0) / (1<<z) )
+    bw = bx2-bx1
+    bh = by2-by1
     if(bx1>180.0) bx1-=360;
 
     // draw the data
