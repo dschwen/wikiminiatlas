@@ -355,9 +355,15 @@ var wmajt = (function(){
   }
 
   // detect mouse pointer proximity
-  function detectPath(mx,my) {
-    var rmax = null, omax = null;
-    return function(g,c,m) {
+  function detectPointer( e, tile ) {
+    var rmax = null, mmax = null
+      , o = tile.div.offset()
+      , mx = e.pageX - o.left
+      , my = e.pageY - o.top
+      , d = tile.csca.data
+      , m, i;
+
+    function detectPath(g,c,m) {
       var px, py, r;
 
       // iterate over all nodes
@@ -367,11 +373,29 @@ var wmajt = (function(){
         r = px*px + py*py;
         if( rmax === null || r<rmax ) {
           rmax = r;
-          omax = m;
+          mmax = m;
         }
       }
-
     }
+
+    // set globals for current tile coordinates
+    bx1 = x*60.0/(1<<tile.csz)
+    by1 = 90.0 - ( ((tile.csy+1.0)*60.0) / (1<<tile.csz) )
+    bx2 = (tile.csx+1) * 60.0 / (1<<tile.csz)
+    by2 = 90.0 - ( (y*60.0) / (1<<tile.csz) )
+    bw = bx2-bx1
+    bh = by2-by1
+
+    // loop over tag index objects 
+    for(i =0; i<d.length; ++i ) {
+      m = d[i];
+      processShape(m,'Polygon',c,detectPath);
+      if( m.geo.type == 'GeometryCollection'  ) {
+        processShape(m,'Line',c,detectPath);
+      }
+    }
+
+    console.log( rmax,mmax );
   }
 
   // quick hack for shape type
@@ -576,7 +600,7 @@ var wmajt = (function(){
 
   return {
     update: update,
-
+    detectPointer: detectPointer,
     ref_z : function() {
       return ref_z;
     },
