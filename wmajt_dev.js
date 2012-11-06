@@ -5,6 +5,7 @@ var wmajt = (function(){
     , ref_sd = {}, ref_z = {}
     , zbuild = {}
     , bx1,by1,bx2,by2,bw,bh // used by update and mouse pointer interaction (current tile coords)
+    , dash = null
     , style = {
       Polygon: [
         ['natural',{ocean:1}, // actually it's land!
@@ -296,13 +297,13 @@ var wmajt = (function(){
   }
 
   // create path from coordinate data in g
-  function drawPath(s,g,c) {
-    if('dash' in style[s][o][2][0]) {
+  function drawPath(g,c) {
+    if( dash ) {
       // iterate over all nodes
       if( g.length > 0 ) {
         var px = (g[0][0]-bx1)*128.0/bw
           , py = 128.0-(g[0][1]-by1)*128.0/bh
-          , dx, dy, ds=0,ds=style[s][o][2][0].dash,di=0,dl=ds.length,dc=0.0
+          , dx, dy, di=0,dl=dash.length,dc=0.0
           , mx, my, r, rr, j, done;
         for( j=1; j<g.length; ++j ) {
           // move to start
@@ -323,7 +324,7 @@ var wmajt = (function(){
           // loop over segment
           done = false;
           while(true) {
-            rr += ds[di];
+            rr += dash[di];
             if( rr>r ) {
               done=true;
               dc = rr-r;
@@ -359,7 +360,7 @@ var wmajt = (function(){
       , d = tile.csca.data
       , m, i;
 
-    function detectPath(s,g,c,m) {
+    function detectPath(g,c,m) {
       var px, py, r;
 
       // iterate over all nodes
@@ -400,19 +401,19 @@ var wmajt = (function(){
     switch(m.geo.type) {
       case 'Polygon':
         // TODO 
-        path( s,m.geo.coordinates[0],c,m );
+        path( m.geo.coordinates[0],c,m );
         break;
       case 'LineString':
-        path( s,m.geo.coordinates,c,m );
+        path( m.geo.coordinates,c,m );
         break;
       case 'MultiLineString':
         for(k=0; k<m.geo.coordinates.length; k++ ) {
-          path( s,m.geo.coordinates[k],c,m );
+          path( m.geo.coordinates[k],c,m );
         }
         break;
       case 'MultiPolygon':
         for(k=0; k<m.geo.coordinates.length; k++ ) {
-          path( s,m.geo.coordinates[k][0],c,m );
+          path( m.geo.coordinates[k][0],c,m );
         }
         break;
       case 'GeometryCollection':
@@ -422,22 +423,22 @@ var wmajt = (function(){
             switch(g[l].type) {
               case 'Polygon':
                 // TODO 
-                path( s,g[l].coordinates[0],c,m );
+                path( g[l].coordinates[0],c,m );
                 break;
               case 'MultiPolygon':
                 for(k=0; k<g[l].coordinates.length; k++ ) {
-                  path( s,g[l].coordinates[k][0],c,m );
+                  path( g[l].coordinates[k][0],c,m );
                 }
                 break;
             }
           } else {
             switch(g[l].type) {
               case 'LineString':
-                path( s,g[l].coordinates,c,m );
+                path( g[l].coordinates,c,m );
                 break;
               case 'MultiLineString':
                 for(k=0; k<g[l].coordinates.length; k++ ) {
-                  path( s,g[l].coordinates[k],c,m );
+                  path( g[l].coordinates[k],c,m );
                 }
                 break;
             }
@@ -461,7 +462,7 @@ var wmajt = (function(){
 
     // draw the data
     function drawGeoJSON(ca) {
-      var i, j, k, g, s, o, ds, d = ca.data, m, idx;
+      var i, j, k, g, s, o, d = ca.data, m, idx;
 
       c.lineWidth = 1.0;
 
@@ -475,6 +476,9 @@ var wmajt = (function(){
          
           // skip styles whose tag does not occur
           if( !(style[s][o][0] in ca.idx) ) continue;
+
+          // set dash style global
+          dash = style[s][o][2][0].dash || null;
 
           // loop over tag index objects 
           idx = ca.idx[style[s][o][0]];
