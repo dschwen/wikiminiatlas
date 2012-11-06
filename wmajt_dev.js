@@ -353,7 +353,7 @@ var wmajt = (function(){
 
   // detect mouse pointer proximity
   function detectPointer( e, tile ) {
-    var rmin = null, mmin = null
+    var rmin = null, mmin = {}
       , o = tile.div.offset()
       , mx = e.pageX - o.left
       , my = e.pageY - o.top
@@ -368,7 +368,7 @@ var wmajt = (function(){
         px = (g[j][0]-bx1)*128/bw - mx;
         py = 128-(g[j][1]-by1)*128/bh - my;
         r = px*px + py*py;
-        if( rmin === null || r<rmin ) {
+        if( ( rmin === null || r<rmin ) && ( 'name' in m.tags || 'addr:street' in m.tags ) ) {
           rmin = r;
           mmin = m;
         }
@@ -384,8 +384,6 @@ var wmajt = (function(){
     bh = by2-by1
     if(bx1>180.0) bx1-=360;
 
-    console.log( mx, my, o, e );
-
     // loop over tag index objects 
     for(i =0; i<d.length; ++i ) {
       m = d[i];
@@ -395,14 +393,16 @@ var wmajt = (function(){
       }
     }
 
-    console.log( rmin,mmin );
     t = mmin.tags || {};
-
+//console.log(t);
     // has name
     if( 'name' in t ) { 
       s = t.name; 
-      if( 'artist' in t ) {
-        s += ' by ' + t.artist;
+      if( 'loc_name' in t ) {
+        s += ' "' + t.loc_name + '"';
+      }
+      if( 'artist_name' in t ) {
+        s += ' (' + t.artist_name + ')';
       }
       return s;
     } 

@@ -331,7 +331,7 @@ function wikiminiatlasInstall( wma_widget, url_params ) {
 
   var hasCanvas = "HTMLCanvasElement" in window;
 
-  var labelcaption;
+  var labelcaption, noticehandler = null;
 
   function setupWidget()
   {
@@ -753,11 +753,14 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
   function wmaNewTile() {
     var d = $('<div></div>').addClass('wmatile').mousedown(mouseDownWikiMiniAtlasMap).click(function(e){
           // only count clicks if the mouse pointer has not moved between mouse down and mouse up! 
-          var r = wmaMouseCoords(e.originalEvent);
+          var s, r = wmaMouseCoords(e.originalEvent);
           if( r.x != wma_mdcoord.x || 
               r.y != wma_mdcoord.y ||
               !t.csrender ) return false; 
-          wmajt.detectPointer(e,t);
+          s = wmajt.detectPointer(e,t);
+          if(s) {
+            wmaNotice(s);
+          }
         })
       , h = null
       , t = {
@@ -1404,6 +1407,12 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
 
    moveWikiMiniAtlasMapTo();
    return false;
+  }
+
+  function wmaNotice(s) {
+    if( noticehandler ) clearTimeout(noticehandler);
+    labelcaption.stop().fadeIn(10).text(s);
+    noticehandler = setTimeout( function(){ labelcaption.fadeOut(200); }, 5000 );
   }
 
   function wmaSetSizeOverlay(lang,page) {
