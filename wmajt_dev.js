@@ -353,12 +353,12 @@ var wmajt = (function(){
 
   // detect mouse pointer proximity
   function detectPointer( e, tile ) {
-    var rmax = null, mmax = null
+    var rmin = null, mmin = null
       , o = tile.div.offset()
       , mx = e.pageX - o.left
       , my = e.pageY - o.top
-      , d = tile.csca.data
-      , m, i;
+      , d = tile.csca.data || []
+      , m, i, t, s = '';
 
     function detectPath(g,c,m) {
       var px, py, r;
@@ -368,31 +368,61 @@ var wmajt = (function(){
         px = (g[j][0]-bx1)*128/bw - mx;
         py = 128-(g[j][1]-by1)*128/bh - my;
         r = px*px + py*py;
-        if( rmax === null || r<rmax ) {
-          rmax = r;
-          mmax = m;
+        if( rmin === null || r<rmin ) {
+          rmin = r;
+          mmin = m;
         }
       }
     }
 
     // set globals for current tile coordinates
-    bx1 = x*60.0/(1<<tile.csz)
+    bx1 = tile.csx*60.0/(1<<tile.csz)
     by1 = 90.0 - ( ((tile.csy+1.0)*60.0) / (1<<tile.csz) )
     bx2 = (tile.csx+1) * 60.0 / (1<<tile.csz)
-    by2 = 90.0 - ( (y*60.0) / (1<<tile.csz) )
+    by2 = 90.0 - ( (tile.csy*60.0) / (1<<tile.csz) )
     bw = bx2-bx1
     bh = by2-by1
+    if(bx1>180.0) bx1-=360;
+
+    console.log( mx, my, o, e );
 
     // loop over tag index objects 
     for(i =0; i<d.length; ++i ) {
       m = d[i];
-      processShape(m,'Polygon',c,detectPath);
+      processShape(m,'Polygon',null,detectPath);
       if( m.geo.type == 'GeometryCollection'  ) {
-        processShape(m,'Line',c,detectPath);
+        processShape(m,'Line',null,detectPath);
       }
     }
 
-    console.log( rmax,mmax );
+    console.log( rmin,mmin );
+    t = mmin.tags || {};
+
+    // has name
+    if( 'name' in t ) { 
+      s = t.name; 
+      if( 'artist' in t ) {
+        s += ' by ' + t.artist;
+      }
+      return s;
+    } 
+
+    // has address
+    if( 'addr:street' in t ) {
+      s = t['addr:street'];
+      if( 'addr:housenumber' in t ) {
+        s = t['addr:housenumber'] + ' ' + s;
+      }
+      return s;
+    }
+
+    // misc 
+    var tags = ['landuse','historic','highway','building'];
+    for( i=0; i<tags.length; ++i ) {
+      if( tags[i] in t ) return tags[i] + ' ' + t[tags[i]];
+    }
+
+    return null;
   }
 
   // quick hack for shape type

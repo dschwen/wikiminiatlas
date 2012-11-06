@@ -755,8 +755,9 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
           // only count clicks if the mouse pointer has not moved between mouse down and mouse up! 
           var r = wmaMouseCoords(e.originalEvent);
           if( r.x != wma_mdcoord.x || 
-              r.y != wma_mdcoord.y ) return false; 
-          console.log(t);
+              r.y != wma_mdcoord.y ||
+              !t.csrender ) return false; 
+          wmajt.detectPointer(e,t);
         })
       , h = null
       , t = {
