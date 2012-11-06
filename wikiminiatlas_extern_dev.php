@@ -751,7 +751,13 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
   }
 
   function wmaNewTile() {
-    var d = $('<div></div>').addClass('wmatile').mousedown(mouseDownWikiMiniAtlasMap)
+    var d = $('<div></div>').addClass('wmatile').mousedown(mouseDownWikiMiniAtlasMap).click(function(){
+          // only count clicks if the mouse pointer has not moved between mouse down and mouse up! 
+          var r = wmaMouseCoords(e.originalEvent);
+          if( r.x != wma_mdcoord.x || 
+              r.y != wma_mdcoord.y ) return false; 
+          console.log(t);
+        })
       , h = null
       , t = {
       div : d,
