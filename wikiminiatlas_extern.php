@@ -39,8 +39,8 @@ var wmaNews = []; // array of news item actions (needs to be global)
 
 
 // global settings
-var wma_imgbase = '//toolserver.org/~dschwen/wma/tiles/';
-var wma_database = '//toolserver.org/~dschwen/wma/label.php';
+var wma_imgbase = 'tiles/';
+var wma_database = 'label.php';
 var wma_tilebase = '.www.toolserver.org/~dschwen/wma/tiles/';
 var wma_maxlabel = 13;
 var i, wma_zoomsize = [3];
@@ -331,7 +331,7 @@ function wikiminiatlasInstall( wma_widget, url_params ) {
 
   var hasCanvas = "HTMLCanvasElement" in window;
 
-  var labelcaption;
+  var labelcaption, noticehandler = null;
 
   function setupWidget()
   {
@@ -353,6 +353,11 @@ function wikiminiatlasInstall( wma_widget, url_params ) {
         success: processWIWOSM
       });
     }
+
+    // GeoIP request (sets global variable geoip)
+    $.getScript( '/~para/geoip.fcgi', function() {
+      // modify home button
+    } );
 
     // setup the globe
     wmaGlobeLoadTiles = (function(){
@@ -746,7 +751,17 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
   }
 
   function wmaNewTile() {
-    var d = $('<div></div>').addClass('wmatile').mousedown(mouseDownWikiMiniAtlasMap)
+    var d = $('<div></div>').addClass('wmatile').mousedown(mouseDownWikiMiniAtlasMap).click(function(e){
+          // only count clicks if the mouse pointer has not moved between mouse down and mouse up! 
+          var s, r = wmaMouseCoords(e.originalEvent);
+          if( r.x != wma_mdcoord.x || 
+              r.y != wma_mdcoord.y ||
+              !t.csrender ) return false; 
+          s = wmajt.detectPointer(e,t);
+          if(s) {
+            wmaNotice(s);
+          }
+        })
       , h = null
       , t = {
       div : d,
@@ -1394,6 +1409,12 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
    return false;
   }
 
+  function wmaNotice(s) {
+    if( noticehandler ) clearTimeout(noticehandler);
+    labelcaption.stop().fadeIn(10).text(s);
+    noticehandler = setTimeout( function(){ labelcaption.fadeOut(200); }, 5000 );
+  }
+
   function wmaSetSizeOverlay(lang,page) {
     if( page == '+' ) {
       page = prompt('Enter article title to use as overlay');
@@ -1763,7 +1784,7 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
       , globe = wma_tilesets[wma_tileset].globe
       , mapcenter = wmaXYToLatLon( wma_gx + wma_width / 2, wma_gy + wma_height / 2 );
 
-    fs.document.location = 'iframe_dev.html' + '?' + marker.lat + '_' + marker.lon + '_' + 0 + '_' + 0 + '_' + 
+    fs.document.location = 'iframe.html' + '?' + marker.lat + '_' + marker.lon + '_' + 0 + '_' + 0 + '_' + 
       wma_site + '_' + wma_zoom + '_' + wma_language + '_' + mapcenter.lat + '_' + mapcenter.lon + 
       '&globe=' + globe + '&page=' + page + '&lang=' + lang;
   }
