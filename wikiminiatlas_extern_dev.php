@@ -1193,9 +1193,9 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
         } else {
           if( thistile.csrender ) { 
             thistile.img.fadeIn(200);
-            thistile.csrender = false;
           }
         }
+        thistile.csrender = false;
       }
 
       if( thistile.xhr !== null ) {
