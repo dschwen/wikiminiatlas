@@ -1411,7 +1411,7 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
 
   function wmaNotice(s) {
     if( noticehandler ) clearTimeout(noticehandler);
-    labelcaption.stop().fadeIn(10).text(s);
+    labelcaption.stop(true).fadeTo(1,1).text(s);
     noticehandler = setTimeout( function(){ labelcaption.fadeOut(200); }, 5000 );
   }
 
