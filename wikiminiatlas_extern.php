@@ -756,7 +756,7 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
           var s, r = wmaMouseCoords(e.originalEvent);
           if( r.x != wma_mdcoord.x || 
               r.y != wma_mdcoord.y ||
-              !t.csrender ) return false; 
+              !t.csrender ) return true; 
           s = wmajt.detectPointer(e,t);
           if(s) {
             wmaNotice(s);

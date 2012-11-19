@@ -756,7 +756,7 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
           var s, r = wmaMouseCoords(e.originalEvent);
           if( r.x != wma_mdcoord.x || 
               r.y != wma_mdcoord.y ||
-              !t.csrender ) return false; 
+              !t.csrender ) return true; 
           s = wmajt.detectPointer(e,t);
           if(s) {
             wmaNotice(s);
@@ -983,6 +983,8 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
         // areas
         if( a !== null ) {
           c.fillStyle = "rgb(255,0,0)";
+          c.strokeStyle = "rgb(0,0,0)";
+          c.lineWidth = 2.0;
           for( i = 0; i<a.length; i++ ) {
             c.globalCompositeOperation = 'source-over';
             for( j = 0; j<a[i].outer.length; ++j ) {
@@ -990,6 +992,7 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
               addToPath(a[i].outer[j]);
               c.closePath();
               c.fill();
+              c.stroke();
             }
             c.globalCompositeOperation = 'destination-out';
             for( j = 0; j<a[i].inner.length; ++j ) {
@@ -997,6 +1000,7 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
               addToPath(a[i].inner[j]);
               c.closePath();
               c.fill();
+              c.stroke();
             }
           }
         }

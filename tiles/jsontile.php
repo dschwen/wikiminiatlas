@@ -206,8 +206,9 @@ $query = "
       ) ,4326), 9 )
     from coastlines
   where
-    ST_IsValid(the_geom) AND the_geom && SetSRID('BOX3D($mllx $mlly, $murx $mury)'::box3d,900913);
+    the_geom && SetSRID('BOX3D($mllx $mlly, $murx $mury)'::box3d,900913);
 ";
+//    ST_IsValid(the_geom) AND the_geom && SetSRID('BOX3D($mllx $mlly, $murx $mury)'::box3d,900913);
 //transform( ST_GeomFromText('POLYGON(($llx $ury, $urx $ury, $urx $lly, $llx $lly, $llx $ury))', 4326 ), 900913 )
 
 // perform query
@@ -232,6 +233,7 @@ while ($row = pg_fetch_row($result)) {
   $geo[] = array( "geo" => json_decode($row[0]), "tags" => $type );
 }
 
+//$s = json_encode( array( "data" => $geo, "x" => $x, "y" => $y, "z" => $z, "f" => $tagfound, "v" => 2, "idx" => $idx, "bbox" => "$mllx $mlly, $murx $mury" ) );
 $s = json_encode( array( "data" => $geo, "x" => $x, "y" => $y, "z" => $z, "f" => $tagfound, "v" => 2, "idx" => $idx ) );
 
 // write to cache

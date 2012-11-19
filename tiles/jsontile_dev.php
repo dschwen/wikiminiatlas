@@ -1,6 +1,5 @@
 <?php
 
-
 $x = intval($_GET['x']);
 $y = intval($_GET['y']);
 $z = intval($_GET['z']);
@@ -26,7 +25,6 @@ if( $a!=='query' && $a!=='print' ) {
 function beginsWith($str, $sub) {
   return (strncmp($str, $sub, strlen($sub)) == 0);
 }
-
 //$dbconn = pg_connect("host=sql-mapnik dbname=osm_mapnik port=5433");
 $dbconn = pg_connect("host=sql-mapnik dbname=osm_mapnik");
 
@@ -206,8 +204,9 @@ $query = "
       ) ,4326), 9 )
     from coastlines
   where
-    ST_IsValid(the_geom) AND the_geom && SetSRID('BOX3D($mllx $mlly, $murx $mury)'::box3d,900913);
+    the_geom && SetSRID('BOX3D($mllx $mlly, $murx $mury)'::box3d,900913);
 ";
+//    ST_IsValid(the_geom) AND the_geom && SetSRID('BOX3D($mllx $mlly, $murx $mury)'::box3d,900913);
 //transform( ST_GeomFromText('POLYGON(($llx $ury, $urx $ury, $urx $lly, $llx $lly, $llx $ury))', 4326 ), 900913 )
 
 // perform query
@@ -232,7 +231,11 @@ while ($row = pg_fetch_row($result)) {
   $geo[] = array( "geo" => json_decode($row[0]), "tags" => $type );
 }
 
+//$s = json_encode( array( "data" => $geo, "x" => $x, "y" => $y, "z" => $z, "f" => $tagfound, "v" => 2, "idx" => $idx, "bbox" => "$mllx $mlly, $murx $mury" ) );
 $s = json_encode( array( "data" => $geo, "x" => $x, "y" => $y, "z" => $z, "f" => $tagfound, "v" => 2, "idx" => $idx ) );
+
+// output JSON data
+echo $s;
 
 // write to cache
 if( !is_dir( "jsontile/$z/$y" ) ) {
@@ -247,6 +250,4 @@ if( $a !== 'purge' ) {
   header("Cache-Control: public, max-age=3600");
 }
 
-// output JSON data
-echo $s;
 ?>

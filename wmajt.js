@@ -135,15 +135,20 @@ var wmajt = (function(){
         ['highway',{pedestrian:1},
           [ { lineWidth: 5, strokeStyle: "rgb(255,255,255)" } ]
         ],
-        ['highway',{footway:1,pedestrian:1},
-          [ { lineWidth: 2, strokeStyle: "rgb(168,148,148)" } ]
+        ['highway',{footway:1,pedestrian:1,path:1},
+          [ { lineWidth: 2, strokeStyle: "rgb(198,178,178)" } ]
+          //[ { lineWidth: 2, strokeStyle: "rgb(168,148,148)" } ]
         ],
         ['highway',{steps:1},
           [ { dash:[1.5,1.5], lineWidth: 3, strokeStyle: "rgb(168,148,148)" } ]
         ],
-        ['highway',{service:1,path:1,track:1},
+        ['highway',{service:1},
           [ { lineWidth: 4, strokeStyle: "rgb(168,168,168)" },
             { lineWidth: 2.5, strokeStyle: "rgb(208,208,208)" } ]
+        ],
+        ['highway',{track:1},
+          [ { lineWidth: 3.5, strokeStyle: "rgb(168,168,168)" },
+            { lineWidth: 2.5, strokeStyle: "rgb(250,250,208)" } ]
         ],
         ['highway',{residential:1,unclassified:1},
           [ { lineWidth: 4, strokeStyle: "rgb(200,200,200)" },
