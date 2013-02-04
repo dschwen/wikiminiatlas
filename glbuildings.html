@@ -1,0 +1,93 @@
+<html lang="en">
+<head>
+<script id="bldg-fragment" type="x-shader/x-fragment">
+precision mediump float;
+void main() {
+  gl_FragColor = vec4(1.0, 0.0, 1.0, 1.0);
+}
+</script>
+<script id="bldg-vertex" type="x-shader/x-vertex">
+attribute vec3 pos;
+void main() {
+  gl_Position = vec4(pos,1.0);
+}
+</script>
+</head>
+<body>
+  <canvas id="c" width="800" height="600" style="border: 1px solid grey"></canvas>
+<script>
+  //vNormal = normal;
+  //gl_Position = projectionMatrix * modelViewMatrix * vec4(a_position,1.0);
+  var bldg = { p:[ [0,0],[0.5,0],[0.35,0.5],[0,0.5] ], h:4 }
+    , c = document.getElementById('c')
+    , fragSrc = document.getElementById('bldg-fragment').text
+    , vertSrc = document.getElementById('bldg-vertex').text
+    , gl = c.getContext('experimental-webgl')
+    , vPosBuf, v
+    , i, l
+    ;
+
+  gl.clearColor(0,0,1,0);
+  gl.clear( gl.COLOR_BUFFER_BIT + gl.DEPTH_BUFFER_BIT );
+  //gl.clear( gl.COLOR_BUFFER_BIT );
+
+  vPosBuf = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, vPosBuf);
+  v = [];
+
+  // build walls from outline
+  l = bldg.p.length;
+  for( i=0; i<l; i++ ) {
+    // triangle on ground
+    v.push( bldg.p[i][0] );
+    v.push( bldg.p[i][1] );
+    v.push( 0.0 );
+    v.push( bldg.p[(i+1)%l][0] );
+    v.push( bldg.p[(i+1)%l][1] );
+    v.push( 0.0 );
+    v.push( bldg.p[i][0] + 0.05 );
+    v.push( bldg.p[i][1] + 0.05 );
+    v.push( bldg.h );
+    // triangle on ceiling
+    v.push( bldg.p[i][0] + 0.05 );
+    v.push( bldg.p[i][1] + 0.05 );
+    v.push( bldg.h );
+    v.push( bldg.p[(i+1)%l][0] + 0.05 );
+    v.push( bldg.p[(i+1)%l][1] + 0.05 );
+    v.push( bldg.h );
+    v.push( bldg.p[(i+1)%l][0] );
+    v.push( bldg.p[(i+1)%l][1] );
+    v.push( 0.0 );
+  }
+  //v = [ 0,-0.2,0, -0.2,0.2,0, 0.2,0.2,0 ];
+
+  // send vertices to GL buffer
+  gl.bufferData( gl.ARRAY_BUFFER, new Float32Array(v), gl.STATIC_DRAW );
+
+  // compile shaders
+  var program = gl.createProgram();
+  
+  var vshader = gl.createShader(gl.VERTEX_SHADER);
+  gl.shaderSource(vshader, vertSrc);
+  gl.compileShader(vshader);
+  gl.attachShader(program, vshader);
+
+  var fshader = gl.createShader(gl.FRAGMENT_SHADER);
+  gl.shaderSource(fshader, fragSrc);
+  gl.compileShader(fshader);
+  gl.attachShader(program, fshader);
+  
+  console.log('vshader:', gl.getShaderInfoLog(vshader), vertSrc );
+  console.log('fshader:', gl.getShaderInfoLog(fshader), fragSrc );
+
+  gl.linkProgram(program);
+  gl.useProgram(program);
+
+  program.vertexPosAttrib = gl.getAttribLocation(program, 'pos');
+  gl.enableVertexAttribArray(program.vertexPosAttrib);
+  gl.vertexAttribPointer(program.vertexPosAttrib, 3, gl.FLOAT, false, 0, 0);
+
+  gl.drawArrays( gl.TRIANGLES, 0, v.length/3 );
+
+</script>
+</body>
