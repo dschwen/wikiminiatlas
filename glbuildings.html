@@ -9,14 +9,12 @@ void main() {
 </script>
 <script id="bldg-vertex" type="x-shader/x-vertex">
 attribute vec3 pos;
+attribute vec3 norm;
 uniform vec3 u_resolution;
 uniform vec3 u_centerdeg;
 void main() {
   vec3 proj = (pos-u_centerdeg)/u_resolution;
   proj *= vec3(1.0+proj[2],1.0+proj[2],1.0);
- 
- //proj.x = proj.x*(1+proj.z);
-  //proj.y = proj.y*(1+proj.z);
   gl_Position = vec4(proj,1.0);
 }
 </script>
@@ -31,8 +29,10 @@ void main() {
     , fragSrc = $('#bldg-fragment').text()
     , vertSrc = $('#bldg-vertex').text()
     , gl = c.getContext('experimental-webgl')
-    , vPosBuf, v
-    , i, j, l
+    , vPosBuf, v=[]
+    , nPosBuf, n=[]
+    , i, j, k, l
+    , dx ,dy 
     ;
 
   gl.clearColor(0,0,1,0);
@@ -41,10 +41,6 @@ void main() {
   gl.depthFunc(gl.LEQUAL);
 
   //gl.clear( gl.COLOR_BUFFER_BIT );
-
-  vPosBuf = gl.createBuffer();
-  gl.bindBuffer(gl.ARRAY_BUFFER, vPosBuf);
-  v = [];
 
   // random building grid
   bldgs=[];
@@ -79,12 +75,29 @@ void main() {
       v.push( bldg.p[(i+1)%l][0] );
       v.push( bldg.p[(i+1)%l][1] );
       v.push( 0.0 );
+
+      // normal vector (dx,dy,0) x (0,0,1)
+      dx = bldg.p[i][0] - bldg.p[(i+1)%l][0];
+      dy = bldg.p[i][1] - bldg.p[(i+1)%l][1];
+      for( k=0; k<6; k++ ) {
+        n.push(dy);
+        n.push(-dx);
+        n.push(0.0);
+      }
     }
   }
-  //v = [ 0,-0.2,0, -0.2,0.2,0, 0.2,0.2,0 ];
+console.log(v.length, n.length );
 
   // send vertices to GL buffer
+  vPosBuf = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, vPosBuf);
   gl.bufferData( gl.ARRAY_BUFFER, new Float32Array(v), gl.STATIC_DRAW );
+
+  // send normals to GL buffer
+  nPosBuf = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, nPosBuf);
+  gl.bufferData( gl.ARRAY_BUFFER, new Float32Array(n), gl.STATIC_DRAW );
+
 
   // compile shaders
   var program = gl.createProgram();
@@ -107,8 +120,13 @@ void main() {
 
   program.vertexPosAttrib = gl.getAttribLocation(program, 'pos');
   gl.enableVertexAttribArray(program.vertexPosAttrib);
+  gl.bindBuffer(gl.ARRAY_BUFFER, vPosBuf);
   gl.vertexAttribPointer(program.vertexPosAttrib, 3, gl.FLOAT, false, 0, 0);
 
+  program.normalPosAttrib = gl.getAttribLocation(program, 'norm');
+  gl.enableVertexAttribArray(program.normalPosAttrib);
+  gl.bindBuffer(gl.ARRAY_BUFFER, nPosBuf);
+  gl.vertexAttribPointer(program.normalPosAttrib, 3, gl.FLOAT, false, 0, 0);
 
   var resolutionLocation = gl.getUniformLocation(program, "u_resolution");
   var centerdegLocation = gl.getUniformLocation(program, "u_centerdeg");
