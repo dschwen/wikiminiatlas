@@ -4,6 +4,7 @@ var wmajt = (function(){
     , cache = {}
     , ref_sd = {}, ref_z = {}
     , zbuild = {}
+    , trackstartdate = false, trackzbuild = true
     , bx1,by1,bx2,by2,bw,bh // used by update and mouse pointer interaction (current tile coords)
     , dash = null
     , style = {
@@ -40,7 +41,7 @@ var wmajt = (function(){
         ['natural',{beach:1},
           [ { fillStyle: "rgb(224,224,200)" } ]
         ],
-        ['natural',{wetland:1},
+        ['natural',{wetland:1,mud:1},
           [ { fillStyle: "rgb(200,218,224)" } ]
         ],
         ['natural',{grassland:1,fell:1},
@@ -548,7 +549,7 @@ var wmajt = (function(){
     tile.csz = z;
 
     // seach cache for data
-    var zz, xx=x, yy=y, ca, d,v, idx, trackstartdate = false;
+    var zz, xx=x, yy=y, ca, d,v, idx;
     for( zz=z; zz>=minzoom; zz-- ) {
       ca = cache[hash(xx,yy,zz)];
       if( ca && ca.data && !purge ) {
@@ -566,7 +567,7 @@ var wmajt = (function(){
             }
           }
           // union index
-          if( z>buildingzoom ) {
+          if( trackzbuild && z>buildingzoom ) {
             idx = _.union( tile.csca.idx['building:levels']||[], tile.csca.idx['height']||[] );
             //if( z>buildingzoom && 'building:levels' in tile.csca.idx ) {
             //  idx = tile.csca.idx['building:levels']
@@ -602,7 +603,7 @@ var wmajt = (function(){
         // and a lookup table of buildings by osm_id
         //if( z>buildingzoom && 'building:levels' in ca.idx ) {
         // union index
-        if( z>buildingzoom ) {
+        if( trackzbuild && z>buildingzoom ) {
           idx = _.union( ca.idx['building:levels']||[], ca.idx['height']||[] );
           //idx = ca.idx['building:levels']
           for(i=0; i<idx.length; ++i ) {
