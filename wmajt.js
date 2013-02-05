@@ -40,7 +40,7 @@ var wmajt = (function(){
         ['natural',{beach:1},
           [ { fillStyle: "rgb(224,224,200)" } ]
         ],
-        ['natural',{wetland:1},
+        ['natural',{wetland:1,mud:1},
           [ { fillStyle: "rgb(200,218,224)" } ]
         ],
         ['natural',{grassland:1,fell:1},
