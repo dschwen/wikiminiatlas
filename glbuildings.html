@@ -1,21 +1,25 @@
 <html lang="en">
 <head>
 <script src="jquery-1.5.1.min.js"></script>
-<script id="bldg-fragment" type="x-shader/x-fragment">
-precision mediump float;
-void main() {
-  gl_FragColor = vec4(1.0, 0.0, 1.0, 1.0);
-}
-</script>
 <script id="bldg-vertex" type="x-shader/x-vertex">
 attribute vec3 pos;
 attribute vec3 norm;
 uniform vec3 u_resolution;
 uniform vec3 u_centerdeg;
+uniform vec3 u_lightdir;
+varying float light;
 void main() {
   vec3 proj = (pos-u_centerdeg)/u_resolution;
-  proj *= vec3(1.0+proj[2],1.0+proj[2],1.0);
+  proj *= vec3(1.0+proj[2],1.0+proj[2],-1.0);
   gl_Position = vec4(proj,1.0);
+  light = dot(norm,u_lightdir)*0.5+0.5;
+}
+</script>
+<script id="bldg-fragment" type="x-shader/x-fragment">
+precision mediump float;
+varying float light;
+void main() {
+  gl_FragColor = vec4(1.0, light, 1.0, 1.0);
 }
 </script>
 </head>
@@ -32,11 +36,12 @@ void main() {
     , vPosBuf, v=[]
     , nPosBuf, n=[]
     , i, j, k, l
-    , dx ,dy 
+    , dx ,dy, r
     ;
 
   gl.clearColor(0,0,1,0);
   gl.clear( gl.COLOR_BUFFER_BIT + gl.DEPTH_BUFFER_BIT );
+  gl.clearDepth(1.0);
   gl.enable(gl.DEPTH_TEST);
   gl.depthFunc(gl.LEQUAL);
 
@@ -44,8 +49,8 @@ void main() {
 
   // random building grid
   bldgs=[];
-  for(i=-20; i<=20; ++i ) {
-    for(j=-15; j<=15; ++j ) {
+  for(i=-40; i<=40; ++i ) {
+    for(j=-30; j<=30; ++j ) {
       var x = 30*i, y=30*j;
       bldgs.push( { p:[ [x,y],[x+25,y],[x+25,y+25],[x,y+25] ], h:Math.random()*10 } );
     }
@@ -62,15 +67,15 @@ void main() {
       v.push( bldg.p[(i+1)%l][0] );
       v.push( bldg.p[(i+1)%l][1] );
       v.push( 0.0 );
-      v.push( bldg.p[i][0] + 0.5 );
-      v.push( bldg.p[i][1] + 0.5 );
+      v.push( bldg.p[i][0] );
+      v.push( bldg.p[i][1] );
       v.push( bldg.h );
       // triangle on ceiling
-      v.push( bldg.p[i][0] + 0.5 );
-      v.push( bldg.p[i][1] + 0.5 );
+      v.push( bldg.p[i][0] );
+      v.push( bldg.p[i][1] );
       v.push( bldg.h );
-      v.push( bldg.p[(i+1)%l][0] + 0.5 );
-      v.push( bldg.p[(i+1)%l][1] + 0.5 );
+      v.push( bldg.p[(i+1)%l][0] );
+      v.push( bldg.p[(i+1)%l][1] );
       v.push( bldg.h );
       v.push( bldg.p[(i+1)%l][0] );
       v.push( bldg.p[(i+1)%l][1] );
@@ -79,11 +84,39 @@ void main() {
       // normal vector (dx,dy,0) x (0,0,1)
       dx = bldg.p[i][0] - bldg.p[(i+1)%l][0];
       dy = bldg.p[i][1] - bldg.p[(i+1)%l][1];
+      r = Math.sqrt(dx*dx+dy*dy);
+      dx /= r;
+      dy /= r;
+      // add for all six vertices
       for( k=0; k<6; k++ ) {
-        n.push(dy);
-        n.push(-dx);
+        n.push(-dy);
+        n.push(dx);
         n.push(0.0);
       }
+    }
+    // fake ceiling
+    v.push( bldg.p[0][0] );
+    v.push( bldg.p[0][1] );
+    v.push( bldg.h );
+    v.push( bldg.p[1][0] );
+    v.push( bldg.p[1][1] );
+    v.push( bldg.h );
+    v.push( bldg.p[3][0] );
+    v.push( bldg.p[3][1] );
+    v.push( bldg.h );
+    v.push( bldg.p[1][0] );
+    v.push( bldg.p[1][1] );
+    v.push( bldg.h );
+    v.push( bldg.p[2][0] );
+    v.push( bldg.p[2][1] );
+    v.push( bldg.h );
+    v.push( bldg.p[3][0] );
+    v.push( bldg.p[3][1] );
+    v.push( bldg.h );
+    for( k=0; k<6; k++ ) {
+      n.push(0);
+      n.push(0);
+      n.push(1);
     }
   }
 console.log(v.length, n.length );
@@ -130,8 +163,13 @@ console.log(v.length, n.length );
 
   var resolutionLocation = gl.getUniformLocation(program, "u_resolution");
   var centerdegLocation = gl.getUniformLocation(program, "u_centerdeg");
+  var lightdirLocation = gl.getUniformLocation(program, "u_lightdir");
   gl.uniform3f(resolutionLocation, c.width, c.height, 100);
   gl.uniform3f(centerdegLocation, 0,0,0 );
+  
+  var lx=3, ly=2, lz=5;
+  r = Math.sqrt(lx*lx+ly*ly+lz*lz);
+  gl.uniform3f(lightdirLocation, lx/r,ly/r,lz/r );
 
   gl.drawArrays( gl.TRIANGLES, 0, v.length/3 );
 
