@@ -1,7 +1,7 @@
 <html lang="en">
 <head>
 <script src="jquery-1.5.1.min.js"></script>
-<script id="bldg-vertex" type="x-shader/x-vertex">
+<script id="dj-vertex" type="x-shader/x-vertex">
 attribute vec3 pos;
 attribute vec3 norm;
 uniform vec3 u_resolution;
@@ -15,7 +15,7 @@ void main() {
   light = dot(norm,u_lightdir)*0.5+0.5;
 }
 </script>
-<script id="bldg-fragment" type="x-shader/x-fragment">
+<script id="dj-fragment" type="x-shader/x-fragment">
 precision mediump float;
 varying float light;
 void main() {
@@ -38,8 +38,7 @@ void main() {
 
   //vNormal = normal;
   //gl_Position = projectionMatrix * modelViewMatrix * vec4(a_position,1.0);
-  var bldgs = [ { p:[ [0,0],[25,0],[25,25],[0,25] ], h:4 }, { p:[ [0,0],[0,25],[25,25],[25,0] ], h:4 } ]
-    , canvas = $('#c')[0]
+  var canvas = $('#c')[0]
     , c = canvas.getContext('2d')
     , i, j, k
     ;
@@ -48,33 +47,75 @@ void main() {
 
   // enforce winding order
   for( j=0; j<d.length; ++j ) {
-    var bldg = d[j];
-    l = bldg.length;
+    var dj = d[j];
+    l = dj.length;
     var area = 0;
     for( i=0; i<l; i++ ) {
-      area += (bldg[i][0] * bldg[(i+1)%l][1]) - (bldg[(i+1)%l][0] * bldg[i][1]);
+      area += (dj[i][0] * dj[(i+1)%l][1]) - (dj[(i+1)%l][0] * dj[i][1]);
     }
 
     // set consistent winding order (opposite for outer and holes)
     if( j==0 ) {
       if( area>0 ) {
-        bldg.reverse();
+        dj.reverse();
         console.log('reversed',j);
       }
       c.strokeStyle = 'rgb(0,0,255)';
     } else { 
       if( area<0 ) {
-        bldg.reverse();
+        dj.reverse();
         console.log('reversed',j);
       }
       c.strokeStyle = 'rgb(255,0,0)';
     }
     
-    draw(bldg);
+    draw(dj);
     console.log(area);
   }
 
+  // holes present? 
+  if( false && d.length > 1 ) {
+    var nodes = [], d0 = d[0];
+    for( j=1; j<d.length; ++j ) {
+      var dj = d[j];
+      for( i=0; i<d0.length; ++i ) {
+        for( k=0; k<dj.length; ++k ) {
+        }
+      }
+    }
+  }
+  
+  // ear clipping
+  function earClip(d) {
+    var l, x0,x1,y0,y1;
+    while( (l=d.length) > 3 ) {
+      for( i=0; i<l; ++i ) {
+        // test triangle i,i+1,i+2
 
+        // triangle area inside or outside polygon?
+
+        // bounding box
+        x0 = Math.min( d[i][0], Math.min(d[(i+1)%l][0], d[(i+2)%l][0] ) );
+        y0 = Math.min( d[i][1], Math.min(d[(i+1)%l][1], d[(i+2)%l][1] ) );
+        x1 = Math.max( d[i][0], Math.max(d[(i+1)%l][0], d[(i+2)%l][0] ) );
+        y1 = Math.max( d[i][1], Math.max(d[(i+1)%l][1], d[(i+2)%l][1] ) );
+
+        // check of any of the points [i+j] lie inside the triangle
+        var bad = false;
+        for( j=3; j<l; ++j ) {
+          // outside of bounding box, skip more complicated test
+          if( d[(i+j)%l][0]<x0 || d[(i+j)%l][0]>x1 || d[(i+j)%l][1]<y0 || d[(i+j)%l][1]>y1 ) continue;
+
+          // inside of bbox, test more careful
+
+        }
+
+        // not a good "ear"
+        if(bad) continue;
+      }
+    }
+  }
+  earClip(d[0]);
 
 </script>
 </body>
