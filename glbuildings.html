@@ -40,7 +40,6 @@ void main() {
     ;
 
   gl.clearColor(0,0,1,0);
-  gl.clear( gl.COLOR_BUFFER_BIT + gl.DEPTH_BUFFER_BIT );
   gl.clearDepth(1.0);
   gl.enable(gl.DEPTH_TEST);
   gl.depthFunc(gl.LEQUAL);
@@ -171,12 +170,14 @@ console.log(v.length, n.length );
   r = Math.sqrt(lx*lx+ly*ly+lz*lz);
   gl.uniform3f(lightdirLocation, lx/r,ly/r,lz/r );
 
+  gl.clear( gl.COLOR_BUFFER_BIT + gl.DEPTH_BUFFER_BIT );
   gl.drawArrays( gl.TRIANGLES, 0, v.length/3 );
 
   $('#c').mousemove(function(e){
     var x=e.offsetX, y=e.offsetY;
 
     gl.uniform3f(centerdegLocation, -2*x+c.width,2*y-c.height,0 );
+    gl.clear( gl.COLOR_BUFFER_BIT + gl.DEPTH_BUFFER_BIT );
     gl.drawArrays( gl.TRIANGLES, 0, v.length/3 );
   })
 
