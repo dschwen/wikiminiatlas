@@ -30,6 +30,8 @@
  */
 
 //Namespace('p2t');
+var p2t = (function(){
+
 var p2t = { sweep:{} };
 
 // ------------------------------------------------------------------------Point
@@ -44,7 +46,6 @@ p2t.Point = function() {
         this.x = arguments[0];
         this.y = arguments[1];
     } else {
-        alert('Invalid p2t.Point constructor call!');
     }
 
     // The edges this point constitutes an upper ending point
@@ -73,37 +74,37 @@ p2t.Point.prototype.set = function(x, y) {
 /**
  * Negate this Point instance. (component-wise)
  */
-p2t.Point.prototype.negate = function() {
+/*p2t.Point.prototype.negate = function() {
     this.x = -this.x;
     this.y = -this.y;
-}
+}*/
 
 /**
  * Add another Point object to this instance. (component-wise)
  * @param   n   Point object.
  */
-p2t.Point.prototype.add = function(n) {
+/*p2t.Point.prototype.add = function(n) {
     this.x += n.x;
     this.y += n.y;
-}
+}*/
 
 /**
  * Subtract this Point instance with another point given. (component-wise)
  * @param   n   Point object.
  */
-p2t.Point.prototype.sub = function(n) {
+/*p2t.Point.prototype.sub = function(n) {
     this.x -= n.x;
     this.y -= n.y;
-}
+}*/
 
 /**
  * Multiply this Point instance by a scalar. (component-wise)
  * @param   s   scalar.
  */
-p2t.Point.prototype.mul = function(s) {
+/*p2t.Point.prototype.mul = function(s) {
     this.x *= s;
     this.y *= s;
-}
+}*/
 
 /**
  * Return the distance of this Point instance from the origo.
@@ -116,12 +117,12 @@ p2t.Point.prototype.length = function() {
  * Normalize this Point instance (as a vector).
  * @return The original distance of this instance from the origo.
  */
-p2t.Point.prototype.normalize = function() {
+/*p2t.Point.prototype.normalize = function() {
     var len = this.length();
     this.x /= len;
     this.y /= len;
     return len;
-}
+}*/
 
 /**
  * Test this Point object with another for equality.
@@ -137,9 +138,9 @@ p2t.Point.prototype.equals = function(p) {
  * @param   p   Point object.
  * @return the resulting Point object.
  */
-p2t.negate = function(p) {
+/*p2t.negate = function(p) {
     return new p2t.Point(-p.x, -p.y);
-}
+}*/
 
 /**
  * Compare two points component-wise.
@@ -162,9 +163,9 @@ p2t.cmp = function(a, b) {
  * @param   b   Point object.
  * @return the resulting Point object.
  */
-p2t.add = function(a, b) {
+/*p2t.add = function(a, b) {
     return new p2t.Point(a.x+b.x, a.y+b.y);
-}
+}*/
 
 /**
  * Subtract two points component-wise and return the result as a new Point object.
@@ -172,9 +173,9 @@ p2t.add = function(a, b) {
  * @param   b   Point object.
  * @return the resulting Point object.
  */
-p2t.sub = function(a, b) {
+/*p2t.sub = function(a, b) {
     return new p2t.Point(a.x-b.x, a.y-b.y);
-}
+}*/
 
 /**
  * Multiply a point by a scalar and return the result as a new Point object.
@@ -182,9 +183,9 @@ p2t.sub = function(a, b) {
  * @param   p   Point object.
  * @return the resulting Point object.
  */
-p2t.mul = function(s, p) {
+/*p2t.mul = function(s, p) {
     return new p2t.Point(s*p.x, s*p.y);
-}
+}*/
 
 /**
  * Test two Point objects for equality.
@@ -232,7 +233,6 @@ p2t.cross = function() {
             else return arguments[0]*arguments[1];
         }
     } else {
-        alert('Invalid p2t.cross call!');
         return undefined;
     }
 }
@@ -252,7 +252,6 @@ p2t.Edge = function() {
                 this.q = arguments[0];
                 this.p = arguments[1];
             } else if (arguments[0].x == arguments[1].x) {
-                alert('Invalid p2t.edge constructor call: repeated points!');
             } else {
                 this.p = arguments[0];
                 this.q = arguments[1];
@@ -262,7 +261,6 @@ p2t.Edge = function() {
             this.q = arguments[1];
         }
     } else {
-        alert('Invalid p2t.Edge constructor call!');
     }
 
     this.q.edge_list.push(this);
@@ -365,7 +363,6 @@ p2t.Triangle.prototype.MarkNeighbor = function() {
         if ((p1.equals(this.points_[2]) && p2.equals(this.points_[1])) || (p1.equals(this.points_[1]) && p2.equals(this.points_[2]))) this.neighbors_[0] = t;
         else if ((p1.equals(this.points_[0]) && p2.equals(this.points_[2])) || (p1.equals(this.points_[2]) && p2.equals(this.points_[0]))) this.neighbors_[1] = t;
         else if ((p1.equals(this.points_[0]) && p2.equals(this.points_[1])) || (p1.equals(this.points_[1]) && p2.equals(this.points_[0]))) this.neighbors_[2] = t;
-        else alert('Invalid p2t.Triangle.MarkNeighbor call (1)!');
     } else if (arguments.length == 1) {
         // exhaustive search to update neighbor pointers
         t = arguments[0];
@@ -380,7 +377,6 @@ p2t.Triangle.prototype.MarkNeighbor = function() {
             t.MarkNeighbor(this.points_[0], this.points_[1], this);
         }
     } else {
-        alert('Invalid p2t.Triangle.MarkNeighbor call! (2)');
     }
 }
 
@@ -576,10 +572,8 @@ p2t.Triangle.prototype.Legalize = function() {
             this.points_[2] = this.points_[1];
             this.points_[1] = npoint;
         } else {
-            alert('Invalid p2t.Triangle.Legalize call!');
         }
     } else {
-        alert('Invalid p2t.Triangle.Legalize call!');
     }
 }
 
@@ -636,7 +630,6 @@ p2t.Triangle.prototype.MarkConstrainedEdge = function() {
             this.constrained_edge[0] = true;
         }
     } else {
-        alert('Invalid p2t.Triangle.MarkConstrainedEdge call!');
     }
 }
 
@@ -728,7 +721,6 @@ p2t.Node = function() {
         this.triangle = arguments[1];
         this.value = this.point.x;
     } else {
-        alert('Invalid p2t.Node constructor call!');
     }
 }
 
@@ -801,7 +793,6 @@ p2t.AdvancingFront.prototype.LocatePoint = function(point) {
         } else if (point.equals(node.point)) {
             // do nothing
         } else {
-            alert('Invalid p2t.AdvancingFront.LocatePoint call!');
             return null;
         }
     } else if (px < nx) {
@@ -1095,14 +1086,12 @@ p2t.sweep.EdgeEvent = function() {
         var p1 = triangle.PointCCW(point);
         var o1 = p2t.Orient2d(eq, p1, ep);
         if (o1 == p2t.Orientation.COLLINEAR) {
-            alert('p2t.sweep.EdgeEvent: Collinear not supported!');
             return;
         }
 
         var p2 = triangle.PointCW(point);
         var o2 = p2t.Orient2d(eq, p2, ep);
         if (o2 == p2t.Orientation.COLLINEAR) {
-            alert('p2t.sweep.EdgeEvent: Collinear not supported!');
             return;
         }
 
@@ -1120,7 +1109,6 @@ p2t.sweep.EdgeEvent = function() {
             p2t.sweep.FlipEdgeEvent(tcx, ep, eq, triangle, point);
         }
     } else {
-        alert('Invalid p2t.sweep.EdgeEvent call!');
     }
 }
 
@@ -1648,7 +1636,6 @@ p2t.sweep.FlipEdgeEvent = function(tcx, ep, eq, t, p) {
     if (ot == null) {
         // If we want to integrate the fillEdgeEvent do it here
         // With current implementation we should never get here
-        alert('[BUG:FIXME] FLIP failed due to missing triangle!');
         return;
     }
     var op = ot.OppositePoint(t, p);
@@ -1709,7 +1696,6 @@ p2t.sweep.NextFlipPoint = function(ep, eq, ot, op) {
         // Left
         return ot.PointCW(op);
     } else {
-        alert("[Unsupported] p2t.sweep.NextFlipPoint: opposing point on constrained edge!");
         return undefined;
     }
 }
@@ -1720,7 +1706,6 @@ p2t.sweep.FlipScanEdgeEvent = function(tcx, ep, eq, flip_triangle, t, p) {
     if (ot == null) {
         // If we want to integrate the fillEdgeEvent do it here
         // With current implementation we should never get here
-        alert('[BUG:FIXME] FLIP failed due to missing triangle');
         return;
     }
     var op = ot.OppositePoint(t, p);
@@ -1741,6 +1726,13 @@ p2t.sweep.FlipScanEdgeEvent = function(tcx, ep, eq, flip_triangle, t, p) {
     }
 }
 
+return {
+  Point: p2t.Point,
+  SweepContext: p2t.SweepContext,
+  sweep: { Triangulate: p2t.sweep.Triangulate }
+}
+
 // -----------------------------------------------------------------------------
 //Namespace.provide('p2t');
 //Namespace.provide('p2t.sweep');
+})();
