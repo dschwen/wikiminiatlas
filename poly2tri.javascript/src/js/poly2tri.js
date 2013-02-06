@@ -55,6 +55,7 @@ p2t.Point = function() {
 
 /**
  * Set this Point instance to the origo. <code>(0; 0)</code>
+ * @private
  */
 p2t.Point.prototype.set_zero = function() {
     this.x = 0.0;
@@ -65,6 +66,7 @@ p2t.Point.prototype.set_zero = function() {
  * Set the coordinates of this instance.
  * @param   x   number.
  * @param   y   number;
+ * @private
  */
 p2t.Point.prototype.set = function(x, y) {
     this.x = x;
@@ -108,6 +110,7 @@ p2t.Point.prototype.set = function(x, y) {
 
 /**
  * Return the distance of this Point instance from the origo.
+ * @private
  */
 p2t.Point.prototype.length = function() {
     return Math.sqrt(this.x*this.x + this.y*this.y);
@@ -128,6 +131,7 @@ p2t.Point.prototype.length = function() {
  * Test this Point object with another for equality.
  * @param   p   Point object.
  * @return <code>True</code> if <code>this == p</code>, <code>false</code> otherwise.
+ * @private
  */
 p2t.Point.prototype.equals = function(p) {
     return p2t.equals(this, p);
@@ -148,6 +152,7 @@ p2t.Point.prototype.equals = function(p) {
  * @param   b   Point object.
  * @return <code>-1</code> if <code>a &lt; b</code>, <code>1</code> if
  *         <code>a &gt; b</code>, <code>0</code> otherwise.
+ * @private
  */
 p2t.cmp = function(a, b) {
     if (a.y == b.y) {
@@ -192,6 +197,7 @@ p2t.cmp = function(a, b) {
  * @param   a   Point object.
  * @param   b   Point object.
  * @return <code>True</code> if <code>a == b</code>, <code>false</code> otherwise.
+ * @private
  */
 p2t.equals = function(a, b) {
     return a.x == b.x && a.y == b.y;
@@ -202,6 +208,7 @@ p2t.equals = function(a, b) {
  * @param   a   Point object.
  * @param   b   Point object.
  * @return The dot product (as a number).
+ * @private
  */
 p2t.dot = function(a, b) {
     return a.x*b.x + a.y*b.y;
@@ -213,6 +220,7 @@ p2t.dot = function(a, b) {
  * This function requires two parameters, either may be a Point object or a
  * number.
  * @return a Point object or a number, depending on the parameters.
+ * @private
  */
 p2t.cross = function() {
     var a0_p = false;
@@ -239,6 +247,7 @@ p2t.cross = function() {
 
 
 // -------------------------------------------------------------------------Edge
+/** @private */
 p2t.Edge = function() {
     this.p = null;
     this.q = null;
@@ -277,6 +286,7 @@ p2t.Edge = function() {
  * @param   p1  Point object.
  * @param   p2  Point object.
  * @param   p3  Point object.
+ * @private
  */
 p2t.Triangle = function(p1, p2, p3) {
     // Triangle points
@@ -297,10 +307,12 @@ p2t.Triangle = function(p1, p2, p3) {
     }
 }
 
+// public interface
 p2t.Triangle.prototype.GetPoint = function(index) {
     return this.points_[index];
 }
 
+/** @private */
 p2t.Triangle.prototype.GetNeighbor = function(index) {
     return this.neighbors_[index];
 }
@@ -310,6 +322,7 @@ p2t.Triangle.prototype.GetNeighbor = function(index) {
  * vertices.
  * @return <code>True</code> if the Point objects are of the Triangle's vertices,
  *         <code>false</code> otherwise.
+ * @private
  */
 p2t.Triangle.prototype.ContainsP = function() {
     var back = true;
@@ -327,6 +340,7 @@ p2t.Triangle.prototype.ContainsP = function() {
  * bounding edges.
  * @return <code>True</code> if the Edge objects are of the Triangle's bounding
  *         edges, <code>false</code> otherwise.
+ * @private
  */
 p2t.Triangle.prototype.ContainsE = function() {
     var back = true;
@@ -336,6 +350,7 @@ p2t.Triangle.prototype.ContainsE = function() {
     return back;
 }
 
+/** @private */
 p2t.Triangle.prototype.IsInterior = function() {
     if (arguments.length == 0) {
         return this.interior_;
@@ -352,6 +367,7 @@ p2t.Triangle.prototype.IsInterior = function() {
  * @param   p1  Point object.
  * @param   p2  Point object.
  * @param   t   Triangle object.
+ * @private
  */
 p2t.Triangle.prototype.MarkNeighbor = function() {
     var t;
@@ -380,12 +396,14 @@ p2t.Triangle.prototype.MarkNeighbor = function() {
     }
 }
 
+/** @private */
 p2t.Triangle.prototype.ClearNeigbors = function() {
     this.neighbors_[0] = null;
     this.neighbors_[1] = null;
     this.neighbors_[2] = null;
 }
 
+/** @private */
 p2t.Triangle.prototype.ClearDelunayEdges = function() {
     this.delaunay_edge[0] = false;
     this.delaunay_edge[1] = false;
@@ -394,6 +412,7 @@ p2t.Triangle.prototype.ClearDelunayEdges = function() {
 
 /**
  * Return the point clockwise to the given point.
+ * @private
  */
 p2t.Triangle.prototype.PointCW = function(p) {
     if (p.equals(this.points_[0])) {
@@ -409,6 +428,7 @@ p2t.Triangle.prototype.PointCW = function(p) {
 
 /**
  * Return the point counter-clockwise to the given point.
+ * @private
  */
 p2t.Triangle.prototype.PointCCW = function(p) {
     if (p.equals(this.points_[0])) {
@@ -424,6 +444,7 @@ p2t.Triangle.prototype.PointCCW = function(p) {
 
 /**
  * Return the neighbor clockwise to given point.
+ * @private
  */
 p2t.Triangle.prototype.NeighborCW = function(p) {
     if (p.equals(this.points_[0])) {
@@ -437,6 +458,7 @@ p2t.Triangle.prototype.NeighborCW = function(p) {
 
 /**
  * Return the neighbor counter-clockwise to given point.
+ * @private
  */
 p2t.Triangle.prototype.NeighborCCW = function(p) {
     if (p.equals(this.points_[0])) {
@@ -448,6 +470,7 @@ p2t.Triangle.prototype.NeighborCCW = function(p) {
     }
 }
 
+/** @private */
 p2t.Triangle.prototype.GetConstrainedEdgeCW = function(p) {
     if (p.equals(this.points_[0])) {
         return this.constrained_edge[1];
@@ -458,6 +481,7 @@ p2t.Triangle.prototype.GetConstrainedEdgeCW = function(p) {
     }
 }
 
+/** @private */
 p2t.Triangle.prototype.GetConstrainedEdgeCCW = function(p) {
     if (p.equals(this.points_[0])) {
         return this.constrained_edge[2];
@@ -468,6 +492,7 @@ p2t.Triangle.prototype.GetConstrainedEdgeCCW = function(p) {
     }
 }
 
+/** @private */
 p2t.Triangle.prototype.SetConstrainedEdgeCW = function(p, ce) {
     if (p.equals(this.points_[0])) {
         this.constrained_edge[1] = ce;
@@ -478,6 +503,7 @@ p2t.Triangle.prototype.SetConstrainedEdgeCW = function(p, ce) {
     }
 }
 
+/** @private */
 p2t.Triangle.prototype.SetConstrainedEdgeCCW = function(p, ce) {
     if (p.equals(this.points_[0])) {
         this.constrained_edge[2] = ce;
@@ -488,6 +514,7 @@ p2t.Triangle.prototype.SetConstrainedEdgeCCW = function(p, ce) {
     }
 }
 
+/** @private */
 p2t.Triangle.prototype.GetDelaunayEdgeCW = function(p) {
     if (p.equals(this.points_[0])) {
         return this.delaunay_edge[1];
@@ -498,6 +525,7 @@ p2t.Triangle.prototype.GetDelaunayEdgeCW = function(p) {
     }
 }
 
+/** @private */
 p2t.Triangle.prototype.GetDelaunayEdgeCCW = function(p) {
     if (p.equals(this.points_[0])) {
         return this.delaunay_edge[2];
@@ -508,6 +536,7 @@ p2t.Triangle.prototype.GetDelaunayEdgeCCW = function(p) {
     }
 }
 
+/** @private */
 p2t.Triangle.prototype.SetDelaunayEdgeCW = function(p, e) {
     if (p.equals(this.points_[0])) {
         this.delaunay_edge[1] = e;
@@ -518,6 +547,7 @@ p2t.Triangle.prototype.SetDelaunayEdgeCW = function(p, e) {
     }
 }
 
+/** @private */
 p2t.Triangle.prototype.SetDelaunayEdgeCCW = function(p, e) {
     if (p.equals(this.points_[0])) {
         this.delaunay_edge[2] = e;
@@ -530,6 +560,7 @@ p2t.Triangle.prototype.SetDelaunayEdgeCCW = function(p, e) {
 
 /**
  * The neighbor across to given point.
+ * @private
  */
 p2t.Triangle.prototype.NeighborAcross = function(p) {
     if (p.equals(this.points_[0])) {
@@ -541,6 +572,7 @@ p2t.Triangle.prototype.NeighborAcross = function(p) {
     }
 }
 
+/** @private */
 p2t.Triangle.prototype.OppositePoint = function(t, p) {
     var cw = t.PointCW(p);
     return this.PointCW(cw);
@@ -551,6 +583,7 @@ p2t.Triangle.prototype.OppositePoint = function(t, p) {
  * This method takes either 1 parameter (then the triangle is rotated around
  * points(0)) or 2 parameters (then the triangle is rotated around the first
  * parameter).
+ * @private
  */
 p2t.Triangle.prototype.Legalize = function() {
     if (arguments.length == 1) {
@@ -577,6 +610,7 @@ p2t.Triangle.prototype.Legalize = function() {
     }
 }
 
+/** @private */
 p2t.Triangle.prototype.Index = function(p) {
     if (p.equals(this.points_[0])) return 0;
     else if (p.equals(this.points_[1])) return 1;
@@ -584,6 +618,7 @@ p2t.Triangle.prototype.Index = function(p) {
     else return -1;
 }
 
+/** @private */
 p2t.Triangle.prototype.EdgeIndex = function(p1, p2) {
     if (p1.equals(this.points_[0])) {
         if (p2.equals(this.points_[1])) {
@@ -611,6 +646,7 @@ p2t.Triangle.prototype.EdgeIndex = function(p1, p2) {
  * Mark an edge of this triangle as constrained.<br>
  * This method takes either 1 parameter (an edge index or an Edge instance) or
  * 2 parameters (two Point instances defining the edge of the triangle).
+ * @private
  */
 p2t.Triangle.prototype.MarkConstrainedEdge = function() {
     if (arguments.length == 1) {
@@ -634,9 +670,9 @@ p2t.Triangle.prototype.MarkConstrainedEdge = function() {
 }
 
 // ------------------------------------------------------------------------utils
-p2t.PI_3div4 = 3 * Math.PI / 4;
-p2t.PI_2 = Math.PI / 2;
-p2t.EPSILON = 1e-12;
+/** @const */ p2t.PI_3div4 = 3 * Math.PI / 4;
+/** @const */ p2t.PI_2 = Math.PI / 2;
+/** @const */ p2t.EPSILON = 1e-12;
 
 /* 
  * Inital triangle factor, seed triangle will extend 30% of
@@ -659,6 +695,7 @@ p2t.Orientation = {
  * A[P1,P2,P3]  =  (x1*y2 - y1*x2) + (x2*y3 - y2*x3) + (x3*y1 - y3*x1)
  *              =  (x1-x3)*(y2-y3) - (y1-y3)*(x2-x3)
  * </pre>
+ * @private
  */
 p2t.Orient2d = function(pa, pb, pc) {
     var detleft = (pa.x - pc.x) * (pb.y - pc.y);
@@ -673,6 +710,7 @@ p2t.Orient2d = function(pa, pb, pc) {
     }
 }
 
+/** @private */
 p2t.InScanArea = function(pa, pb, pc, pd) {
     var pdx = pd.x;
     var pdy = pd.y;
@@ -704,6 +742,7 @@ p2t.InScanArea = function(pa, pb, pc, pd) {
 }
 
 // ---------------------------------------------------------------AdvancingFront
+/** @private */
 p2t.Node = function() {
     this.point = null; // Point
     this.triangle = null; // Triangle
@@ -724,40 +763,49 @@ p2t.Node = function() {
     }
 }
 
+/** @private */
 p2t.AdvancingFront = function(head, tail) {
     this.head_ = head; // Node
     this.tail_ = tail; // Node
     this.search_node_ = head; // Node
 }
 
+/** @private */
 p2t.AdvancingFront.prototype.head = function() {
     return this.head_;
 }
 
+/** @private */
 p2t.AdvancingFront.prototype.set_head = function(node) {
     this.head_ = node;
 }
 
+/** @private */
 p2t.AdvancingFront.prototype.tail = function() {
     return this.tail_;
 }
 
+/** @private */
 p2t.AdvancingFront.prototype.set_tail = function(node) {
     this.tail_ = node;
 }
 
+/** @private */
 p2t.AdvancingFront.prototype.search = function() {
     return this.search_node_;
 }
 
+/** @private */
 p2t.AdvancingFront.prototype.set_search = function(node) {
     this.search_node_ = node;
 }
 
+/** @private */
 p2t.AdvancingFront.prototype.FindSearchNode = function(x) {
     return this.search_node_;
 }
 
+/** @private */
 p2t.AdvancingFront.prototype.LocateNode = function(x) {
     var node = this.search_node_;
 
@@ -779,6 +827,7 @@ p2t.AdvancingFront.prototype.LocateNode = function(x) {
     return null;
 }
 
+/** @private */
 p2t.AdvancingFront.prototype.LocatePoint = function(point) {
     var px = point.x;
     var node = this.FindSearchNode(px);
@@ -810,6 +859,7 @@ p2t.AdvancingFront.prototype.LocatePoint = function(point) {
 }
 
 // ------------------------------------------------------------------------Basin
+/** @private */
 p2t.Basin = function() {
     this.left_node = null; // Node
     this.bottom_node = null; // Node
@@ -818,6 +868,7 @@ p2t.Basin = function() {
     this.left_highest = false;
 }
 
+/** @private */
 p2t.Basin.prototype.Clear = function() {
     this.left_node = null;
     this.bottom_node = null;
@@ -827,12 +878,14 @@ p2t.Basin.prototype.Clear = function() {
 }
 
 // --------------------------------------------------------------------EdgeEvent
+/** @private */
 p2t.EdgeEvent = function() {
     this.constrained_edge = null; // Edge
     this.right = false;
 }
 
 // -----------------------------------------------------------------SweepContext
+// public interface
 p2t.SweepContext = function(polyline) {
     this.triangles_ = [];
     this.map_ = [];
@@ -856,6 +909,7 @@ p2t.SweepContext = function(polyline) {
     this.InitEdges(this.points_);
 }
 
+// public interface
 p2t.SweepContext.prototype.AddHole = function(polyline) {
     this.InitEdges(polyline);
     for (var i in polyline) {
@@ -863,18 +917,22 @@ p2t.SweepContext.prototype.AddHole = function(polyline) {
     }
 }
 
+/** @private */
 p2t.SweepContext.prototype.front = function() {
     return this.front_;
 }
 
+/** @private */
 p2t.SweepContext.prototype.point_count = function() {
     return this.points_.length;
 }
 
+/** @private */
 p2t.SweepContext.prototype.head = function() {
     return this.head_;
 }
 
+/** @private */
 p2t.SweepContext.prototype.set_head = function(p1) {
     this.head_ = p1;
 }
@@ -883,18 +941,22 @@ p2t.SweepContext.prototype.tail = function() {
     return this.tail_;
 }
 
+/** @private */
 p2t.SweepContext.prototype.set_tail = function(p1) {
     this.tail_ = p1;
 }
 
+/** @private */
 p2t.SweepContext.prototype.GetTriangles = function() {
     return this.triangles_;
 }
 
+/** @private */
 p2t.SweepContext.prototype.GetMap = function() {
     return this.map_;
 }
 
+/** @private */
 p2t.SweepContext.prototype.InitTriangulation = function() {
     var xmax = this.points_[0].x;
     var xmin = this.points_[0].x;
@@ -919,24 +981,29 @@ p2t.SweepContext.prototype.InitTriangulation = function() {
     this.points_.sort(p2t.cmp);
 }
 
+/** @private */
 p2t.SweepContext.prototype.InitEdges = function(polyline) {
     for (var i=0; i < polyline.length; ++i) {
         this.edge_list.push(new p2t.Edge(polyline[i], polyline[(i+1) % polyline.length]));
     }
 }
 
+/** @private */
 p2t.SweepContext.prototype.GetPoint = function(index) {
     return this.points_[index];
 }
 
+/** @private */
 p2t.SweepContext.prototype.AddToMap = function(triangle) {
     this.map_.push(triangle);
 }
 
+/** @private */
 p2t.SweepContext.prototype.LocateNode = function(point) {
     return this.front_.LocateNode(point.x);
 }
 
+/** @private */
 p2t.SweepContext.prototype.CreateAdvancingFront = function() {
     var head;
     var middle;
@@ -958,10 +1025,12 @@ p2t.SweepContext.prototype.CreateAdvancingFront = function() {
     tail.prev = middle;
 }
 
+/** @private */
 p2t.SweepContext.prototype.RemoveNode = function(node) {
     // do nothing
 }
 
+/** @private */
 p2t.SweepContext.prototype.MapTriangleToNodes = function(t) {
     for (var i=0; i<3; ++i) {
         if (t.GetNeighbor(i) == null) {
@@ -973,6 +1042,7 @@ p2t.SweepContext.prototype.MapTriangleToNodes = function(t) {
     }
 }
 
+/** @private */
 p2t.SweepContext.prototype.RemoveFromMap = function(triangle) {
     for (var i in this.map_) {
         if (this.map_[i] == triangle) {
@@ -982,6 +1052,7 @@ p2t.SweepContext.prototype.RemoveFromMap = function(triangle) {
     }
 }
 
+/** @private */
 p2t.SweepContext.prototype.MeshClean = function(triangle) {
     if (triangle != null && !triangle.IsInterior()) {
         triangle.IsInterior(true);
@@ -997,6 +1068,7 @@ p2t.SweepContext.prototype.MeshClean = function(triangle) {
 // ------------------------------------------------------------------------Sweep
 //Namespace('p2t.sweep');
 
+// public interface
 /**
  * Triangulate simple polygon with holes.
  * @param   tcx SweepContext object.
@@ -1010,6 +1082,7 @@ p2t.sweep.Triangulate = function(tcx) {
     p2t.sweep.FinalizationPolygon(tcx);
 }
 
+/** @private */
 p2t.sweep.SweepPoints = function(tcx) {
     for (var i=1; i < tcx.point_count(); ++i) {
         var point = tcx.GetPoint(i);
@@ -1020,6 +1093,7 @@ p2t.sweep.SweepPoints = function(tcx) {
     }
 }
 
+/** @private */
 p2t.sweep.FinalizationPolygon = function(tcx) {
     // Get an Internal triangle to start with
     var t = tcx.front().head().next.triangle;
@@ -1036,6 +1110,7 @@ p2t.sweep.FinalizationPolygon = function(tcx) {
  * Find closes node to the left of the new point and
  * create a new triangle. If needed new holes and basins
  * will be filled to.
+ * @private 
  */
 p2t.sweep.PointEvent = function(tcx, point) {
     var node = tcx.LocateNode(point);
@@ -1053,6 +1128,7 @@ p2t.sweep.PointEvent = function(tcx, point) {
     return new_node;
 }
 
+/** @private */
 p2t.sweep.EdgeEvent = function() {
     var tcx;
     if (arguments.length == 3) {
@@ -1112,6 +1188,7 @@ p2t.sweep.EdgeEvent = function() {
     }
 }
 
+/** @private */
 p2t.sweep.IsEdgeSideOfTriangle = function(triangle, ep, eq) {
     var index = triangle.EdgeIndex(ep, eq);
     if (index != -1) {
@@ -1125,6 +1202,7 @@ p2t.sweep.IsEdgeSideOfTriangle = function(triangle, ep, eq) {
     return false;    
 }
 
+/** @private */
 p2t.sweep.NewFrontTriangle = function(tcx, point, node) {
     var triangle = new p2t.Triangle(point, node.point, node.next.point);
 
@@ -1148,6 +1226,7 @@ p2t.sweep.NewFrontTriangle = function(tcx, point, node) {
  * Adds a triangle to the advancing front to fill a hole.
  * @param tcx
  * @param node - middle node, that is the bottom of the hole
+ * @private
  */
 p2t.sweep.Fill = function(tcx, node) {
     var triangle = new p2t.Triangle(node.prev.point, node.point, node.next.point);
@@ -1174,6 +1253,7 @@ p2t.sweep.Fill = function(tcx, node) {
 
 /**
  * Fills holes in the Advancing Front
+ * @private
  */
 p2t.sweep.FillAdvancingFront = function(tcx, n) {
     // Fill right holes
@@ -1206,6 +1286,7 @@ p2t.sweep.FillAdvancingFront = function(tcx, n) {
     }
 }
 
+/** @private */
 p2t.sweep.BasinAngle = function(node) {
     var ax = node.point.x - node.next.next.point.x;
     var ay = node.point.y - node.next.next.point.y;
@@ -1216,6 +1297,7 @@ p2t.sweep.BasinAngle = function(node) {
  *
  * @param node - middle node
  * @return the angle between 3 front nodes
+ * @private
  */
 p2t.sweep.HoleAngle = function(node) {
   /* Complex plane
@@ -1235,6 +1317,7 @@ p2t.sweep.HoleAngle = function(node) {
 
 /**
  * Returns true if triangle was legalized
+ * @private
  */
 p2t.sweep.Legalize = function(tcx, t) {
     // To legalize a triangle we start by finding if any of the three edges
@@ -1315,6 +1398,7 @@ p2t.sweep.Legalize = function(tcx, t) {
  * @param pc - triangle point
  * @param pd - point opposite a
  * @return true if d is inside circle, false if on circle edge
+ * @private
  */
 p2t.sweep.Incircle = function(pa, pb, pc, pd) {
     var adx = pa.x - pd.x;
@@ -1361,6 +1445,7 @@ p2t.sweep.Incircle = function(pa, pb, pc, pd) {
  *    +-----+ oP            +-----+
  *       n4                    n4
  * </pre>
+ * @private
  */
 p2t.sweep.RotateTrianglePair = function(t, p, ot, op) {
     var n1; var n2; var n3; var n4;
@@ -1418,6 +1503,7 @@ p2t.sweep.RotateTrianglePair = function(t, p, ot, op) {
  *
  * @param tcx
  * @param node - starting node, this or next node will be left node
+ * @private
  */
 p2t.sweep.FillBasin = function(tcx, node) {
     if (p2t.Orient2d(node.point, node.next.point, node.next.next.point) == p2t.Orientation.CCW) {
@@ -1456,6 +1542,7 @@ p2t.sweep.FillBasin = function(tcx, node) {
  *
  * @param tcx
  * @param node - bottom_node
+ * @private
  */
 p2t.sweep.FillBasinReq = function(tcx, node) {
     // if shallow stop filling
@@ -1492,6 +1579,7 @@ p2t.sweep.FillBasinReq = function(tcx, node) {
     p2t.sweep.FillBasinReq(tcx, node);
 }
 
+/** @private */
 p2t.sweep.IsShallow = function(tcx, node) {
     var height;
     if (tcx.basin.left_highest) {
@@ -1507,6 +1595,7 @@ p2t.sweep.IsShallow = function(tcx, node) {
     return false;
 }
 
+/** @private */
 p2t.sweep.FillEdgeEvent = function(tcx, edge, node) {
     if (tcx.edge_event.right) {
         p2t.sweep.FillRightAboveEdgeEvent(tcx, edge, node);
@@ -1515,6 +1604,7 @@ p2t.sweep.FillEdgeEvent = function(tcx, edge, node) {
     }
 }
 
+/** @private */
 p2t.sweep.FillRightAboveEdgeEvent = function(tcx, edge, node) {
     while (node.next.point.x < edge.p.x) {
         // Check if next node is below the edge
@@ -1526,6 +1616,7 @@ p2t.sweep.FillRightAboveEdgeEvent = function(tcx, edge, node) {
     }
 }
 
+/** @private */
 p2t.sweep.FillRightBelowEdgeEvent = function(tcx, edge, node) {
     if (node.point.x < edge.p.x) {
         if (p2t.Orient2d(node.point, node.next.point, node.next.next.point) == p2t.Orientation.CCW) {
@@ -1540,6 +1631,7 @@ p2t.sweep.FillRightBelowEdgeEvent = function(tcx, edge, node) {
     }
 }
 
+/** @private */
 p2t.sweep.FillRightConcaveEdgeEvent = function(tcx, edge, node) {
     p2t.sweep.Fill(tcx, node.next);
     if (node.next.point != edge.p) {
@@ -1556,6 +1648,7 @@ p2t.sweep.FillRightConcaveEdgeEvent = function(tcx, edge, node) {
     }
 }
 
+/** @private */
 p2t.sweep.FillRightConvexEdgeEvent = function(tcx, edge, node) {
     // Next concave or convex?
     if (p2t.Orient2d(node.next.point, node.next.next.point, node.next.next.next.point) == p2t.Orientation.CCW) {
@@ -1573,6 +1666,7 @@ p2t.sweep.FillRightConvexEdgeEvent = function(tcx, edge, node) {
     }
 }
 
+/** @private */
 p2t.sweep.FillLeftAboveEdgeEvent = function(tcx, edge, node) {
     while (node.prev.point.x > edge.p.x) {
         // Check if next node is below the edge
@@ -1584,6 +1678,7 @@ p2t.sweep.FillLeftAboveEdgeEvent = function(tcx, edge, node) {
     }
 }
 
+/** @private */
 p2t.sweep.FillLeftBelowEdgeEvent = function(tcx, edge, node) {
     if (node.point.x > edge.p.x) {
         if (p2t.Orient2d(node.point, node.prev.point, node.prev.prev.point) == p2t.Orientation.CW) {
@@ -1598,6 +1693,7 @@ p2t.sweep.FillLeftBelowEdgeEvent = function(tcx, edge, node) {
     }
 }
 
+/** @private */
 p2t.sweep.FillLeftConvexEdgeEvent = function(tcx, edge, node) {
     // Next concave or convex?
     if (p2t.Orient2d(node.prev.point, node.prev.prev.point, node.prev.prev.prev.point) == p2t.Orientation.CW) {
@@ -1615,6 +1711,7 @@ p2t.sweep.FillLeftConvexEdgeEvent = function(tcx, edge, node) {
     }
 }
 
+/** @private */
 p2t.sweep.FillLeftConcaveEdgeEvent = function(tcx, edge, node) {
     p2t.sweep.Fill(tcx, node.prev);
     if (node.prev.point != edge.p) {
@@ -1631,6 +1728,7 @@ p2t.sweep.FillLeftConcaveEdgeEvent = function(tcx, edge, node) {
     }
 }
 
+/** @private */
 p2t.sweep.FlipEdgeEvent = function(tcx, ep, eq, t, p) {
     var ot = t.NeighborAcross(p);
     if (ot == null) {
@@ -1667,6 +1765,7 @@ p2t.sweep.FlipEdgeEvent = function(tcx, ep, eq, t, p) {
     }
 }
 
+/** @private */
 p2t.sweep.NextFlipTriangle = function(tcx, o, t, ot, p, op) {
     var edge_index;
     if (o == p2t.Orientation.CCW) {
@@ -1687,6 +1786,7 @@ p2t.sweep.NextFlipTriangle = function(tcx, o, t, ot, p, op) {
     return ot;
 }
 
+/** @private */
 p2t.sweep.NextFlipPoint = function(ep, eq, ot, op) {
     var o2d = p2t.Orient2d(eq, op, ep);
     if (o2d == p2t.Orientation.CW) {
@@ -1700,6 +1800,7 @@ p2t.sweep.NextFlipPoint = function(ep, eq, ot, op) {
     }
 }
 
+/** @private */
 p2t.sweep.FlipScanEdgeEvent = function(tcx, ep, eq, flip_triangle, t, p) {
     var ot = t.NeighborAcross(p);
 
