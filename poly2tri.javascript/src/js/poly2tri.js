@@ -35,6 +35,7 @@ var p2t = (function(){
 var p2t = { sweep:{} };
 
 // ------------------------------------------------------------------------Point
+/** @constructor */
 p2t.Point = function() {
     this.x = null;
     this.y = null;
@@ -287,6 +288,7 @@ p2t.Edge = function() {
  * @param   p2  Point object.
  * @param   p3  Point object.
  * @private
+ * @constructor
  */
 p2t.Triangle = function(p1, p2, p3) {
     // Triangle points
@@ -742,7 +744,11 @@ p2t.InScanArea = function(pa, pb, pc, pd) {
 }
 
 // ---------------------------------------------------------------AdvancingFront
-/** @private */
+/** 
+ * @private 
+ * @constructor
+ * @param {1...2} var_args
+ */
 p2t.Node = function() {
     this.point = null; // Point
     this.triangle = null; // Triangle
@@ -1128,7 +1134,9 @@ p2t.sweep.PointEvent = function(tcx, point) {
     return new_node;
 }
 
-/** @private */
+/** 
+ * @private 
+ */
 p2t.sweep.EdgeEvent = function() {
     var tcx;
     if (arguments.length == 3) {
@@ -1759,7 +1767,7 @@ p2t.sweep.FlipEdgeEvent = function(tcx, ep, eq, t, p) {
             p2t.sweep.FlipEdgeEvent(tcx, ep, eq, t, p);
         }
     } else {
-        var newP = p2t.sweep.NextFlipPoint(ep, eq, ot, op);
+        var newP = new p2t.sweep.NextFlipPoint(ep, eq, ot, op);
         p2t.sweep.FlipScanEdgeEvent(tcx, ep, eq, t, ot, newP);
         p2t.sweep.EdgeEvent(tcx, ep, eq, t, p);
     }
@@ -1786,7 +1794,10 @@ p2t.sweep.NextFlipTriangle = function(tcx, o, t, ot, p, op) {
     return ot;
 }
 
-/** @private */
+/**
+ * @private 
+ * @constructor
+ */
 p2t.sweep.NextFlipPoint = function(ep, eq, ot, op) {
     var o2d = p2t.Orient2d(eq, op, ep);
     if (o2d == p2t.Orientation.CW) {
