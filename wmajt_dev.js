@@ -6,7 +6,7 @@ var wmajt = (function(){
     , zbuild = {}
     , trackstartdate = false, trackzbuild = true
     , bx1,by1,bx2,by2,bw,bh              // used by update and mouse pointer interaction (current tile coords)
-    , glBufList, glBufSize, glI, glO, gl // used to build the webgl building buffers (glI is index to current buffer (last in list))
+    , glBufList, glBufSize, glI, glO, gl = null // used to build the webgl building buffers (glI is index to current buffer (last in list))
 
     , dash = null
     , style = {
@@ -622,6 +622,24 @@ var wmajt = (function(){
         //  just increment ref_z if ref_z is 0 (before the increment)
         //  add the building to the WebGL buffer
         //  otherwise do nothing
+        if( gl !== null ) {
+          idx = _.union( ca.idx['building:levels']||[], ca.idx['height']||[] );
+          for(i=0; i<idx.length; ++i ) {
+            if( 'osm_id' in d[idx[i]].tags ) {
+              v = d[idx[i]].tags['osm_id'];
+              if( !( v in ref_z ) ) {
+                ref_z[v] = true;
+                v = d[idx[i]];
+                if( v.geo.type === 'Polygon' ) {
+                  triangulate( v.geo.coordinates,
+                    (v.tags['building:min_level']*3)||v.tags['min_height']||0,
+                    (v.tags['building:levels']*3)||v.tags['height']
+                  );
+                }
+              }
+            }
+          }
+        }
         
         tile.can.show();
         if( z< buildingzoom || zz >= buildingzoom ) return;
@@ -653,6 +671,9 @@ var wmajt = (function(){
     va = new Float32Array(glBufSize*9);
     na = new Float32Array(glBufSize*9);
     glArrList.push( { v:va, n:na } );
+
+    // switch off the visible building tracking needed for canvas
+    trackzbuild = false;
   }
 
   function renderWebGLBuildingData(program) {
@@ -697,16 +718,32 @@ var wmajt = (function(){
   // push vertex coordinates and normals into the Float32Arrays
   function vnPush(v,n) {
     // assert v.length = n.length
-    var l = v.length/9, s=glBufSize, i;
+    var l = v.length/9, s=glBufSize, i, j, k, n;
 
     // entire array fits into current buffer
+    i = glArrList.length-1;
     if( glI+l <= s ) {
-      i = glArrList.length-1;
       glArrList[i].v.set( v, glI*9 );
       glArrList[i].n.set( n, glI*9 );
       glI += l;
     } else {
       // copy as much as fits, then make new array and continue
+      for( j=0; j<l; ++j ) {
+        // copy triangle
+        for( k=0; k<9; ++k ) {
+          glArrList[i].v[glI*9+k] = v[j*9+k];
+        }
+
+        // increment pointer
+        glI++;
+
+        // end of array
+        if( glI == s ) {
+          glI = 0;
+          glArrList.push( { v:new Float32Array(glBufSize*9), n:new Float32Array(glBufSize*9) } );
+          i++;
+        }
+      }
     }
 
     // is last buffer filled up?
