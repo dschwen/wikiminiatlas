@@ -616,6 +616,10 @@ var wmajt = (function(){
             }
           }
         }
+        // Hook for WebGL buildings:
+        //  just increment ref_z if ref_z is 0 (before the increment)
+        //  add the building to the WebGL buffer
+        //  otherwise do nothing
         
         tile.can.show();
         if( z< buildingzoom || zz >= buildingzoom ) return;
