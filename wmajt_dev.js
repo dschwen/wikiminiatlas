@@ -694,6 +694,166 @@ var wmajt = (function(){
     }
   }
 
+  // push vertex coordinates and normals into the Float32Arrays
+  function vnPush(v,n) {
+  }
+
+  function triangulate(d,b,h) { 
+    var v = [], n=[], d0, c, i, j, l, good, area;
+
+    // setup walls
+    for( j=0; j<d.length; ++j ) {
+      c = d[j];
+      l = c.length;
+      for( i=0; i<l; i++ ) {
+        // normal vector (dx,dy,0) x (0,0,1)
+        dx = c[i][0] - c[(i+1)%l][0];
+        dy = c[i][1] - c[(i+1)%l][1];
+        r = Math.sqrt(dx*dx+dy*dy);
+        dx /= r; dy /= r;
+
+        // triangle at base level
+        vnPush( [ c[i][0],c[i][1],b, c[i+1][0],c[i+1][1],b, c[i][0],c[i][1],h ],
+                [ -dy,dx,0.0, -dy,dx,0.0, -dy,dx,0.0 ] );
+        // triangle at roof level
+        vnPush( [ c[i][0],c[i][1],h, c[i+1][0],c[i+1][1],h, c[i+1][0],c[i+1][1],b ] 
+                [ -dy,dx,0.0, -dy,dx,0.0, -dy,dx,0.0 ] );
+      }
+    }
+
+    // note that the first and last point are always the same
+    // thus a triangle has 4 points!
+    if( d.length === 1 && d[0].length <= 5 ) {
+      // simple triangulations
+      c=d[0];
+      // c.length must be at least 4!
+      if( c.length == 4 ) {
+        //console.log('triangle');
+        vnPush( [ c[0][0],c[0][1],h, c[1][0],c[1][1],h, c[2][0],c[2][1],h ],
+                [ 0,0,1, 0,0,1, 0,0,1 ] );
+      } else {
+        //console.log('quad');
+        vnPush( [ c[0][0],c[0][1],h, c[1][0],c[1][1],h, c[2][0],c[2][1],h, c[0][0],c[0][1],h, c[2][0],c[2][1],h, c[3][0],c[3][1],h ],
+                [ 0,0,1, 0,0,1, 0,0,1, 0,0,1, 0,0,1, 0,0,1 ]  );
+      }
+      return;
+    } 
+
+    //
+    // More complex triangulations
+    // 
+
+    // enforce winding order
+    for( j=0; j<d.length; ++j ) {
+      c = d[j]; l = c.length - 1;
+      area = 0;
+      for( i=0; i<l-1; i++ ) {
+        area += (c[i][0] * c[i+1][1]) - (c[i+1][0] * c[i][1]);
+      }
+
+      // set consistent winding order (opposite for outer and holes)
+      if( j==0 ) {
+        if( area>0 ) { c.reverse(); }
+        //c.strokeStyle = 'rgb(0,0,255)';
+      } else { 
+        if( area<0 ) { c.reverse(); }
+        //c.strokeStyle = 'rgb(255,0,0)';
+      }
+      
+      //draw(dj);
+      //console.log(area);
+    }
+
+    // holes present? 
+    if( d.length > 1 ) {
+      // incorporate holes
+      var nodes = [];
+      d0 = d[0].concat();
+      for( j=1; j<d.length-1; ++j ) {
+        var dj = d[j];
+        for( i=0; i<d0.length-1; ++i ) {
+          for( k=0; k<dj.length; ++k ) {
+          }
+        }
+      }
+    } else {
+      // no holes, try if the polygon is convex 
+      // (or at least  representable as a triangle fan around node 0)
+      function turn(c,i) {
+        var x1 = c[i][0] - c[0][0]
+          , y1 = c[i][1] - c[0][1]
+          , x2 = c[i+1][0] - c[0][0]
+          , y2 = c[i+1][1] - c[0][1];
+        return (x1*y2-y1*x2)>0;
+      }
+      c = d[0]; l = c.length; j=0;
+      area = turn(c,1), good=true;
+      for( i=2; i<l-2; ++i ) {
+        if( turn(c,i) != area ) {
+          good = false;
+          break;
+        }
+      }
+      // simple convex polygon!
+      if(good) {
+        //console.log("konvex polygon!");
+        for( i=1; i<l-2; ++i ) {
+          vnPush( [ c[0][0],c[0][1],h, c[i][0],c[i][1],h, c[i+1][0],c[i+1][1],h ],
+                  [ 0,0,1, 0,0,1, 0,0,1 ] );
+        }
+        return v;
+      }
+      // polygon is concave continue with the heavy stuff! :-(
+      d0 = d[0].concat();
+    }
+    
+    // ear clipping
+    function earClip(c) {
+      var l, x0,x1,y0,y1;
+      // pretend length is actuallength-1 to skip last redundant point
+      while( (l=c.length-1) >= 3 ) {
+        for( i=0; i<l; ++i ) {
+          // test triangle i,i+1,i+2
+
+          // triangle area inside or outside polygon?
+          x0 = c[(i+1)%l][0] - c[i][0];
+          x1 = c[(i+2)%l][0] - c[i][0];
+          y0 = c[(i+1)%l][1] - c[i][1];
+          y1 = c[(i+2)%l][1] - c[i][1];
+          if( x0*y1-x1*y0 < 0 ) continue;
+
+          // assume success (debug) TODO no deed for %l on i+1
+          vnPush( [ c[i][0],c[i][1],h, c[(i+1)%l][0],c[(i+1)%l][1],h, c[(i+2)%l][0],c[(i+2)%l][1],h ],
+                  [ 0,0,1, 0,0,1, 0,0,1 ] );
+          c.splice((i+1)%l,1);
+          break;
+
+          // bounding box
+          x0 = Math.min( c[i][0], Math.min(c[(i+1)%l][0], c[(i+2)%l][0] ) );
+          y0 = Math.min( c[i][1], Math.min(c[(i+1)%l][1], c[(i+2)%l][1] ) );
+          x1 = Math.max( c[i][0], Math.max(c[(i+1)%l][0], c[(i+2)%l][0] ) );
+          y1 = Math.max( c[i][1], Math.max(c[(i+1)%l][1], c[(i+2)%l][1] ) );
+
+          // check of any of the points [i+j] lie inside the triangle
+          var bad = false;
+          for( j=3; j<l; ++j ) {
+            // outside of bounding box, skip more complicated test
+            if( c[(i+j)%l][0]<x0 || c[(i+j)%l][0]>x1 || c[(i+j)%l][1]<y0 || c[(i+j)%l][1]>y1 ) continue;
+
+            // inside of bbox, test more careful
+
+          }
+
+          // not a good "ear"
+          if(bad) continue;
+        }
+      }
+    }
+
+    // run earclip on a copy of d[0]
+    earClip(d0);
+  }
+
   return {
     update: update,
     detectPointer: detectPointer,
