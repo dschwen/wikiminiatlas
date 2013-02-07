@@ -696,6 +696,24 @@ var wmajt = (function(){
 
   // push vertex coordinates and normals into the Float32Arrays
   function vnPush(v,n) {
+    // assert v.length = n.length
+    var l = v.length/9, s=glBufSize, i;
+
+    // entire array fits into current buffer
+    if( glI+l <= s ) {
+      i = glArrList.length-1;
+      glArrList[i].v.set( v, glI*9 );
+      glArrList[i].n.set( n, glI*9 );
+      glI += l;
+    } else {
+      // copy as much as fits, then make new array and continue
+    }
+
+    // is last buffer filled up?
+    if( glI == s ) {
+      glI = 0;
+      glArrList.push( { v:new Float32Array(glBufSize*9), n:new Float32Array(glBufSize*9) } );
+    }
   }
 
   function triangulate(d,b,h) { 
