@@ -640,44 +640,57 @@ var wmajt = (function(){
     });
   }
 
-  function registerWebGLBuildingData( bufferSize, context ) {
-    glVArrList = []; 
-    glVBufList = []; 
-    glNArrList = []; 
-    glNBufList = []; 
-    glBufSize = bufferSize; // must be divisible by 3!
+  function registerWebGLBuildingData( triangleNum, context ) {
+    glArrList = []; 
+    glBufList = []; 
+    glBufSize = triangleNum; // *9 floats
     gl = context;
     
     // setup first buffer array
-    var a;
+    var va, na;
     glI = 0;
     glO = 0;
-    a = new Float32Array(glBufSize);
-    glVArrList.push(a);
+    va = new Float32Array(glBufSize*9);
+    na = new Float32Array(glBufSize*9);
+    glArrList.push( { v:va, n:na } );
   }
 
   function renderWebGLBuildingData(program) {
-    var i, l, b;
+    var i, l, vb, nb;
 
     // new data to be copied
-    if( glArrList > glBufList || glI > glO ) {
-      // copy data, add buffers
-      b =  gl.createBuffer();
-      glVBufList.push(b);
-      gl.bindBuffer(gl.ARRAY_BUFFER, b );
-      gl.bufferData( gl.ARRAY_BUFFER, new Float32Array(n), gl.STATIC_DRAW );
+    if( glArrList.length > glBufList.length || glI > glO ) {
+      // copy data, add buffers (may more arrays than buffers!)
+      // start at last entry in glBufList loop up till 
+      for( i=glBufList.length-1; i<glArrList.length; ++i ) {
+        // create new buffer
+        if( i>=glBufrList.length ) {
+          vb =  gl.createBuffer();
+          nb =  gl.createBuffer();
+          glBufList.push( { v: vb, n: nb } );
+        } else {
+          vb = glBufList[i].v;
+          nb = glBufList[i].n;
+        }
+
+        gl.bindBuffer(gl.ARRAY_BUFFER, vb );
+        gl.bufferData( gl.ARRAY_BUFFER, glArrList[i].v, gl.STATIC_DRAW );
+        gl.bindBuffer(gl.ARRAY_BUFFER, nb );
+        gl.bufferData( gl.ARRAY_BUFFER, glArrList[i].n, gl.STATIC_DRAW );
+      }
 
       glO = glI;
     }
 
     l = glBufList.length-1;
     for( i=0; i<=l; ++i ) {
-      gl.bindBuffer(gl.ARRAY_BUFFER, glNBufList[i] );
+      gl.bindBuffer(gl.ARRAY_BUFFER, glBufList[i].n );
       gl.vertexAttribPointer(program.normalPosAttrib, 3, gl.FLOAT, false, 0, 0);
-      gl.bindBuffer(gl.ARRAY_BUFFER, glVBufList[i] );
+      gl.bindBuffer(gl.ARRAY_BUFFER, glBufList[i].v );
       gl.vertexAttribPointer(program.vertexPosAttrib, 3, gl.FLOAT, false, 0, 0);
 
-      drawArrays( gl.TRIANGLES, (i==l)?glO:glBufSize )
+      // number of vertices = glBufSize*3
+      gl.drawArrays( gl.TRIANGLES, 0, ((i==l)?glO:glBufSize)*3 )
     }
   }
 

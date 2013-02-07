@@ -1350,7 +1350,8 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
     r = Math.sqrt(lx*lx+ly*ly+lz*lz);
     gl.uniform3f(lightdirLocation, lx/r,ly/r,lz/r );
 
-    //gl.drawArrays( gl.TRIANGLES, 0, v.length/3 );
+    // hold 5000 triangles per buffer
+    registerWebGLBuildingData( 5000, gl );
 
     return function() {
       // draw arrays
