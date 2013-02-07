@@ -62,9 +62,36 @@ void main() {
   var d = [[[12.480341044,41.897735929],[12.480655545,41.897823455],[12.480515986484,41.897918938],[12.480928992,41.8981942734],[12.48028,41.89812],[12.480106544,41.898173492],[12.480341044,41.897735929]]];
   
 
-  function triangulate(d,h) {
-    var v = [], d0, c, i, j, l, good, area;
+  /**
+   * d polygon array
+   * b base height
+   * h roof height
+   */
+  function triangulate(d,b,h) { 
+    var v = [], n=[], d0, c, i, j, l, good, area;
 
+    // setup walls
+    for( j=0; j<d.length; ++j ) {
+      c = d[j];
+      l = c.length;
+      for( i=0; i<l; i++ ) {
+        // triangle at base level
+        v.push.apply( v, [ c[i][0],c[i][1],b, c[i+1][0],c[i+1][1],b, c[i][0],c[i][1],h ] );
+        // triangle at roof level
+        v.push.apply( v, [ c[i][0],c[i][1],h, c[i+1][0],c[i+1][1],h, c[i+1][0],c[i+1][1],b ] );
+
+        // normal vector (dx,dy,0) x (0,0,1)
+        dx = bldg.p[i][0] - bldg.p[(i+1)%l][0];
+        dy = bldg.p[i][1] - bldg.p[(i+1)%l][1];
+        r = Math.sqrt(dx*dx+dy*dy);
+        dx /= r;
+        dy /= r;
+        // add for all six vertices
+        for( k=0; k<6; k++ ) {
+          n.push.apply( n, [-dy,dx,0.0] );
+        }
+      }
+    }
 
     // note that the first and last point are always the same
     // thus a triangle has 4 points!
