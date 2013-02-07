@@ -1315,7 +1315,7 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
     // initialize shaders etc.
     return false; // if shaders do not compile
 
-    gl0,0,1,0);
+    gl.clearColor(0,0,1,0);
     gl.clearDepth(1.0);
     gl.enable(gl.DEPTH_TEST);
     gl.depthFunc(gl.LEQUAL);
