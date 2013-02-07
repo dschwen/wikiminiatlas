@@ -1,11 +1,13 @@
 var wmajt = (function(){
-  var w=128,h=128
+  var w=128, h=128  // tile size
     , minzoom = 12, buildingzoom = 14
     , cache = {}
     , ref_sd = {}, ref_z = {}
     , zbuild = {}
     , trackstartdate = false, trackzbuild = true
-    , bx1,by1,bx2,by2,bw,bh // used by update and mouse pointer interaction (current tile coords)
+    , bx1,by1,bx2,by2,bw,bh              // used by update and mouse pointer interaction (current tile coords)
+    , glBufList, glBufSize, glI, glO, gl // used to build the webgl building buffers (glI is index to current buffer (last in list))
+
     , dash = null
     , style = {
       Polygon: [
@@ -638,6 +640,43 @@ var wmajt = (function(){
     });
   }
 
+  function registerWebGLBuildingData( bufferSize, context ) {
+    glVArrList = []; 
+    glVBufList = []; 
+    glNArrList = []; 
+    glNBufList = []; 
+    glBufSize = bufferSize; // must be divisible by 3!
+    gl = context;
+    
+    // setup first buffer array
+    var a;
+    glI = 0;
+    glO = 0;
+    a = new Float32Array(glBufSize);
+    glVArrList.push(a);
+  }
+
+  function renderWebGLBuildingData(c) {
+    var i, l, b;
+
+    // new data to be copied
+    if( glArrList > glBufList || glI > glO ) {
+      // copy data, add buffers
+      b =  gl.createBuffer();
+      glVBufList.push(b);
+      gl.bindBuffer(gl.ARRAY_BUFFER, b );
+      gl.bufferData( gl.ARRAY_BUFFER, new Float32Array(n), gl.STATIC_DRAW );
+
+      glO = glI;
+    }
+
+    l = glBufList.length-1;
+    for( i=0; i<=l; ++i ) {
+      gl.bindBuffer( glBufList[i] );
+      drawArrays( gl.TRIANGLES, (i==l)?glO:glBufSize )
+    }
+  }
+
   return {
     update: update,
     detectPointer: detectPointer,
@@ -646,6 +685,7 @@ var wmajt = (function(){
     },
     zbuild : function() {
       return zbuild;
-    }
+    },
+    registerWebGLBuildingData : registerWebGLBuildingData
   }
 })();
