@@ -33,7 +33,8 @@
 
 var wma_highzoom_activated = true;
 var wma_highzoom_purge = false;
-var bldg3d, bldg3dc, bldg3dtimer = null; // move to appropriate scope
+var bldg3d, bldg3dc = null, bldg3dtimer = null; // move to appropriate scope
+var update3dBuildings;
 var credit; // move to appropriate scope
 var wmaNews = []; // array of news item actions (needs to be global)
 
@@ -677,7 +678,19 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
         .attr( { width: wma_width, height: wma_height } )
         .css( { zIndex:19, opacity: 0.75 } )
         .appendTo( $(wma_map) );
-    if( hasCanvas ) { bldg3dc = bldg3d[0].getContext('2d'); }
+    if( hasCanvas ) { 
+      // try to use webgl
+      try {
+        bldg3dc = bldg3d.getContext("experimental-webgl");
+        update3dBuildings = update3dBuildings_webgl_builder(bldg3dc);
+      } catch (e) { bldg3dc=null; }
+
+      // wireframe as fallback
+      if( !bldg3dc || update3dBuildings===false ) {
+        bldg3dc = bldg3d[0].getContext('2d'); 
+        update3dBuildings = update3dBuildings_canvas;
+      }
+    }
 
     $(window).resize(wmaResize);
 
@@ -836,6 +849,10 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
       }
       // 3D building canvas
       bldg3d.attr( { width: nw, height: nh } );
+      // set webgle viewport (does nothing for 2d context)
+      bldg3dc.viewportWidth = nw;
+      bldg3dc.viewportHeight = nh;
+
       // TODO: resize overlay canvas!
     }
 
@@ -1294,7 +1311,18 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
     //console.log('map rendering: ', t2.getTime()-t1.getTime(), 'ms' );
   }
 
-  function update3dBuildings() {
+  function update3dBuildings_webgl_builder(c) {
+    // initialize shaders etc.
+    var s;
+    return false; // if shaders do not compile
+
+    return function() {
+      // draw arrays
+      //c.drawArrays();
+    }
+  }
+
+  function update3dBuildings_canvas() {
     if( hasCanvas && wma_zoom > 14 ) {
       var ref = wmajt.ref_z()
         , bui = wmajt.zbuild()
