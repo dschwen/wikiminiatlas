@@ -7,7 +7,7 @@
 -->
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <link rel="stylesheet" href="wikiminiatlas_dev.css" type="text/css">
-<script id="globe-fs" type="x-shader/x-fragment">
+<script id="shader-fs" type="x-shader/x-fragment">
   precision mediump float;
 
   varying vec2 vTextureCoord;
@@ -20,7 +20,7 @@
     gl_FragColor = vec4(textureColor.rgb * vLightWeighting, textureColor.a);
   }
 </script>
-<script id="globe-vs" type="x-shader/x-vertex">
+<script id="shader-vs" type="x-shader/x-vertex">
   attribute vec3 aVertexPosition;
   attribute vec3 aVertexNormal;
   attribute vec2 aTextureCoord;
