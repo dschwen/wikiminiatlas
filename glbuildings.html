@@ -1,7 +1,7 @@
 <html lang="en">
 <head>
 <script src="jquery-1.5.1.min.js"></script>
-<script id="bldg-vertex" type="x-shader/x-vertex">
+<script id="bldg-vs" type="x-shader/x-vertex">
 attribute vec3 pos;
 attribute vec3 norm;
 uniform vec3 u_resolution;
@@ -15,7 +15,7 @@ void main() {
   light = dot(norm,u_lightdir)*0.5+0.5;
 }
 </script>
-<script id="bldg-fragment" type="x-shader/x-fragment">
+<script id="bldg-fs" type="x-shader/x-fragment">
 precision mediump float;
 varying float light;
 void main() {
@@ -30,8 +30,8 @@ void main() {
   //gl_Position = projectionMatrix * modelViewMatrix * vec4(a_position,1.0);
   var bldgs = [ { p:[ [0,0],[25,0],[25,25],[0,25] ], h:4 } ]
     , c = $('#c')[0]
-    , fragSrc = $('#bldg-fragment').text()
-    , vertSrc = $('#bldg-vertex').text()
+    , fragSrc = $('#bldg-fs').text()
+    , vertSrc = $('#bldg-vs').text()
     , gl = c.getContext('experimental-webgl')
     , vPosBuf, v=[]
     , nPosBuf, n=[]

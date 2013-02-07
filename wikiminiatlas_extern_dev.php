@@ -28,7 +28,7 @@
 <? require( 'underscore-min.js' ); ?>
 <? require( 'glMatrix-0.9.5.custom.js' ); ?>
 <? require( 'webgl-utils_min.js' ); ?>
-<? require( 'wmaglobe3d_min.js' ); ?>
+<? require( 'wmaglobe3d.js' ); ?>
 <? require( 'wmajt_dev.js' ); ?>
 
 var wma_highzoom_activated = true;
@@ -1311,14 +1311,62 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
     //console.log('map rendering: ', t2.getTime()-t1.getTime(), 'ms' );
   }
 
-  function update3dBuildings_webgl_builder(c) {
+  function update3dBuildings_webgl_builder(gl) {
     // initialize shaders etc.
-    var s;
     return false; // if shaders do not compile
+
+    gl0,0,1,0);
+    gl.clearDepth(1.0);
+    gl.enable(gl.DEPTH_TEST);
+    gl.depthFunc(gl.LEQUAL);
+
+    // compile shaders
+    var program = gl.createProgram();
+    
+    var vshader = gl.createShader(gl.VERTEX_SHADER);
+    gl.shaderSource(vshader, $('#bldg-vs').text() );
+    gl.compileShader(vshader);
+    gl.attachShader(program, vshader);
+
+    var fshader = gl.createShader(gl.FRAGMENT_SHADER);
+    gl.shaderSource(fshader, $('#bldg-fs').text() );
+    gl.compileShader(fshader);
+    gl.attachShader(program, fshader);
+    
+    gl.linkProgram(program);
+    gl.useProgram(program);
+
+    program.vertexPosAttrib = gl.getAttribLocation(program, 'pos');
+    gl.enableVertexAttribArray(program.vertexPosAttrib);
+
+    program.normalPosAttrib = gl.getAttribLocation(program, 'norm');
+    gl.enableVertexAttribArray(program.normalPosAttrib);
+
+    var resolutionLocation = gl.getUniformLocation(program, "u_resolution");
+    var centerdegLocation = gl.getUniformLocation(program, "u_centerdeg");
+    var lightdirLocation = gl.getUniformLocation(program, "u_lightdir");
+    
+    var lx=3, ly=2, lz=5;
+    r = Math.sqrt(lx*lx+ly*ly+lz*lz);
+    gl.uniform3f(lightdirLocation, lx/r,ly/r,lz/r );
+
+    //gl.drawArrays( gl.TRIANGLES, 0, v.length/3 );
 
     return function() {
       // draw arrays
-      //c.drawArrays();
+      var dx = wma_width/2, dy = wma_height/2
+        , f0 = (128*1<<wma_zoom)/60.0
+        , ll = wmaXYToLatLon(wma_gx+dx,wma_gy+dy);
+
+      if( ll.lon > 180 ) { ll.lon -= 360.0 };
+
+      // set zoom and position
+      gl.uniform3f(resolutionLocation, w, h, 100);
+      gl.uniform3f(centerdegLocation, ll.lat,ll.lon, 0 );
+
+      // clear and render
+      gl.clear( gl.COLOR_BUFFER_BIT + gl.DEPTH_BUFFER_BIT );
+      wmajt.renderWebGLBuildingData(program);
     }
   }
 

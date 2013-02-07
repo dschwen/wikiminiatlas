@@ -656,7 +656,7 @@ var wmajt = (function(){
     glVArrList.push(a);
   }
 
-  function renderWebGLBuildingData(c) {
+  function renderWebGLBuildingData(program) {
     var i, l, b;
 
     // new data to be copied
@@ -672,7 +672,11 @@ var wmajt = (function(){
 
     l = glBufList.length-1;
     for( i=0; i<=l; ++i ) {
-      gl.bindBuffer( glBufList[i] );
+      gl.bindBuffer(gl.ARRAY_BUFFER, glNBufList[i] );
+      gl.vertexAttribPointer(program.normalPosAttrib, 3, gl.FLOAT, false, 0, 0);
+      gl.bindBuffer(gl.ARRAY_BUFFER, glVBufList[i] );
+      gl.vertexAttribPointer(program.vertexPosAttrib, 3, gl.FLOAT, false, 0, 0);
+
       drawArrays( gl.TRIANGLES, (i==l)?glO:glBufSize )
     }
   }
@@ -686,6 +690,7 @@ var wmajt = (function(){
     zbuild : function() {
       return zbuild;
     },
-    registerWebGLBuildingData : registerWebGLBuildingData
+    registerWebGLBuildingData : registerWebGLBuildingData,
+    renderWebGLBuildingData: renderWebGLBuildingData
   }
 })();

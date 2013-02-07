@@ -30,6 +30,7 @@ div.bsprite {
 #button_menu   { z-index:50; position:absolute; right:40px; top: 8px; width:18px; cursor:pointer; background-position: -140px 0; }
 #button_fs     { z-index:50; position:absolute; right:62px; top: 8px; width:18px; cursor:pointer; background-position: 0px 0; }
 #button_hide   { z-index:50; position:absolute; right:18px; top: 8px; width:18px; cursor:pointer; background-position: -100px 0; }
+#button_home   { z-index:30; position:absolute; left:10px; top: 54px; width:18px; cursor:pointer; background-position: -20px 0; }
 
 option.bg { background-color: #aaaaff }
 

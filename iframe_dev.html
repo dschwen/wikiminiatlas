@@ -7,7 +7,7 @@
 -->
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <link rel="stylesheet" href="wikiminiatlas_dev.css" type="text/css">
-<script id="shader-fs" type="x-shader/x-fragment">
+<script id="globe-fs" type="x-shader/x-fragment">
   precision mediump float;
 
   varying vec2 vTextureCoord;
@@ -20,7 +20,7 @@
     gl_FragColor = vec4(textureColor.rgb * vLightWeighting, textureColor.a);
   }
 </script>
-<script id="shader-vs" type="x-shader/x-vertex">
+<script id="globe-vs" type="x-shader/x-vertex">
   attribute vec3 aVertexPosition;
   attribute vec3 aVertexNormal;
   attribute vec2 aTextureCoord;
@@ -44,6 +44,27 @@
     vec3 transformedNormal = uNMatrix * aVertexNormal;
     float directionalLightWeighting = max(dot(transformedNormal, uLightingDirection), 0.0);
     vLightWeighting = uAmbientColor + uDirectionalColor * directionalLightWeighting;
+  }
+</script>
+<script id="bldg-vs" type="x-shader/x-vertex">
+  attribute vec3 pos;
+  attribute vec3 norm;
+  uniform vec3 u_resolution;
+  uniform vec3 u_centerdeg;
+  uniform vec3 u_lightdir;
+  varying float light;
+  void main() {
+    vec3 proj = (pos-u_centerdeg)/u_resolution;
+    proj *= vec3(1.0+proj[2],1.0+proj[2],-1.0);
+    gl_Position = vec4(proj,1.0);
+    light = dot(norm,u_lightdir)*0.5+0.5;
+  }
+</script>
+<script id="bldg-fs" type="x-shader/x-fragment">
+  precision mediump float;
+  varying float light;
+  void main() {
+    gl_FragColor = vec4(1.0, light, 1.0, 1.0);
   }
 </script>
 <script src="wikiminiatlas_extern_dev.php" type="text/javascript"></script>

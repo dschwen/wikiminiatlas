@@ -31,8 +31,8 @@ function wmaGlobe3d(canvas,textureCanvas) {
   var shaderProgram;
 
   function initShaders() {
-    var fragmentShader = getShader(gl, "shader-fs");
-    var vertexShader = getShader(gl, "shader-vs");
+    var fragmentShader = getShader(gl, "globe-fs");
+    var vertexShader = getShader(gl, "globe-vs");
 
     shaderProgram = gl.createProgram();
     gl.attachShader(shaderProgram, vertexShader);
