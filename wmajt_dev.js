@@ -712,7 +712,7 @@ var wmajt = (function(){
       gl.vertexAttribPointer(program.vertexPosAttrib, 3, gl.FLOAT, false, 0, 0);
 
       // number of vertices = glBufSize*3
-      gl.drawArrays( gl.TRIANGLES, 0, ((i==l)?glO:glBufSize)*3 )
+      gl.drawArrays( gl.TRIANGLES, 0, ((i==l)?glO:glBufSize)*3 );
     }
   }
 
@@ -772,7 +772,7 @@ var wmajt = (function(){
         vnPush( [ c[i][0],c[i][1],b, c[i+1][0],c[i+1][1],b, c[i][0],c[i][1],h ],
                 [ -dy,dx,0.0, -dy,dx,0.0, -dy,dx,0.0 ] );
         // triangle at roof level
-        vnPush( [ c[i][0],c[i][1],h, c[i+1][0],c[i+1][1],h, c[i+1][0],c[i+1][1],b ] 
+        vnPush( [ c[i][0],c[i][1],h, c[i+1][0],c[i+1][1],h, c[i+1][0],c[i+1][1],b ], 
                 [ -dy,dx,0.0, -dy,dx,0.0, -dy,dx,0.0 ] );
       }
     }

@@ -1,4 +1,7 @@
-<? ob_start("ob_gzhandler"); ?>
+<? 
+ob_start("ob_gzhandler"); 
+header('Content-type: text/javascript');
+?>
 /************************************************************************
  *
  * WikiMiniAtlas (c) 2006-2010 by Daniel Schwen
@@ -23,13 +26,15 @@
  ************************************************************************/
 
 // include minified jquery
-<? require( 'jquery-1.5.1.min.js' ); ?>
-<? require( 'json2min.js' ); ?>
-<? require( 'underscore-min.js' ); ?>
-<? require( 'glMatrix-0.9.5.custom.js' ); ?>
-<? require( 'webgl-utils_min.js' ); ?>
-<? require( 'wmaglobe3d.js' ); ?>
-<? require( 'wmajt_dev.js' ); ?>
+<? 
+require( 'jquery-1.5.1.min.js' ); 
+require( 'json2min.js' ); 
+require( 'underscore-min.js' ); 
+require( 'glMatrix-0.9.5.custom.js' ); 
+require( 'webgl-utils_min.js' ); 
+require( 'wmaglobe3d.js' ); 
+require( 'wmajt_dev.js' ); 
+?>
 
 var wma_highzoom_activated = true;
 var wma_highzoom_purge = false;
@@ -362,7 +367,7 @@ function wikiminiatlasInstall( wma_widget, url_params ) {
 
     // setup the globe
     wmaGlobeLoadTiles = (function(){
-      if( !hasCanvas ) { return function(){}; }
+      if( true || !hasCanvas ) { return function(){}; }
 
       var map = $('<canvas></canvas>').attr( { width: 6*128*4/3, height: 3*128*4/3 } ).css( { display: 'none' } ),
           tmap = $('<canvas></canvas>').attr( { width: 6*128, height: 3*128 } ).css( { display: 'none' } ),
@@ -1313,7 +1318,7 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
     wma_highzoom_purge = false;
 
     // draw buildings
-    update3dBuildings();
+    if( wma_zoom >= 14 ) update3dBuildings();
 
     // update KML overlay
     wmaDrawKML();
@@ -1372,9 +1377,10 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
       if( ll.lon > 180 ) { ll.lon -= 360.0 };
 
       // set zoom and position
-      gl.uniform3f(resolutionLocation, dx*f0, dy*f0, 100);
-      gl.uniform3f(centerdegLocation, ll.lat,ll.lon, 0 );
+      gl.uniform3f(resolutionLocation, dx*f0, dy*f0, 500);
+      gl.uniform3f(centerdegLocation, ll.lon,ll.lat, 0 );
 
+      console.log(ll.lat,ll.lon, dx*f0, dy*f0);
       // clear and render
       gl.clear( gl.COLOR_BUFFER_BIT + gl.DEPTH_BUFFER_BIT );
       wmajt.renderWebGLBuildingData(program);
