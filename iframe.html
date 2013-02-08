@@ -57,16 +57,17 @@
     vec3 proj = (pos-u_centerdeg)/u_resolution;
     proj *= vec3(1.0+proj[2],1.0+proj[2],-1.0);
     gl_Position = vec4(proj,1.0);
-    light = dot(norm,u_lightdir)*0.5+0.5;
+    light = dot(norm,u_lightdir)*0.25+0.75;
   }
 </script>
 <script id="bldg-fs" type="x-shader/x-fragment">
   precision mediump float;
   varying float light;
   void main() {
-    gl_FragColor = vec4(1.0, light, 1.0, 1.0);
+    gl_FragColor = vec4(light, light, light, 1.0);
   }
 </script>
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.0/jquery.min.js"></script>
 <script src="wikiminiatlas_extern.php" type="text/javascript"></script>
 </head>
 <body style="padding:0px;" onselectstart="return false">
