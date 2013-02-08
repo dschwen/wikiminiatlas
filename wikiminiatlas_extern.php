@@ -23,7 +23,7 @@
  ************************************************************************/
 
 // include minified jquery
-<? require( 'jquery-1.5.1.min.js' ); ?>
+<? require( 'min/jquery.min.js' ); ?>
 <? require( 'json2min.js' ); ?>
 <? require( 'underscore-min.js' ); ?>
 <? require( 'glMatrix-0.9.5.custom.js' ); ?>
