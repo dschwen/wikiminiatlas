@@ -681,9 +681,20 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
     if( hasCanvas ) { 
       // try to use webgl
       try {
-        bldg3dc = bldg3d.getContext("experimental-webgl");
+        console.log("WebGL ...");
+        bldg3dc = bldg3d[0].getContext("experimental-webgl");
+        console.log("WebGL context");
         update3dBuildings = update3dBuildings_webgl_builder(bldg3dc);
-      } catch (e) { bldg3dc=null; }
+        console.log("WebGL buildings!");
+      } catch (e) { 
+        bldg3dc=null; 
+        // replace canvas
+        bldg3d.remove();
+        bldg3d = $('<canvas class="wmakml"></canvas>')
+            .attr( { width: wma_width, height: wma_height } )
+            .css( { zIndex:19, opacity: 0.75 } )
+            .appendTo( $(wma_map) );
+      }
 
       // wireframe as fallback
       if( !bldg3dc || update3dBuildings===false ) {
@@ -1312,9 +1323,7 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
   }
 
   function update3dBuildings_webgl_builder(gl) {
-    // initialize shaders etc.
-    return false; // if shaders do not compile
-
+    // initialize building webgl module
     gl.clearColor(0,0,1,0);
     gl.clearDepth(1.0);
     gl.enable(gl.DEPTH_TEST);
