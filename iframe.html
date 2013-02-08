@@ -71,7 +71,9 @@
 <script src="wikiminiatlas_extern.php" type="text/javascript"></script>
 </head>
 <body style="padding:0px;" onselectstart="return false">
-<div id="wma_widget"></div>
+  <div id="wma_widget">
+    <img id="wmaspinner" src="http://upload.wikimedia.org/wikipedia/commons/4/42/Loading.gif">
+  </div>
 <script>
   $(function(){
     wikiminiatlasInstall($('#wma_widget'));
