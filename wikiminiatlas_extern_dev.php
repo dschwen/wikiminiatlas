@@ -1324,10 +1324,11 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
 
   function update3dBuildings_webgl_builder(gl) {
     // initialize building webgl module
-    gl.clearColor(0,0,1,0);
+    gl.clearColor(0,0,0,0.0);
     gl.clearDepth(1.0);
     gl.enable(gl.DEPTH_TEST);
     gl.depthFunc(gl.LEQUAL);
+    gl.clear( gl.COLOR_BUFFER_BIT + gl.DEPTH_BUFFER_BIT );
 
     // compile shaders
     var program = gl.createProgram();
@@ -1360,18 +1361,18 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
     gl.uniform3f(lightdirLocation, lx/r,ly/r,lz/r );
 
     // hold 5000 triangles per buffer
-    registerWebGLBuildingData( 5000, gl );
+    wmajt.registerWebGLBuildingData( 5000, gl );
 
     return function() {
       // draw arrays
       var dx = wma_width/2, dy = wma_height/2
-        , f0 = (128*1<<wma_zoom)/60.0
+        , f0 = 60.0/(128*1<<wma_zoom)
         , ll = wmaXYToLatLon(wma_gx+dx,wma_gy+dy);
 
       if( ll.lon > 180 ) { ll.lon -= 360.0 };
 
       // set zoom and position
-      gl.uniform3f(resolutionLocation, w, h, 100);
+      gl.uniform3f(resolutionLocation, dx*f0, dy*f0, 100);
       gl.uniform3f(centerdegLocation, ll.lat,ll.lon, 0 );
 
       // clear and render

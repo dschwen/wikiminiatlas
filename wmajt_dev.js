@@ -677,15 +677,16 @@ var wmajt = (function(){
   }
 
   function renderWebGLBuildingData(program) {
-    var i, l, vb, nb;
+    var i, l, vb, nb, s;
 
     // new data to be copied
     if( glArrList.length > glBufList.length || glI > glO ) {
       // copy data, add buffers (may more arrays than buffers!)
       // start at last entry in glBufList loop up till 
-      for( i=glBufList.length-1; i<glArrList.length; ++i ) {
+      s = glBufList.length-1; s=s<0?0:s; 
+      for( i=s; i<glArrList.length; ++i ) {
         // create new buffer
-        if( i>=glBufrList.length ) {
+        if( i>=glBufList.length ) {
           vb =  gl.createBuffer();
           nb =  gl.createBuffer();
           glBufList.push( { v: vb, n: nb } );
@@ -760,7 +761,7 @@ var wmajt = (function(){
     for( j=0; j<d.length; ++j ) {
       c = d[j];
       l = c.length;
-      for( i=0; i<l; i++ ) {
+      for( i=0; i<l-1; i++ ) {
         // normal vector (dx,dy,0) x (0,0,1)
         dx = c[i][0] - c[(i+1)%l][0];
         dy = c[i][1] - c[(i+1)%l][1];
@@ -875,7 +876,7 @@ var wmajt = (function(){
           x1 = c[(i+2)%l][0] - c[i][0];
           y0 = c[(i+1)%l][1] - c[i][1];
           y1 = c[(i+2)%l][1] - c[i][1];
-          if( x0*y1-x1*y0 < 0 ) continue;
+          if( x0*y1-x1*y0 > 0 ) continue;
 
           // assume success (debug) TODO no deed for %l on i+1
           vnPush( [ c[i][0],c[i][1],h, c[(i+1)%l][0],c[(i+1)%l][1],h, c[(i+2)%l][0],c[(i+2)%l][1],h ],
@@ -906,7 +907,7 @@ var wmajt = (function(){
     }
 
     // run earclip on a copy of d[0]
-    earClip(d0);
+    //earClip(d0);
   }
 
   return {
