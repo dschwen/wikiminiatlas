@@ -13,3 +13,4 @@ Features include:
 * Size comparison overlays
 * Article summary display
 
+Visit http://meta.wikimedia.org/wiki/WikiMiniAtlas for documentaion and licensing details.
