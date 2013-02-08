@@ -645,11 +645,8 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
     if( hasCanvas ) { 
       // try to use webgl
       try {
-        console.log("WebGL ...");
         bldg3dc = bldg3d[0].getContext("experimental-webgl");
-        console.log("WebGL context");
         update3dBuildings = update3dBuildings_webgl_builder(bldg3dc);
-        console.log("WebGL buildings!");
       } catch (e) { 
         bldg3dc=null; 
         // replace canvas
@@ -1339,7 +1336,6 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
       gl.uniform3f(resolutionLocation, dx*f0, dy*f0, 500);
       gl.uniform3f(centerdegLocation, ll.lon,ll.lat, 0 );
 
-      console.log(ll.lat,ll.lon, dx*f0, dy*f0);
       // clear and render
       gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT );
       wmajt.renderWebGLBuildingData(program);
@@ -1512,7 +1508,6 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
     case 109 : wmaZoomOut(); break;
     case 80 :
       wma_highzoom_purge = true;
-      console.log('purging current viewport'); 
       moveWikiMiniAtlasMapTo();
       break;
     case 79 : // o

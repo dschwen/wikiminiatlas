@@ -770,7 +770,7 @@ var wmajt = (function(){
   }
 
   function triangulate(d,b,h) { 
-    var v = [], n=[], d0, c, i, j, l, good, area;
+    var tr, d0, c, i, j, l, good, area;
 
     // setup walls
     for( j=0; j<d.length; ++j ) {
@@ -810,6 +810,31 @@ var wmajt = (function(){
       return;
     } 
 
+    // use poly2tri
+    var pc = [], ph=[];
+    c = d[0]; l = c.length-1;
+    for( i=0; i<l; i++ ) {
+      pc.push( new p2t.Point( c[i][0], c[i][1] ) )
+    }
+    var swctx = new p2t.SweepContext(pc);
+    for( j=1; j<d.length; ++j ) {
+      c = d[j]; l = c.length-1;
+      var hole=[];
+      for( i=0; i<l; i++ ) {
+        hole.push( new p2t.Point( c[i][0], c[i][1] ) )
+      }
+      swctx.AddHole(hole);
+    }
+    p2t.sweep.Triangulate(swctx);
+    tr = swctx.GetTriangles();
+    for( i=0; i<tr.length; ++i ) {
+      var tp = [ tr[i].GetPoint(0), tr[i].GetPoint(1), tr[i].GetPoint(2) ];
+      vnPush( [ tp[0].x,tp[0].y,h, tp[1].x,tp[1].y,h, tp[2].x,tp[2].y,h ],
+              [ 0,0,1, 0,0,1, 0,0,1 ]  );
+    }
+
+
+/*
     //
     // More complex triangulations
     // 
@@ -923,6 +948,7 @@ var wmajt = (function(){
 
     // run earclip on a copy of d[0]
     //earClip(d0);
+*/
   }
 
   return {
