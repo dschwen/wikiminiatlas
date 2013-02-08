@@ -29,8 +29,8 @@ header('Content-type: text/javascript');
 <? 
 require( 'jquery-1.5.1.min.js' ); 
 require( 'json2min.js' ); 
+require( 'utils.js' ); 
 require( 'glMatrix-0.9.5.custom.js' ); 
-//require( 'webgl-utils_min.js' ); 
 require( 'wmaglobe3d.js' ); 
 require( 'wmajt_dev.js' ); 
 ?>
@@ -366,7 +366,7 @@ function wikiminiatlasInstall( wma_widget, url_params ) {
 
     // setup the globe
     wmaGlobeLoadTiles = (function(){
-      if( true || !hasCanvas ) { return function(){}; }
+      if( !hasCanvas ) { return function(){}; }
 
       var map = $('<canvas></canvas>').attr( { width: 6*128*4/3, height: 3*128*4/3 } ).css( { display: 'none' } ),
           tmap = $('<canvas></canvas>').attr( { width: 6*128, height: 3*128 } ).css( { display: 'none' } ),
