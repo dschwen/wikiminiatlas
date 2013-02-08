@@ -27,12 +27,12 @@ header('Content-type: text/javascript');
 
 // include files
 <? 
+require( 'min/jquery.min.js' ); 
 require( 'min/json2.min.js' ); 
 require( 'min/utils.min.js' ); 
 require( 'min/glMatrix-0.9.5.custom.js' ); 
 require( 'min/wmaglobe3d.min.js' ); 
 require( 'min/poly2tri.min.js' );
-
 require( 'wikiminiatlas_i18n.inc' );
 
 if( false ) {
