@@ -6,8 +6,7 @@ var wmajt = (function(){
     , zbuild = {}
     , trackstartdate = false, trackzbuild = true
     , bx1,by1,bx2,by2,bw,bh              // used by update and mouse pointer interaction (current tile coords)
-    , glBufList, glBufSize, glI, glO, gl = null // used to build the webgl building buffers (glI is index to current buffer (last in list))
-
+    , glProgram, glBufList, glBufSize, glI, glO, gl = null // used to build the webgl building buffers (glI is index to current buffer (last in list))
     , dash = null
     , style = {
       Polygon: [
@@ -417,7 +416,6 @@ var wmajt = (function(){
     }
 
     t = mmin.tags || {};
-//console.log(t);
     // has name
     if( 'name' in t ) { 
       s = t.name; 
@@ -502,7 +500,7 @@ var wmajt = (function(){
   }
 
   function update(x,y,z,tile,purge) {
-    var c = tile.ctx;
+    var c = tile.ctx, glRedraw = false;
 
     // set globals for current tile coordinates
     bx1 = x*60.0/(1<<z)
@@ -646,6 +644,7 @@ var wmajt = (function(){
                 ref_z[v] = true;
                 v = d[idx[i]];
                 if( v.geo.type === 'Polygon' ) {
+                  glRedraw = true;
                   triangulate( v.geo.coordinates,
                     (v.tags['building:min_level']*3)||v.tags['min_height']||0,
                     (v.tags['building:levels']*3)||v.tags['height']
@@ -657,6 +656,7 @@ var wmajt = (function(){
         }
         
         tile.can.show();
+        if( glRedraw ) renderWebGLBuildingData();
         if( z< buildingzoom || zz >= buildingzoom ) return;
       }
       xx=Math.floor(xx/2);
@@ -673,11 +673,12 @@ var wmajt = (function(){
     });
   }
 
-  function registerWebGLBuildingData( triangleNum, context ) {
+  function registerWebGLBuildingData( triangleNum, context, program ) {
     glArrList = []; 
     glBufList = []; 
     glBufSize = triangleNum; // *9 floats
     gl = context;
+    glProgram = program;
     
     // setup first buffer array
     var va, na;
@@ -691,7 +692,7 @@ var wmajt = (function(){
     trackzbuild = false;
   }
 
-  function renderWebGLBuildingData(program) {
+  function renderWebGLBuildingData() {
     var i, l, vb, nb, s;
 
     // new data to be copied
@@ -722,9 +723,9 @@ var wmajt = (function(){
     l = glBufList.length-1;
     for( i=0; i<=l; ++i ) {
       gl.bindBuffer(gl.ARRAY_BUFFER, glBufList[i].n );
-      gl.vertexAttribPointer(program.normalPosAttrib, 3, gl.FLOAT, false, 0, 0);
+      gl.vertexAttribPointer(glProgram.normalPosAttrib, 3, gl.FLOAT, false, 0, 0);
       gl.bindBuffer(gl.ARRAY_BUFFER, glBufList[i].v );
-      gl.vertexAttribPointer(program.vertexPosAttrib, 3, gl.FLOAT, false, 0, 0);
+      gl.vertexAttribPointer(glProgram.vertexPosAttrib, 3, gl.FLOAT, false, 0, 0);
 
       // number of vertices = glBufSize*3
       gl.drawArrays( gl.TRIANGLES, 0, ((i==l)?glO:glBufSize)*3 );
@@ -799,11 +800,10 @@ var wmajt = (function(){
       c=d[0];
       // c.length must be at least 4!
       if( c.length == 4 ) {
-        //console.log('triangle');
         vnPush( [ c[0][0],c[0][1],h, c[1][0],c[1][1],h, c[2][0],c[2][1],h ],
                 [ 0,0,1, 0,0,1, 0,0,1 ] );
       } else {
-        //console.log('quad');
+        // TODO: not valid for arbitrary concave quads!
         vnPush( [ c[0][0],c[0][1],h, c[1][0],c[1][1],h, c[2][0],c[2][1],h, c[0][0],c[0][1],h, c[2][0],c[2][1],h, c[3][0],c[3][1],h ],
                 [ 0,0,1, 0,0,1, 0,0,1, 0,0,1, 0,0,1, 0,0,1 ]  );
       }
@@ -834,121 +834,6 @@ var wmajt = (function(){
     }
 
 
-/*
-    //
-    // More complex triangulations
-    // 
-
-    // enforce winding order
-    for( j=0; j<d.length; ++j ) {
-      c = d[j]; l = c.length - 1;
-      area = 0;
-      for( i=0; i<l-1; i++ ) {
-        area += (c[i][0] * c[i+1][1]) - (c[i+1][0] * c[i][1]);
-      }
-
-      // set consistent winding order (opposite for outer and holes)
-      if( j==0 ) {
-        if( area>0 ) { c.reverse(); }
-        //c.strokeStyle = 'rgb(0,0,255)';
-      } else { 
-        if( area<0 ) { c.reverse(); }
-        //c.strokeStyle = 'rgb(255,0,0)';
-      }
-      
-      //draw(dj);
-      //console.log(area);
-    }
-
-    // holes present? 
-    if( d.length > 1 ) {
-      // incorporate holes
-      var nodes = [];
-      d0 = d[0].concat();
-      for( j=1; j<d.length-1; ++j ) {
-        var dj = d[j];
-        for( i=0; i<d0.length-1; ++i ) {
-          for( k=0; k<dj.length; ++k ) {
-          }
-        }
-      }
-    } else {
-      // no holes, try if the polygon is convex 
-      // (or at least  representable as a triangle fan around node 0)
-      function turn(c,i) {
-        var x1 = c[i][0] - c[0][0]
-          , y1 = c[i][1] - c[0][1]
-          , x2 = c[i+1][0] - c[0][0]
-          , y2 = c[i+1][1] - c[0][1];
-        return (x1*y2-y1*x2)>0;
-      }
-      c = d[0]; l = c.length; j=0;
-      area = turn(c,1), good=true;
-      for( i=2; i<l-2; ++i ) {
-        if( turn(c,i) != area ) {
-          good = false;
-          break;
-        }
-      }
-      // simple convex polygon!
-      if(good) {
-        //console.log("konvex polygon!");
-        for( i=1; i<l-2; ++i ) {
-          vnPush( [ c[0][0],c[0][1],h, c[i][0],c[i][1],h, c[i+1][0],c[i+1][1],h ],
-                  [ 0,0,1, 0,0,1, 0,0,1 ] );
-        }
-        return v;
-      }
-      // polygon is concave continue with the heavy stuff! :-(
-      d0 = d[0].concat();
-    }
-    
-    // ear clipping
-    function earClip(c) {
-      var l, x0,x1,y0,y1;
-      // pretend length is actuallength-1 to skip last redundant point
-      while( (l=c.length-1) >= 3 ) {
-        for( i=0; i<l; ++i ) {
-          // test triangle i,i+1,i+2
-
-          // triangle area inside or outside polygon?
-          x0 = c[(i+1)%l][0] - c[i][0];
-          x1 = c[(i+2)%l][0] - c[i][0];
-          y0 = c[(i+1)%l][1] - c[i][1];
-          y1 = c[(i+2)%l][1] - c[i][1];
-          if( x0*y1-x1*y0 > 0 ) continue;
-
-          // assume success (debug) TODO no deed for %l on i+1
-          vnPush( [ c[i][0],c[i][1],h, c[(i+1)%l][0],c[(i+1)%l][1],h, c[(i+2)%l][0],c[(i+2)%l][1],h ],
-                  [ 0,0,1, 0,0,1, 0,0,1 ] );
-          c.splice((i+1)%l,1);
-          break;
-
-          // bounding box
-          x0 = Math.min( c[i][0], Math.min(c[(i+1)%l][0], c[(i+2)%l][0] ) );
-          y0 = Math.min( c[i][1], Math.min(c[(i+1)%l][1], c[(i+2)%l][1] ) );
-          x1 = Math.max( c[i][0], Math.max(c[(i+1)%l][0], c[(i+2)%l][0] ) );
-          y1 = Math.max( c[i][1], Math.max(c[(i+1)%l][1], c[(i+2)%l][1] ) );
-
-          // check of any of the points [i+j] lie inside the triangle
-          var bad = false;
-          for( j=3; j<l; ++j ) {
-            // outside of bounding box, skip more complicated test
-            if( c[(i+j)%l][0]<x0 || c[(i+j)%l][0]>x1 || c[(i+j)%l][1]<y0 || c[(i+j)%l][1]>y1 ) continue;
-
-            // inside of bbox, test more careful
-
-          }
-
-          // not a good "ear"
-          if(bad) continue;
-        }
-      }
-    }
-
-    // run earclip on a copy of d[0]
-    //earClip(d0);
-*/
   }
 
   return {
