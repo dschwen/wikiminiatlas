@@ -230,6 +230,21 @@ var wmajt = (function(){
       ]
     };  
 
+
+  function union(a1,a2) {
+    var a=a1.concat(a2), r = [], s = {};
+    for( i in a ) {
+      if( a.hasOwnProperty(i) ) {
+        if( !(a[i] in s) ) {
+          s[a[i]]=true;
+          r.push(a[i]);
+        }
+      }
+    }
+    return r;
+  };
+  
+
   function hash(x,y,z) {
     return x+'_'+y+'_'+z;
   }
@@ -570,7 +585,7 @@ var wmajt = (function(){
           }
           // union index
           if( trackzbuild && z>buildingzoom ) {
-            idx = _.union( tile.csca.idx['building:levels']||[], tile.csca.idx['height']||[] );
+            idx = union( tile.csca.idx['building:levels']||[], tile.csca.idx['height']||[] );
             //if( z>buildingzoom && 'building:levels' in tile.csca.idx ) {
             //  idx = tile.csca.idx['building:levels']
             for(i=0; i<idx.length; ++i ) {
@@ -606,7 +621,7 @@ var wmajt = (function(){
         //if( z>buildingzoom && 'building:levels' in ca.idx ) {
         // union index
         if( trackzbuild && z>buildingzoom ) {
-          idx = _.union( ca.idx['building:levels']||[], ca.idx['height']||[] );
+          idx = union( ca.idx['building:levels']||[], ca.idx['height']||[] );
           //idx = ca.idx['building:levels']
           for(i=0; i<idx.length; ++i ) {
             if( 'osm_id' in d[idx[i]].tags ) {
@@ -623,7 +638,7 @@ var wmajt = (function(){
         //  add the building to the WebGL buffer
         //  otherwise do nothing
         if( gl !== null ) {
-          idx = _.union( ca.idx['building:levels']||[], ca.idx['height']||[] );
+          idx = union( ca.idx['building:levels']||[], ca.idx['height']||[] );
           for(i=0; i<idx.length; ++i ) {
             if( 'osm_id' in d[idx[i]].tags ) {
               v = d[idx[i]].tags['osm_id'];

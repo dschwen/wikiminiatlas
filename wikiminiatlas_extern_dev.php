@@ -29,9 +29,8 @@ header('Content-type: text/javascript');
 <? 
 require( 'jquery-1.5.1.min.js' ); 
 require( 'json2min.js' ); 
-require( 'underscore-min.js' ); 
 require( 'glMatrix-0.9.5.custom.js' ); 
-require( 'webgl-utils_min.js' ); 
+//require( 'webgl-utils_min.js' ); 
 require( 'wmaglobe3d.js' ); 
 require( 'wmajt_dev.js' ); 
 ?>
@@ -866,8 +865,7 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
       // 3D building canvas
       bldg3d.attr( { width: nw, height: nh } );
       // set webgle viewport (does nothing for 2d context)
-      bldg3dc.viewportWidth = nw;
-      bldg3dc.viewportHeight = nh;
+      if( bldg3dc.viewport ) bldg3dc.viewport(0,0,nw,nh);
 
       // TODO: resize overlay canvas!
     }
@@ -1332,6 +1330,7 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
     gl.clearColor(0,0,0,0.0);
     gl.clearDepth(1.0);
     gl.enable(gl.DEPTH_TEST);
+    gl.depthMask(true);
     gl.depthFunc(gl.LEQUAL);
     gl.clear( gl.COLOR_BUFFER_BIT + gl.DEPTH_BUFFER_BIT );
 
@@ -1382,7 +1381,7 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
 
       console.log(ll.lat,ll.lon, dx*f0, dy*f0);
       // clear and render
-      gl.clear( gl.COLOR_BUFFER_BIT + gl.DEPTH_BUFFER_BIT );
+      gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT );
       wmajt.renderWebGLBuildingData(program);
     }
   }
