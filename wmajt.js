@@ -1,10 +1,13 @@
 var wmajt = (function(){
-  var w=128,h=128
+  var w=128, h=128  // tile size
     , minzoom = 12, buildingzoom = 14
     , cache = {}
     , ref_sd = {}, ref_z = {}
     , zbuild = {}
-    , bx1,by1,bx2,by2,bw,bh // used by update and mouse pointer interaction (current tile coords)
+    , trackstartdate = false, trackzbuild = true
+    , bx1,by1,bx2,by2,bw,bh              // used by update and mouse pointer interaction (current tile coords)
+    , glBufList, glBufSize, glI, glO, gl = null // used to build the webgl building buffers (glI is index to current buffer (last in list))
+
     , dash = null
     , style = {
       Polygon: [
@@ -105,7 +108,7 @@ var wmajt = (function(){
         ['building:part',true,
           [ { fillStyle: "rgb(200,200,200)" },
             { lineWidth: 1, strokeStyle: "rgb(127,127,127)" } ]
-        ],
+        ]
         /*['building:height',true,
           [ { lineWidth: 5, strokeStyle: "rgb(255,0,0)" } ]
         ],
@@ -115,9 +118,9 @@ var wmajt = (function(){
         ['building:min_level',true,
           [ { lineWidth: 1.5, strokeStyle: "rgb(0,0,255)" } ]
         ],*/
-        ['start_date',true,
+        /*['start_date',true,
           [ { dash: [2,5], lineWidth: 3, strokeStyle: "rgb(255,0,0)" } ]
-        ]
+        ]*/
       ],
       LineString: [
         ['waterway',{canal:1},
@@ -226,6 +229,21 @@ var wmajt = (function(){
         ]
       ]
     };  
+
+
+  function union(a1,a2) {
+    var a=a1.concat(a2), r = [], s = {};
+    for( i in a ) {
+      if( a.hasOwnProperty(i) ) {
+        if( !(a[i] in s) ) {
+          s[a[i]]=true;
+          r.push(a[i]);
+        }
+      }
+    }
+    return r;
+  };
+  
 
   function hash(x,y,z) {
     return x+'_'+y+'_'+z;
@@ -548,7 +566,7 @@ var wmajt = (function(){
     tile.csz = z;
 
     // seach cache for data
-    var zz, xx=x, yy=y, ca, d,v, idx, trackstartdate = false;
+    var zz, xx=x, yy=y, ca, d,v, idx;
     for( zz=z; zz>=minzoom; zz-- ) {
       ca = cache[hash(xx,yy,zz)];
       if( ca && ca.data && !purge ) {
@@ -566,8 +584,8 @@ var wmajt = (function(){
             }
           }
           // union index
-          if( z>buildingzoom ) {
-            idx = _.union( tile.csca.idx['building:levels']||[], tile.csca.idx['height']||[] );
+          if( trackzbuild && z>buildingzoom ) {
+            idx = union( tile.csca.idx['building:levels']||[], tile.csca.idx['height']||[] );
             //if( z>buildingzoom && 'building:levels' in tile.csca.idx ) {
             //  idx = tile.csca.idx['building:levels']
             for(i=0; i<idx.length; ++i ) {
@@ -602,8 +620,8 @@ var wmajt = (function(){
         // and a lookup table of buildings by osm_id
         //if( z>buildingzoom && 'building:levels' in ca.idx ) {
         // union index
-        if( z>buildingzoom ) {
-          idx = _.union( ca.idx['building:levels']||[], ca.idx['height']||[] );
+        if( trackzbuild && z>buildingzoom ) {
+          idx = union( ca.idx['building:levels']||[], ca.idx['height']||[] );
           //idx = ca.idx['building:levels']
           for(i=0; i<idx.length; ++i ) {
             if( 'osm_id' in d[idx[i]].tags ) {
@@ -611,6 +629,28 @@ var wmajt = (function(){
               ref_z[v] = (ref_z[v]||0) + 1;
               if( !(v in zbuild ) ) {
                 zbuild[v] = d[idx[i]];
+              }
+            }
+          }
+        }
+        // Hook for WebGL buildings:
+        //  just increment ref_z if ref_z is 0 (before the increment)
+        //  add the building to the WebGL buffer
+        //  otherwise do nothing
+        if( gl !== null ) {
+          idx = union( ca.idx['building:levels']||[], ca.idx['height']||[] );
+          for(i=0; i<idx.length; ++i ) {
+            if( 'osm_id' in d[idx[i]].tags ) {
+              v = d[idx[i]].tags['osm_id'];
+              if( !( v in ref_z ) ) {
+                ref_z[v] = true;
+                v = d[idx[i]];
+                if( v.geo.type === 'Polygon' ) {
+                  triangulate( v.geo.coordinates,
+                    (v.tags['building:min_level']*3)||v.tags['min_height']||0,
+                    (v.tags['building:levels']*3)||v.tags['height']
+                  );
+                }
               }
             }
           }
@@ -633,6 +673,284 @@ var wmajt = (function(){
     });
   }
 
+  function registerWebGLBuildingData( triangleNum, context ) {
+    glArrList = []; 
+    glBufList = []; 
+    glBufSize = triangleNum; // *9 floats
+    gl = context;
+    
+    // setup first buffer array
+    var va, na;
+    glI = 0;
+    glO = 0;
+    va = new Float32Array(glBufSize*9);
+    na = new Float32Array(glBufSize*9);
+    glArrList.push( { v:va, n:na } );
+
+    // switch off the visible building tracking needed for canvas
+    trackzbuild = false;
+  }
+
+  function renderWebGLBuildingData(program) {
+    var i, l, vb, nb, s;
+
+    // new data to be copied
+    if( glArrList.length > glBufList.length || glI > glO ) {
+      // copy data, add buffers (may more arrays than buffers!)
+      // start at last entry in glBufList loop up till 
+      s = glBufList.length-1; s=s<0?0:s; 
+      for( i=s; i<glArrList.length; ++i ) {
+        // create new buffer
+        if( i>=glBufList.length ) {
+          vb =  gl.createBuffer();
+          nb =  gl.createBuffer();
+          glBufList.push( { v: vb, n: nb } );
+        } else {
+          vb = glBufList[i].v;
+          nb = glBufList[i].n;
+        }
+
+        gl.bindBuffer(gl.ARRAY_BUFFER, vb );
+        gl.bufferData( gl.ARRAY_BUFFER, glArrList[i].v, gl.STATIC_DRAW );
+        gl.bindBuffer(gl.ARRAY_BUFFER, nb );
+        gl.bufferData( gl.ARRAY_BUFFER, glArrList[i].n, gl.STATIC_DRAW );
+      }
+
+      glO = glI;
+    }
+
+    l = glBufList.length-1;
+    for( i=0; i<=l; ++i ) {
+      gl.bindBuffer(gl.ARRAY_BUFFER, glBufList[i].n );
+      gl.vertexAttribPointer(program.normalPosAttrib, 3, gl.FLOAT, false, 0, 0);
+      gl.bindBuffer(gl.ARRAY_BUFFER, glBufList[i].v );
+      gl.vertexAttribPointer(program.vertexPosAttrib, 3, gl.FLOAT, false, 0, 0);
+
+      // number of vertices = glBufSize*3
+      gl.drawArrays( gl.TRIANGLES, 0, ((i==l)?glO:glBufSize)*3 );
+    }
+  }
+
+  // push vertex coordinates and normals into the Float32Arrays
+  function vnPush(v,n) {
+    // assert v.length = n.length
+    var l = v.length/9, s=glBufSize, i, j, k, n;
+
+    // entire array fits into current buffer
+    i = glArrList.length-1;
+    if( glI+l <= s ) {
+      glArrList[i].v.set( v, glI*9 );
+      glArrList[i].n.set( n, glI*9 );
+      glI += l;
+    } else {
+      // copy as much as fits, then make new array and continue
+      for( j=0; j<l; ++j ) {
+        // copy triangle
+        for( k=0; k<9; ++k ) {
+          glArrList[i].v[glI*9+k] = v[j*9+k];
+        }
+
+        // increment pointer
+        glI++;
+
+        // end of array
+        if( glI == s ) {
+          glI = 0;
+          glArrList.push( { v:new Float32Array(glBufSize*9), n:new Float32Array(glBufSize*9) } );
+          i++;
+        }
+      }
+    }
+
+    // is last buffer filled up?
+    if( glI == s ) {
+      glI = 0;
+      glArrList.push( { v:new Float32Array(glBufSize*9), n:new Float32Array(glBufSize*9) } );
+    }
+  }
+
+  function triangulate(d,b,h) { 
+    var tr, d0, c, i, j, l, good, area;
+
+    // setup walls
+    for( j=0; j<d.length; ++j ) {
+      c = d[j];
+      l = c.length;
+      for( i=0; i<l-1; i++ ) {
+        // normal vector (dx,dy,0) x (0,0,1)
+        dx = c[i][0] - c[(i+1)%l][0];
+        dy = c[i][1] - c[(i+1)%l][1];
+        r = Math.sqrt(dx*dx+dy*dy);
+        dx /= r; dy /= r;
+
+        // triangle at base level
+        vnPush( [ c[i][0],c[i][1],b, c[i+1][0],c[i+1][1],b, c[i][0],c[i][1],h ],
+                [ -dy,dx,0.0, -dy,dx,0.0, -dy,dx,0.0 ] );
+        // triangle at roof level
+        vnPush( [ c[i][0],c[i][1],h, c[i+1][0],c[i+1][1],h, c[i+1][0],c[i+1][1],b ], 
+                [ -dy,dx,0.0, -dy,dx,0.0, -dy,dx,0.0 ] );
+      }
+    }
+
+    // note that the first and last point are always the same
+    // thus a triangle has 4 points!
+    if( d.length === 1 && d[0].length <= 5 ) {
+      // simple triangulations
+      c=d[0];
+      // c.length must be at least 4!
+      if( c.length == 4 ) {
+        //console.log('triangle');
+        vnPush( [ c[0][0],c[0][1],h, c[1][0],c[1][1],h, c[2][0],c[2][1],h ],
+                [ 0,0,1, 0,0,1, 0,0,1 ] );
+      } else {
+        //console.log('quad');
+        vnPush( [ c[0][0],c[0][1],h, c[1][0],c[1][1],h, c[2][0],c[2][1],h, c[0][0],c[0][1],h, c[2][0],c[2][1],h, c[3][0],c[3][1],h ],
+                [ 0,0,1, 0,0,1, 0,0,1, 0,0,1, 0,0,1, 0,0,1 ]  );
+      }
+      return;
+    } 
+
+    // use poly2tri
+    var pc = [], ph=[];
+    c = d[0]; l = c.length-1;
+    for( i=0; i<l; i++ ) {
+      pc.push( new p2t.Point( c[i][0], c[i][1] ) )
+    }
+    var swctx = new p2t.SweepContext(pc);
+    for( j=1; j<d.length; ++j ) {
+      c = d[j]; l = c.length-1;
+      var hole=[];
+      for( i=0; i<l; i++ ) {
+        hole.push( new p2t.Point( c[i][0], c[i][1] ) )
+      }
+      swctx.AddHole(hole);
+    }
+    p2t.sweep.Triangulate(swctx);
+    tr = swctx.GetTriangles();
+    for( i=0; i<tr.length; ++i ) {
+      var tp = [ tr[i].GetPoint(0), tr[i].GetPoint(1), tr[i].GetPoint(2) ];
+      vnPush( [ tp[0].x,tp[0].y,h, tp[1].x,tp[1].y,h, tp[2].x,tp[2].y,h ],
+              [ 0,0,1, 0,0,1, 0,0,1 ]  );
+    }
+
+
+/*
+    //
+    // More complex triangulations
+    // 
+
+    // enforce winding order
+    for( j=0; j<d.length; ++j ) {
+      c = d[j]; l = c.length - 1;
+      area = 0;
+      for( i=0; i<l-1; i++ ) {
+        area += (c[i][0] * c[i+1][1]) - (c[i+1][0] * c[i][1]);
+      }
+
+      // set consistent winding order (opposite for outer and holes)
+      if( j==0 ) {
+        if( area>0 ) { c.reverse(); }
+        //c.strokeStyle = 'rgb(0,0,255)';
+      } else { 
+        if( area<0 ) { c.reverse(); }
+        //c.strokeStyle = 'rgb(255,0,0)';
+      }
+      
+      //draw(dj);
+      //console.log(area);
+    }
+
+    // holes present? 
+    if( d.length > 1 ) {
+      // incorporate holes
+      var nodes = [];
+      d0 = d[0].concat();
+      for( j=1; j<d.length-1; ++j ) {
+        var dj = d[j];
+        for( i=0; i<d0.length-1; ++i ) {
+          for( k=0; k<dj.length; ++k ) {
+          }
+        }
+      }
+    } else {
+      // no holes, try if the polygon is convex 
+      // (or at least  representable as a triangle fan around node 0)
+      function turn(c,i) {
+        var x1 = c[i][0] - c[0][0]
+          , y1 = c[i][1] - c[0][1]
+          , x2 = c[i+1][0] - c[0][0]
+          , y2 = c[i+1][1] - c[0][1];
+        return (x1*y2-y1*x2)>0;
+      }
+      c = d[0]; l = c.length; j=0;
+      area = turn(c,1), good=true;
+      for( i=2; i<l-2; ++i ) {
+        if( turn(c,i) != area ) {
+          good = false;
+          break;
+        }
+      }
+      // simple convex polygon!
+      if(good) {
+        //console.log("konvex polygon!");
+        for( i=1; i<l-2; ++i ) {
+          vnPush( [ c[0][0],c[0][1],h, c[i][0],c[i][1],h, c[i+1][0],c[i+1][1],h ],
+                  [ 0,0,1, 0,0,1, 0,0,1 ] );
+        }
+        return v;
+      }
+      // polygon is concave continue with the heavy stuff! :-(
+      d0 = d[0].concat();
+    }
+    
+    // ear clipping
+    function earClip(c) {
+      var l, x0,x1,y0,y1;
+      // pretend length is actuallength-1 to skip last redundant point
+      while( (l=c.length-1) >= 3 ) {
+        for( i=0; i<l; ++i ) {
+          // test triangle i,i+1,i+2
+
+          // triangle area inside or outside polygon?
+          x0 = c[(i+1)%l][0] - c[i][0];
+          x1 = c[(i+2)%l][0] - c[i][0];
+          y0 = c[(i+1)%l][1] - c[i][1];
+          y1 = c[(i+2)%l][1] - c[i][1];
+          if( x0*y1-x1*y0 > 0 ) continue;
+
+          // assume success (debug) TODO no deed for %l on i+1
+          vnPush( [ c[i][0],c[i][1],h, c[(i+1)%l][0],c[(i+1)%l][1],h, c[(i+2)%l][0],c[(i+2)%l][1],h ],
+                  [ 0,0,1, 0,0,1, 0,0,1 ] );
+          c.splice((i+1)%l,1);
+          break;
+
+          // bounding box
+          x0 = Math.min( c[i][0], Math.min(c[(i+1)%l][0], c[(i+2)%l][0] ) );
+          y0 = Math.min( c[i][1], Math.min(c[(i+1)%l][1], c[(i+2)%l][1] ) );
+          x1 = Math.max( c[i][0], Math.max(c[(i+1)%l][0], c[(i+2)%l][0] ) );
+          y1 = Math.max( c[i][1], Math.max(c[(i+1)%l][1], c[(i+2)%l][1] ) );
+
+          // check of any of the points [i+j] lie inside the triangle
+          var bad = false;
+          for( j=3; j<l; ++j ) {
+            // outside of bounding box, skip more complicated test
+            if( c[(i+j)%l][0]<x0 || c[(i+j)%l][0]>x1 || c[(i+j)%l][1]<y0 || c[(i+j)%l][1]>y1 ) continue;
+
+            // inside of bbox, test more careful
+
+          }
+
+          // not a good "ear"
+          if(bad) continue;
+        }
+      }
+    }
+
+    // run earclip on a copy of d[0]
+    //earClip(d0);
+*/
+  }
+
   return {
     update: update,
     detectPointer: detectPointer,
@@ -641,6 +959,8 @@ var wmajt = (function(){
     },
     zbuild : function() {
       return zbuild;
-    }
+    },
+    registerWebGLBuildingData : registerWebGLBuildingData,
+    renderWebGLBuildingData: renderWebGLBuildingData
   }
 })();
