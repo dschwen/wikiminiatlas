@@ -32,6 +32,8 @@ div.bsprite {
 #button_hide   { z-index:50; position:absolute; right:18px; top: 8px; width:18px; cursor:pointer; background-position: -100px 0; }
 #button_home   { z-index:30; position:absolute; left:10px; top: 54px; width:18px; cursor:pointer; background-position: -20px 0; }
 
+#wmaspinner { position:absolute; margin: -9px 0 0 -9px; left: 50%; top: 50% }
+
 option.bg { background-color: #aaaaff }
 
 #wma_wmaci_link
