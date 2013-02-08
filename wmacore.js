@@ -1,6 +1,7 @@
 var wma_highzoom_activated = true;
 var wma_highzoom_purge = false;
-var bldg3d, bldg3dc = null, bldg3dtimer = null; // move to appropriate scope
+var wma_bldg3dzoom = 14;
+var bldg3d = null, bldg3dc = null, bldg3dtimer = null; // move to appropriate scope
 var update3dBuildings;
 var credit; // move to appropriate scope
 var wmaNews = []; // array of news item actions (needs to be global)
@@ -424,10 +425,11 @@ function wikiminiatlasInstall( wma_widget, url_params ) {
      if( coord_filter.test(coord_params) ) {
       coord_filter.exec(coord_params);
       wma_defaultzoom = parseInt( RegExp.$6, 10 );
-      wma_zoom = wma_defaultzoom;
+      wmaSetZoom(wma_defaultzoom);
       // make sure zoom is in range
-      wma_zoom = Math.min( wma_zoom, ( wma_tileset != 0 ? wma_tilesets[wma_tileset].maxzoom : ((hasCanvas&&wma_highzoom_activated)?15:12) ) );
-      wma_zoom = Math.max( wma_zoom, wma_tilesets[wma_tileset].minzoom );
+      wmaSetZoom( Math.min( wma_zoom, 
+            ( wma_tileset != 0 ? wma_tilesets[wma_tileset].maxzoom : ((hasCanvas&&wma_highzoom_activated)?15:12) ) ) );
+      wmaSetZoom( Math.max( wma_zoom, wma_tilesets[wma_tileset].minzoom ) );
      }
 
      coord_filter = /([\d+-.]+)_([\d+-.]+)_([\d]+)_([\d]+)_([a-z]+)_([\d]+)_([a-z]+)/;
@@ -597,7 +599,7 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
     wmaNews[0] = function() { wmaSelectTileset(4); };
     wmaNews[1] = function() { 
       if( hasCanvas ) {
-        wma_gx=19039255; wma_gy=3363704; wma_zoom=15; wmaSelectTileset(0); 
+        wma_gx=19039255; wma_gy=3363704; wmaSetZoom(15); wmaSelectTileset(0); 
       } else {
         news.text('Sorry, your browser does not support the canvas element! Try FireFox or Google Chrome.');
       }
@@ -821,7 +823,7 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
       }
       // 3D building canvas
       bldg3d.attr( { width: nw, height: nh } );
-      // set webgle viewport (does nothing for 2d context)
+      // set webgl viewport 
       if( bldg3dc.viewport ) bldg3dc.viewport(0,0,nw,nh);
 
       // TODO: resize overlay canvas!
@@ -1273,7 +1275,7 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
     wma_highzoom_purge = false;
 
     // draw buildings
-    if( wma_zoom >= 14 ) update3dBuildings();
+    if( wma_zoom >= wma_bldg3dzoom ) update3dBuildings();
 
     // update KML overlay
     wmaDrawKML();
@@ -1343,7 +1345,7 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
   }
 
   function update3dBuildings_canvas() {
-    if( hasCanvas && wma_zoom > 14 ) {
+    if( hasCanvas && wma_zoom > wma_bldg3dzoom ) {
       var ref = wmajt.ref_z()
         , bui = wmajt.zbuild()
         , dx = wma_width/2, dy = wma_height/2
@@ -1465,6 +1467,18 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
     if( noticehandler ) clearTimeout(noticehandler);
     labelcaption.stop(true).fadeTo(1,1).text(s);
     noticehandler = setTimeout( function(){ labelcaption.fadeOut(200); }, 5000 );
+  }
+
+  function wmaSetZoom(z) {
+    wma_zoom = z;
+
+    // building layer
+    if( bldg3d ) {
+      if( z >= wma_bldg3dzoom ) 
+        { bldg3d.show(); } 
+      else
+        { bldg3d.hide(); }
+    }
   }
 
   function wmaSetSizeOverlay(lang,page) {
@@ -1605,16 +1619,16 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
 
    if( rightclick ) {
      if( hasCanvas && wma_highzoom_activated ) {
-       wma_zoom = ( wma_tileset==0 ) ? 15 : wma_tilesets[wma_tileset].maxzoom;
+       wmaSetZoom( ( wma_tileset==0 ) ? 15 : wma_tilesets[wma_tileset].maxzoom );
      } else {
-       wma_zoom = ( wma_tileset==0 ) ? 12 : wma_tilesets[wma_tileset].maxzoom;
+       wmaSetZoom( ( wma_tileset==0 ) ? 12 : wma_tilesets[wma_tileset].maxzoom );
      }
    }
    else {
     if( wma_zoom >= ( ( wma_tileset==0 && !( hasCanvas && wma_highzoom_activated ) ) ? 12 : wma_tilesets[wma_tileset].maxzoom ) ) {
      //tilesetUpgrade();
     }
-    else wma_zoom++;
+    else wmaSetZoom( wma_zoom+1);
    }
 
    var newcoords;
@@ -1642,12 +1656,12 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
    }
 
    if( rightclick ) {
-    wma_zoom = wma_tilesets[wma_tileset].minzoom;
+    wmaSetZoom( wma_tilesets[wma_tileset].minzoom );
    } else {
     if( wma_zoom <= wma_tilesets[wma_tileset].minzoom ) {
      tilesetDowngrade();
     } 
-    else wma_zoom--;
+    else wmaSetZoom( wma_zoom-1);
    }
 
    var newcoords = wmaLatLonToXY(mapcenter.lat,mapcenter.lon);
@@ -1680,7 +1694,7 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
     // keep map centered
     if( wma_zoom != newz ) {
       var mapcenter = wmaXYToLatLon(wma_gx+wma_width/2,wma_gy+wma_height/2);
-      wma_zoom = newz;
+      wmaSetZoom(newz);
       var newcoords = wmaLatLonToXY(mapcenter.lat,mapcenter.lon);
       wma_gx = newcoords.x-wma_width/2;
       wma_gy = newcoords.y-wma_height/2;
@@ -1835,7 +1849,7 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
       , globe = wma_tilesets[wma_tileset].globe
       , mapcenter = wmaXYToLatLon( wma_gx + wma_width / 2, wma_gy + wma_height / 2 );
 
-    fs.document.location = 'iframe.html' + '?' + marker.lat + '_' + marker.lon + '_' + 0 + '_' + 0 + '_' + 
+    fs.document.location = document.location.pathname + '?' + marker.lat + '_' + marker.lon + '_' + 0 + '_' + 0 + '_' + 
       wma_site + '_' + wma_zoom + '_' + wma_language + '_' + mapcenter.lat + '_' + mapcenter.lon + 
       '&globe=' + globe + '&page=' + page + '&lang=' + lang;
   }
@@ -2004,12 +2018,14 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
       var clon = ( wmakml.maxlon + wmakml.minlon )/2.0
         , clat = ( wmakml.maxlat + wmakml.minlat )/2.0
         , ex = (wmakml.maxlon - wmakml.minlon)/180.0 * 3.0*128 // TODO: Mercator is 1:1
-        , ey = (wmakml.maxlat - wmakml.minlat)/180.0 * 3.0*128; // max extent in degrees, zoom0 has 3*128/180 px/degree
+        , ey = (wmakml.maxlat - wmakml.minlat)/180.0 * 3.0*128 // max extent in degrees, zoom0 has 3*128/180 px/degree
+        , i;
 
-      for( wma_zoom = 0; wma_zoom < 12; ++wma_zoom ) {
+      for( i = 0; i < 12; ++i ) {
         if( ex>wma_width/2 || ey>wma_height/2 ) break;
         ex *= 2; ey *= 2;
       }
+      wmaSetZoom(i);
       wmaMoveToCoord( clat, clon );
     }
   }

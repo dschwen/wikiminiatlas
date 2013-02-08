@@ -22,11 +22,17 @@ header('Content-type: text/javascript');
 // include files
 <? 
 require( 'min/jquery.min.js' );
+echo "\n";
 require( 'min/json2.min.js' ); 
+echo "\n";
 require( 'min/utils.min.js' ); 
+echo "\n";
 require( 'min/glMatrix-0.9.5.custom.js' ); 
+echo "\n";
 require( 'min/wmaglobe3d.min.js' ); 
+echo "\n";
 require( 'min/poly2tri.min.js' );
+echo "\n";
 
 require( 'wikiminiatlas_i18n.inc' );
 
