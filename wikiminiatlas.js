@@ -3,7 +3,7 @@
 // also check my user page [[User:Dschwen]] for more tools
 // <nowiki>
 //
-// Revision 16.6
+// Revision 16.7
 
 jQuery(function ($) {
  var config = {
@@ -478,6 +478,30 @@ jQuery(function ($) {
   } else { awt=(ttc=='yes')?'p':ttc; }
  }
 
+ var titlebutton = false;
+
+  function addTitleButton( alat, along, zoomlevel ) {
+    mapbutton = $('<img>')
+     .hover(function (){ $(this).css('opacity', 0.75); }, function () { $(this).css('opacity', ''); })
+     .css('padding', isRTL() ? '0px 3px 0px 0px' : '0px 0px 0px 3px' ).css('cursor', 'pointer')       
+     .attr('src', wc.buttonImage).addClass('wmamapbutton').addClass('noprint')
+     .bind( 'click', { param:
+       alat + '_' + alon + '_' +
+       wc.width + '_' + wc.height + '_' +
+       site + '_' + zoomlevel + '_' + language 
+      }, showIFrame ); // zoomlevel!
+
+    if(!titlebutton ) { 
+     if( $('#coordinates').length ) {
+      $('#coordinates').find('img').detach();
+      $('#coordinates').append(mapbutton);
+     } else {
+      $('<span id="coordinates">'+(strings.map[language] || strings.map.en)+' </span>').append(mapbutton).appendTo('#bodyContent');
+     }
+     titlebutton = true;
+    }
+  }
+
  // detect and load KML
  // also insert globe even if no title coords are given
  (function () {
@@ -485,7 +509,7 @@ jQuery(function ($) {
      ,alat = 0, alon = 0, np = 0
      ,la1 = Infinity, la2 =- Infinity
      ,lo1 = Infinity, lo2 =- Infinity
-     ,ex,ey, titlebutton = false;
+     ,ex,ey;
   for( i = 0; i < l.length; ++i ) {// TODO: replace with .each
    coordinates = true;
    $.ajax({
@@ -571,30 +595,18 @@ window.kml = kml; // DEBUG!
       }
 
       // add mapbutton
-      mapbutton = $('<img>')
-       .hover(function (){ $(this).css('opacity', 0.75); }, function () { $(this).css('opacity', ''); })
-       .css('padding', isRTL() ? '0px 3px 0px 0px' : '0px 0px 0px 3px' ).css('cursor', 'pointer')       
-       .attr('src', wc.buttonImage).addClass('wmamapbutton').addClass('noprint')
-       .bind( 'click', { param:
-         alat + '_' + alon + '_' +
-         wc.width + '_' + wc.height + '_' +
-         site + '_' + zoomlevel + '_' + language 
-        }, showIFrame ); // zoomlevel!
-
-      if(!titlebutton ) { 
-       if( $('#coordinates').length ) {
-        $('#coordinates').append(mapbutton);
-       } else {
-        $('<span id="coordinates">'+(strings.map[language] || strings.map.en)+' </span>').append(mapbutton).appendTo('#bodyContent');
-       }
-       titlebutton = true;
-      }
-
+      addTitleButton( alat, along, zoomlevel );
      }
     }
    });
   } // end for
  })();
+
+ // detect All Coordinates crap
+ links = $('#coordinates>span>a');
+ if( links.length>0 && links[0].href.substr(0,50) == "http://www.lenz-online.de/cgi-bin/wiki/wiki-osm.pl" ) {
+   addTitleButton( 0, 0, 2 );
+ }
 
  // prepare quicklink menu box
  if ( coordinates !== null && wc.quicklink ) {
