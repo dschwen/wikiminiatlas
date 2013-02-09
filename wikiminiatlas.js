@@ -480,7 +480,7 @@ jQuery(function ($) {
 
  var titlebutton = false;
 
-  function addTitleButton( alat, along, zoomlevel ) {
+  function addTitleButton( alat, alon, zoomlevel ) {
     mapbutton = $('<img>')
      .hover(function (){ $(this).css('opacity', 0.75); }, function () { $(this).css('opacity', ''); })
      .css('padding', isRTL() ? '0px 3px 0px 0px' : '0px 0px 0px 3px' ).css('cursor', 'pointer')       
@@ -595,7 +595,7 @@ window.kml = kml; // DEBUG!
       }
 
       // add mapbutton
-      addTitleButton( alat, along, zoomlevel );
+      addTitleButton( alat, alon, zoomlevel );
      }
     }
    });
@@ -605,7 +605,8 @@ window.kml = kml; // DEBUG!
  // detect All Coordinates crap
  links = $('#coordinates>span>a');
  if( links.length>0 && links[0].href.substr(0,50) == "http://www.lenz-online.de/cgi-bin/wiki/wiki-osm.pl" ) {
-   addTitleButton( 0, 0, 2 );
+   addTitleButton( 0, 0, 1 );
+   coordinates = true;
  }
 
  // prepare quicklink menu box
