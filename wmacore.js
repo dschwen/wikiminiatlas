@@ -1324,7 +1324,7 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
     gl.uniform3f(lightdirLocation, lx/r,ly/r,lz/r );
 
     // hold 5000 triangles per buffer
-    wmajt.registerWebGLBuildingData( 5000, gl );
+    wmajt.registerWebGLBuildingData( 5000, gl, program );
 
     return function() {
       // draw arrays
@@ -1340,7 +1340,7 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
 
       // clear and render
       gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT );
-      wmajt.renderWebGLBuildingData(program);
+      wmajt.renderWebGLBuildingData();
     }
   }
 
