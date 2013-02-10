@@ -232,7 +232,12 @@ while ($row = pg_fetch_row($result)) {
 }
 
 //$s = json_encode( array( "data" => $geo, "x" => $x, "y" => $y, "z" => $z, "f" => $tagfound, "v" => 2, "idx" => $idx, "bbox" => "$mllx $mlly, $murx $mury" ) );
-$s = json_encode( array( "data" => $geo, "x" => $x, "y" => $y, "z" => $z, "f" => $tagfound, "v" => 2, "idx" => $idx ) );
+$s = json_encode( array( "data" => $geo, "x" => $x, "y" => $y, "z" => $z, "f" => $tagfound, "v" => 3, "idx" => $idx, "t" => time() ) );
+
+// do not cache purge action
+if( $a !== 'purge' ) {
+  header("Cache-Control: public, max-age=3600");
+}
 
 // output JSON data
 echo $s;
@@ -244,10 +249,5 @@ if( !is_dir( "jsontile/$z/$y" ) ) {
   umask($oldumask);
 }
 file_put_contents ( $tfile , $s );
-
-// do not cache purge action
-if( $a !== 'purge' ) {
-  header("Cache-Control: public, max-age=3600");
-}
 
 ?>

@@ -1,6 +1,5 @@
 <?php
 
-
 $x = intval($_GET['x']);
 $y = intval($_GET['y']);
 $z = intval($_GET['z']);
@@ -26,7 +25,6 @@ if( $a!=='query' && $a!=='print' ) {
 function beginsWith($str, $sub) {
   return (strncmp($str, $sub, strlen($sub)) == 0);
 }
-
 //$dbconn = pg_connect("host=sql-mapnik dbname=osm_mapnik port=5433");
 $dbconn = pg_connect("host=sql-mapnik dbname=osm_mapnik");
 
@@ -234,7 +232,15 @@ while ($row = pg_fetch_row($result)) {
 }
 
 //$s = json_encode( array( "data" => $geo, "x" => $x, "y" => $y, "z" => $z, "f" => $tagfound, "v" => 2, "idx" => $idx, "bbox" => "$mllx $mlly, $murx $mury" ) );
-$s = json_encode( array( "data" => $geo, "x" => $x, "y" => $y, "z" => $z, "f" => $tagfound, "v" => 2, "idx" => $idx ) );
+$s = json_encode( array( "data" => $geo, "x" => $x, "y" => $y, "z" => $z, "f" => $tagfound, "v" => 3, "idx" => $idx, "t" => time() ) );
+
+// do not cache purge action
+if( $a !== 'purge' ) {
+  header("Cache-Control: public, max-age=3600");
+}
+
+// output JSON data
+echo $s;
 
 // write to cache
 if( !is_dir( "jsontile/$z/$y" ) ) {
@@ -244,11 +250,4 @@ if( !is_dir( "jsontile/$z/$y" ) ) {
 }
 file_put_contents ( $tfile , $s );
 
-// do not cache purge action
-if( $a !== 'purge' ) {
-  header("Cache-Control: public, max-age=3600");
-}
-
-// output JSON data
-echo $s;
 ?>

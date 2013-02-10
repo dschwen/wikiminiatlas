@@ -1,10 +1,8 @@
-// [[File:Erioll_world.svg|18px]] '''WikiMiniAtlas''' <br>
-// Script to embed interactive maps into pages that have coordinate templates <br>
+// '''WikiMiniAtlas''' 
+// Script to embed interactive maps into pages that have coordinate templates
 // also check my user page [[User:Dschwen]] for more tools
-// <nowiki>
 //
 // Revision 16.7
-
 jQuery(function ($) {
  var config = {
   width  : 600,
