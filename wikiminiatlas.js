@@ -11,8 +11,6 @@ jQuery(function ($) {
   height : 400,
   timeout : 5000,
   zoom : -1,
-  quicklink : false,
-  quicklinkurl : '//maps.google.com/maps?ll={latdegdec},{londegdec}&spn={span},{span}&q={latdegdec},{londegdec}',
   enabled : true,
   onlytitle : false,
   flowTextTooltips: (location.host === "en.wikipedia.org"),
@@ -189,20 +187,15 @@ jQuery(function ($) {
  language = '', site = '', awt="0",
  iframe = { div: null, iframe: null, closebutton: null, resizebutton: null, resizehelper: null, indom: false },
  
- page_title = (mw.config.get( 'wgNamespaceNumber' )==0) ? encodeURIComponent(mw.config.get( 'wgTitle' )) : '',
+ page_title = (mw.config.get('wgNamespaceNumber')==0) ? encodeURIComponent(mw.config.get('wgTitle')) : '',
 
  bodyc,
  coord_filter = /&params=([\d.+-]+)_([\d.+-]*)_?([\d.+-]*)_?([NSZ])_([\d.+-]+)_([\d.+-]*)_?([\d.+-]*)_?([EOW])([^&=<>|]{0,250})/,
  coord_list = [],
  coord_highlight = -1,
- //region_index = 0,
- //coordinate_region = '',
 
  kml = null,
- mes = null,
-
- quicklinkbox = null,
- quicklinkdest = null;
+ mes = null;
 
  // check if we are in a right-to-left-script project
  function isRTL() {
@@ -233,18 +226,6 @@ jQuery(function ($) {
   }
   wi.div.css( 'top', my+'px' ).show();
   return false;
- }
-
- // fill in the map-service templates 
- function qlURL( lat, lon, zoom ) {
-  var url  = config.quicklinkurl,
-      span = Math.pow( 2.0, zoom) / 150.0;
-
-  url = url.replace( /\{latdegdec\}/g, lat );
-  url = url.replace( /\{londegdec\}/g, lon );
-  url = url.replace( /\{span\}/g, span.toFixed(4) );
-
-  return url;
  }
 
  function highlight(i) {
@@ -402,7 +383,7 @@ jQuery(function ($) {
 
   function capitalize(s) { return s.substr(0,1).toUpperCase()+s.substr(1).toLowerCase(); }
   if( /_globe:([^_&]+)/.test(coord_params) ) { globe = capitalize(RegExp.$1); }
-  if( globe!="Earth" && globe!="Moon" && globe!="Mars" && globe!="Venus" && globe!="Mercury" && globe!="Io"  && globe!="Titan" ) { return; }
+  if( $.inArray(globe,["Earth","Moon","Mars","Venus","Mercury","Io","Titan"]) < 0 ) { return; }
 
   // Test the unicode Symbol
   if( site === 'de' && link.parentNode.id !== 'coordinates' ) {
@@ -414,8 +395,6 @@ jQuery(function ($) {
    title: strings.buttonTooltip[language] || strings.buttonTooltip.en,
    alt: '' 
   } )
-//  .css('opacity', 0.75)
-//  .hover(function (){ $(this).fadeTo(50, 1.0); }, function () { $(this).fadeTo(250, 0.75); })
   .hover(function (){ $(this).css('opacity', 0.75); }, function () { $(this).css('opacity', ''); })
   .addClass('noprint')
   .css('padding', isRTL() ? '0px 0px 0px 3px' : '0px 3px 0px 0px' ).css('cursor', 'pointer');
@@ -450,10 +429,6 @@ jQuery(function ($) {
   coordinates = link.href;
   params = parseParams(link.href);
   coord_list.push( { lat: marker.lat, lon: marker.lon, obj: link, mb: mapbutton, title: params.title || params.pagename || '' } );
-
-  if ( wc.quicklink ) {
-   link.href = qlURL( marker.lat, marker.lon, zoomlevel );
-  }
  } ); //end each
 
  // awareness tooltip 
@@ -609,12 +584,6 @@ window.kml = kml; // DEBUG!
    coordinates = true;
  }
 
- // prepare quicklink menu box
- if ( coordinates !== null && wc.quicklink ) {
-  quicklinkbox = document.createElement('div');
-  // more to come :-)
- }
-
  // prepare iframe to house the map
  if ( coordinates !== null ) {
   wi.div = $('<div/>').css( {
@@ -641,14 +610,13 @@ window.kml = kml; // DEBUG!
    zIndex : 15, position : 'absolute', right : '11px', top : '9px', width : '18px', cursor : 'pointer'
   } ).click( function(e) { wi.div.hide() } );
 
-  wi.iframe = $('<iframe/>').attr( {
-   scrolling: 'no',
-   frameBorder : 0
-  } ).css( {
-   zIndex: 14, position: 'absolute', right: '1px', top: '1px',
-   width: (wc.width)+'px', height: (wc.height)+'px',
-   margin: '0px', padding: '0px'
-  } );
+  wi.iframe = $('<iframe/>')
+   .attr( { scrolling: 'no', frameBorder : 0 } )
+   .css( {
+    zIndex: 14, position: 'absolute', right: '1px', top: '1px',
+    width: (wc.width)+'px', height: (wc.height)+'px',
+    margin: '0px', padding: '0px'
+   } );
 
   wi.div.append(wi.iframe);
   wi.div.append(wi.resizehelper);
