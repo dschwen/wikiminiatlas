@@ -222,8 +222,8 @@ var wmajt = (function(){
         ],
         ['building:part',true,
           [ { lineWidth: 1, strokeStyle: "rgb(127,127,255)" } ]
-        ]/*,
-        ['start_date',true,
+        ]
+        /*['start_date',true,
           [ { dash: [2,5], lineWidth: 3, strokeStyle: "rgb(255,0,0)" } ]
         ]*/
       ]
@@ -775,13 +775,16 @@ var wmajt = (function(){
   function triangulate(d,b,h) { 
     var tr, d0, c, i, j, l, good, area=0;
 
-    // enforce winding order of contour
-    c = d[0]; l = c.length-1;
-    if( l<3 ) return;
-    for( i=0; i<l; i++ ) {
-      area += (c[i][0] * c[i+1][1]) - (c[i+1][0] * c[i][1]);
+    // enforce winding orders
+    for( j=0; j<d.length; ++j ) {
+      c = d[j]; l = c.length-1;
+      if( l<3 ) return;
+      for( i=0; i<l; i++ ) {
+        area += (c[i][0] * c[i+1][1]) - (c[i+1][0] * c[i][1]);
+      }
+      area *= (j==0)?1:-1;
+      if( area>0 ) { c.reverse(); }
     }
-    if( area>0 ) { c.reverse(); }
 
     // setup walls
     for( j=0; j<d.length; ++j ) {
