@@ -773,11 +773,11 @@ var wmajt = (function(){
   }
 
   function triangulate(d,b,h) { 
-    var tr, d0, c, i, j, l, good, area=0;
+    var tr, d0, c, i, j, l, good, area;
 
     // enforce winding orders
     for( j=0; j<d.length; ++j ) {
-      c = d[j]; l = c.length-1;
+      c = d[j]; l = c.length-1; area=0;
       if( l<3 ) return;
       for( i=0; i<l; i++ ) {
         area += (c[i][0] * c[i+1][1]) - (c[i+1][0] * c[i][1]);
@@ -788,12 +788,11 @@ var wmajt = (function(){
 
     // setup walls
     for( j=0; j<d.length; ++j ) {
-      c = d[j];
-      l = c.length;
-      for( i=0; i<l-1; i++ ) {
+      c = d[j]; l = c.length-1;
+      for( i=0; i<l; i++ ) {
         // normal vector (dx,dy,0) x (0,0,1)
-        dx = c[i][0] - c[(i+1)%l][0];
-        dy = c[i][1] - c[(i+1)%l][1];
+        dx = c[i][0] - c[i+1][0];
+        dy = c[i][1] - c[i+1][1];
         r = Math.sqrt(dx*dx+dy*dy);
         dx /= r; dy /= r;
 

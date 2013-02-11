@@ -16,6 +16,7 @@ if( $a!=='query' && $a!=='print' ) {
   if( $a !== 'purge' ) {
     if( file_exists( $tfile ) ) {
       header("Cache-Control: public, max-age=3600");
+      // TODO parse json and check timestamp (or check file time)
       readfile( $tfile );
       exit;
     }
