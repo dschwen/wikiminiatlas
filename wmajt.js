@@ -500,7 +500,7 @@ var wmajt = (function(){
   }
 
   function update(x,y,z,tile,purge) {
-    var c = tile.ctx, glRedraw = false;
+    var c = tile.ctx, glRedraw = false, bldgh, bldgm;
 
     // set globals for current tile coordinates
     bx1 = x*60.0/(1<<z)
@@ -643,12 +643,14 @@ var wmajt = (function(){
               if( !( v in ref_z ) ) {
                 ref_z[v] = true;
                 v = d[idx[i]];
-                if( v.geo.type === 'Polygon' || v.geo.type === 'LineString' ) {
+                bldgh = (v.tags['building:levels']*3)||v.tags['height'];
+                bldgm= (v.tags['building:min_level']*3)||v.tags['min_height']||0;
+                if( v.geo.type === 'Polygon' ) {
                   glRedraw = true;
-                  triangulate( v.geo.coordinates,
-                    (v.tags['building:min_level']*3)||v.tags['min_height']||0,
-                    (v.tags['building:levels']*3)||v.tags['height']
-                  );
+                  triangulate( v.geo.coordinates, bldgm, bldgh );
+                } else if( v.geo.type === 'LineString' ) {
+                  glRedraw = true;
+                  triangulate( [v.geo.coordinates], bldgm, bldgh );
                 }
               }
             }
@@ -771,7 +773,15 @@ var wmajt = (function(){
   }
 
   function triangulate(d,b,h) { 
-    var tr, d0, c, i, j, l, good, area;
+    var tr, d0, c, i, j, l, good, area=0;
+
+    // enforce winding order of contour
+    c = d[0]; l = c.length-1;
+    if( l<3 ) return;
+    for( i=0; i<l; i++ ) {
+      area += (c[i][0] * c[i+1][1]) - (c[i+1][0] * c[i][1]);
+    }
+    if( area>0 ) { c.reverse(); }
 
     // setup walls
     for( j=0; j<d.length; ++j ) {
