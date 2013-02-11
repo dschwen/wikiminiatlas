@@ -650,7 +650,7 @@ var wmajt = (function(){
                   triangulate( v.geo.coordinates, bldgm, bldgh );
                 } else if( v.geo.type === 'LineString' ) {
                   glRedraw = true;
-                  triangulate( [v.geo.coordinates], bldgm, bldgh );
+                  triangulate( [v.geo.coordinates.reverse()], bldgm, bldgh );
                 }
               }
             }
