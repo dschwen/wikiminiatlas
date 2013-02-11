@@ -643,7 +643,7 @@ var wmajt = (function(){
               if( !( v in ref_z ) ) {
                 ref_z[v] = true;
                 v = d[idx[i]];
-                if( v.geo.type === 'Polygon' ) {
+                if( v.geo.type === 'Polygon' || v.geo.type === 'LineString' ) {
                   glRedraw = true;
                   triangulate( v.geo.coordinates,
                     (v.tags['building:min_level']*3)||v.tags['min_height']||0,
