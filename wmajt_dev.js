@@ -777,6 +777,7 @@ var wmajt = (function(){
 
     // enforce winding order of contour
     c = d[0]; l = c.length-1;
+    if( l<3 ) return;
     for( i=0; i<l; i++ ) {
       area += (c[i][0] * c[i+1][1]) - (c[i+1][0] * c[i][1]);
     }
