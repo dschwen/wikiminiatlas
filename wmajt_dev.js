@@ -650,7 +650,7 @@ var wmajt = (function(){
                   triangulate( v.geo.coordinates, bldgm, bldgh );
                 } else if( v.geo.type === 'LineString' ) {
                   glRedraw = true;
-                  triangulate( [v.geo.coordinates.reverse()], bldgm, bldgh );
+                  triangulate( [v.geo.coordinates], bldgm, bldgh );
                 }
               }
             }
@@ -773,7 +773,14 @@ var wmajt = (function(){
   }
 
   function triangulate(d,b,h) { 
-    var tr, d0, c, i, j, l, good, area;
+    var tr, d0, c, i, j, l, good, area=0;
+
+    // enforce winding order of contour
+    c = d[0];
+    for( i=0; i<l-1; i++ ) {
+      area += (c[i][0] * c[i+1][1]) - (c[i+1][0] * c[i][1]);
+    }
+    if( area>0 ) { c.reverse(); }
 
     // setup walls
     for( j=0; j<d.length; ++j ) {
