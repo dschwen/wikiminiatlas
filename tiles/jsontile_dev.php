@@ -233,7 +233,7 @@ while ($row = pg_fetch_row($result)) {
 }
 
 //$s = json_encode( array( "data" => $geo, "x" => $x, "y" => $y, "z" => $z, "f" => $tagfound, "v" => 2, "idx" => $idx, "bbox" => "$mllx $mlly, $murx $mury" ) );
-$s = json_encode( array( "data" => $geo, "x" => $x, "y" => $y, "z" => $z, "f" => $tagfound, "v" => 3, "idx" => $idx, "t" => time() ) );
+$s = json_encode( array( "data" => $geo, "x" => $x, "y" => $y, "z" => $z, "f" => $tagfound, "v" => 3, "idx" => $idx, "t" => time(), "bbox" => "$mllx $mlly, $murx $mury" ) );
 
 // do not cache purge action
 if( $a !== 'purge' ) {
