@@ -7,6 +7,7 @@ $z = intval($_GET['z']);
 $a = $_GET['action'];
 
 $tfile = "jsontile/$z/$y/$x";
+$f = '';
 ob_start("ob_gzhandler");
 if( $a!=='query' && $a!=='print' ) {
   // set content type
@@ -14,10 +15,18 @@ if( $a!=='query' && $a!=='print' ) {
 
   // check cache first
   if( $a !== 'purge' ) {
-    if( file_exists( $tfile ) ) {
+    if( file_exists( $tfile.'.gz' ) ) {
+      // gzipped tile
+      header("Cache-Control: public, max-age=3600");
+      $f = implode("\n",gzfile($tfile.'.gz'));
+    } else if( file_exists( $tfile ) ) {
+      // old unpacked file
+      $f = file_get_contents($tfile);
+    }
+
+    if( $f!='' ) {
       header("Cache-Control: public, max-age=3600");
       // parse json and check tile version ( or timestamp, or check file time)
-      $f = file_get_contents($tfile);
       $d = json_decode($f);
       if( $d->v >= 4 ) {
         echo $f;
@@ -220,6 +229,8 @@ if( !is_dir( "jsontile/$z/$y" ) ) {
   mkdir("jsontile/$z/$y",0755); 
   umask($oldumask);
 }
-file_put_contents ( $tfile , $s );
+
+//file_put_contents ( $tfile , $s );
+file_put_contents ( $tfile.'.gz' , gzencode($s,9) );
 
 ?>

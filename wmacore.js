@@ -759,6 +759,7 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
         .error(function(e){
           // tile is probably not ready yet, try again in one second
           // TODO: add max tries
+          return; //TS is busted
           h = setTimeout( function() {
             t.img.attr("src",t.img.attr('src') + "?" + Math.random() );
           }, 1000 );
