@@ -1809,6 +1809,9 @@ var strings =
   ilo:'Kutien ti pannakaituon'
  },
  dyk: {
+   en: ['Due to a toolserver problem various map-styles are temporarily unavailable.'] 
+ },
+/* dyk: {
   de: ['Halte Strg oder ⌘ und positioniere den Mauspfeil auf einen Link, um eine Artikelzusammenfassung anzuzeigen.',
        'Druecke "o" oder oeffne die Einstellungen um eine Einblendung zum Groessenvergleich zu aktivieren.',
        'Jetzt mit <a href="#" onclick="wmaNews[0]()">Mondkarte</a>!',
@@ -1837,7 +1840,7 @@ var strings =
        '探索<a href="#" onclick="wmaNews[0]()">月球</a>！',
        'WikiMiniAtlas新功能: <a href="#" onclick="wmaNews[1]()">3D-建筑</a>!',
        'WikiMiniAtlas is now resizable. Just move the mouse in the bottom left corner!']
- },
+ },*/
  other: {
   ar: 'آخرون',
   ca: 'altres',

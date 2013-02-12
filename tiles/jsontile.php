@@ -16,6 +16,7 @@ if( $a!=='query' && $a!=='print' ) {
   if( $a !== 'purge' ) {
     if( file_exists( $tfile ) ) {
       header("Cache-Control: public, max-age=3600");
+      // TODO parse json and check timestamp (or check file time)
       readfile( $tfile );
       exit;
     }
@@ -78,43 +79,20 @@ $intersect = "
 //transform( ST_GeomFromText('POLYGON(($llx $ury, $urx $ury, $urx $lly, $llx $lly, $llx $ury))', 4326 ), 900913 )
 $table = array( 
   array('planet_polygon','building IS NULL AND  not exist(hstore(tags),\'building:part\') AND',$intersect), 
-  array('planet_line','',$intersect)
+  array('planet_line','building IS NULL AND  not exist(hstore(tags),\'building:part\') AND',$intersect)
 );
-
-/*
-$table = array( 
-  array( "(SELECT way, waterway, \"natural\" from planet_polygon where ( waterway in ('riverbank','dock') ) or ( \"natural\" in ('water','bay','wetland','wood', 'grassland','fell') ) ) as foo",'',$intersect,array('waterway','natural')),
-  array("(SELECT way, landuse,leisure from planet_polygon where landuse in ('military','railway','commercial','industrial','residential','retail','basin','salt_pond','orchard','cemetary','meadow','village_green','forrest','recreation_ground') or leisure in ('dog_park','garden','park','pitch','stadium') ) as foo",'',$intersect,array('landuse','leisure')),
-  array( "(SELECT way,waterway from planet_line where waterway in ('canal','river','stream')) as foo",'',$intersect,array('waterway')),
-  array( "(SELECT way,route from planet_line where route in ('ferry')) as foo",'',$intersect,array('route')),
-  array( "(SELECT way,railway from planet_line where railway in ('rail','preserved')) as foo",'',$intersect,array('railway')),
-  array( "(SELECT way,highway from planet_line where highway in ('track','path','residential','tertiary','tertiary_link','unclassified','service')) as foo",'',$intersect,array('highway')),
-  array( "(SELECT way,highway from planet_line where highway in ('primary','primary_link','secondary','secondary_link','motorway','motorway_link','trunk','trunk_link')) as foo",'',$intersect,array('highway'))
-);
-
-$table = array( 
-  array( "(SELECT * from planet_polygon where ( waterway in ('riverbank','dock') ) or ( \"natural\" in ('water','bay','wetland','wood', 'grassland','fell') ) ) as foo",'',$intersect),
-  array( "(SELECT * from planet_polygon where landuse in ('military','railway','commercial','industrial','residential','retail','basin','salt_pond','orchard','cemetary','meadow','village_green','forrest','recreation_ground') or leisure in ('dog_park','garden','park','pitch','stadium') ) as foo",'',$intersect),
-  array( "(SELECT * from planet_line where waterway in ('canal','river','stream')) as foo",'',$intersect),
-  array( "(SELECT * from planet_line where route in ('ferry')) as foo",'',$intersect),
-  array( "(SELECT * from planet_line where railway in ('rail','preserved')) as foo",'',$intersect),
-  array( "(SELECT * from planet_line where highway in ('track','path')) as foo",'',$intersect),
-  array( "(SELECT * from planet_line where highway in ('residential','tertiary','tertiary_link','unclassified','service')) as foo",'',$intersect),
-  array( "(SELECT * from planet_line where highway in ('primary','primary_link','secondary','secondary_link')) as foo",'',$intersect),
-  array( "(SELECT * from planet_roads where highway in ('motorway','motorway_link','trunk','trunk_link')) as foo",'',$intersect)
-);
-*/
 
 // also return buildings for large zoom levels
-if( $z>=14 ) $table[] = array('planet_polygon','(building IS NOT NULL OR exist(hstore(tags),\'building:part\')) AND','way',$tags);
+if( $z>=14 ) {
+  $table[] = array('planet_polygon','(building IS NOT NULL OR exist(hstore(tags),\'building:part\')) AND','way');
+  $table[] = array('planet_line','(building IS NOT NULL OR exist(hstore(tags),\'building:part\')) AND','way');
+}
 
 $geo = array();
 $tagfound = array();
 $idx = array();
 for( $i=0; $i<count($table); $i++ ) {
   // build query for the cropped data without buildings
-  //$taglist = '"'.implode($table[$i][3],'", "').'"';
-  //$tagnum = count($table[$i][3]);
   $query = "
     select 
       ST_AsGeoJSON( transform(".$table[$i][2].",4326), 9 ),
@@ -125,19 +103,9 @@ for( $i=0; $i<count($table); $i++ ) {
       ST_IsValid(way) AND way && SetSRID('BOX3D($mllx $mlly, $murx $mury)'::box3d,900913);
   ";
 
-//      way && SetSRID('BOX3D($llx $lly, $urx $ury)'::box3d,4326);
-//      way && SetSRID('BOX3D($mllx $mlly, $murx $mury)'::box3d,900913);
-/*
-      ST_Intersects
-        way, 
-        transform( ST_GeomFromText('POLYGON(($llx $ury, $urx $ury, $urx $lly, $llx $lly, $llx $ury))', 4326 ), 900913 ) 
-      );
- */
-
   // debug
   if( $a === 'query' ) {
-    echo $query;
-    exit;
+    echo $query,"\n\n";
   }
 
   // perform query
@@ -232,7 +200,7 @@ while ($row = pg_fetch_row($result)) {
 }
 
 //$s = json_encode( array( "data" => $geo, "x" => $x, "y" => $y, "z" => $z, "f" => $tagfound, "v" => 2, "idx" => $idx, "bbox" => "$mllx $mlly, $murx $mury" ) );
-$s = json_encode( array( "data" => $geo, "x" => $x, "y" => $y, "z" => $z, "f" => $tagfound, "v" => 3, "idx" => $idx, "t" => time() ) );
+$s = json_encode( array( "data" => $geo, "x" => $x, "y" => $y, "z" => $z, "f" => $tagfound, "v" => 4, "idx" => $idx, "t" => time() ) );
 
 // do not cache purge action
 if( $a !== 'purge' ) {
