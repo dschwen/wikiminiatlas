@@ -643,8 +643,8 @@ var wmajt = (function(){
               if( !( v in ref_z ) ) {
                 ref_z[v] = true;
                 v = d[idx[i]];
-                bldgh = (v.tags['building:levels']*3)||v.tags['height'];
-                bldgm= (v.tags['building:min_level']*3)||v.tags['min_height']||0;
+                bldgh = v.tags['height'] || (v.tags['building:levels']*3);
+                bldgm = v.tags['min_height'] || (v.tags['building:min_level']*3) || 0;
                 if( v.geo.type === 'Polygon' ) {
                   glRedraw = true;
                   triangulate( v.geo.coordinates, bldgm, bldgh );
