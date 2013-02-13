@@ -515,21 +515,6 @@ var wmajt = (function(){
     function drawGeoJSON(ca) {
       var i, j, k, g, s, o, d = ca.data, m, idx;
       
-      function parseHeight(s) {
-        var m;
-        if( s === undefined ) return null;
-
-        // meters (or implicit meters)
-        m = /^(\d+(\.\d*)?)(\s*m)?$/.exec(s);
-        if( m !== null ) return parseFloat(m[1]);
-
-        // feet and inches
-        m = /^((\d+(\.\d*)?)')?((\d+(\.\d*)?)")?$/.exec(s);
-        if( m !== null ) return parseFloat(m[2]||'0')*0.3048 + parseFloat(m[5]||'0')*0.0254;
-
-        return 0.0;
-      }
-
       c.lineWidth = 1.0;
 
       // TODO: handle coastlines properly!!
@@ -572,6 +557,22 @@ var wmajt = (function(){
       }
 
     }
+
+    function parseHeight(s) {
+      var m;
+      if( s === undefined ) return null;
+
+      // meters (or implicit meters)
+      m = /^(\d+(\.\d*)?)(\s*m)?$/.exec(s);
+      if( m !== null ) return parseFloat(m[1]);
+
+      // feet and inches
+      m = /^((\d+(\.\d*)?)')?((\d+(\.\d*)?)")?$/.exec(s);
+      if( m !== null ) return parseFloat(m[2]||'0')*0.3048 + parseFloat(m[5]||'0')*0.0254;
+
+      return 0.0;
+    }
+
 
     // store coords in tile context
     tile.csx = x;

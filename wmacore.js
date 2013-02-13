@@ -1335,7 +1335,7 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
       if( ll.lon > 180 ) { ll.lon -= 360.0 };
 
       // set zoom and position
-      gl.uniform3f(resolutionLocation, dx*f0, dy*f0, 500);
+      gl.uniform3f(resolutionLocation, dx*f0, dy*f0, 850);
       gl.uniform3f(centerdegLocation, ll.lon,ll.lat, 0 );
 
       // clear and render
