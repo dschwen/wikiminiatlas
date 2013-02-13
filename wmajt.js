@@ -514,7 +514,7 @@ var wmajt = (function(){
     // draw the data
     function drawGeoJSON(ca) {
       var i, j, k, g, s, o, d = ca.data, m, idx;
-
+      
       c.lineWidth = 1.0;
 
       // TODO: handle coastlines properly!!
@@ -557,6 +557,22 @@ var wmajt = (function(){
       }
 
     }
+
+    function parseHeight(s) {
+      var m;
+      if( s === undefined ) return null;
+
+      // meters (or implicit meters)
+      m = /^(\d+(\.\d*)?)(\s*m)?$/.exec(s);
+      if( m !== null ) return parseFloat(m[1]);
+
+      // feet and inches
+      m = /^((\d+(\.\d*)?)')?((\d+(\.\d*)?)")?$/.exec(s);
+      if( m !== null ) return parseFloat(m[2]||'0')*0.3048 + parseFloat(m[5]||'0')*0.0254;
+
+      return 0.0;
+    }
+
 
     // store coords in tile context
     tile.csx = x;
@@ -643,8 +659,8 @@ var wmajt = (function(){
               if( !( v in ref_z ) ) {
                 ref_z[v] = true;
                 v = d[idx[i]];
-                bldgh = v.tags['height'] || (v.tags['building:levels']*3);
-                bldgm = v.tags['min_height'] || (v.tags['building:min_level']*3) || 0;
+                bldgh = parseHeight(v.tags['height']) || (v.tags['building:levels']*3);
+                bldgm = parseHeight(v.tags['min_height']) || (v.tags['building:min_level']*3) || 0;
                 if( v.geo.type === 'Polygon' ) {
                   glRedraw = true;
                   triangulate( v.geo.coordinates, bldgm, bldgh );
