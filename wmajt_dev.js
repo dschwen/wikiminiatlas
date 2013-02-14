@@ -500,7 +500,7 @@ var wmajt = (function(){
   }
 
   function update(x,y,z,tile,purge) {
-    var c = tile.ctx, glRedraw = false, bldgh, bldgm, g;
+    var c = tile.ctx, glRedraw = false, bldgh, bldgm, g, roofh;
 
     // set globals for current tile coordinates
     bx1 = x*60.0/(1<<z)
@@ -668,12 +668,26 @@ var wmajt = (function(){
                 } else {
                   continue;
                 }
+
                 glRedraw = true;
+
+                // old style pyramid
                 if( v.tags['building:shape'] === 'pyramid' ) {
                   shapePyramid( g, bldgm, bldgh );
-                } else {
-                  triangulate( g, bldgm, bldgh );
-                }
+                  continue;
+                } 
+
+                // pyramidal roof
+                if( ('roof:shape' in v.tags) && ('roof:height' in v.tags) ) {
+                  roofh =  parseHeight(v.tags['roof:height']);
+                  if( v.tags['roof:shape'] === 'pyramidal' ) {
+                    if( roofh<bldgh) triangulate( g, bldgm, bldgh-roofh, true );
+                    shapePyramid( g, bldgh-roofh, bldgh );
+                    continue;
+                  }
+                } 
+
+                triangulate( g, bldgm, bldgh );
               }
             }
           }
@@ -822,8 +836,9 @@ var wmajt = (function(){
 
   }
 
-  function triangulate(d,b,h) { 
+  function triangulate(d,b,h, noroof) { 
     var tr, d0, c, i, j, l, good, area;
+    noroof = ~~noroof;
 
     // enforce winding orders
     for( j=0; j<d.length; ++j ) {
@@ -854,6 +869,8 @@ var wmajt = (function(){
                 [ -dy,dx,0.0, -dy,dx,0.0, -dy,dx,0.0 ] );
       }
     }
+
+    if( noroof) return;
 
     // note that the first and last point are always the same
     // thus a triangle has 4 points!
