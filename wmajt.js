@@ -500,7 +500,7 @@ var wmajt = (function(){
   }
 
   function update(x,y,z,tile,purge) {
-    var c = tile.ctx, glRedraw = false, bldgh, bldgm;
+    var c = tile.ctx, glRedraw = false, bldgh, bldgm, g, roofh;
 
     // set globals for current tile coordinates
     bx1 = x*60.0/(1<<z)
@@ -662,12 +662,32 @@ var wmajt = (function(){
                 bldgh = parseHeight(v.tags['height']) || (v.tags['building:levels']*3);
                 bldgm = parseHeight(v.tags['min_height']) || (v.tags['building:min_level']*3) || 0;
                 if( v.geo.type === 'Polygon' ) {
-                  glRedraw = true;
-                  triangulate( v.geo.coordinates, bldgm, bldgh );
+                  g = v.geo.coordinates;
                 } else if( v.geo.type === 'LineString' ) {
-                  glRedraw = true;
-                  triangulate( [v.geo.coordinates], bldgm, bldgh );
+                  g = [v.geo.coordinates];
+                } else {
+                  continue;
                 }
+
+                glRedraw = true;
+
+                // old style pyramid
+                if( v.tags['building:shape'] === 'pyramid' ) {
+                  shapePyramid( g, bldgm, bldgh );
+                  continue;
+                } 
+
+                // pyramidal roof
+                if( ('roof:shape' in v.tags) && ('roof:height' in v.tags) ) {
+                  roofh =  parseHeight(v.tags['roof:height']);
+                  if( v.tags['roof:shape'] === 'pyramidal' ) {
+                    if( roofh<bldgh) triangulate( g, bldgm, bldgh-roofh, true );
+                    shapePyramid( g, bldgh-roofh, bldgh );
+                    continue;
+                  }
+                } 
+
+                triangulate( g, bldgm, bldgh );
               }
             }
           }
@@ -788,8 +808,42 @@ var wmajt = (function(){
     }
   }
 
-  function triangulate(d,b,h) { 
-    var tr, d0, c, i, j, l, good, area;
+  function shapePyramid(d,b,h) {
+    var c, i, j, l, cx=0, cy=0, dx1,dy1,dx2,dy2,dz2,nx,ny,nz;
+
+    // pyramids only need outer contours
+    // winding order and center
+    c = d[0]; l = c.length-1; area=0;
+    if( l<3 ) return;
+    for( i=0; i<l; i++ ) {
+      area += (c[i][0] * c[i+1][1]) - (c[i+1][0] * c[i][1]);
+      cx += c[i][0]; cy += c[i][1];
+    }
+    if( area>0 ) { c.reverse(); }
+    cx /= l; cy /= l;
+
+    for( i=0; i<l; i++ ) {
+      // normal vector (dx,dy,0) x (0,0,1)
+      dx1 = c[i][0] - c[i+1][0];
+      dy1 = c[i][1] - c[i+1][1];
+      dx2 = cx - c[i][0];
+      dy2 = cy - c[i][1];
+      dz2 = h-b;
+
+      nx = -dy1*dz2; ny=dx1*dz2; nz=dy1*dx2-dx1*dy2;
+      r = Math.sqrt(nx*nx+ny*ny+nz*nz);
+      nx /= r; ny /= r; nz /=r;
+
+      // triangle base to top
+      vnPush( [ c[i][0],c[i][1],b, c[i+1][0],c[i+1][1],b, cx,cy,h ],
+              [ nx,ny,nz, nx,ny,nz, nx,ny,nz ] );
+    }
+
+  }
+
+  function triangulate(d,b,h, noroof) { 
+    var tr, d0, c, i, j, l, good, area, dx,dy;
+    noroof = ~~noroof;
 
     // enforce winding orders
     for( j=0; j<d.length; ++j ) {
@@ -820,6 +874,8 @@ var wmajt = (function(){
                 [ -dy,dx,0.0, -dy,dx,0.0, -dy,dx,0.0 ] );
       }
     }
+
+    if( noroof) return;
 
     // note that the first and last point are always the same
     // thus a triangle has 4 points!

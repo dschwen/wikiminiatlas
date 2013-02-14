@@ -826,9 +826,9 @@ var wmajt = (function(){
       // normal vector (dx,dy,0) x (0,0,1)
       dx1 = c[i][0] - c[i+1][0];
       dy1 = c[i][1] - c[i+1][1];
-      dx2 = c[i][0] - cx;
-      dy2 = c[i][1] - cy;
-      dz2 = b - h;
+      dx2 = cx - c[i][0];
+      dy2 = cy - c[i][1];
+      dz2 = h-b;
 
       nx = -dy1*dz2; ny=dx1*dz2; nz=dy1*dx2-dx1*dy2;
       r = Math.sqrt(nx*nx+ny*ny+nz*nz);
