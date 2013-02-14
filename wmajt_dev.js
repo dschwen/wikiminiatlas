@@ -500,7 +500,7 @@ var wmajt = (function(){
   }
 
   function update(x,y,z,tile,purge) {
-    var c = tile.ctx, glRedraw = false, bldgh, bldgm, g, roofh;
+    var c = tile.ctx, glRedraw = false, bldgh, bldgm, g, roofh, roofs;
 
     // set globals for current tile coordinates
     bx1 = x*60.0/(1<<z)
@@ -677,13 +677,23 @@ var wmajt = (function(){
                   continue;
                 } 
 
-                // pyramidal roof
+                // roofs
                 if( ('roof:shape' in v.tags) && ('roof:height' in v.tags) ) {
-                  roofh =  parseHeight(v.tags['roof:height']);
-                  if( v.tags['roof:shape'] === 'pyramidal' ) {
+                  roofh = parseHeight(v.tags['roof:height']);
+                  roofs = v.tags['roof:shape'];
+                  // pyramidal
+                  if( roofs === 'pyramidal' ) {
                     if( roofh<bldgh) triangulate( g, bldgm, bldgh-roofh, true );
                     shapePyramid( g, bldgh-roofh, bldgh );
                     continue;
+                  }
+                  // gabled and hilted
+                  if( g[0].length == 5 ) {
+                    if( roofs === 'gabled' ||  roofs === 'hilted' ) {
+                      if( roofh<bldgh) triangulate( g, bldgm, bldgh-roofh, true );
+                      shapeGabled( g, bldgh-roofh, bldgh );
+                      continue;
+                    }
                   }
                 } 
 
@@ -808,6 +818,50 @@ var wmajt = (function(){
     }
   }
 
+  function shapeGabled(d,b,h, hilted) {
+    var c, i, j, k , l, ls, cx=[], cy=[], dx1,dy1,dx2,dy2,dz2,nx,ny,nz;
+    // assumes a 4 corner poly
+    c = d[0]; 
+    // side lengths
+    for( i=0; i<4; ++i ) {
+      dx1 = c[i][0]-c[i+1][0], dy1 = c[i][1]-c[i+1][1];
+      ls[i] = Math.sqrt(dx1*dx1+dy1*dy1);
+    }
+    // first node of long edge
+    j = ( ls[0]+ls[2] > ls[1]+ls[3] ) ? 0 : 1;
+
+    // roofline ends
+    cx[0] = 0.5*(c[j][0]+c[j+3][0]);
+    cy[0] = 0.5*(c[j][1]+c[j+3][1]);
+    cx[1] = 0.5*(c[j+1][0]+c[j+2][0]);
+    cy[1] = 0.5*(c[j+1][1]+c[j+2][1]);
+
+    // TODO: modify for hilted roof
+    
+    dz2 = h-b;
+    // rectangular roof surfaces
+    for( k=0; k<2; ++k ) {
+      i=k*2+j;
+
+      dx1 = c[i][0] - c[i+1][0];
+      dy1 = c[i][1] - c[i+1][1];
+      dx2 = cx[k] - c[i][0];
+      dy2 = cy[k] - c[i][1];
+
+      nx = -dy1*dz2; ny=dx1*dz2; nz=dy1*dx2-dx1*dy2;
+      r = Math.sqrt(nx*nx+ny*ny+nz*nz);
+      nx /= r; ny /= r; nz /=r;
+
+      // triangle at base level
+      vnPush( [ c[i][0],c[i][1],b, c[i+1][0],c[i+1][1],b, cx[k],cy[k],h ],
+              [ nx,ny,nz, nx,ny,nz, nx,ny,nz ] );
+      // triangle at roof level
+      vnPush( [ cx[k],cy[k],h, cx[(k+1)%2],cy[(k+1)%2],h, c[i+1][0],c[i+1][1],b ], 
+              [ nx,ny,nz, nx,ny,nz, nx,ny,nz ] );
+    }
+    // triangular roof surfaces
+  }
+
   function shapePyramid(d,b,h) {
     var c, i, j, l, cx=0, cy=0, dx1,dy1,dx2,dy2,dz2,nx,ny,nz;
 
@@ -822,13 +876,13 @@ var wmajt = (function(){
     if( area>0 ) { c.reverse(); }
     cx /= l; cy /= l;
 
+    dz2 = h-b;
     for( i=0; i<l; i++ ) {
       // normal vector (dx,dy,0) x (0,0,1)
       dx1 = c[i][0] - c[i+1][0];
       dy1 = c[i][1] - c[i+1][1];
       dx2 = cx - c[i][0];
       dy2 = cy - c[i][1];
-      dz2 = h-b;
 
       nx = -dy1*dz2; ny=dx1*dz2; nz=dy1*dx2-dx1*dy2;
       r = Math.sqrt(nx*nx+ny*ny+nz*nz);
