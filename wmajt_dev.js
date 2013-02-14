@@ -809,7 +809,7 @@ var wmajt = (function(){
   }
 
   function shapePyramid(d,b,h) {
-    var c, i, j, l, cx=0, cy=0;
+    var c, i, j, l, cx=0, cy=0, dx1,dy1,dx2,dy2,dz2,nx,ny,nz;
 
     // pyramids only need outer contours
     // winding order and center
@@ -824,20 +824,25 @@ var wmajt = (function(){
 
     for( i=0; i<l; i++ ) {
       // normal vector (dx,dy,0) x (0,0,1)
-      dx = c[i][0] - c[i+1][0];
-      dy = c[i][1] - c[i+1][1];
-      r = Math.sqrt(dx*dx+dy*dy);
-      dx /= r; dy /= r;
+      dx1 = c[i][0] - c[i+1][0];
+      dy1 = c[i][1] - c[i+1][1];
+      dx2 = c[i][0] - cx;
+      dy2 = c[i][1] - cy;
+      dz2 = b - h;
+
+      nx = -dy1*dz2; ny=dx1*dz2; nz=dy1*dx2-dx1*dy2;
+      r = Math.sqrt(nx*nx+ny*ny+nz*nz);
+      nx /= r; ny /= r; nz /=r;
 
       // triangle base to top
       vnPush( [ c[i][0],c[i][1],b, c[i+1][0],c[i+1][1],b, cx,cy,h ],
-              [ -dy,dx,0.0, -dy,dx,0.0, -dy,dx,0.0 ] );
+              [ nx,ny,nz, nx,ny,nz, nx,ny,nz ] );
     }
 
   }
 
   function triangulate(d,b,h, noroof) { 
-    var tr, d0, c, i, j, l, good, area;
+    var tr, d0, c, i, j, l, good, area, dx,dy;
     noroof = ~~noroof;
 
     // enforce winding orders
