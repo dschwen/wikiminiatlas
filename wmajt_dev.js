@@ -500,7 +500,7 @@ var wmajt = (function(){
   }
 
   function update(x,y,z,tile,purge) {
-    var c = tile.ctx, glRedraw = false, bldgh, bldgm;
+    var c = tile.ctx, glRedraw = false, bldgh, bldgm, g;
 
     // set globals for current tile coordinates
     bx1 = x*60.0/(1<<z)
@@ -662,11 +662,17 @@ var wmajt = (function(){
                 bldgh = parseHeight(v.tags['height']) || (v.tags['building:levels']*3);
                 bldgm = parseHeight(v.tags['min_height']) || (v.tags['building:min_level']*3) || 0;
                 if( v.geo.type === 'Polygon' ) {
-                  glRedraw = true;
-                  triangulate( v.geo.coordinates, bldgm, bldgh );
+                  g = v.geo.coordinates;
                 } else if( v.geo.type === 'LineString' ) {
-                  glRedraw = true;
-                  triangulate( [v.geo.coordinates], bldgm, bldgh );
+                  g = [v.geo.coordinates];
+                } else {
+                  continue;
+                }
+                glRedraw = true;
+                if( v.tags['building:shape'] === 'pyramid' ) {
+                  shapePyramid( g, bldgm, bldgh );
+                } else {
+                  triangulate( g, bldgm, bldgh );
                 }
               }
             }
@@ -786,6 +792,34 @@ var wmajt = (function(){
       glI = 0;
       glArrList.push( { v:new Float32Array(glBufSize*9), n:new Float32Array(glBufSize*9) } );
     }
+  }
+
+  function shapePyramid(d,b,h) {
+    var c, i, j, l, cx=0, cy=0;
+
+    // pyramids only need outer contours
+    // winding order and center
+    c = d[0]; l = c.length-1; area=0;
+    if( l<3 ) return;
+    for( i=0; i<l; i++ ) {
+      area += (c[i][0] * c[i+1][1]) - (c[i+1][0] * c[i][1]);
+      cx += c[i][0]; cy += c[i][1];
+    }
+    if( area>0 ) { c.reverse(); }
+    cx /= l; cy /= l;
+
+    for( i=0; i<l; i++ ) {
+      // normal vector (dx,dy,0) x (0,0,1)
+      dx = c[i][0] - c[i+1][0];
+      dy = c[i][1] - c[i+1][1];
+      r = Math.sqrt(dx*dx+dy*dy);
+      dx /= r; dy /= r;
+
+      // triangle base to top
+      vnPush( [ c[i][0],c[i][1],b, c[i+1][0],c[i+1][1],b, cx,cy,h ],
+              [ -dy,dx,0.0, -dy,dx,0.0, -dy,dx,0.0 ] );
+    }
+
   }
 
   function triangulate(d,b,h) { 
