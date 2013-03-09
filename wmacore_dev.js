@@ -457,6 +457,7 @@ function wikiminiatlasInstall( wma_widget, url_params ) {
     UILang = wma_language;
     if( UILang == 'co' || UILang == 'commons' ) UILang = 'en';
     UIrtl = isRTL(UILang);
+    wmajt.setUILang(UILang);
 
     // Fill missing i18n items
     for( i in strings ) {

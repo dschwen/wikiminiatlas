@@ -1,5 +1,6 @@
 var wmajt = (function(){
   var w=128, h=128  // tile size
+    , UILang='en'
     , minzoom = 12, buildingzoom = 14
     , cache = {}
     , ref_sd = {}, ref_z = {}
@@ -390,7 +391,7 @@ var wmajt = (function(){
         px = (g[j][0]-bx1)*128/bw - mx;
         py = 128-(g[j][1]-by1)*128/bh - my;
         r = px*px + py*py;
-        if( ( rmin === null || r<rmin ) && ( 'name' in m.tags || 'addr:street' in m.tags ) ) {
+        if( ( rmin === null || r<rmin ) && ( ('name:'+UILang) in m.tags || 'name' in m.tags || 'addr:street' in m.tags ) ) {
           rmin = r;
           mmin = m;
         }
@@ -930,6 +931,7 @@ var wmajt = (function(){
       return zbuild;
     },
     registerWebGLBuildingData : registerWebGLBuildingData,
-    renderWebGLBuildingData: renderWebGLBuildingData
+    renderWebGLBuildingData: renderWebGLBuildingData,
+    setUILang: function(l) { UILang=l; }
   }
 })();
