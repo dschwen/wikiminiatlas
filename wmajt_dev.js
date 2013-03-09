@@ -390,7 +390,7 @@ var wmajt = (function(){
         px = (g[j][0]-bx1)*128/bw - mx;
         py = 128-(g[j][1]-by1)*128/bh - my;
         r = px*px + py*py;
-        if( ( rmin === null || r<rmin ) && ( 'name' in m.tags || 'addr:street' in m.tags ) ) {
+        if( ( rmin === null || r<rmin ) && ( 'name:en' in m.tags || 'name' in m.tags || 'addr:street' in m.tags ) ) {
           rmin = r;
           mmin = m;
         }
