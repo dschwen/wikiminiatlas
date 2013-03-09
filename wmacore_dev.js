@@ -679,7 +679,7 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
     synopsis_filter = /https?:\/\/([a-z-]+)\.wikipedia\.org\/wiki\/(.*)/;
     $('#wma_widget').mouseover( function(e){
       var l,t;
-      if( e.metaKey ) {
+      if( e.metaKey || e.ctrlKey ) {
         if( e.target.href && synopsis_filter.test(e.target.href) ) {
           l = RegExp.$1;
           t = RegExp.$2;
