@@ -418,8 +418,8 @@ var wmajt = (function(){
 
     t = mmin.tags || {};
     // has name
-    if( 'name' in t ) { 
-      s = t.name; 
+    if( ('name' in t) || (('name:'+UILang) in t) ) { 
+      s = t[('name:'+UILang)] || t.name; 
       if( 'loc_name' in t ) {
         s += ' "' + t.loc_name + '"';
       }
