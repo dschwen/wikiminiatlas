@@ -156,7 +156,8 @@ for( $i=0; $i<count($table); $i++ ) {
     if( $row[1] !== null ) {
       $hstore = json_decode('{' . str_replace('"=>"', '":"', $row[1]) . '}', true);
       foreach( $hstore as $j => $val ) {
-        if( beginsWith($j,'name:') ||  beginsWith($j,'tiger:')  ||  beginsWith($j,'nist:') ) continue;   
+        //if( beginsWith($j,'name:') ||  beginsWith($j,'tiger:')  ||  beginsWith($j,'nist:') ) continue;   
+        if( beginsWith($j,'tiger:')  ||  beginsWith($j,'nist:') ) continue;   
         $type[$j]=$val;
         $tagfound[$j]++;
         // server side index
@@ -213,7 +214,7 @@ while ($row = pg_fetch_row($result)) {
 }
 
 //$s = json_encode( array( "data" => $geo, "x" => $x, "y" => $y, "z" => $z, "f" => $tagfound, "v" => 2, "idx" => $idx, "bbox" => "$mllx $mlly, $murx $mury" ) );
-$s = json_encode( array( "data" => $geo, "x" => $x, "y" => $y, "z" => $z, "f" => $tagfound, "v" => 4, "idx" => $idx, "t" => time() ) );
+$s = json_encode( array( "data" => $geo, "x" => $x, "y" => $y, "z" => $z, "f" => $tagfound, "v" => 5, "idx" => $idx, "t" => time() ) );
 
 // do not cache purge action
 if( $a !== 'purge' ) {
