@@ -678,9 +678,10 @@ var wmajt = (function(){
                 } 
 
                 // roofs
-                if( ('roof:shape' in v.tags) && ('roof:height' in v.tags) ) {
-                  roofh = parseHeight(v.tags['roof:height']);
-                  roofs = v.tags['roof:shape'];
+                if( ( 'roof:shape' in v.tags || 'building:roof:shape' in v.tags ) && 
+                    ( 'roof:height' in v.tags || 'building:roof:height' in v.tags ) ) {
+                  roofh = parseHeight(v.tags['roof:height'] || v.tags['building:roof:height']);
+                  roofs = v.tags['roof:shape'] || v.tags['building:roof:shape'];
                   // pyramidal
                   if( roofs === 'pyramidal' ) {
                     if( roofh<bldgh) triangulate( g, bldgm, bldgh-roofh, true );
