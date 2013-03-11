@@ -1,0 +1,216 @@
+#polygon [zoom>8][natural='ocean']{
+  polygon-fill: rgb(250,250,208)
+}
+#polygon [zoom>8][railway='platform']{
+  polygon-fill: rgb(220,220,220)
+}
+#polygon [zoom>8][landuse='industrial'][landuse='retail'][landuse='commercial'][landuse='residential']{
+  polygon-fill: rgb(208,208,208)
+}
+#polygon [zoom>8][landuse='reservoir']{
+  polygon-fill: rgb(200,200,224)
+}
+#polygon [zoom>8][landuse='military'][landuse='railway']{
+  polygon-fill: rgb(224,200,200)
+}
+#polygon [zoom>8][landuse='cemetery'][landuse='recreation_ground']{
+  polygon-fill: rgb(190,214,190)
+}
+#polygon [zoom>8][landuse='grass']{
+  polygon-fill: rgb(0,160,0)
+}
+#polygon [zoom>8][leisure='park'][leisure='orchard'][leisure='meadow'][leisure='village_green'][leisure='golf_course'][leisure='track'][leisure='forrest'][leisure='recreation_ground'][leisure='dog_park'][leisure='garden'][leisure='pitch'][leisure='stadium']{
+  polygon-fill: rgb(200,224,200)
+}
+#polygon [zoom>8][waterway='riverbank'][waterway='dock']{
+  polygon-fill: rgb(158,199,243)
+}
+#polygon [zoom>8][natural='beach'][natural='sand']{
+  polygon-fill: rgb(250,242,175)
+}
+#polygon [zoom>8][natural='wetland'][natural='mud']{
+  polygon-fill: rgb(200,218,224)
+}
+#polygon [zoom>8][natural='grassland'][natural='fell']{
+  polygon-fill: rgb(200,224,200)
+}
+#polygon [zoom>8][natural='scrub']{
+  polygon-fill: rgb(150,214,150)
+}
+#polygon [zoom>8][natural='wood']{
+  polygon-fill: rgb(100,204,100)
+}
+#polygon [zoom>8][natural='water'][natural='bay']{
+  polygon-fill: rgb(158,199,243)
+}
+#polygon [zoom>8][natural='glacier']{
+  polygon-fill: rgb(230,245,255)
+}
+#polygon [zoom>8][amenity='university']{
+  line-width: 0.5;
+  line-color: rgb(240,225,183)
+}
+#polygon [zoom>8][amenity='parking']{
+  polygon-fill: rgb(240,235,193)
+}
+#polygon [zoom>8][highway='pedestrian']{
+  polygon-fill: rgb(255,255,255)
+}
+#polygon [zoom>8][tourism!='']{
+  line-dasharray: 3,3;
+  line-width: 2;
+  line-color: rgb(255,255,0)
+}
+#polygon [zoom>8][aeroway='terminal']{
+  polygon-fill: rgb(190,210,190)
+}
+#polygon [zoom>8][historic='memorial'][historic='monument'][historic='fort'][historic='castle']{
+  polygon-fill: rgb(255,190,190)
+}
+#polygon [zoom>8][historic='ship'][historic='wreck']{
+  polygon-fill: rgb(255,190,235)
+}
+#polygon [zoom>8][railway='station']{
+  polygon-fill: rgb(210,195,195)
+}
+#polygon [zoom>8][natural='water'][natural='bay']{
+  polygon-fill: rgb(158,199,243)
+}
+#polygon [zoom>8][building!='']{
+  polygon-fill: rgb(200,200,200)
+}
+#polygon [zoom>8][building:part!='']{
+  polygon-fill: rgb(200,200,200)
+}
+
+#line [zoom>8][waterway='canal']{
+  line-width: 3;
+  line-color: rgb(158,199,243)
+}
+#line [zoom>8][waterway='river']{
+  line-width: 1.5;
+  line-color: rgb(126,159,194)
+}
+#line [zoom>8][waterway='stream']{
+  line-dasharray: 2,2;
+  line-width: 1.5;
+  line-color: rgb(126,159,194)
+}
+#line [zoom>8][route='ferry']{
+  line-dasharray: 4,4;
+  line-width: 2;
+  line-color: rgb(126,159,194)
+}
+#line [zoom>8][highway='pedestrian']{
+  line-width: 5;
+  line-color: rgb(255,255,255)
+}
+#line [zoom>8][highway='footway'][highway='pedestrian'][highway='path']{
+  line-width: 2;
+  line-color: rgb(198,178,178)
+}
+#line [zoom>8][highway='steps']{
+  line-dasharray: 1.5,1.5;
+  line-width: 3;
+  line-color: rgb(168,148,148)
+}
+#line [zoom>8][highway='service']{
+  line-width: 4;
+  line-color: rgb(168,168,168)
+}
+#line [zoom>8][highway='track']{
+  line-width: 3.5;
+  line-color: rgb(168,168,168)
+}
+#line [zoom>8][highway='residential'][highway='unclassified']{
+  line-width: 4;
+  line-color: rgb(200,200,200)
+}
+#line [zoom>8][highway='tertiary']{
+  line-width: 5;
+  line-color: rgb(200,200,200)
+}
+#line [zoom>8][railway='subway']{
+  line-width: 3;
+  line-color: rgb(100,100,100)
+}
+#line [zoom>8][railway='rail'][railway='preserved'][railway='monorail'][railway='narrow_gauge']{
+  line-width: 3;
+  line-color: rgb(100,100,100)
+}
+#line [zoom>8][highway='secondary'][highway='secondary_link'][highway='primary'][highway='primary_link']{
+  line-width: 6;
+  line-color: rgb(171,158,137)
+}
+#line [zoom>8][highway='motorway'][highway='motorway_link'][highway='trunk'][highway='trunk_link']{
+  line-width: 7;
+  line-color: rgb(188,149,28)
+}
+#line [zoom>8][aeroway='runway']{
+  line-width: 10;
+  line-color: rgb(100,130,100)
+}
+#line [zoom>8][aeroway='taxiway']{
+  line-width: 4.5;
+  line-color: rgb(100,130,100)
+}
+#line [zoom>8][railway='subway']{
+  line-dasharray: 3,3;
+  line-width: 1.5;
+  line-color: rgb(255,255,255)
+}
+#line [zoom>8][railway='rail'][railway='narrow_gauge']{
+  line-dasharray: 3,3;
+  line-width: 1.5;
+  line-color: rgb(255,255,255)
+}
+#line [zoom>8][railway='preserved']{
+  line-dasharray: 3,3;
+  line-width: 1.5;
+  line-color: rgb(200,200,200)
+}
+#line [zoom>8][railway='monorail']{
+  line-dasharray: 1,2,4,2;
+  line-width: 1.5;
+  line-color: rgb(200,200,200)
+}
+#line [zoom>8][highway='secondary'][highway='secondary_link']{
+  line-width: 4.5;
+  line-color: rgb(255,250,115)
+}
+#line [zoom>8][highway='primary'][highway='primary_link']{
+  line-width: 4;
+  line-color: rgb(255,230,95)
+}
+#line [zoom>8][highway='motorway'][highway='motorway_link'][highway='trunk'][highway='trunk_link']{
+  line-width: 5;
+  line-color: rgb(242,191,36)
+}
+#line [zoom>8][aeroway='runway']{
+  line-width: 8;
+  line-color: rgb(150,180,150)
+}
+#line [zoom>8][aeroway='taxiway']{
+  line-width: 2.5;
+  line-color: rgb(150,180,150)
+}
+#line [zoom>8][railway='tram']{
+  line-dasharray: 3,3;
+  line-width: 1.5;
+  line-color: rgb(0,0,0)
+}
+#line [zoom>8][access='permissive']{
+  line-dasharray: 1,2;
+  line-width: 1;
+  line-color: rgb(100,200,100)
+}
+#line [zoom>8][access='private'][access='residents']{
+  line-dasharray: 1,2;
+  line-width: 1;
+  line-color: rgb(200,100,100)
+}
+#line [zoom>8][building:part!='']{
+  line-width: 1;
+  line-color: rgb(127,127,255)
+}
+
