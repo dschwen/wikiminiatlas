@@ -227,7 +227,7 @@ var l = {
 function listStyles( id, a ) {
   var i,j,t='',o,p;
   for( i=0; i<a.length; ++i ) {
-    t += id+' [zoom>8]';
+    t += id+'::sub'+i+' [zoom>12]';
     o = a[i][1];
     if( o === true ) {
         t += '['+a[i][0]+'!=\'\']';
