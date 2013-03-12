@@ -17,27 +17,27 @@
   "srs": "+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0.0 +k=1.0 +units=m +nadgrids=@null +wktext +no_defs +over",
   "Stylesheet": [
     "style.mss",
-    "auto.mss"
+    "auto.mss",
+    "highway.mss"
   ],
   "Layer": [
     {
-      "id": "countries",
-      "name": "countries",
-      "srs": "+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0.0 +k=1.0 +units=m +nadgrids=@null +wktext +no_defs +over",
       "geometry": "polygon",
-      "Datasource": {
-        "file": "/home/daniel/Downloads/OSM/world_boundaries/shoreline_300.shp",
-        "type": "shape"
-      },
       "extent": [
         -179.99999692067183,
         -85.051,
         179.99999692067183,
-        83.66933299999998
+        83.66601999999999
       ],
+      "id": "hirescoast",
       "class": "",
+      "Datasource": {
+        "file": "/usr/share/mapnik-osm-data/world_boundaries/processed_p.shp"
+      },
       "srs-name": "900913",
-      "advanced": {}
+      "srs": "+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0.0 +k=1.0 +units=m +nadgrids=@null +wktext +no_defs +over",
+      "advanced": {},
+      "name": "hirescoast"
     },
     {
       "extent": [
@@ -54,7 +54,7 @@
         "extent_cache": "auto",
         "extent": "-8879123.35,4934503.48,-7998713.57,5632708.48",
         "dbname": "gis",
-        "id": "postgis",
+        "id": "polygon",
         "project": "wikiminatlas",
         "srs": "+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0.0 +k=1.0 +units=m +nadgrids=@null +wktext +no_defs +over"
       },
@@ -88,6 +88,26 @@
       "srs": "+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0.0 +k=1.0 +units=m +nadgrids=@null +wktext +no_defs +over",
       "advanced": {},
       "name": "line"
+    },
+    {
+      "id": "countries",
+      "name": "countries",
+      "srs": "+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0.0 +k=1.0 +units=m +nadgrids=@null +wktext +no_defs +over",
+      "geometry": "polygon",
+      "Datasource": {
+        "file": "/usr/share/mapnik-osm-data/world_boundaries/world_boundaries_m.shp",
+        "type": "shape"
+      },
+      "extent": [
+        -179.999026740165,
+        -84.96651237096897,
+        179.999026740165,
+        83.58102695433922
+      ],
+      "class": "",
+      "srs-name": "900913",
+      "advanced": {},
+      "status": "off"
     }
   ],
   "scale": 1,

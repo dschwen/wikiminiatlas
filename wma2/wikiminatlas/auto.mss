@@ -1,6 +1,4 @@
-#polygon::sub0 [zoom>12][natural='ocean']{
-  polygon-fill: rgb(250,250,208)
-}
+
 #polygon::sub1 [zoom>12][railway='platform']{
   polygon-fill: rgb(220,220,220)
 }
@@ -53,9 +51,9 @@
 #polygon::sub17 [zoom>12][amenity='parking']{
   polygon-fill: rgb(240,235,193)
 }
-#polygon::sub18 [zoom>12][highway='pedestrian']{
+/*#polygon::sub18 [zoom>12][highway='pedestrian']{
   polygon-fill: rgb(255,255,255)
-}
+}*/
 #polygon::sub19 [zoom>12][tourism!='']{
   line-dasharray: 3,3;
   line-width: 2;
@@ -79,9 +77,9 @@
 #polygon::sub25 [zoom>12][building!='']{
   polygon-fill: rgb(200,200,200)
 }
-#polygon::sub26 [zoom>12]['building:part'!='']{
+/*#polygon::sub26 [zoom>12]['building:part'!='']{
   polygon-fill: rgb(200,200,200)
-}
+}*/
 
 #line::sub0 [zoom>12][waterway='canal']{
   line-width: 3;
@@ -101,7 +99,7 @@
   line-width: 2;
   line-color: rgb(126,159,194)
 }
-#line::sub4 [zoom>12][highway='pedestrian']{
+/*#line::sub4 [zoom>12][highway='pedestrian']{
   line-width: 5;
   line-color: rgb(255,255,255)
 }
@@ -129,30 +127,33 @@
 #line::sub10 [zoom>12][highway='tertiary']{
   line-width: 5;
   line-color: rgb(200,200,200)
-}
+}*/
 #line::sub11 [zoom>12][railway='subway']{
   line-width: 3;
-  line-color: rgb(100,100,100)
+  line-color: rgb(100,100,100);
+  line-opacity: 0.5;
 }
 #line::sub12 [zoom>12][railway='rail'][railway='preserved'][railway='monorail'][railway='narrow_gauge']{
   line-width: 3;
   line-color: rgb(100,100,100)
 }
-#line::sub13 [zoom>12][highway='secondary'][highway='secondary_link'][highway='primary'][highway='primary_link']{
+/*#line::sub13 [zoom>12][highway='secondary'][highway='secondary_link'][highway='primary'][highway='primary_link']{
   line-width: 6;
   line-color: rgb(171,158,137)
 }
 #line::sub14 [zoom>12][highway='motorway'][highway='motorway_link'][highway='trunk'][highway='trunk_link']{
   line-width: 7;
   line-color: rgb(188,149,28)
-}
+}*/
 #line::sub15 [zoom>12][aeroway='runway']{
+  line-cap: round;
   line-width: 10;
   line-color: rgb(100,130,100)
 }
 #line::sub16 [zoom>12][aeroway='taxiway']{
   line-width: 4.5;
-  line-color: rgb(100,130,100)
+  line-color: rgb(100,130,100);
+  line-cap: round;
 }
 #line::sub17 [zoom>12][railway='subway']{
   line-dasharray: 3,3;
@@ -187,10 +188,12 @@
   line-color: rgb(242,191,36)
 }
 #line::sub24 [zoom>12][aeroway='runway']{
+  line-cap: round;
   line-width: 8;
   line-color: rgb(150,180,150)
 }
 #line::sub25 [zoom>12][aeroway='taxiway']{
+  line-cap: round;
   line-width: 2.5;
   line-color: rgb(150,180,150)
 }
@@ -209,7 +212,7 @@
   line-width: 1;
   line-color: rgb(200,100,100)
 }
-#line::sub29 [zoom>12]['building:part'!='']{
+/*#line::sub29 [zoom>12]['building:part'!='']{
   line-width: 1;
   line-color: rgb(127,127,255)
-}
+}*/
