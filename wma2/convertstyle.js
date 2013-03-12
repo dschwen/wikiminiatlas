@@ -227,14 +227,15 @@ var l = {
 function listStyles( id, a ) {
   var i,j,t='',o,p;
   for( i=0; i<a.length; ++i ) {
-    t += id+'::sub'+i+' [zoom>12]';
+    p = [];
     o = a[i][1];
     if( o === true ) {
-        t += '['+a[i][0]+'!=\'\']';
+        t +=  id+'::sub'+i+' [zoom>12]['+a[i][0]+'!=\'\']';
     } else {
       for( j in o ) {
-        t += '['+a[i][0]+'=\''+j+'\']';
+        p.push( id+'::sub'+i+' [zoom>12]['+a[i][0]+'=\''+j+'\']' );
       }
+      t += p.join(',\n'); 
     }
     t += '{\n';
     o = a[i][2][0];
