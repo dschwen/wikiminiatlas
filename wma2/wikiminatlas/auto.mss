@@ -17,23 +17,24 @@
 #polygon::sub4 [zoom>12][landuse='railway']{
   polygon-fill: rgb(224,200,200)
 }
+
+@grassgreen: rgb(190,234,190);
+
 #polygon::sub5 [zoom>12][landuse='cemetery'],
 #polygon::sub5 [zoom>12][landuse='recreation_ground']{
   polygon-fill: rgb(190,214,190)
 }
-#polygon::sub6 [zoom>12][landuse='grass']{
-  polygon-fill: rgb(0,160,0)
-}
 #polygon::sub7 [zoom>12] {
   [leisure='park'],[leisure='orchard'],[leisure='meadow'],[leisure='village_green'],
-  [leisure='forrest'] {
-  	polygon-fill: rgb(190,234,190)
+  [leisure='forrest'],[landuse='grass'] {
+  	polygon-fill: @grassgreen;
   }
 }
 #polygon::sub7b [zoom>12] {
   [leisure='golf_course'],[leisure='track'],[leisure='recreation_ground'],
   [leisure='dog_park'],[leisure='pitch'],[leisure='stadium'] {
   	polygon-fill: rgb(100,255,100);
+    line-color: darken(rgb(190,234,190),20%);
     opacity: 0.2;
   }
 }
@@ -165,14 +166,17 @@
 #line::sub9 [zoom>12][highway='unclassified']{
   ::bridge [bridge!=''] {
     line-width: 6;
+    line-smooth: 1;
+    [zoom=13] { line-width: 6 - 1 }
     [zoom>=15] { line-width: 6 + 1 }
     [zoom>=16] { line-width: 6 + 2 }
     line-color: #333;
     line-opacity: 0.5;
   }
-  ::outline { 
+  ::outline [zoom>13] { 
     line-cap: round;
     line-width: 4;
+    line-smooth: 1;
     [zoom>=15] { line-width: 4 + 1 }
     [zoom>=16] { line-width: 4 + 2 }
     line-color: rgb(200,200,200);
@@ -181,6 +185,8 @@
   ::fill {
     line-cap: round;
     line-width: 3;
+    line-smooth: 1;
+    [zoom=13] { line-width: 3 - 0.5; line-opacity: 0.75; }
     [zoom>=15] { line-width: 3 + 1 }
     [zoom>=16] { line-width: 3 + 2 }
     line-color: #ffffff;
@@ -237,6 +243,7 @@
 
 
 #line::sub13 [zoom>12][highway='secondary'],
+#line::sub13 [zoom>12][highway='secondary'],
 #line::sub13 [zoom>12][highway='secondary_link'],
 #line::sub13 [zoom>12][highway='primary'],
 #line::sub13 [zoom>12][highway='primary_link']{
@@ -244,6 +251,7 @@
     line-width: 8;
     [zoom>=15] { line-width: 8 + 1 }
     [zoom>=16] { line-width: 8 + 2 }
+    [zoom>=17] { line-width: 8 + 3 }
     line-color: #333;
     line-opacity: 0.5;
   }
@@ -252,6 +260,7 @@
     line-width: 6;
     [zoom>=15] { line-width: 6 + 1 }
     [zoom>=16] { line-width: 6 + 2 }
+    [zoom>=17] { line-width: 6 + 3 }
     line-color: rgb(171,158,137);
     [tunnel!=''] { line-dasharray: 4,4 }
   }
@@ -262,16 +271,20 @@
 #line::sub14 [zoom>12][highway='trunk_link']{
   ::bridge [bridge!=''] {
     line-width: 9;
+    line-smooth: 1;
     [zoom>=15] { line-width: 9 + 1 }
     [zoom>=16] { line-width: 9 + 2 }
+    [zoom>=17] { line-width: 9 + 3 }
     line-color: #333;
     line-opacity: 0.5;
   }
   ::outline { 
     line-cap: round;
     line-width: 7;
+    line-smooth: 1;
     [zoom>=15] { line-width: 7 + 1 }
     [zoom>=16] { line-width: 7 + 2 }
+    [zoom>=17] { line-width: 7 + 3 }
     line-color: rgb(188,149,28);
     [tunnel!=''] { line-dasharray: 4,4 }
   }
@@ -293,12 +306,23 @@
   [tunnel!=''] { line-opacity: 0.5 }
 }
 
+#line::sub20 [zoom>12][highway='tertiary'] {
+  line-width: 4;
+  line-cap: round;
+  [zoom>=15] { line-width: 4 + 1 }
+  [zoom>=16] { line-width: 4 + 2 }
+  [zoom>=17] { line-width: 4 + 3 }
+  line-color: rgb(255,255,170);
+  [tunnel!=''] { line-opacity: 0.75 }
+}
+
 #line::sub21 [zoom>12][highway='secondary'],
 #line::sub21 [zoom>12][highway='secondary_link']{
   line-width: 4.5;
   line-cap: round;
   [zoom>=15] { line-width: 4.5 + 1 }
   [zoom>=16] { line-width: 4.5 + 2 }
+  [zoom>=17] { line-width: 4.5 + 3 }
   line-color: rgb(255,250,115);
   [tunnel!=''] { line-opacity: 0.75 }
 }
@@ -308,6 +332,7 @@
   line-cap: round;
   [zoom>=15] { line-width: 4 + 1 }
   [zoom>=16] { line-width: 4 + 2 }
+  [zoom>=17] { line-width: 4 + 3 }
   line-color: rgb(255,230,95);
   [tunnel!=''] { line-opacity: 0.75 }
 }
@@ -317,8 +342,10 @@
 #line::sub23 [zoom>12][highway='trunk_link']{
   line-width: 5;
   line-cap: round;
+  line-smooth: 1;
   [zoom>=15] { line-width: 5 + 1 }
   [zoom>=16] { line-width: 5 + 2 }
+  [zoom>=17] { line-width: 5 + 3 }
   line-color: rgb(242,191,36);
   [tunnel!=''] { line-opacity: 0.75 }
 }
@@ -345,6 +372,7 @@
   line-dasharray: 1.5,3;
   line-width: 1.5;
   line-cap: round;
+  [zoom=13] { line-opacity: 0.5 }
   [access='private'] { line-color: rgb(200,100,100) }
   [access='residents'] { line-color: rgb(100,100,200) }
   [access='permissive'] { line-color: rgb(100,200,100) }
