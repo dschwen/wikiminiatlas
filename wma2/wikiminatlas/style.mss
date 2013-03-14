@@ -21,3 +21,10 @@ Map {
   line-color: #f00;
   line-width: 1;
 }*/
+
+#turningcircle [zoom>13] {
+  marker-width:10;
+  marker-fill:#fff;
+  marker-line-color:#888;
+  marker-allow-overlap:true;
+}
