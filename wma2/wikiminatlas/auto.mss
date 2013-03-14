@@ -173,6 +173,7 @@
   [tunnel!=''] { line-dasharray: 4,4 }
 }
 
+/*
 #line::sub9 [zoom>12][highway='residential'],
 #line::sub9 [zoom>12][highway='unclassified']{
   ::bridge [bridge!=''] {
@@ -205,7 +206,7 @@
   }
 }
 
-/*#line::sub10 [zoom>12][highway='tertiary']{
+#line::sub10 [zoom>12][highway='tertiary']{
   ::bridge [bridge!=''] {
     line-width: 7;
     [zoom>=15] { line-width: 7 + 1 }
@@ -328,49 +329,6 @@
 }
 
 
-/*
-#line::sub20 [zoom>12][highway='tertiary'] {
-  line-width: 4;
-  line-cap: round;
-  [zoom>=15] { line-width: 4 + 1 }
-  [zoom>=16] { line-width: 4 + 2 }
-  [zoom>=17] { line-width: 4 + 3 }
-  line-color: rgb(255,255,170);
-  [tunnel!=''] { line-opacity: 0.75 }
-}
-#line::sub21 [zoom>12][highway='secondary'],
-#line::sub21 [zoom>12][highway='secondary_link']{
-  line-width: 4.5;
-  line-cap: round;
-  [zoom>=15] { line-width: 4.5 + 1 }
-  [zoom>=16] { line-width: 4.5 + 2 }
-  [zoom>=17] { line-width: 4.5 + 3 }
-  line-color: rgb(255,250,115);
-  [tunnel!=''] { line-opacity: 0.75 }
-}
-#line::sub22 [zoom>12][highway='primary'],
-#line::sub22 [zoom>12][highway='primary_link']{
-  line-width: 4;
-  line-cap: round;
-  [zoom>=15] { line-width: 4 + 1 }
-  [zoom>=16] { line-width: 4 + 2 }
-  [zoom>=17] { line-width: 4 + 3 }
-  line-color: rgb(255,230,95);
-  [tunnel!=''] { line-opacity: 0.75 }
-}
-#line::sub23 [zoom>12][highway='motorway'],
-#line::sub23 [zoom>12][highway='motorway_link'],
-#line::sub23 [zoom>12][highway='trunk'],
-#line::sub23 [zoom>12][highway='trunk_link']{
-  line-width: 5;
-  line-cap: round;
-  line-smooth: 1;
-  [zoom>=15] { line-width: 5 + 1 }
-  [zoom>=16] { line-width: 5 + 2 }
-  [zoom>=17] { line-width: 5 + 3 }
-  line-color: rgb(242,191,36);
-  [tunnel!=''] { line-opacity: 0.75 }
-}*/
 
 #line::sub24 [zoom>12][aeroway='runway']{
   line-width: 8;
@@ -388,6 +346,9 @@
   line-width: 1.5;
   line-color: rgb(0,0,0)
 }
+
+
+/*
 #line::sub28 [zoom>12][access='private'],
 #line::sub28 [zoom>12][access='residents'],
 #line::sub28 [zoom>12][access='permissive']{
@@ -398,7 +359,8 @@
   [access='private'] { line-color: rgb(200,100,100) }
   [access='residents'] { line-color: rgb(100,100,200) }
   [access='permissive'] { line-color: rgb(100,200,100) }
-}
+}*/
+
 /*#line::sub29 [zoom>12][building:part!='']{
   line-width: 1;
   line-color: rgb(127,127,255)
