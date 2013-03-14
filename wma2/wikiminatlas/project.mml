@@ -17,7 +17,8 @@
   "srs": "+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0.0 +k=1.0 +units=m +nadgrids=@null +wktext +no_defs +over",
   "Stylesheet": [
     "style.mss",
-    "auto.mss"
+    "auto.mss",
+    "transport.mss"
   ],
   "Layer": [
     {
@@ -47,7 +48,7 @@
       ],
       "Datasource": {
         "type": "postgis",
-        "table": "planet_osm_polygon",
+        "table": "(SELECT * FROM planet_osm_polygon WHERE building IS NULL ORDER BY z_order) AS r",
         "key_field": "",
         "geometry_field": "way",
         "extent_cache": "auto",
@@ -74,7 +75,7 @@
       ],
       "Datasource": {
         "type": "postgis",
-        "table": "planet_osm_line",
+        "table": "(SELECT * FROM planet_osm_line ORDER BY z_order) AS r",
         "key_field": "",
         "geometry_field": "",
         "extent_cache": "auto",
@@ -107,6 +108,101 @@
       "srs-name": "900913",
       "advanced": {},
       "status": "off"
+    },
+    {
+      "geometry": "linestring",
+      "extent": [
+        -82.01618337398715,
+        40.09764192859879,
+        13.78214353180193,
+        54.13675397472351
+      ],
+      "Datasource": {
+        "type": "postgis",
+        "table": "(SELECT * FROM planet_osm_line WHERE tunnel IN ('yes','true','1')  ORDER BY z_order) AS data",
+        "key_field": "",
+        "geometry_field": "",
+        "extent_cache": "auto",
+        "extent": "-9129999.77,4880141.5,1534221.2,7196098.52",
+        "dbname": "gis"
+      },
+      "id": "tunnels",
+      "class": "",
+      "srs-name": "900913",
+      "srs": "+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0.0 +k=1.0 +units=m +nadgrids=@null +wktext +no_defs +over",
+      "advanced": {},
+      "name": "tunnels"
+    },
+    {
+      "geometry": "linestring",
+      "extent": [
+        -82.01618337398715,
+        40.09764192859879,
+        13.78214353180193,
+        54.13675397472351
+      ],
+      "Datasource": {
+        "type": "postgis",
+        "table": "(SELECT * FROM planet_osm_line WHERE (highway IS NOT NULL OR railway IS NOT NULL) AND (bridge is null or bridge in ('no','false','0')) and (tunnel is null or tunnel in ('no','false','0')) ORDER BY z_order ) AS data",
+        "key_field": "",
+        "geometry_field": "",
+        "extent_cache": "auto",
+        "extent": "-9129999.77,4880141.5,1534221.2,7196098.52",
+        "dbname": "gis"
+      },
+      "id": "transport",
+      "class": "",
+      "srs-name": "900913",
+      "srs": "+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0.0 +k=1.0 +units=m +nadgrids=@null +wktext +no_defs +over",
+      "advanced": {},
+      "name": "transport"
+    },
+    {
+      "extent": [
+        -79.76252214887526,
+        40.47017198952294,
+        13.76826527931451,
+        52.70173737291895
+      ],
+      "Datasource": {
+        "type": "postgis",
+        "table": "(SELECT * FROM planet_osm_polygon WHERE building IS NOT NULL) AS data",
+        "key_field": "",
+        "geometry_field": "",
+        "extent_cache": "auto",
+        "extent": "-8879123.35,4934503.48,1532676.28,6928016.85",
+        "dbname": "gis"
+      },
+      "id": "buildings",
+      "class": "",
+      "srs-name": "900913",
+      "srs": "+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0.0 +k=1.0 +units=m +nadgrids=@null +wktext +no_defs +over",
+      "advanced": {},
+      "name": "buildings"
+    },
+    {
+      "geometry": "linestring",
+      "extent": [
+        -82.01618337398715,
+        40.09764192859879,
+        13.78214353180193,
+        54.13675397472351
+      ],
+      "Datasource": {
+        "type": "postgis",
+        "table": "(SELECT * FROM planet_osm_line WHERE bridge IN ('yes','true','1','viaduct')  ORDER BY z_order) AS data",
+        "key_field": "",
+        "geometry_field": "",
+        "extent_cache": "auto",
+        "extent": "-9129999.77,4880141.5,1534221.2,7196098.52",
+        "dbname": "gis"
+      },
+      "id": "bridges",
+      "class": "",
+      "srs-name": "900913",
+      "srs": "+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0.0 +k=1.0 +units=m +nadgrids=@null +wktext +no_defs +over",
+      "advanced": {},
+      "name": "bridges"
     }
   ],
   "scale": 1,

@@ -102,8 +102,19 @@
 #polygon::sub24 [zoom>12][natural='bay']{
   polygon-fill: rgb(158,199,243)
 }
-#polygon::sub25 [zoom>12][building!='']{
-  polygon-fill: rgb(200,200,200)
+
+#buildings [zoom>12][building!='']{
+  polygon-fill: rgb(170,170,170);
+  polygon-opacity: 0.7;
+  [zoom=16] {
+    line-width: 1;
+    line-color: rgb(120,120,120);
+    line-opacity: 0.5;
+  }
+  [zoom>=17] {
+    line-color: rgb(120,120,120);
+    line-opacity: 0.75;
+  }
 }
 /*#polygon::sub26 [zoom>12][building:part!='']{
   polygon-fill: rgb(200,200,200)
@@ -194,7 +205,7 @@
   }
 }
 
-#line::sub10 [zoom>12][highway='tertiary']{
+/*#line::sub10 [zoom>12][highway='tertiary']{
   ::bridge [bridge!=''] {
     line-width: 7;
     [zoom>=15] { line-width: 7 + 1 }
@@ -210,7 +221,7 @@
   	line-color: rgb(200,200,200);
   	[tunnel!=''] { line-dasharray: 4,4 }
   }
-}
+}*/
 
 #line::sub11 [zoom>12][railway='subway']{
   line-width: 3;
@@ -241,7 +252,7 @@
   }
 }
 
-
+/*
 #line::sub13 [zoom>12][highway='secondary'],
 #line::sub13 [zoom>12][highway='secondary'],
 #line::sub13 [zoom>12][highway='secondary_link'],
@@ -288,7 +299,17 @@
     line-color: rgb(188,149,28);
     [tunnel!=''] { line-dasharray: 4,4 }
   }
-}
+  ::inline {
+    line-width: 5;
+    line-cap: round;
+    line-smooth: 1;
+    [zoom>=15] { line-width: 5 + 1 }
+    [zoom>=16] { line-width: 5 + 2 }
+    [zoom>=17] { line-width: 5 + 3 }
+    line-color: rgb(242,191,36);
+    [tunnel!=''] { line-opacity: 0.75 }
+  }
+}*/
 #line::sub15 [zoom>12][aeroway='runway']{
   line-width: 10;
   line-cap: round;
@@ -306,6 +327,8 @@
   [tunnel!=''] { line-opacity: 0.5 }
 }
 
+
+/*
 #line::sub20 [zoom>12][highway='tertiary'] {
   line-width: 4;
   line-cap: round;
@@ -315,7 +338,6 @@
   line-color: rgb(255,255,170);
   [tunnel!=''] { line-opacity: 0.75 }
 }
-
 #line::sub21 [zoom>12][highway='secondary'],
 #line::sub21 [zoom>12][highway='secondary_link']{
   line-width: 4.5;
@@ -348,7 +370,7 @@
   [zoom>=17] { line-width: 5 + 3 }
   line-color: rgb(242,191,36);
   [tunnel!=''] { line-opacity: 0.75 }
-}
+}*/
 
 #line::sub24 [zoom>12][aeroway='runway']{
   line-width: 8;

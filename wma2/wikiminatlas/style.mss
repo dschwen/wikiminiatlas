@@ -15,3 +15,9 @@ Map {
   polygon-fill: rgb(250,250,208);
   polygon-gamma: 0.5;
 }
+
+/*
+#bridges {
+  line-color: #f00;
+  line-width: 1;
+}*/
