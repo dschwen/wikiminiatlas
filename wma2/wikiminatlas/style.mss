@@ -15,3 +15,10 @@ Map {
   polygon-fill: rgb(250,250,208);
   polygon-gamma: 0.5;
 }
+
+#turningcircle [zoom>13] {
+  marker-width:10;
+  marker-fill:#fff;
+  marker-line-color:#888;
+  marker-allow-overlap:true;
+}
