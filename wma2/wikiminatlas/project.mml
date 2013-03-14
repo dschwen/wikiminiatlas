@@ -119,7 +119,7 @@
       ],
       "Datasource": {
         "type": "postgis",
-        "table": "(SELECT * FROM planet_osm_line WHERE tunnel IN ('yes','true','1')  ORDER BY z_order) AS data",
+        "table": "(SELECT way,highway,railway,access, '' AS bridge, 'yes' AS tunnel  FROM planet_osm_line WHERE tunnel IN ('yes','true','1')  ORDER BY z_order) AS data\n",
         "key_field": "",
         "geometry_field": "",
         "extent_cache": "auto",
@@ -143,7 +143,7 @@
       ],
       "Datasource": {
         "type": "postgis",
-        "table": "(SELECT * FROM planet_osm_line WHERE (highway IS NOT NULL OR railway IS NOT NULL) AND (bridge is null or bridge in ('no','false','0')) and (tunnel is null or tunnel in ('no','false','0')) ORDER BY z_order ) AS data",
+        "table": "(SELECT way, highway, railway, access, '' AS bridge, '' AS tunnel FROM planet_osm_line WHERE (highway IS NOT NULL OR railway IS NOT NULL) AND (bridge is null or bridge in ('no','false','0')) and (tunnel is null or tunnel in ('no','false','0')) ORDER BY z_order ) AS data",
         "key_field": "",
         "geometry_field": "",
         "extent_cache": "auto",
@@ -190,7 +190,7 @@
       ],
       "Datasource": {
         "type": "postgis",
-        "table": "(SELECT * FROM planet_osm_line WHERE bridge IN ('yes','true','1','viaduct')  ORDER BY z_order) AS data",
+        "table": "(SELECT way,highway,railway,access, 'yes' AS bridge, '' AS tunnel FROM planet_osm_line WHERE bridge IN ('yes','true','1','viaduct')  ORDER BY z_order) AS data",
         "key_field": "",
         "geometry_field": "",
         "extent_cache": "auto",

@@ -13,7 +13,7 @@ Map {
 
 #hirescoast{
   polygon-fill: rgb(250,250,208);
-  polygon-gamma: 0.5;
+  polygon-gamma: 0.75;
 }
 
 /*
