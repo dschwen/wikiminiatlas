@@ -275,6 +275,16 @@
 #transport::tram [zoom>12][railway='tram']{
   line-dasharray: 3,3;
   line-width: 1.5;
+  [zoom<16] { line-width: 1; }
   line-color: rgb(0,0,0);
   line-opacity: 0.4;
 }
+
+#turningcircle [zoom>13] {
+  marker-width:10;
+  marker-fill: @color_residential;
+  marker-line-color: @color_residential * @outlinedarken;
+  marker-line-width: 0.5;
+  marker-allow-overlap:true;
+}
+
