@@ -47,3 +47,15 @@ Map {
   polygon-gamma: 0.75;
   polygon-fill: @ocean*0.875;
 }*/
+
+
+#trees {
+  polygon-opacity:1;
+  polygon-fill:#4e4;
+}
+
+
+#grass {
+  polygon-opacity:1;
+  polygon-fill:#bf9;
+}

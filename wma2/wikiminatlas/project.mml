@@ -59,6 +59,24 @@
       "name": "hirescoast"
     },
     {
+      "geometry": "polygon",
+      "extent": [
+        -179.98318481445312,
+        -55.84857177734375,
+        179.99990000000003,
+        71.47889709472656
+      ],
+      "id": "trees",
+      "class": "",
+      "Datasource": {
+        "file": "/home/daniel/Documents/shp/treesa.shp"
+      },
+      "srs-name": "autodetect",
+      "srs": "",
+      "advanced": {},
+      "name": "trees"
+    },
+    {
       "id": "countries",
       "name": "countries",
       "srs": "+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0.0 +k=1.0 +units=m +nadgrids=@null +wktext +no_defs +over",
@@ -246,6 +264,24 @@
       "srs": "+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0.0 +k=1.0 +units=m +nadgrids=@null +wktext +no_defs +over",
       "advanced": {},
       "name": "bridges"
+    },
+    {
+      "geometry": "polygon",
+      "extent": [
+        -179.98318481445312,
+        -55.979496002197266,
+        179.99990000000003,
+        82.90718841552734
+      ],
+      "id": "grass",
+      "class": "",
+      "Datasource": {
+        "file": "/home/daniel/Documents/shp/grassa.shp"
+      },
+      "srs-name": "autodetect",
+      "srs": "",
+      "advanced": {},
+      "name": "grass"
     }
   ],
   "scale": 1,
