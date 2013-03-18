@@ -56,3 +56,13 @@ Map {
   polygon-opacity:1;
   polygon-fill: @swamp;
 }
+
+@border: rgb(108,108,108);
+#borders [ADMIN_LEVE='4']{
+  line-color: @border;
+  line-width: 0.5;
+}
+#borders [ADMIN_LEVE='3'][zoom>=4]{
+  line-color: @border;
+  line-width: 0.15;
+}
