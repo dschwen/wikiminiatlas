@@ -140,7 +140,10 @@
       "id": "water",
       "class": "",
       "Datasource": {
-        "file": "/home/daniel/Documents/shp/inwatera.shp"
+        "file": "/home/daniel/Documents/shp/inwatera.shp",
+        "id": "water",
+        "project": "wikiminatlas",
+        "srs": ""
       },
       "srs-name": "autodetect",
       "srs": "",
@@ -148,24 +151,22 @@
       "name": "water"
     },
     {
-      "id": "countries",
-      "name": "countries",
-      "srs": "+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0.0 +k=1.0 +units=m +nadgrids=@null +wktext +no_defs +over",
       "geometry": "polygon",
-      "Datasource": {
-        "file": "/usr/share/mapnik-osm-data/world_boundaries/world_boundaries_m.shp",
-        "type": "shape"
-      },
       "extent": [
-        -179.999026740165,
-        -84.96651237096897,
-        179.999026740165,
-        83.58102695433922
+        -179.12960815429688,
+        -53.167423248291016,
+        178.44325256347656,
+        70.99272918701172
       ],
+      "id": "builtup",
       "class": "",
-      "srs-name": "900913",
+      "Datasource": {
+        "file": "/home/daniel/Documents/shp/builtupa.shp"
+      },
+      "srs-name": "autodetect",
+      "srs": "",
       "advanced": {},
-      "status": "off"
+      "name": "builtup"
     },
     {
       "extent": [
@@ -251,7 +252,7 @@
       ],
       "Datasource": {
         "type": "postgis",
-        "table": "(SELECT way,highway FROM planet_osm_roads WHERE highway in ('motorway','motorway_link','trunk','trunk_link','secondary','secondary_link') ) AS data\n",
+        "table": "(SELECT way,highway FROM planet_osm_roads WHERE highway in ('motorway','motorway_link','trunk','trunk_link','primary','primary_link','secondary','secondary_link') ) AS data\n",
         "key_field": "",
         "geometry_field": "",
         "extent_cache": "auto",
@@ -361,22 +362,43 @@
       "name": "bridges"
     },
     {
-      "geometry": "polygon",
+      "geometry": "linestring",
       "extent": [
-        -179.9999999749438,
-        -85.051,
-        179.9999999749438,
-        83.33621278835224
+        -141.0055486389999,
+        -55.120923766999944,
+        140.97762699400005,
+        70.07531036400012
       ],
-      "id": "borders",
+      "id": "countries",
       "class": "",
       "Datasource": {
-        "file": "/home/daniel/Documents/shp/countries3.shp"
+        "file": "/home/daniel/Documents/shp/ne_10m_admin_0_boundary_lines_land.shp",
+        "id": "borders",
+        "project": "wikiminatlas",
+        "srs": ""
+      },
+      "srs-name": "WGS84",
+      "srs": "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs",
+      "advanced": {},
+      "name": "countries"
+    },
+    {
+      "geometry": "polygon",
+      "extent": [
+        -179.99999999990004,
+        -85.051,
+        180,
+        83.63410065282281
+      ],
+      "id": "states",
+      "class": "",
+      "Datasource": {
+        "file": "/home/daniel/Documents/shp/ne_10m_admin_1_states_provinces_shp.shp"
       },
       "srs-name": "autodetect",
       "srs": "",
       "advanced": {},
-      "name": "borders"
+      "name": "states"
     }
   ],
   "scale": 1,

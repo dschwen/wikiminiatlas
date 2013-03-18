@@ -58,11 +58,21 @@ Map {
 }
 
 @border: rgb(108,108,108);
-#borders [ADMIN_LEVE='4']{
+#countries [zoom<=10]{
   line-color: @border;
   line-width: 0.5;
+  [zoom>=5] { line-width: 1; }
+  line-opacity: 0.5;
 }
-#borders [ADMIN_LEVE='3'][zoom>=4]{
+#states [zoom>=6][zoom<=10]{
   line-color: @border;
-  line-width: 0.15;
+  line-width: 0.25;
+  [zoom>=8] { line-width: 0.5; }
+  line-opacity: 0.5;
+}
+
+@builtup: rgb(208,208,208);
+#builtup [zoom<=9] {
+  polygon-opacity:1;
+  polygon-fill: @builtup;
 }

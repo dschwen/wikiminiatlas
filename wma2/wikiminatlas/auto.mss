@@ -8,7 +8,7 @@
 #polygon::sub2 [zoom>12][landuse='retail'],
 #polygon::sub2 [zoom>12][landuse='commercial'],
 #polygon::sub2 [zoom>12][landuse='residential']{
-  polygon-fill: rgb(208,208,208)
+  polygon-fill: @builtup;
 }
 #polygon::sub3 [zoom>12][landuse='reservoir']{
   polygon-fill: rgb(200,200,224)
@@ -38,33 +38,33 @@
     opacity: 0.2;
   }
 }
-#polygon::sub8 [zoom>12][waterway='riverbank'],
-#polygon::sub8 [zoom>12][waterway='dock']{
+#polygon::sub8 [zoom>=12][waterway='riverbank'],
+#polygon::sub8 [zoom>=12][waterway='dock']{
   polygon-fill: rgb(158,199,243)
 }
-#polygon::sub9 [zoom>12][natural='beach'],
-#polygon::sub9 [zoom>12][natural='sand']{
+#polygon::sub9 [zoom>=12][natural='beach'],
+#polygon::sub9 [zoom>=12][natural='sand']{
   polygon-fill: rgb(250,242,175)
 }
-#polygon::sub10 [zoom>12][natural='wetland'],
-#polygon::sub10 [zoom>12][natural='mud']{
-  polygon-fill: rgb(200,218,224)
+#polygon::sub10 [zoom>=12][natural='wetland'],
+#polygon::sub10 [zoom>=12][natural='mud']{
+  polygon-fill: @swamp;
 }
-#polygon::sub11 [zoom>12][natural='grassland'],
-#polygon::sub11 [zoom>12][natural='fell']{
-  polygon-fill: rgb(200,224,200)
+#polygon::sub11 [zoom>=12][natural='grassland'],
+#polygon::sub11 [zoom>=12][natural='fell']{
+  polygon-fill: @grass;
 }
-#polygon::sub12 [zoom>12][natural='scrub']{
+#polygon::sub12 [zoom>=12][natural='scrub']{
   polygon-fill: rgb(150,214,150)
 }
-#polygon::sub13 [zoom>12][natural='wood']{
-  polygon-fill: rgb(100,204,100)
+#polygon::sub13 [zoom>=12][natural='wood']{
+  polygon-fill: @trees;
 }
-#polygon::sub14 [zoom>12][natural='water'],
-#polygon::sub14 [zoom>12][natural='bay']{
-  polygon-fill: rgb(158,199,243)
+#polygon::sub14 [zoom>=12][natural='water'],
+#polygon::sub14 [zoom>=12][natural='bay']{
+  polygon-fill: @ocean;
 }
-#polygon::sub15 [zoom>12][natural='glacier']{
+#polygon::sub15 [zoom>=12][natural='glacier']{
   polygon-fill: rgb(230,245,255)
 }
 #polygon::sub16 [zoom>12][amenity='university']{
@@ -74,10 +74,10 @@
 #polygon::sub17 [zoom>12][amenity='parking']{
   polygon-fill: rgb(240,235,193)
 }
-#polygon::sub18 [zoom>12][highway='pedestrian']{
+#polygon::sub18 [zoom>=14][highway='pedestrian']{
   polygon-fill: rgb(255,255,255)
 }
-#polygon::sub19 [zoom>12][tourism!='']{
+#polygon::sub19 [zoom>=14][tourism!='']{
   line-dasharray: 3,3;
   line-width: 2;
   line-color: rgb(255,255,0)
@@ -91,16 +91,12 @@
 #polygon::sub21 [zoom>12][historic='castle']{
   polygon-fill: rgb(255,190,190)
 }
-#polygon::sub22 [zoom>12][historic='ship'],
-#polygon::sub22 [zoom>12][historic='wreck']{
+#polygon::sub22 [zoom>=14][historic='ship'],
+#polygon::sub22 [zoom>=14][historic='wreck']{
   polygon-fill: rgb(255,190,235)
 }
-#polygon::sub23 [zoom>12][railway='station']{
+#polygon::sub23 [zoom>=13][railway='station']{
   polygon-fill: rgb(210,195,195)
-}
-#polygon::sub24 [zoom>12][natural='water'],
-#polygon::sub24 [zoom>12][natural='bay']{
-  polygon-fill: rgb(158,199,243)
 }
 
 #buildings [zoom>=14][building!='']{
@@ -122,16 +118,16 @@
 
 #line::sub0 [zoom>=12][waterway='canal']{
   line-width: 3;
-  line-color: rgb(158,199,243)
+  line-color: @ocean;
 }
 #line::sub1 [zoom>=12][waterway='river']{
   line-width: 1.5;
-  line-color: rgb(126,159,194)
+  line-color: @ocean;
 }
 #line::sub2 [zoom>=12][waterway='stream']{
   line-dasharray: 2,2;
   line-width: 1.5;
-  line-color: rgb(126,159,194)
+  line-color: @ocean;
 }
 #line::sub3 [zoom>12][route='ferry']{
   line-dasharray: 4,4;
