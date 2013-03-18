@@ -18,8 +18,7 @@
   "Stylesheet": [
     "style.mss",
     "auto.mss",
-    "transport.mss",
-    "labels.mss"
+    "transport.mss"
   ],
   "Layer": [
     {
@@ -57,6 +56,60 @@
       "srs": "+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0.0 +k=1.0 +units=m +nadgrids=@null +wktext +no_defs +over",
       "advanced": {},
       "name": "hirescoast"
+    },
+    {
+      "geometry": "polygon",
+      "extent": [
+        -179.99999692067183,
+        -85.051,
+        179.99999692067183,
+        83.66601999999999
+      ],
+      "id": "lorescoast",
+      "class": "",
+      "Datasource": {
+        "file": "layers/countries/shoreline_300.shp"
+      },
+      "srs-name": "900913",
+      "srs": "+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0.0 +k=1.0 +units=m +nadgrids=@null +wktext +no_defs +over",
+      "advanced": {},
+      "name": "lorescoast"
+    },
+    {
+      "geometry": "polygon",
+      "extent": [
+        -179.98318481445312,
+        -51.5482177734375,
+        179.99990000000003,
+        75.65982055664062
+      ],
+      "id": "swamp",
+      "class": "",
+      "Datasource": {
+        "file": "/home/daniel/Documents/shp/swampa.shp"
+      },
+      "srs-name": "autodetect",
+      "srs": "",
+      "advanced": {},
+      "name": "swamp"
+    },
+    {
+      "geometry": "polygon",
+      "extent": [
+        -179.98318481445312,
+        -55.979496002197266,
+        179.99990000000003,
+        82.90718841552734
+      ],
+      "id": "grass",
+      "class": "",
+      "Datasource": {
+        "file": "/home/daniel/Documents/shp/grassa.shp"
+      },
+      "srs-name": "autodetect",
+      "srs": "",
+      "advanced": {},
+      "name": "grass"
     },
     {
       "geometry": "polygon",
@@ -173,6 +226,30 @@
     {
       "geometry": "linestring",
       "extent": [
+        -81.08693684884717,
+        38.44098612553919,
+        -61.965821985387734,
+        47.79131656816052
+      ],
+      "Datasource": {
+        "type": "postgis",
+        "table": "(SELECT way,highway FROM planet_osm_roads WHERE highway='motorway') AS data",
+        "key_field": "",
+        "geometry_field": "",
+        "extent_cache": "auto",
+        "extent": "-9026556.52,4641911.04,-6898003.75,6072207.3",
+        "dbname": "gis"
+      },
+      "id": "bigroads",
+      "class": "",
+      "srs-name": "900913",
+      "srs": "+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0.0 +k=1.0 +units=m +nadgrids=@null +wktext +no_defs +over",
+      "advanced": {},
+      "name": "bigroads"
+    },
+    {
+      "geometry": "linestring",
+      "extent": [
         -82.01618337398715,
         40.09764192859879,
         13.78214353180193,
@@ -264,24 +341,6 @@
       "srs": "+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0.0 +k=1.0 +units=m +nadgrids=@null +wktext +no_defs +over",
       "advanced": {},
       "name": "bridges"
-    },
-    {
-      "geometry": "polygon",
-      "extent": [
-        -179.98318481445312,
-        -55.979496002197266,
-        179.99990000000003,
-        82.90718841552734
-      ],
-      "id": "grass",
-      "class": "",
-      "Datasource": {
-        "file": "/home/daniel/Documents/shp/grassa.shp"
-      },
-      "srs-name": "autodetect",
-      "srs": "",
-      "advanced": {},
-      "name": "grass"
     }
   ],
   "scale": 1,

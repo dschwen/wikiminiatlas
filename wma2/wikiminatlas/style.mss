@@ -12,50 +12,45 @@ Map {
   polygon-fill: #fff;
 }*/
 
-#hirescoast{
+#hirescoast [zoom>=10]{
+  polygon-fill: rgb(250,250,208);
+  polygon-gamma: 0.75;
+}
+#lorescoast [zoom<10]{
   polygon-fill: rgb(250,250,208);
   polygon-gamma: 0.75;
 }
 
-/*
-#bridges {
-  line-color: #f00;
-  line-width: 1;
-}*/
+
 #bathymetry {
   //polygon-fill: rgb(16,12,4);
   polygon-fill: rgb(8,8,8);
   polygon-comp-op: minus;
 }
-/*#bathy200 {
-  polygon-gamma: 0.75;
-  polygon-fill: @ocean*0.975;
-}
-#bathy1000 {
-  polygon-gamma: 0.75;
-  polygon-fill: @ocean*0.95;
-}
-#bathy2000 {
-  polygon-gamma: 0.75;
-  polygon-fill: @ocean*0.925;
-}
-#bathy3000 {
-  polygon-gamma: 0.75;
-  polygon-fill: @ocean*0.9;
-}
-#bathy4000 {
-  polygon-gamma: 0.75;
-  polygon-fill: @ocean*0.875;
-}*/
 
+@grass: rgb(208, 250, 208);
+@trees: rgb(190, 240, 190);
+@swamp: rgb(204, 224, 225);
 
-#trees {
+#trees [zoom<12],
+#polygon [zoom>=12][natural='wood'] {
   polygon-opacity:1;
-  polygon-fill:#4e4;
+  polygon-fill: @trees;
 }
 
-
-#grass {
+#grass [zoom<12],
+#polygon [zoom>=12][natural='fell'],
+#polygon [zoom>=12][natural='grassland'] {
   polygon-opacity:1;
-  polygon-fill:#bf9;
+  polygon-fill: @grass;
+}
+
+#swamp [zoom<12],
+#polygon [zoom>=12][natural='wetland'] {
+  polygon-opacity:1;
+  polygon-fill: @swamp;
+}
+
+#bigroads [zoom<12] {
+  line-color: #f00;
 }
