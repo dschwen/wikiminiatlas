@@ -288,3 +288,31 @@
   marker-allow-overlap:true;
 }
 
+#bigroads [zoom>=6][zoom<12] {  
+  [highway='motorway'],[highway='motorway_link'],
+  [highway='trunk'],[highway='trunk_link'] {
+    ::outline { 
+      line-width: 2;
+	  line-smooth: @smooth;
+      line-color: @color_motorway * @outlinedarken;
+    }
+    ::inline { 
+      line-width: 1;
+	  line-smooth: @smooth;
+      line-color: @color_motorway;
+    }
+  }
+  [highway='secondary'][zoom>=9],
+  [highway='secondary_link'][zoom>=9], {
+    ::outline { 
+      line-width: 2;
+	  line-smooth: @smooth;
+      line-color: @color_secondary * @outlinedarken;
+    }
+    ::inline { 
+      line-width: 1;
+	  line-smooth: @smooth;
+      line-color: @color_secondary;
+    }
+  }
+}

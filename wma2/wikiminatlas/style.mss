@@ -38,6 +38,12 @@ Map {
   polygon-fill: @trees;
 }
 
+#water [zoom<12] {
+  polygon-opacity:1;
+  polygon-fill: @ocean;
+  polygon-gamma: 0.75;
+}
+
 #grass [zoom<12],
 #polygon [zoom>=12][natural='fell'],
 #polygon [zoom>=12][natural='grassland'] {
@@ -49,8 +55,4 @@ Map {
 #polygon [zoom>=12][natural='wetland'] {
   polygon-opacity:1;
   polygon-fill: @swamp;
-}
-
-#bigroads [zoom<12] {
-  line-color: #f00;
 }
