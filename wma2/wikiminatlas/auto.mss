@@ -141,19 +141,6 @@
   line-color: rgb(168,148,148)
 }
 
-#line::sub7 [zoom>=14][highway='service']{
-  line-cap: round;
-  ::outline { 
-    line-width: 4;
-  	line-color: rgb(188,188,188);
-  	[tunnel!=''] { line-dasharray: 4,4 }
-  }
-  ::fill {
-    line-width: 4;
-  	line-color: #fff;
-  	[tunnel!=''] { line-opacity: 0.5 }
-  }
-}
 
 #line::sub8 [zoom>=15][highway='track']{
   line-width: 3.5;
@@ -162,17 +149,19 @@
 }
 
 
+@aeroway: rgb(110,130,110);
 
-
-#line::sub15 [zoom>12][aeroway='runway']{
+#line::sub15 [zoom>=12][aeroway='runway']{
   line-width: 10;
+  [zoom=12] { line-width: 8 }
+  [zoom=13] { line-width: 9 }
   line-cap: round;
-  line-color: rgb(100,130,100)
+  line-color: @aeroway;
 }
-#line::sub16 [zoom>12][aeroway='taxiway']{
+#line::sub16 [zoom>=13][aeroway='taxiway']{
   line-width: 4.5;
   line-cap: round;
-  line-color: rgb(100,130,100)
+  line-color: @aeroway;
 }
 
 
