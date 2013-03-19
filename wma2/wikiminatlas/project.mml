@@ -348,7 +348,7 @@
       ],
       "Datasource": {
         "type": "postgis",
-        "table": "(SELECT way,highway,railway,access, 'yes' AS bridge, '' AS tunnel FROM planet_osm_line WHERE bridge IN ('yes','true','1','viaduct','suspension')  ORDER BY z_order) AS data",
+        "table": "(SELECT way,highway,railway,access, 'yes' AS bridge, '' AS tunnel FROM planet_osm_line WHERE bridge IS NOT NULL AND bridge NOT IN ('no','false','0')  ORDER BY z_order) AS data",
         "key_field": "",
         "geometry_field": "",
         "extent_cache": "auto",

@@ -1,16 +1,17 @@
-#polygon::sub0 [zoom>12][natural='ocean']{
+/*#polygon::sub0 [zoom>12][natural='ocean']{
   polygon-fill: rgb(250,250,208)
-}
+}*/
+
 #polygon::sub1 [zoom>12][railway='platform']{
   polygon-fill: rgb(220,220,220)
 }
-#polygon::sub2 [zoom>12][landuse='industrial'],
-#polygon::sub2 [zoom>12][landuse='retail'],
-#polygon::sub2 [zoom>12][landuse='commercial'],
-#polygon::sub2 [zoom>12][landuse='residential']{
+#polygon::sub2 [zoom>=12][landuse='industrial'],
+#polygon::sub2 [zoom>=12][landuse='retail'],
+#polygon::sub2 [zoom>=12][landuse='commercial'],
+#polygon::sub2 [zoom>=12][landuse='residential']{
   polygon-fill: @builtup;
 }
-#polygon::sub3 [zoom>12][landuse='reservoir']{
+#polygon::sub3 [zoom>=12][landuse='reservoir']{
   polygon-fill: rgb(200,200,224)
 }
 #polygon::sub4 [zoom>12][landuse='military'],
@@ -24,7 +25,7 @@
 #polygon::sub5 [zoom>12][landuse='recreation_ground']{
   polygon-fill: rgb(190,214,190)
 }
-#polygon::sub7 [zoom>12] {
+#polygon::sub7 [zoom>=12] {
   [leisure='park'],[leisure='orchard'],[leisure='meadow'],[leisure='village_green'],
   [leisure='forrest'],[landuse='grass'] {
   	polygon-fill: @grassgreen;
