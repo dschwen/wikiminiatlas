@@ -135,7 +135,7 @@
   line-color: rgb(126,159,194)
 }
 
-#line::sub6 [zoom>12][highway='steps']{
+#line::sub6 [zoom>=16][highway='steps']{
   line-dasharray: 1.5,1.5;
   line-width: 3;
   line-color: rgb(168,148,148)

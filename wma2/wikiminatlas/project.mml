@@ -18,7 +18,8 @@
   "Stylesheet": [
     "style.mss",
     "auto.mss",
-    "transport.mss"
+    "transport.mss",
+    "labels.mss"
   ],
   "Layer": [
     {
@@ -276,7 +277,7 @@
       ],
       "Datasource": {
         "type": "postgis",
-        "table": "(SELECT way, highway, railway, access, '' AS bridge, '' AS tunnel FROM planet_osm_line WHERE (highway IS NOT NULL OR railway IS NOT NULL) AND (bridge is null or bridge in ('no','false','0')) and (tunnel is null or tunnel in ('no','false','0')) ORDER BY z_order ) AS data",
+        "table": "(SELECT way, name, highway, railway, access, '' AS bridge, '' AS tunnel FROM planet_osm_line WHERE (highway IS NOT NULL OR railway IS NOT NULL) AND (bridge is null or bridge in ('no','false','0')) and (tunnel is null or tunnel in ('no','false','0')) ORDER BY z_order ) AS data",
         "key_field": "",
         "geometry_field": "",
         "extent_cache": "auto",
@@ -347,7 +348,7 @@
       ],
       "Datasource": {
         "type": "postgis",
-        "table": "(SELECT way,highway,railway,access, 'yes' AS bridge, '' AS tunnel FROM planet_osm_line WHERE bridge IN ('yes','true','1','viaduct')  ORDER BY z_order) AS data",
+        "table": "(SELECT way,highway,railway,access, 'yes' AS bridge, '' AS tunnel FROM planet_osm_line WHERE bridge IN ('yes','true','1','viaduct','suspension')  ORDER BY z_order) AS data",
         "key_field": "",
         "geometry_field": "",
         "extent_cache": "auto",
@@ -399,6 +400,54 @@
       "srs": "",
       "advanced": {},
       "name": "states"
+    },
+    {
+      "geometry": "linestring",
+      "extent": [
+        -82.01618337398715,
+        40.09764192859879,
+        13.78214353180193,
+        54.13675397472351
+      ],
+      "Datasource": {
+        "type": "postgis",
+        "table": "(SELECT way, name, highway FROM planet_osm_line WHERE highway IN ('motorway','primary','trunk','secondary')  ORDER BY z_order ) AS data",
+        "key_field": "",
+        "geometry_field": "",
+        "extent_cache": "auto",
+        "extent": "-9129999.77,4880141.5,1534221.2,7196098.52",
+        "dbname": "gis"
+      },
+      "id": "biglabels",
+      "class": "",
+      "srs-name": "900913",
+      "srs": "+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0.0 +k=1.0 +units=m +nadgrids=@null +wktext +no_defs +over",
+      "advanced": {},
+      "name": "biglabels"
+    },
+    {
+      "geometry": "linestring",
+      "extent": [
+        -82.01618337398715,
+        40.09764192859879,
+        13.78214353180193,
+        54.13675397472351
+      ],
+      "Datasource": {
+        "type": "postgis",
+        "table": "(SELECT way, name, highway FROM planet_osm_line WHERE highway IN ('road','unclassified','residential','tertiary')  ORDER BY z_order ) AS data",
+        "key_field": "",
+        "geometry_field": "",
+        "extent_cache": "auto",
+        "extent": "-9129999.77,4880141.5,1534221.2,7196098.52",
+        "dbname": "gis"
+      },
+      "id": "smalllabels",
+      "class": "",
+      "srs-name": "900913",
+      "srs": "+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0.0 +k=1.0 +units=m +nadgrids=@null +wktext +no_defs +over",
+      "advanced": {},
+      "name": "smalllabels"
     }
   ],
   "scale": 1,
