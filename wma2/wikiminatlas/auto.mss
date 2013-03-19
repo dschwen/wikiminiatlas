@@ -166,12 +166,12 @@
 
 
 
-#line::sub24 [zoom>12][aeroway='runway']{
+#line::sub24 [zoom>=12][aeroway='runway']{
   line-width: 8;
   line-cap: round;
   line-color: rgb(150,180,150)
 }
-#line::sub25 [zoom>12][aeroway='taxiway']{
+#line::sub25 [zoom>=13][aeroway='taxiway']{
   line-width: 2.5;
   line-cap: round;
   line-color: rgb(150,180,150)

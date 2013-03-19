@@ -291,9 +291,9 @@
 }
 
 // Access
-#transport::access [zoom>12],
-#tunnels::access   [zoom>12],
-#bridges::access   [zoom>12] { 
+#transport::access [zoom>=14],
+#tunnels::access   [zoom>=14],
+#bridges::access   [zoom>=14] { 
   [access='private'],
   [access='residents'],
   [access='permissive']{
