@@ -19,6 +19,15 @@
   polygon-fill: rgb(224,200,200)
 }
 
+#polygon::boundaries [zoom>=11][boundary='administrative'] {
+  [admin_level='2'],[admin_level='4'] {
+    line-width: 1.5;
+    line-opacity: 0.35;
+    line-dasharray: 1.5,1.5,4.0,1.5;
+    [admin_level='4'] { line-dasharray: 4.0,1.5; }
+  }
+}
+
 @grassgreen: rgb(190,234,190);
 
 #polygon::sub5 [zoom>12][landuse='cemetery'],
@@ -166,6 +175,7 @@
 }
 
 
+@aeroway_color: rgb(150,180,150);
 
 #line::sub24 [zoom>=12][aeroway='runway']{
   line-width: 8;
@@ -177,7 +187,9 @@
   line-cap: round;
   line-color: rgb(150,180,150)
 }
-
+#polygon::apron [zoom>=15][aeroway='apron']{
+  polygon-fill: 0.25*@aeroway_color + 0.75*rgb(250,250,208);
+}
 
 
 /*#line::sub29 [zoom>12][building:part!='']{
