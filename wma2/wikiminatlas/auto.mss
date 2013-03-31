@@ -191,6 +191,9 @@
   polygon-fill: 0.25*@aeroway_color + 0.75*rgb(250,250,208);
 }
 
+#line::cliff [zoom>=15][natural='cliff'] {
+  line-pattern-file: url(cliff_line.png);
+}
 
 /*#line::sub29 [zoom>12][building:part!='']{
   line-width: 1;

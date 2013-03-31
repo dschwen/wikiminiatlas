@@ -30,7 +30,7 @@ Map {
 
 @grass: rgb(208, 250, 208);
 @trees: rgb(190, 240, 190);
-@swamp: rgb(204, 224, 225);
+@swamp: rgb(204, 224,  225);
 
 #trees [zoom<12],
 #polygon [zoom>=12][natural='wood'] {
@@ -44,7 +44,7 @@ Map {
   polygon-gamma: 0.75;
 }
 
-#grass [zoom<12],
+#grass [zoom<12], 
 #polygon [zoom>=12][natural='fell'],
 #polygon [zoom>=12][natural='grassland'] {
   polygon-opacity:1;
