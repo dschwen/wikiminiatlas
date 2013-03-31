@@ -10,12 +10,12 @@
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    width="600"
-   height="420"
+   height="300"
    id="svg2"
    version="1.1"
    inkscape:version="0.48.3.1 r9886"
    sodipodi:docname="cliff_line.svg"
-   inkscape:export-filename="/data/daniel/Programs/toolserver/wmajs/wma2/wikiminatlas/cliff_line.png"
+   inkscape:export-filename="/Users/b259038/Programs/toolserver/wmajs/wma2/wikiminatlas/cliff_line.png"
    inkscape:export-xdpi="4.5"
    inkscape:export-ydpi="4.5">
   <defs
@@ -27,9 +27,9 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="0.7"
-     inkscape:cx="-0.70001143"
-     inkscape:cy="67.783159"
+     inkscape:zoom="1.4"
+     inkscape:cx="118.62953"
+     inkscape:cy="15.904669"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      showgrid="true"
@@ -50,7 +50,7 @@
        enabled="true"
        snapvisiblegridlinesonly="true"
        originx="-60px"
-       originy="-520px" />
+       originy="-580px" />
   </sodipodi:namedview>
   <metadata
      id="metadata7">
@@ -68,10 +68,10 @@
      inkscape:label="Layer 1"
      inkscape:groupmode="layer"
      id="layer1"
-     transform="translate(-60,-112.36218)">
+     transform="translate(-60,-172.36218)">
     <path
-       style="fill:#000000;stroke:none;fill-opacity:0.19634703"
-       d="m 60,272.36218 600,0 0,80 -80,0 -80,120 -80,-120 -120,0 -120,180 -120,-180 z"
+       style="fill:#000000;fill-opacity:0.11946902;stroke:none"
+       d="m 60,292.36218 600,0 0,40 -110,0 -50,70 -50,-70 -190,0 -100,140 -100,-140 z"
        id="path2987"
        inkscape:connector-curvature="0"
        sodipodi:nodetypes="cccccccccc" />
