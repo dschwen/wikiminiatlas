@@ -76,3 +76,11 @@ Map {
   polygon-opacity:1;
   polygon-fill: @builtup;
 }
+
+
+#hill1 [zoom>=7][zoom<=16] {
+  raster-comp-op: hard-light;
+  raster-scaling: bilinear;
+  raster-opacity:0.25;
+  [zoom=16] { raster-opacity:0.1; }
+}
