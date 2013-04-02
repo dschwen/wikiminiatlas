@@ -78,7 +78,7 @@ Map {
 }
 
 
-#hill1 [zoom>=7][zoom<=16] {
+.hill [zoom>=7][zoom<=16] {
   raster-comp-op: hard-light;
   raster-scaling: bilinear;
   raster-opacity:0.25;

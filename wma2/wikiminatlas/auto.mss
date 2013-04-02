@@ -53,7 +53,8 @@
   polygon-fill: rgb(158,199,243)
 }
 #polygon::sub9 [zoom>=12][natural='beach'],
-#polygon::sub9 [zoom>=12][natural='sand']{
+#polygon::sub9 [zoom>=12][natural='sand'],
+#polygon::sub9 [zoom>=8][natural='desert']{
   polygon-fill: rgb(250,242,175)
 }
 #polygon::sub10 [zoom>=12][natural='wetland'],

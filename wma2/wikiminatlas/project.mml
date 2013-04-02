@@ -171,18 +171,18 @@
     },
     {
       "extent": [
-        -79.76252214887526,
-        40.47017198952294,
-        -71.85366653225222,
-        45.071016259106294
+        -80.66841023083992,
+        38.788755968306354,
+        -66.87199435563542,
+        47.49999994311116
       ],
       "Datasource": {
         "type": "postgis",
         "table": "(SELECT * FROM planet_osm_polygon WHERE building IS NULL ORDER BY z_order) AS r",
         "key_field": "",
         "geometry_field": "way",
-        "extent_cache": "auto",
-        "extent": "-8879123.35,4934503.48,-7998713.57,5632708.48",
+        "extent_cache": "dynamic",
+        "extent": "",
         "dbname": "gis",
         "id": "polygon",
         "project": "wikiminatlas",
@@ -212,6 +212,24 @@
       "srs": "+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0.0 +k=1.0 +units=m +nadgrids=@null +wktext +no_defs +over",
       "advanced": {},
       "name": "hill1"
+    },
+    {
+      "geometry": "raster",
+      "extent": [
+        -120.00041666666668,
+        31.9998644076312,
+        -107.99928379694352,
+        40.00041666666665
+      ],
+      "id": "hill2",
+      "class": "hill",
+      "Datasource": {
+        "file": "/home/daniel/Downloads/output2_hillshade.tif"
+      },
+      "srs-name": "900913",
+      "srs": "+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0.0 +k=1.0 +units=m +nadgrids=@null +wktext +no_defs +over",
+      "advanced": {},
+      "name": "hill2"
     },
     {
       "geometry": "linestring",
@@ -289,17 +307,17 @@
       "geometry": "linestring",
       "extent": [
         -82.01618337398715,
-        40.09764192859879,
-        13.78214353180193,
-        54.13675397472351
+        38.44098612553919,
+        -61.965821985387734,
+        47.79131656816052
       ],
       "Datasource": {
         "type": "postgis",
         "table": "(SELECT way, name, highway, railway, access, '' AS bridge, '' AS tunnel FROM planet_osm_line WHERE (highway IS NOT NULL OR railway IS NOT NULL) AND (bridge is null or bridge in ('no','false','0')) and (tunnel is null or tunnel in ('no','false','0')) ORDER BY z_order ) AS data",
         "key_field": "",
         "geometry_field": "",
-        "extent_cache": "auto",
-        "extent": "-9129999.77,4880141.5,1534221.2,7196098.52",
+        "extent_cache": "dynamic",
+        "extent": "",
         "dbname": "gis"
       },
       "id": "transport",
@@ -331,7 +349,8 @@
       "srs-name": "900913",
       "srs": "+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0.0 +k=1.0 +units=m +nadgrids=@null +wktext +no_defs +over",
       "advanced": {},
-      "name": "turningcircle"
+      "name": "turningcircle",
+      "status": "off"
     },
     {
       "extent": [
