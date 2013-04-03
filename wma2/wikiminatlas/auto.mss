@@ -153,11 +153,6 @@
 }
 
 
-#line::sub8 [zoom>=15][highway='track']{
-  line-width: 3.5;
-  line-color: rgb(168,168,168);
-  [tunnel!=''] { line-dasharray: 4,4 }
-}
 
 
 @aeroway: rgb(110,130,110);

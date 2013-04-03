@@ -1,5 +1,6 @@
 // Constants
 @bridgewidth: 2;
+@bridgeopacity: 0.25;
 @add15: 1;
 @add16: 2;
 @add17: 3;
@@ -24,7 +25,7 @@
         line-width: 3 + @bridgewidth;
         line-smooth: @smooth;
         line-color: #333;
-        line-opacity: 0.5;
+        line-opacity: @bridgeopacity;
       }
       ::outline {
         line-width: 3;
@@ -47,7 +48,7 @@
         [zoom>=15] { line-width: 4 + @bridgewidth + 1 }
         [zoom>=16] { line-width: 4 + @bridgewidth + 2 }
         line-color: #333;
-        line-opacity: 0.5;
+        line-opacity: @bridgeopacity;
       }
       ::outline  { 
         line-width: 4;
@@ -67,15 +68,24 @@
 
   [zoom>=15] {
     [highway='service'] {
-      line-cap: round;
-      line-width: 3.5;
-      [zoom>=16] { line-width: 3.5 + 1 }
-  	  line-color: @color_residential * @outlinedarken;
-      [tunnel!=''] { 
-        line-dasharray: 4,4;
-        line-cap: butt;
+      ::bridge [bridge!=''] {
+        line-width: 3.5 + @bridgewidth;
+        line-smooth: @smooth;
+        [zoom>=16] { line-width: 3.5 + @bridgewidth + 1 }
+        line-color: #333;
+        line-opacity: @bridgeopacity;
       }
-      [bridge!=''] { line-cap: butt; }
+      ::outline {
+        line-cap: round;
+        line-width: 3.5;
+        [zoom>=16] { line-width: 3.5 + 1 }
+        line-color: @color_residential * @outlinedarken;
+        [tunnel!=''] { 
+          line-dasharray: 4,4;
+          line-cap: butt;
+        }
+        [bridge!=''] { line-cap: butt; }
+      }
     }
   }
     
@@ -84,7 +94,7 @@
       ::bridge [bridge!=''] {
         line-width: 5 + @bridgewidth;
         line-color: #333;
-        line-opacity: 0.5;
+        line-opacity: @bridgeopacity;
       }
       ::outline { 
         line-width: 5;
@@ -112,7 +122,7 @@
       [zoom>=15] { line-width: 5 + @bridgewidth + 1 }
       [zoom>=16] { line-width: 5 + @bridgewidth + 2 }
       line-color: #333;
-      line-opacity: 0.5;
+      line-opacity: @bridgeopacity;
     }
     ::outline { 
       line-width: 5;
@@ -137,7 +147,7 @@
       [zoom=15] { line-width: 6 + @bridgewidth + 1 }
       [zoom=16] { line-width: 6 + @bridgewidth + 2 }
       line-color: #333;
-      line-opacity: 0.5;
+      line-opacity: @bridgeopacity;
     }
     ::outline  { 
       line-width: 6 + 3;
@@ -169,7 +179,7 @@
       [zoom=15] { line-width: 7 + @bridgewidth + 1 }
       [zoom=16] { line-width: 7 + @bridgewidth + 2 }
       line-color: #333;
-      line-opacity: 0.5;
+      line-opacity: @bridgeopacity;
     }
     ::outline { 
       line-width: 7+3;
@@ -189,7 +199,27 @@
       [bridge!=''] { line-cap: butt; }
     }
   }
-  
+}
+
+#transport::track [zoom>=14][highway='track']{
+  [zoom>=15] {
+    ::left {
+      line-width: 0.5;
+      [tunnel!=''] { line-dasharray: 4,4 }
+      line-color: rgb(168,168,168);
+      line-offset: -1;
+    }
+	::right {
+      line-width: 0.5;
+  		[tunnel!=''] { line-dasharray: 4,4 }
+  		line-color: rgb(168,168,168);
+  		line-offset: 1;
+	}
+  }
+  [zoom=14] {
+    line-width: 0.5;
+    line-color: rgb(168,168,168);
+  }
 }
   
 // Inlines
@@ -207,7 +237,7 @@
       line-color: rgb(200,200,200);
       line-dasharray: 3,3;
     
-      [railway='subway'][railway='rail'],
+      [railway='subway'],[railway='rail'],
       [railway='light_rail'],[railway='narrow_gauge'] {
         line-color: rgb(255,255,255)
       }
@@ -241,9 +271,10 @@
   	}
   }
   
-  [zoom>=15] {
+  [zoom>=14] {
     [highway='service'] {
       line-width: 3;
+      [zoom=14] { line-width: 1.5 }
       line-cap: round;
       [zoom>=16] { line-width: 3 + 1 }
       line-color: @color_residential;
@@ -335,11 +366,20 @@
   line-opacity: 0.4;
 }
 
-#turningcircle [zoom>13] {
-  marker-width:10;
+#turningcircle_casing [zoom>=15] {
+  marker-width:7;
+  [zoom=16] { marker-width:10; }
+  [zoom>=17] { marker-width:14; }
+  marker-fill: @color_residential * @outlinedarken;
+  marker-line-width: 0;
+  marker-allow-overlap:true;
+}
+#turningcircle_fill [zoom>=15] {
+  marker-width:6;
+  [zoom=16] { marker-width:9; }
+  [zoom>=17] { marker-width:13; }
   marker-fill: @color_residential;
-  marker-line-color: @color_residential * @outlinedarken;
-  marker-line-width: 0.5;
+  marker-line-width: 0;
   marker-allow-overlap:true;
 }
 
