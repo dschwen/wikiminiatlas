@@ -90,7 +90,7 @@
   }
     
   [zoom>=16] {
-    [highway='pedestrian']{
+    [highway='cycleway'],[highway='pedestrian']{
       ::bridge [bridge!=''] {
         line-width: 5 + @bridgewidth;
         line-color: #333;
@@ -99,6 +99,7 @@
       ::outline { 
         line-width: 5;
         line-color: rgb(255,255,255);
+        [highway='cycleway'] { line-color: rgb(200,200,255); }
         [tunnel!=''] { 
           line-dasharray: 4,4;
           line-cap: butt;
@@ -251,7 +252,7 @@
   }
   
   [zoom>=16] {
-    [highway='footway'],[highway='pedestrian'],[highway='path']{
+    [highway='cycleway'],[highway='footway'],[highway='pedestrian'],[highway='path']{
       line-width: 2;
       line-color: rgb(198,178,178);
       [tunnel!=''] { line-dasharray: 4,4 }
