@@ -16792,8 +16792,8 @@
 ]]></Parameter>
        <Parameter name="key_field"><![CDATA[]]></Parameter>
        <Parameter name="geometry_field"><![CDATA[]]></Parameter>
-       <Parameter name="extent_cache"><![CDATA[auto]]></Parameter>
-       <Parameter name="extent"><![CDATA[-13099668.03,3676007.26,-11944757.46,4524132.33]]></Parameter>
+       <Parameter name="extent_cache"><![CDATA[dynamic]]></Parameter>
+       <Parameter name="extent"><![CDATA[]]></Parameter>
        <Parameter name="dbname"><![CDATA[gis]]></Parameter>
     </Datasource>
   </Layer>
