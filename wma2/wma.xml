@@ -150,7 +150,7 @@
 <Style name="polygon-sub21" filter-mode="first" >
   <Rule>
     <MaxScaleDenominator>100000</MaxScaleDenominator>
-    <Filter>([historic] = 'fort')</Filter>
+    <Filter>([historic] = 'memorial')</Filter>
     <PolygonSymbolizer fill="#ffbebe" />
   </Rule>
   <Rule>
@@ -160,12 +160,12 @@
   </Rule>
   <Rule>
     <MaxScaleDenominator>100000</MaxScaleDenominator>
-    <Filter>([historic] = 'castle')</Filter>
+    <Filter>([historic] = 'fort')</Filter>
     <PolygonSymbolizer fill="#ffbebe" />
   </Rule>
   <Rule>
     <MaxScaleDenominator>100000</MaxScaleDenominator>
-    <Filter>([historic] = 'memorial')</Filter>
+    <Filter>([historic] = 'castle')</Filter>
     <PolygonSymbolizer fill="#ffbebe" />
   </Rule>
 </Style>
@@ -247,12 +247,12 @@
   </Rule>
   <Rule>
     <MaxScaleDenominator>200000</MaxScaleDenominator>
-    <Filter>([natural] = 'wetland')</Filter>
+    <Filter>([natural] = 'mud')</Filter>
     <PolygonSymbolizer fill="#cce0e1" />
   </Rule>
   <Rule>
     <MaxScaleDenominator>200000</MaxScaleDenominator>
-    <Filter>([natural] = 'mud')</Filter>
+    <Filter>([natural] = 'wetland')</Filter>
     <PolygonSymbolizer fill="#cce0e1" />
   </Rule>
   <Rule>
@@ -269,19 +269,25 @@
 <Style name="polygon-sub8" filter-mode="first" >
   <Rule>
     <MaxScaleDenominator>200000</MaxScaleDenominator>
-    <Filter>([waterway] = 'dock')</Filter>
+    <Filter>([waterway] = 'riverbank')</Filter>
     <PolygonSymbolizer fill="#9ec7f3" />
   </Rule>
   <Rule>
     <MaxScaleDenominator>200000</MaxScaleDenominator>
-    <Filter>([waterway] = 'riverbank')</Filter>
+    <Filter>([waterway] = 'dock')</Filter>
     <PolygonSymbolizer fill="#9ec7f3" />
   </Rule>
 </Style>
 <Style name="polygon-sub7b" filter-mode="first"  opacity="0.25" >
   <Rule>
     <MaxScaleDenominator>100000</MaxScaleDenominator>
-    <Filter>([leisure] = 'stadium')</Filter>
+    <Filter>([leisure] = 'golf_course')</Filter>
+    <PolygonSymbolizer fill="#64ff64" />
+    <LineSymbolizer stroke="#4ac54a" />
+  </Rule>
+  <Rule>
+    <MaxScaleDenominator>100000</MaxScaleDenominator>
+    <Filter>([leisure] = 'pitch')</Filter>
     <PolygonSymbolizer fill="#64ff64" />
     <LineSymbolizer stroke="#4ac54a" />
   </Rule>
@@ -305,36 +311,15 @@
   </Rule>
   <Rule>
     <MaxScaleDenominator>100000</MaxScaleDenominator>
-    <Filter>([leisure] = 'golf_course')</Filter>
-    <PolygonSymbolizer fill="#64ff64" />
-    <LineSymbolizer stroke="#4ac54a" />
-  </Rule>
-  <Rule>
-    <MaxScaleDenominator>100000</MaxScaleDenominator>
-    <Filter>([leisure] = 'pitch')</Filter>
+    <Filter>([leisure] = 'stadium')</Filter>
     <PolygonSymbolizer fill="#64ff64" />
     <LineSymbolizer stroke="#4ac54a" />
   </Rule>
 </Style>
-<Style name="polygon-leisure_green" filter-mode="first" >
+<Style name="polygon-greens" filter-mode="first" >
   <Rule>
     <MaxScaleDenominator>200000</MaxScaleDenominator>
-    <Filter>([leisure] = 'park')</Filter>
-    <PolygonSymbolizer fill="#beeabe" />
-  </Rule>
-  <Rule>
-    <MaxScaleDenominator>200000</MaxScaleDenominator>
-    <Filter>([landuse] = 'garden')</Filter>
-    <PolygonSymbolizer fill="#beeabe" />
-  </Rule>
-  <Rule>
-    <MaxScaleDenominator>200000</MaxScaleDenominator>
-    <Filter>([landuse] = 'grass')</Filter>
-    <PolygonSymbolizer fill="#beeabe" />
-  </Rule>
-  <Rule>
-    <MaxScaleDenominator>200000</MaxScaleDenominator>
-    <Filter>([leisure] = 'forrest')</Filter>
+    <Filter>([leisure] = 'orchard')</Filter>
     <PolygonSymbolizer fill="#beeabe" />
   </Rule>
   <Rule>
@@ -344,12 +329,22 @@
   </Rule>
   <Rule>
     <MaxScaleDenominator>200000</MaxScaleDenominator>
-    <Filter>([leisure] = 'meadow')</Filter>
+    <Filter>([leisure] = 'forrest')</Filter>
     <PolygonSymbolizer fill="#beeabe" />
   </Rule>
   <Rule>
     <MaxScaleDenominator>200000</MaxScaleDenominator>
-    <Filter>([leisure] = 'orchard')</Filter>
+    <Filter>([leisure] = 'garden')</Filter>
+    <PolygonSymbolizer fill="#beeabe" />
+  </Rule>
+  <Rule>
+    <MaxScaleDenominator>200000</MaxScaleDenominator>
+    <Filter>([leisure] = 'park')</Filter>
+    <PolygonSymbolizer fill="#beeabe" />
+  </Rule>
+  <Rule>
+    <MaxScaleDenominator>200000</MaxScaleDenominator>
+    <Filter>([leisure] = 'meadow')</Filter>
     <PolygonSymbolizer fill="#beeabe" />
   </Rule>
 </Style>
@@ -400,12 +395,17 @@
   </Rule>
   <Rule>
     <MaxScaleDenominator>100000</MaxScaleDenominator>
-    <Filter>([landuse] = 'recreation_ground')</Filter>
-    <PolygonSymbolizer fill="#bed6be" />
+    <Filter>([landuse] = 'grass')</Filter>
+    <PolygonSymbolizer fill="#beeabe" />
   </Rule>
   <Rule>
     <MaxScaleDenominator>100000</MaxScaleDenominator>
     <Filter>([landuse] = 'cemetery')</Filter>
+    <PolygonSymbolizer fill="#bed6be" />
+  </Rule>
+  <Rule>
+    <MaxScaleDenominator>100000</MaxScaleDenominator>
+    <Filter>([landuse] = 'recreation_ground')</Filter>
     <PolygonSymbolizer fill="#bed6be" />
   </Rule>
   <Rule>
@@ -450,7 +450,7 @@
   </Rule>
   <Rule>
     <MaxScaleDenominator>200000</MaxScaleDenominator>
-    <Filter>([landuse] = 'residential')</Filter>
+    <Filter>([landuse] = 'industrial')</Filter>
     <PolygonSymbolizer fill="#d0d0d0" />
   </Rule>
   <Rule>
@@ -460,12 +460,12 @@
   </Rule>
   <Rule>
     <MaxScaleDenominator>200000</MaxScaleDenominator>
-    <Filter>([landuse] = 'industrial')</Filter>
+    <Filter>([landuse] = 'commercial')</Filter>
     <PolygonSymbolizer fill="#d0d0d0" />
   </Rule>
   <Rule>
     <MaxScaleDenominator>200000</MaxScaleDenominator>
-    <Filter>([landuse] = 'commercial')</Filter>
+    <Filter>([landuse] = 'residential')</Filter>
     <PolygonSymbolizer fill="#d0d0d0" />
   </Rule>
 </Style>
@@ -482,7 +482,7 @@
     <StyleName>polygon-landuse</StyleName>
     <StyleName>polygon</StyleName>
     <StyleName>polygon-boundaries</StyleName>
-    <StyleName>polygon-leisure_green</StyleName>
+    <StyleName>polygon-greens</StyleName>
     <StyleName>polygon-sub7b</StyleName>
     <StyleName>polygon-sub8</StyleName>
     <StyleName>polygon-natural</StyleName>

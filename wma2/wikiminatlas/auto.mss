@@ -2,6 +2,7 @@
   polygon-fill: rgb(250,250,208)
 }*/
 @farm: rgb(224,224,200);
+@grassgreen: rgb(190,234,190);
 
 #polygon::sub1 [zoom>12][railway='platform']{
   polygon-fill: rgb(220,220,220)
@@ -9,17 +10,17 @@
 
 #polygon::landuse [zoom>=12][landuse!=''] {
   [landuse='industrial'],[landuse='retail'],
-  [landuse='commercial'],[landuse='residential']{
+  [landuse='commercial'],[landuse='residential'] {
     polygon-fill: @builtup;
   }
-  [landuse='reservoir'],[landuse='basin']{
+  [landuse='reservoir'],[landuse='basin'] {
     polygon-fill: rgb(200,200,224)
   }
-  [landuse='conservation']{
+  [landuse='conservation'] {
     polygon-fill: rgb(200,255,200)
   }
   [zoom>=13] {
-    [landuse='military'],[landuse='railway'],[landuse='prison']{
+    [landuse='military'],[landuse='railway'],[landuse='prison'] {
       polygon-fill: rgb(224,200,200)
     }
     [landuse='farm'],[landuse='farmland'],[landuse='farmyard'] {
@@ -30,8 +31,11 @@
       polygon-fill: @builtup;
       polygon-opacity: 0.5;
     }
-    [landuse='cemetery'],[landuse='recreation_ground']{
+    [landuse='cemetery'],[landuse='recreation_ground'] {
       polygon-fill: rgb(190,214,190)
+    }
+    [landuse='grass'] {
+  	  polygon-fill: @grassgreen;
     }
   }
 }
@@ -50,13 +54,13 @@
   }
 }
 
-@grassgreen: rgb(190,234,190);
-#polygon::leisure_green [zoom>=12] {
-  [leisure='park'],[leisure='orchard'],[leisure='meadow'],[leisure='village_green'],
-  [leisure='forrest'],[landuse='grass'],[landuse='garden'] {
+#polygon::greens [zoom>=12][leisure!=''] {
+  [leisure='park'],[leisure='orchard'],[leisure='meadow'],
+  [leisure='village_green'],[leisure='forrest'],[leisure='garden'] {
   	polygon-fill: @grassgreen;
   }
 }
+
 #polygon::sub7b [zoom>12] {
   [leisure='golf_course'],[leisure='track'],[leisure='recreation_ground'],
   [leisure='dog_park'],[leisure='pitch'],[leisure='stadium'] {
