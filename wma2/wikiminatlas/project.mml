@@ -292,8 +292,8 @@
         "table": "(SELECT way,highway FROM planet_osm_roads WHERE highway in ('motorway','motorway_link','trunk','trunk_link','primary','primary_link','secondary','secondary_link') ) AS data\n",
         "key_field": "",
         "geometry_field": "",
-        "extent_cache": "auto",
-        "extent": "-13099668.03,3676007.26,-11944757.46,4524132.33",
+        "extent_cache": "dynamic",
+        "extent": "",
         "dbname": "gis"
       },
       "id": "bigroads",
