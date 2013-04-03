@@ -376,15 +376,15 @@
 #turningcircle_casing [zoom>=15] {
   marker-width:7;
   [zoom=16] { marker-width:10; }
-  [zoom>=17] { marker-width:14; }
+  [zoom>=17] { marker-width:13; }
   marker-fill: @color_residential * @outlinedarken;
   marker-line-width: 0;
   marker-allow-overlap:true;
 }
 #turningcircle_fill [zoom>=15] {
-  marker-width:6;
-  [zoom=16] { marker-width:9; }
-  [zoom>=17] { marker-width:13; }
+  marker-width:6.5;
+  [zoom=16] { marker-width:9.5; }
+  [zoom>=17] { marker-width:12.5; }
   marker-fill: @color_residential;
   marker-line-width: 0;
   marker-allow-overlap:true;

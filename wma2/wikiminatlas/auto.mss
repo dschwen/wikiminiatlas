@@ -22,9 +22,9 @@
     [landuse='military'],[landuse='railway'],[landuse='prison']{
       polygon-fill: rgb(224,200,200)
     }
-    [landuse='farm'],[landuse='farmyard'] {
+    [landuse='farm'],[landuse='farmland'],[landuse='farmyard'] {
       polygon-fill: @farm;
-      [landuse='farm'] { polygon-opacity: 0.5 }
+      [landuse='farm'],[landuse='farmland'] { polygon-opacity: 0.5 }
     }
     [landuse='quarry'] {
       polygon-fill: @builtup;

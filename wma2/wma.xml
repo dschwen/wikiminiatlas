@@ -150,7 +150,7 @@
 <Style name="polygon-sub21" filter-mode="first" >
   <Rule>
     <MaxScaleDenominator>100000</MaxScaleDenominator>
-    <Filter>([historic] = 'fort')</Filter>
+    <Filter>([historic] = 'castle')</Filter>
     <PolygonSymbolizer fill="#ffbebe" />
   </Rule>
   <Rule>
@@ -165,7 +165,7 @@
   </Rule>
   <Rule>
     <MaxScaleDenominator>100000</MaxScaleDenominator>
-    <Filter>([historic] = 'castle')</Filter>
+    <Filter>([historic] = 'fort')</Filter>
     <PolygonSymbolizer fill="#ffbebe" />
   </Rule>
 </Style>
@@ -214,12 +214,12 @@
 <Style name="polygon-sub14" filter-mode="first" >
   <Rule>
     <MaxScaleDenominator>200000</MaxScaleDenominator>
-    <Filter>([natural] = 'bay')</Filter>
+    <Filter>([natural] = 'water')</Filter>
     <PolygonSymbolizer fill="#9ec7f3" />
   </Rule>
   <Rule>
     <MaxScaleDenominator>200000</MaxScaleDenominator>
-    <Filter>([natural] = 'water')</Filter>
+    <Filter>([natural] = 'bay')</Filter>
     <PolygonSymbolizer fill="#9ec7f3" />
   </Rule>
 </Style>
@@ -240,12 +240,12 @@
 <Style name="polygon-sub11" filter-mode="first" >
   <Rule>
     <MaxScaleDenominator>200000</MaxScaleDenominator>
-    <Filter>([natural] = 'grassland')</Filter>
+    <Filter>([natural] = 'fell')</Filter>
     <PolygonSymbolizer fill="#d0fad0" />
   </Rule>
   <Rule>
     <MaxScaleDenominator>200000</MaxScaleDenominator>
-    <Filter>([natural] = 'fell')</Filter>
+    <Filter>([natural] = 'grassland')</Filter>
     <PolygonSymbolizer fill="#d0fad0" />
   </Rule>
 </Style>
@@ -281,28 +281,16 @@
 <Style name="polygon-sub8" filter-mode="first" >
   <Rule>
     <MaxScaleDenominator>200000</MaxScaleDenominator>
-    <Filter>([waterway] = 'riverbank')</Filter>
+    <Filter>([waterway] = 'dock')</Filter>
     <PolygonSymbolizer fill="#9ec7f3" />
   </Rule>
   <Rule>
     <MaxScaleDenominator>200000</MaxScaleDenominator>
-    <Filter>([waterway] = 'dock')</Filter>
+    <Filter>([waterway] = 'riverbank')</Filter>
     <PolygonSymbolizer fill="#9ec7f3" />
   </Rule>
 </Style>
 <Style name="polygon-sub7b" filter-mode="first"  opacity="0.2" >
-  <Rule>
-    <MaxScaleDenominator>100000</MaxScaleDenominator>
-    <Filter>([leisure] = 'stadium')</Filter>
-    <PolygonSymbolizer fill="#64ff64" />
-    <LineSymbolizer stroke="#71d171" />
-  </Rule>
-  <Rule>
-    <MaxScaleDenominator>100000</MaxScaleDenominator>
-    <Filter>([leisure] = 'pitch')</Filter>
-    <PolygonSymbolizer fill="#64ff64" />
-    <LineSymbolizer stroke="#71d171" />
-  </Rule>
   <Rule>
     <MaxScaleDenominator>100000</MaxScaleDenominator>
     <Filter>([leisure] = 'dog_park')</Filter>
@@ -327,11 +315,33 @@
     <PolygonSymbolizer fill="#64ff64" />
     <LineSymbolizer stroke="#71d171" />
   </Rule>
+  <Rule>
+    <MaxScaleDenominator>100000</MaxScaleDenominator>
+    <Filter>([leisure] = 'pitch')</Filter>
+    <PolygonSymbolizer fill="#64ff64" />
+    <LineSymbolizer stroke="#71d171" />
+  </Rule>
+  <Rule>
+    <MaxScaleDenominator>100000</MaxScaleDenominator>
+    <Filter>([leisure] = 'stadium')</Filter>
+    <PolygonSymbolizer fill="#64ff64" />
+    <LineSymbolizer stroke="#71d171" />
+  </Rule>
 </Style>
 <Style name="polygon-sub7" filter-mode="first" >
   <Rule>
     <MaxScaleDenominator>200000</MaxScaleDenominator>
+    <Filter>([leisure] = 'forrest')</Filter>
+    <PolygonSymbolizer fill="#beeabe" />
+  </Rule>
+  <Rule>
+    <MaxScaleDenominator>200000</MaxScaleDenominator>
     <Filter>([landuse] = 'grass')</Filter>
+    <PolygonSymbolizer fill="#beeabe" />
+  </Rule>
+  <Rule>
+    <MaxScaleDenominator>200000</MaxScaleDenominator>
+    <Filter>([leisure] = 'village_green')</Filter>
     <PolygonSymbolizer fill="#beeabe" />
   </Rule>
   <Rule>
@@ -349,26 +359,16 @@
     <Filter>([leisure] = 'orchard')</Filter>
     <PolygonSymbolizer fill="#beeabe" />
   </Rule>
-  <Rule>
-    <MaxScaleDenominator>200000</MaxScaleDenominator>
-    <Filter>([leisure] = 'village_green')</Filter>
-    <PolygonSymbolizer fill="#beeabe" />
-  </Rule>
-  <Rule>
-    <MaxScaleDenominator>200000</MaxScaleDenominator>
-    <Filter>([leisure] = 'forrest')</Filter>
-    <PolygonSymbolizer fill="#beeabe" />
-  </Rule>
 </Style>
 <Style name="polygon-sub5" filter-mode="first" >
   <Rule>
     <MaxScaleDenominator>100000</MaxScaleDenominator>
-    <Filter>([landuse] = 'cemetery')</Filter>
+    <Filter>([landuse] = 'recreation_ground')</Filter>
     <PolygonSymbolizer fill="#bed6be" />
   </Rule>
   <Rule>
     <MaxScaleDenominator>100000</MaxScaleDenominator>
-    <Filter>([landuse] = 'recreation_ground')</Filter>
+    <Filter>([landuse] = 'cemetery')</Filter>
     <PolygonSymbolizer fill="#bed6be" />
   </Rule>
 </Style>
@@ -414,6 +414,11 @@
   </Rule>
   <Rule>
     <MaxScaleDenominator>100000</MaxScaleDenominator>
+    <Filter>([landuse] = 'farmland')</Filter>
+    <PolygonSymbolizer fill-opacity="0.5" fill="#e0e0c8" />
+  </Rule>
+  <Rule>
+    <MaxScaleDenominator>100000</MaxScaleDenominator>
     <Filter>([landuse] = 'quarry')</Filter>
     <PolygonSymbolizer fill="#d0d0d0" fill-opacity="0.5" />
   </Rule>
@@ -421,6 +426,11 @@
     <MaxScaleDenominator>100000</MaxScaleDenominator>
     <Filter>([landuse] = 'farmyard')</Filter>
     <PolygonSymbolizer fill="#e0e0c8" />
+  </Rule>
+  <Rule>
+    <MaxScaleDenominator>100000</MaxScaleDenominator>
+    <Filter>([landuse] = 'military')</Filter>
+    <PolygonSymbolizer fill="#e0c8c8" />
   </Rule>
   <Rule>
     <MaxScaleDenominator>100000</MaxScaleDenominator>
@@ -433,19 +443,9 @@
     <PolygonSymbolizer fill="#e0c8c8" />
   </Rule>
   <Rule>
-    <MaxScaleDenominator>100000</MaxScaleDenominator>
-    <Filter>([landuse] = 'military')</Filter>
-    <PolygonSymbolizer fill="#e0c8c8" />
-  </Rule>
-  <Rule>
     <MaxScaleDenominator>200000</MaxScaleDenominator>
     <Filter>([landuse] = 'conservation')</Filter>
     <PolygonSymbolizer fill="#c8ffc8" />
-  </Rule>
-  <Rule>
-    <MaxScaleDenominator>200000</MaxScaleDenominator>
-    <Filter>([landuse] = 'reservoir')</Filter>
-    <PolygonSymbolizer fill="#c8c8e0" />
   </Rule>
   <Rule>
     <MaxScaleDenominator>200000</MaxScaleDenominator>
@@ -454,8 +454,8 @@
   </Rule>
   <Rule>
     <MaxScaleDenominator>200000</MaxScaleDenominator>
-    <Filter>([landuse] = 'retail')</Filter>
-    <PolygonSymbolizer fill="#d0d0d0" />
+    <Filter>([landuse] = 'reservoir')</Filter>
+    <PolygonSymbolizer fill="#c8c8e0" />
   </Rule>
   <Rule>
     <MaxScaleDenominator>200000</MaxScaleDenominator>
@@ -464,12 +464,17 @@
   </Rule>
   <Rule>
     <MaxScaleDenominator>200000</MaxScaleDenominator>
-    <Filter>([landuse] = 'commercial')</Filter>
+    <Filter>([landuse] = 'industrial')</Filter>
     <PolygonSymbolizer fill="#d0d0d0" />
   </Rule>
   <Rule>
     <MaxScaleDenominator>200000</MaxScaleDenominator>
-    <Filter>([landuse] = 'industrial')</Filter>
+    <Filter>([landuse] = 'retail')</Filter>
+    <PolygonSymbolizer fill="#d0d0d0" />
+  </Rule>
+  <Rule>
+    <MaxScaleDenominator>200000</MaxScaleDenominator>
+    <Filter>([landuse] = 'commercial')</Filter>
     <PolygonSymbolizer fill="#d0d0d0" />
   </Rule>
 </Style>
@@ -16801,7 +16806,7 @@
 <Style name="turningcircle_casing" filter-mode="first" >
   <Rule>
     <MaxScaleDenominator>5000</MaxScaleDenominator>
-    <MarkersSymbolizer width="14" fill="#808080" stroke-width="0" allow-overlap="true" />
+    <MarkersSymbolizer width="13" fill="#808080" stroke-width="0" allow-overlap="true" />
   </Rule>
   <Rule>
     <MaxScaleDenominator>12500</MaxScaleDenominator>
@@ -32861,17 +32866,17 @@
 <Style name="turningcircle_fill" filter-mode="first" >
   <Rule>
     <MaxScaleDenominator>5000</MaxScaleDenominator>
-    <MarkersSymbolizer width="13" fill="#ffffff" stroke-width="0" allow-overlap="true" />
+    <MarkersSymbolizer width="12.5" fill="#ffffff" stroke-width="0" allow-overlap="true" />
   </Rule>
   <Rule>
     <MaxScaleDenominator>12500</MaxScaleDenominator>
     <MinScaleDenominator>5000</MinScaleDenominator>
-    <MarkersSymbolizer width="9" fill="#ffffff" stroke-width="0" allow-overlap="true" />
+    <MarkersSymbolizer width="9.5" fill="#ffffff" stroke-width="0" allow-overlap="true" />
   </Rule>
   <Rule>
     <MaxScaleDenominator>25000</MaxScaleDenominator>
     <MinScaleDenominator>12500</MinScaleDenominator>
-    <MarkersSymbolizer width="6" fill="#ffffff" stroke-width="0" allow-overlap="true" />
+    <MarkersSymbolizer width="6.5" fill="#ffffff" stroke-width="0" allow-overlap="true" />
   </Rule>
 </Style>
 <Layer name="turningcircle_fill"
