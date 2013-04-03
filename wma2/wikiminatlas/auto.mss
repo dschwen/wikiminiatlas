@@ -1,22 +1,41 @@
 /*#polygon::sub0 [zoom>12][natural='ocean']{
   polygon-fill: rgb(250,250,208)
 }*/
+@farm: rgb(224,224,200);
 
 #polygon::sub1 [zoom>12][railway='platform']{
   polygon-fill: rgb(220,220,220)
 }
-#polygon::sub2 [zoom>=12][landuse='industrial'],
-#polygon::sub2 [zoom>=12][landuse='retail'],
-#polygon::sub2 [zoom>=12][landuse='commercial'],
-#polygon::sub2 [zoom>=12][landuse='residential']{
-  polygon-fill: @builtup;
+
+#polygon::landuse [zoom>=12][landuse!=''] {
+  [landuse='industrial'],[landuse='retail'],
+  [landuse='commercial'],[landuse='residential']{
+    polygon-fill: @builtup;
+  }
+  [landuse='reservoir'],[landuse='basin']{
+    polygon-fill: rgb(200,200,224)
+  }
+  [landuse='conservation']{
+    polygon-fill: rgb(200,255,200)
+  }
+  [zoom>=13] {
+    [landuse='military'],[landuse='railway'],[landuse='prison']{
+      polygon-fill: rgb(224,200,200)
+    }
+    [landuse='farm'],[landuse='farmyard'] {
+      polygon-fill: @farm;
+      [landuse='farm'] { polygon-opacity: 0.5 }
+    }
+    [landuse='quarry'] {
+      polygon-fill: @builtup;
+      polygon-opacity: 0.5;
+    }
+  }
 }
-#polygon::sub3 [zoom>=12][landuse='reservoir']{
-  polygon-fill: rgb(200,200,224)
-}
-#polygon::sub4 [zoom>12][landuse='military'],
-#polygon::sub4 [zoom>12][landuse='railway']{
-  polygon-fill: rgb(224,200,200)
+
+#line::barrier [zoom>=14][barrier!=''] {
+  line-width: 0.5;
+  [zoom<=15] { line-opacity: 0.5 }
 }
 
 #polygon::boundaries [zoom>=11][boundary='administrative'] {
@@ -55,7 +74,8 @@
 #polygon::sub9 [zoom>=12][natural='beach'],
 #polygon::sub9 [zoom>=12][natural='sand'],
 #polygon::sub9 [zoom>=8][natural='desert']{
-  polygon-fill: rgb(250,242,175)
+  polygon-fill: rgb(250,242,175);
+  [natural='desert'] { polygon-opacity: 0.5 }
 }
 #polygon::sub10 [zoom>=12][natural='wetland'],
 #polygon::sub10 [zoom>=12][natural='mud']{

@@ -133,27 +133,6 @@
     {
       "geometry": "polygon",
       "extent": [
-        -179.99942016601562,
-        -70.91725158691406,
-        179.99990000000003,
-        83.57595062255861
-      ],
-      "id": "water",
-      "class": "",
-      "Datasource": {
-        "file": "/home/daniel/Documents/shp/inwatera.shp",
-        "id": "water",
-        "project": "wikiminatlas",
-        "srs": ""
-      },
-      "srs-name": "autodetect",
-      "srs": "",
-      "advanced": {},
-      "name": "water"
-    },
-    {
-      "geometry": "polygon",
-      "extent": [
         -179.12960815429688,
         -53.167423248291016,
         178.44325256347656,
@@ -196,6 +175,27 @@
       "name": "polygon"
     },
     {
+      "geometry": "polygon",
+      "extent": [
+        -179.99942016601562,
+        -70.91725158691406,
+        179.99990000000003,
+        83.57595062255861
+      ],
+      "id": "water",
+      "class": "",
+      "Datasource": {
+        "file": "/home/daniel/Documents/shp/inwatera.shp",
+        "id": "water",
+        "project": "wikiminatlas",
+        "srs": ""
+      },
+      "srs-name": "autodetect",
+      "srs": "",
+      "advanced": {},
+      "name": "water"
+    },
+    {
       "geometry": "raster",
       "extent": [
         -78.00041666666667,
@@ -234,18 +234,18 @@
     {
       "geometry": "linestring",
       "extent": [
-        -82.01618337398715,
-        40.09764192859879,
-        -70.55909413551332,
-        45.56552118574401
+        -117.67632008240862,
+        31.33250735129063,
+        -107.30158191418674,
+        38.843060552207106
       ],
       "Datasource": {
         "type": "postgis",
         "table": "(SELECT * FROM planet_osm_line ORDER BY z_order) AS r",
         "key_field": "",
         "geometry_field": "",
-        "extent_cache": "auto",
-        "extent": "-9129999.77,4880141.5,-7854602.43,5710994.97",
+        "extent_cache": "dynamic",
+        "extent": "",
         "dbname": "gis"
       },
       "id": "line",
@@ -258,18 +258,18 @@
     {
       "geometry": "linestring",
       "extent": [
-        -82.01618337398715,
-        40.09764192859879,
-        13.78214353180193,
-        54.13675397472351
+        -117.67632008240862,
+        31.33250735129063,
+        -107.30158191418674,
+        38.843060552207106
       ],
       "Datasource": {
         "type": "postgis",
         "table": "(SELECT way,highway,railway,access, '' AS bridge, 'yes' AS tunnel  FROM planet_osm_line WHERE tunnel IN ('yes','true','1')  ORDER BY z_order) AS data\n",
         "key_field": "",
         "geometry_field": "",
-        "extent_cache": "auto",
-        "extent": "-9129999.77,4880141.5,1534221.2,7196098.52",
+        "extent_cache": "dynamic",
+        "extent": "",
         "dbname": "gis"
       },
       "id": "tunnels",
@@ -282,10 +282,10 @@
     {
       "geometry": "linestring",
       "extent": [
-        -81.08693684884717,
-        38.44098612553919,
-        -61.965821985387734,
-        47.79131656816052
+        -117.67632008240862,
+        31.33250735129063,
+        -107.30158191418674,
+        37.607543989495404
       ],
       "Datasource": {
         "type": "postgis",
@@ -293,7 +293,7 @@
         "key_field": "",
         "geometry_field": "",
         "extent_cache": "auto",
-        "extent": "-9026556.52,4641911.04,-6898003.75,6072207.3",
+        "extent": "-13099668.03,3676007.26,-11944757.46,4524132.33",
         "dbname": "gis"
       },
       "id": "bigroads",
@@ -306,18 +306,18 @@
     {
       "geometry": "point",
       "extent": [
-        -81.19987238869687,
-        38.93122359541662,
-        -65.69972189085448,
-        47.49806319491091
+        -117.37603388366128,
+        31.33397609607351,
+        -108.47626158489989,
+        38.842701395423276
       ],
       "Datasource": {
         "type": "postgis",
         "table": "( SELECT way \n  FROM planet_osm_point \n  WHERE highway = 'turning_circle'\n) AS data",
         "key_field": "",
         "geometry_field": "",
-        "extent_cache": "auto",
-        "extent": "-9039128.44678853,4711824.72539586,-7313659.58614961,6023752.99074055",
+        "extent_cache": "dynamic",
+        "extent": "",
         "dbname": "gis"
       },
       "id": "turningcircle_casing",
@@ -330,10 +330,10 @@
     {
       "geometry": "linestring",
       "extent": [
-        -82.01618337398715,
-        38.44098612553919,
-        -61.965821985387734,
-        47.79131656816052
+        -117.67632008240862,
+        31.33250735129063,
+        -107.30158191418674,
+        38.843060552207106
       ],
       "Datasource": {
         "type": "postgis",
@@ -354,18 +354,18 @@
     {
       "geometry": "point",
       "extent": [
-        -81.19987238869687,
-        38.93122359541662,
-        -65.69972189085448,
-        47.49806319491091
+        -117.37603388366128,
+        31.33397609607351,
+        -108.47626158489989,
+        38.842701395423276
       ],
       "Datasource": {
         "type": "postgis",
         "table": "( SELECT way \n  FROM planet_osm_point \n  WHERE highway = 'turning_circle'\n) AS data",
         "key_field": "",
         "geometry_field": "",
-        "extent_cache": "auto",
-        "extent": "-9039128.44678853,4711824.72539586,-7313659.58614961,6023752.99074055",
+        "extent_cache": "dynamic",
+        "extent": "",
         "dbname": "gis"
       },
       "id": "turningcircle_fill",
@@ -377,18 +377,18 @@
     },
     {
       "extent": [
-        -79.76252214887526,
-        40.47017198952294,
-        13.76826527931451,
-        52.70173737291895
+        -115.34173915549242,
+        31.332346983673165,
+        -107.6311909497521,
+        37.27732975334386
       ],
       "Datasource": {
         "type": "postgis",
         "table": "(SELECT * FROM planet_osm_polygon WHERE building IS NOT NULL) AS data",
         "key_field": "",
         "geometry_field": "",
-        "extent_cache": "auto",
-        "extent": "-8879123.35,4934503.48,1532676.28,6928016.85",
+        "extent_cache": "dynamic",
+        "extent": "",
         "dbname": "gis"
       },
       "id": "buildings",
@@ -401,18 +401,18 @@
     {
       "geometry": "linestring",
       "extent": [
-        -82.01618337398715,
-        40.09764192859879,
-        13.78214353180193,
-        54.13675397472351
+        -117.67632008240862,
+        31.33250735129063,
+        -107.30158191418674,
+        38.843060552207106
       ],
       "Datasource": {
         "type": "postgis",
         "table": "(SELECT way,highway,railway,access, 'yes' AS bridge, '' AS tunnel FROM planet_osm_line WHERE bridge IS NOT NULL AND bridge NOT IN ('no','false','0')  ORDER BY z_order) AS data",
         "key_field": "",
         "geometry_field": "",
-        "extent_cache": "auto",
-        "extent": "-9129999.77,4880141.5,1534221.2,7196098.52",
+        "extent_cache": "dynamic",
+        "extent": "",
         "dbname": "gis"
       },
       "id": "bridges",
@@ -464,18 +464,18 @@
     {
       "geometry": "linestring",
       "extent": [
-        -82.01618337398715,
-        40.09764192859879,
-        13.78214353180193,
-        54.13675397472351
+        -117.67632008240862,
+        31.33250735129063,
+        -107.30158191418674,
+        38.843060552207106
       ],
       "Datasource": {
         "type": "postgis",
         "table": "(SELECT way, name, highway FROM planet_osm_line WHERE highway IN ('motorway','primary','trunk','secondary')  ORDER BY z_order ) AS data",
         "key_field": "",
         "geometry_field": "",
-        "extent_cache": "auto",
-        "extent": "-9129999.77,4880141.5,1534221.2,7196098.52",
+        "extent_cache": "dynamic",
+        "extent": "",
         "dbname": "gis"
       },
       "id": "biglabels",
@@ -488,18 +488,18 @@
     {
       "geometry": "linestring",
       "extent": [
-        -82.01618337398715,
-        40.09764192859879,
-        13.78214353180193,
-        54.13675397472351
+        -117.67632008240862,
+        31.33250735129063,
+        -107.30158191418674,
+        38.843060552207106
       ],
       "Datasource": {
         "type": "postgis",
         "table": "(SELECT way, name, highway FROM planet_osm_line WHERE highway IN ('road','unclassified','residential','tertiary')  ORDER BY z_order ) AS data",
         "key_field": "",
         "geometry_field": "",
-        "extent_cache": "auto",
-        "extent": "-9129999.77,4880141.5,1534221.2,7196098.52",
+        "extent_cache": "dynamic",
+        "extent": "",
         "dbname": "gis"
       },
       "id": "smalllabels",

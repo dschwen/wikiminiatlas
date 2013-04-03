@@ -251,11 +251,17 @@
     }
   }
   
-  [zoom>=16] {
+  [zoom>=15] {
     [highway='cycleway'],[highway='footway'],[highway='pedestrian'],[highway='path']{
-      line-width: 2;
-      line-color: rgb(198,178,178);
-      [tunnel!=''] { line-dasharray: 4,4 }
+      [zoom>=16] {
+        line-width: 2;
+      	line-color: rgb(198,178,178);
+      	[tunnel!=''] { line-dasharray: 4,4 }
+      }
+      [zoom=15] {
+        line-width: 0.5;
+      	line-color: rgb(198,178,178);
+      }
     }
   }  
   
