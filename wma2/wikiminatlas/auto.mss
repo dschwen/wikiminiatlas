@@ -30,6 +30,9 @@
       polygon-fill: @builtup;
       polygon-opacity: 0.5;
     }
+    [landuse='cemetery'],[landuse='recreation_ground']{
+      polygon-fill: rgb(190,214,190)
+    }
   }
 }
 
@@ -48,14 +51,9 @@
 }
 
 @grassgreen: rgb(190,234,190);
-
-#polygon::sub5 [zoom>12][landuse='cemetery'],
-#polygon::sub5 [zoom>12][landuse='recreation_ground']{
-  polygon-fill: rgb(190,214,190)
-}
-#polygon::sub7 [zoom>=12] {
+#polygon::leisure_green [zoom>=12] {
   [leisure='park'],[leisure='orchard'],[leisure='meadow'],[leisure='village_green'],
-  [leisure='forrest'],[landuse='grass'] {
+  [leisure='forrest'],[landuse='grass'],[landuse='garden'] {
   	polygon-fill: @grassgreen;
   }
 }
@@ -63,41 +61,40 @@
   [leisure='golf_course'],[leisure='track'],[leisure='recreation_ground'],
   [leisure='dog_park'],[leisure='pitch'],[leisure='stadium'] {
   	polygon-fill: rgb(100,255,100);
-    line-color: darken(rgb(190,234,190),20%);
-    opacity: 0.2;
+    line-color: darken(rgb(190,234,190),30%);
+    opacity: 0.25;
   }
 }
 #polygon::sub8 [zoom>=12][waterway='riverbank'],
 #polygon::sub8 [zoom>=12][waterway='dock']{
   polygon-fill: rgb(158,199,243)
 }
-#polygon::sub9 [zoom>=12][natural='beach'],
-#polygon::sub9 [zoom>=12][natural='sand'],
-#polygon::sub9 [zoom>=8][natural='desert']{
-  polygon-fill: rgb(250,242,175);
-  [natural='desert'] { polygon-opacity: 0.5 }
+
+#polygon::natural [zoom>=12][natural!=''] {
+  [natural='beach'],[natural='sand'],[natural='desert'] {
+    polygon-fill: rgb(250,242,175);
+    [natural='desert'] { polygon-opacity: 0.5 }
+  }
+  [natural='wetland'],[natural='mud'] {
+    polygon-fill: @swamp;
+  }
+  [natural='grassland'],[natural='fell'] {
+    polygon-fill: @grass;
+  }
+  [natural='scrub'] {
+    polygon-fill: rgb(150,214,150)
+  }
+  [natural='wood'] {
+    polygon-fill: @trees;
+  }
+  [natural='water'],[natural='bay'] {
+    polygon-fill: @ocean;
+  }
+  [natural='glacier'] {
+    polygon-fill: rgb(230,245,255)
+  }
 }
-#polygon::sub10 [zoom>=12][natural='wetland'],
-#polygon::sub10 [zoom>=12][natural='mud']{
-  polygon-fill: @swamp;
-}
-#polygon::sub11 [zoom>=12][natural='grassland'],
-#polygon::sub11 [zoom>=12][natural='fell']{
-  polygon-fill: @grass;
-}
-#polygon::sub12 [zoom>=12][natural='scrub']{
-  polygon-fill: rgb(150,214,150)
-}
-#polygon::sub13 [zoom>=12][natural='wood']{
-  polygon-fill: @trees;
-}
-#polygon::sub14 [zoom>=12][natural='water'],
-#polygon::sub14 [zoom>=12][natural='bay']{
-  polygon-fill: @ocean;
-}
-#polygon::sub15 [zoom>=12][natural='glacier']{
-  polygon-fill: rgb(230,245,255)
-}
+
 #polygon::sub16 [zoom>12][amenity='university']{
   line-width: 0.5;
   line-color: rgb(240,225,183)
@@ -113,6 +110,7 @@
   line-width: 2;
   line-color: rgb(255,255,0)
 }
+
 #polygon::sub20 [zoom>12][aeroway='terminal']{
   polygon-fill: rgb(190,210,190)
 }
