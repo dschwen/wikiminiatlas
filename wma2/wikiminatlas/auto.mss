@@ -57,10 +57,12 @@
 #line::manmade [zoom>=15][man_made='pier'] {
   ::outline {
   	line-width: 7;
+    line-cap: square;
   	line-color: darken(@builtup,30%);
   }
   ::inline {
   	line-width: 5;
+    line-cap: square;
   	line-color: @builtup;
   }
 }
