@@ -30,6 +30,15 @@
     [landuse='quarry'] {
       polygon-fill: @builtup;
       polygon-opacity: 0.5;
+      [zoom>=14] {
+        outline/line-color: @builtup;
+        ::ticks { 
+          line-color: @builtup;
+          line-width: 4;
+          line-dasharray: 1,10;
+          line-offset: -2;
+        }
+      }
     }
     [landuse='cemetery'],[landuse='recreation_ground'] {
       polygon-fill: rgb(190,214,190)
