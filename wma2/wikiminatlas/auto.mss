@@ -54,6 +54,17 @@
   [zoom<=15] { line-opacity: 0.5 }
 }
 
+#line::manmade [zoom>=15][man_made='pier'] {
+  ::outline {
+  	line-width: 7;
+  	line-color: darken(@builtup,30%);
+  }
+  ::inline {
+  	line-width: 5;
+  	line-color: @builtup;
+  }
+}
+
 #polygon::boundaries [zoom>=11][boundary='administrative'] {
   [admin_level='2'],[admin_level='4'] {
     line-width: 1.5;
@@ -67,6 +78,7 @@
   [leisure='park'],[leisure='orchard'],[leisure='meadow'],
   [leisure='village_green'],[leisure='forrest'],[leisure='garden'] {
   	polygon-fill: @grassgreen;
+    line-color: darken(@grassgreen,30%);
   }
 }
 

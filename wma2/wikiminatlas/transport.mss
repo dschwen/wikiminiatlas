@@ -341,15 +341,16 @@
 // Access
 [zoom>=14] {
   #transport::access, #tunnels::access,#bridges::access { 
+    [access='no'],
     [access='private'],
     [access='residents'],
     [access='permissive']{
+      line-color: rgb(200,100,100); // private, no
       line-dasharray: 1.5,3;
       line-width: 1.5;
       line-smooth: @smooth;
       line-cap: round;
       [zoom=14] { line-opacity: 0.5; line-width: 1; }
-      [access='private'] { line-color: rgb(200,100,100) }
       [access='residents'] { line-color: rgb(100,100,200) }
       [access='permissive'] { line-color: rgb(100,200,100) }
     }
