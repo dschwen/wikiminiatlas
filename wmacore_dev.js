@@ -13,6 +13,8 @@ var wma_database = 'label.php';
 var wma_tilebase = '.www.toolserver.org/~dschwen/wma/tiles/';
 var wma_maxlabel = 13;
 var i, wma_zoomsize = [3];
+var $doc = $(document);
+
 for(i=1; i<40; i++) { wma_zoomsize[i]=2*wma_zoomsize[i-1]; }
 
 // label cache (formerly sessionStorage)
@@ -329,16 +331,16 @@ function wikiminiatlasInstall( wma_widget, url_params ) {
     wmaGlobeLoadTiles = (function(){
       if( !hasCanvas ) { return function(){}; }
 
-      var map = $('<canvas></canvas>').attr( { width: 6*128*4/3, height: 3*128*4/3 } ).css( { display: 'none' } ),
-          tmap = $('<canvas></canvas>').attr( { width: 6*128, height: 3*128 } ).css( { display: 'none' } ),
-          omap = $('<canvas></canvas>').attr( { width: 6*128, height: 3*128 } ).css( { display: 'none' } ),
-          shadow =  $('<div></div>')
+      var map = $('<canvas>').attr( { width: 6*128*4/3, height: 3*128*4/3 } ).css( { display: 'none' } ),
+          tmap = $('<canvas>').attr( { width: 6*128, height: 3*128 } ).css( { display: 'none' } ),
+          omap = $('<canvas>').attr( { width: 6*128, height: 3*128 } ).css( { display: 'none' } ),
+          shadow =  $('<div>')
             .css( { position: 'absolute', 
                     width: '80px', height: '80px', bottom: '20px', right: '5px', 
                     zIndex: 50, display: 'none', 
                     borderRadius: '40px', '-moz-border-radius': '40px', 
                     boxShadow:'5px 5px 25px rgba(0,0,0,0.3)' } ),
-          globe = $('<canvas></canvas>')
+          globe = $('<canvas>')
             .attr( { width: 160, height: 160 } )
             .css( { position: 'absolute', width: '80px', height: '80px', bottom: '20px', right: '5px', zIndex: 51, display: 'none' } );
 
@@ -593,8 +595,8 @@ function wikiminiatlasInstall( wma_widget, url_params ) {
     $('#wma_widget').append(menu.div.css({ right: '40px', top: '26px' }));
 
     l = strings.dyk[UILang];
-    var news = $('<div></div>').html(l[Math.floor(Math.random()*l.length)]).addClass('news');
-labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60px', zIndex:100, fontSize:'40px', color:'white', textShadow:'1px 1px 5px black', fontWeight:'bold'}).appendTo('#wma_widget');
+    var news = $('<div>').html(l[Math.floor(Math.random()*l.length)]).addClass('news');
+labelcaption = $('<div>').css({position:'absolute', top: '30px', left:'60px', zIndex:100, fontSize:'40px', color:'white', textShadow:'1px 1px 5px black', fontWeight:'bold'}).appendTo('#wma_widget');
     
     // add global news item actions
     wmaNews[0] = function() { wmaSelectTileset(4); };
@@ -607,7 +609,7 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
     };
     
 
-    //var news = $('<div></div>').html('<b>New:</b> More Zoom and new data by OpenStreetMap.').addClass('news');
+    //var news = $('<div>').html('<b>New:</b> More Zoom and new data by OpenStreetMap.').addClass('news');
     $('#wma_widget').append(news);
     news.click( function() { news.fadeOut(); } )
     setTimeout( function() { news.fadeOut(); }, 10*1000 );
@@ -623,12 +625,12 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
    
     $('#button_plus').bind('mousedown', wmaZoomIn );
     $('#button_minus').bind('mousedown', wmaZoomOut );
-    $('#button_target').click(wmaMoveToTarget);
+    $(wma_taget_button).click(wmaMoveToTarget);
     $('#button_kml').click(wmaToggleKML);
 
     //document.body.oncontextmenu = function() { return false; };
-    $(document).keydown(wmaKeypress);
-    $(document).bind('contextmenu', function() { return false; } );
+    $doc.keydown(wmaKeypress);
+    $doc.bind('contextmenu', function() { return false; } );
 
     $('body').bind('dragstart', function() { return false; } )
     $('#wma_map').click( function(e) { 
@@ -641,7 +643,7 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
     initializeWikiMiniAtlasMap();
 
     // 3d building outlines
-    bldg3d = $('<canvas class="wmakml"></canvas>')
+    bldg3d = $('<canvas class="wmakml">')
         .attr( { width: wma_width, height: wma_height } )
         .css( { zIndex:19, opacity: 0.75 } )
         .appendTo( $(wma_map) );
@@ -654,7 +656,7 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
         bldg3dc=null; 
         // replace canvas
         bldg3d.remove();
-        bldg3d = $('<canvas class="wmakml"></canvas>')
+        bldg3d = $('<canvas class="wmakml">')
             .attr( { width: wma_width, height: wma_height } )
             .css( { zIndex:19, opacity: 0.75 } )
             .appendTo( $(wma_map) );
@@ -739,7 +741,7 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
   }
 
   function wmaNewTile() {
-    var d = $('<div></div>').addClass('wmatile').mousedown(mouseDownWikiMiniAtlasMap).click(function(e){
+    var d = $('<div>').addClass('wmatile').mousedown(mouseDownWikiMiniAtlasMap).click(function(e){
           // only count clicks if the mouse pointer has not moved between mouse down and mouse up! 
           var s, r = wmaMouseCoords(e.originalEvent);
           if( r.x != wma_mdcoord.x || 
@@ -765,7 +767,7 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
           }, 1000 );
         })
         .appendTo(d),
-      can : $('<canvas></canvas>').appendTo(d),
+      can : $('<canvas>').appendTo(d),
       ctx : null,
       csrender: false,
       csx:0,csy:0,csz:20,
@@ -785,14 +787,16 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
 
   function initializeWikiMiniAtlasMap()
   {
-    var i, j;
+    var i, j, $wma_map;
     if(wma_map === null)
     {
-      $(document)
+      $doc
         .mousemove(mouseMoveWikiMiniAtlasMap)
         .mouseup( function(){ wma_dragging = null; } );
-      $('#wma_map').dblclick(wmaDblclick).mousedown(mouseDownWikiMiniAtlasMap);
+        
       wma_map = document.getElementById('wma_map');
+      $wma_map = $(wma_map).dblclick(wmaDblclick).mousedown(mouseDownWikiMiniAtlasMap);
+      
 
       wma_nx = Math.floor(wma_width/tsx)+2;
       wma_ny = Math.floor(wma_height/tsy)+2;
@@ -804,8 +808,8 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
         }
       }
 
-      marker.obj = $('<div id="wmamarker"></div>');
-      $(wma_map).append(marker.obj);
+      marker.obj = $('<div id="wmamarker">');
+      $wma_map.append(marker.obj);
     }
   }
 
@@ -1098,7 +1102,7 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
         ty = (l[i].ty+l[i].fy-dy)*f;
         if( tx >=0 && tx<128 && ty >=0 && ty<128 ) {
           // make a clone of the old label object (TODO: sort first, clone later )
-          d = jQuery.extend( true, {}, l[i] );
+          d = $.extend( true, {}, l[i] );
           d.tx = Math.floor(tx); d.ty = Math.floor(ty);
           d.fx = tx-d.tx; d.fy = ty-d.ty;
           q[ Math.floor( tx/64) + 2*Math.floor( ty/64 ) ].push(d);
@@ -1227,7 +1231,7 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
               for( k=0; k<lc[ht].label.length; k++ ) {
                 if( Math.floor(lc[ht].label[k].tx/64) === (dx%2) &&
                     Math.floor(lc[ht].label[k].ty/64) === (dy%2) ) {
-                  d = jQuery.extend( true, {}, lc[ht].label[k] );
+                  d = $.extend( true, {}, lc[ht].label[k] );
                   d.tx = (d.tx+d.fx)*2 - (dx%2)*128;
                   d.ty = (d.ty+d.fy)*2 - (dy%2)*128;
                   d.fx = d.tx - Math.floor(d.tx);
@@ -1774,7 +1778,7 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
   }
 
   function wmaDebug(text) {
-    $('#debugbox').append( $('<div></div>').text(text) );
+    $('#debugbox').append( $('<div>').text(text) );
   }
 
   function wmaCommonsThumb(img,w,m5) {
@@ -1894,7 +1898,7 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
       for( i=0; i < d.coords.length; ++i ) {
         m = { obj: null, lat: d.coords[i].lat, lon: d.coords[i].lon };
         if( Math.abs(m.lat-marker.lat) > 0.0001 || Math.abs(m.lon-marker.lon) > 0.0001 ) {
-          m.obj = $('<div></div>')
+          m.obj = $('<div>')
             .attr( 'title', decodeURIComponent(d.coords[i].title) )
             .addClass('emarker')
             .mouseover( extraMarkerMessage(i,'highlight') )
@@ -1920,6 +1924,19 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
     if( ( 'minlon' in d ) && ( 'maxlon' in d ) ) {
       if( !('maxlon' in wmakml) || d.maxlon > wmakml.maxlon ) { wmakml.maxlon = d.maxlon; }
       if( !('minlon' in wmakml) || d.minlon < wmakml.minlon ) { wmakml.minlon = d.minlon; }
+    }
+    
+    // return the coordinates of the view-box
+    if ( 'getcoords' in d ) {
+      var gci = d.getcoords;
+      gci = { 
+        query: gci,
+        response: {
+          topleft: wmaXYToLatLon(wma_gx, wma_gy),
+          rightbottom: wmaXYToLatLon(wma_gx+wma_width,wma_gy+wma_height)
+        }
+      }
+      if (window.parent) window.parent.postMessage(JSON.stringify(gci), e.origin);
     }
   }
 
@@ -2071,19 +2088,19 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
 
 // drop down menu class
 function wmaMenu(rtl) {
-  this.div = $('<div></div>').addClass('wmamenu').css('direction',(rtl===true?'rtl':''));
+  this.div = $('<div>').addClass('wmamenu').css('direction',(rtl===true?'rtl':''));
   this.parent = null;
   this.shown = false;
 }
 wmaMenu.prototype.addTitle = function(html,rtl) {
-  var item = $('<div></div>').addClass('wmamenutitle').html(html)
+  var item = $('<div>').addClass('wmamenutitle').html(html)
     .css('direction',(rtl===true)?'rtl':'')
     .appendTo(this.div);
   return item;
 }
 wmaMenu.prototype.addItem = function(html,func,rtl) {
   func = func || (function(){});
-  var that = this, item = $('<div></div>').addClass('wmamenuitem').html(html)
+  var that = this, item = $('<div>').addClass('wmamenuitem').html(html)
     .css('direction',(rtl===true)?'rtl':'')
     .mouseenter(function(){ item.css('background-color', '#AAA'); })
     .mouseleave(function(){ item.css('background-color', ''); })
@@ -2092,7 +2109,7 @@ wmaMenu.prototype.addItem = function(html,func,rtl) {
   return item;
 }
 wmaMenu.prototype.addMenu = function(html,menu,rtl) {
-  var item = $('<div></div>')
+  var item = $('<div>')
     .addClass('wmasubmenu')
     .html(html)
     .css('direction',(rtl===true)?'rtl':'')
@@ -2178,4 +2195,3 @@ wmaMenu.prototype.hide = function() { this.div.fadeOut(200); this.shown = false;
 wmaMenu.prototype.toggle = function() { this.shown?this.hide():this.show(); }
 wmaMenu.prototype.close = function() { this.hide(); this.parent && this.parent.close(); }
 wmaMenu.prototype.move = function(x,y) { this.div.css({top:y+'px',left:x+'px'}); }
-
