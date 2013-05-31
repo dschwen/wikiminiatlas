@@ -1921,6 +1921,18 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
       if( !('maxlon' in wmakml) || d.maxlon > wmakml.maxlon ) { wmakml.maxlon = d.maxlon; }
       if( !('minlon' in wmakml) || d.minlon < wmakml.minlon ) { wmakml.minlon = d.minlon; }
     }
+
+    // return the coordinates of the view-box
+    if ( 'getcoords' in d ) {
+      var gci = {
+        query: d.getcoords,
+        response: {
+          topleft: wmaXYToLatLon(wma_gx, wma_gy),
+          rightbottom: wmaXYToLatLon(wma_gx+wma_width,wma_gy+wma_height)
+        }
+      }
+      if (window.parent) { window.parent.postMessage(JSON.stringify(gci), e.origin); }
+    }
   }
 
   // reproject and insert the WIWOSM geoJSON data

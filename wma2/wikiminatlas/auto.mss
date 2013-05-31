@@ -8,7 +8,15 @@
   polygon-fill: rgb(220,220,220)
 }
 
-#polygon::landuse [zoom>=12][landuse!=''] {
+#polygon::greens [zoom>=12][leisure!=''] {
+  [leisure='park'],[leisure='orchard'],[leisure='meadow'],
+  [leisure='village_green'],[leisure='forrest'],[leisure='garden'] {
+  	polygon-fill: @grassgreen;
+    [zoom>=15] { line-color: darken(@grassgreen,10%); }
+  }
+}
+
+#polygon::landuse [zoom>=12][landuse!=''] { 
   [landuse='industrial'],[landuse='retail'],
   [landuse='commercial'],[landuse='residential'] {
     polygon-fill: @builtup;
@@ -73,14 +81,6 @@
     line-opacity: 0.35;
     line-dasharray: 1.5,1.5,4.0,1.5;
     [admin_level='4'] { line-dasharray: 4.0,1.5; }
-  }
-}
-
-#polygon::greens [zoom>=12][leisure!=''] {
-  [leisure='park'],[leisure='orchard'],[leisure='meadow'],
-  [leisure='village_green'],[leisure='forrest'],[leisure='garden'] {
-  	polygon-fill: @grassgreen;
-    line-color: darken(@grassgreen,30%);
   }
 }
 
