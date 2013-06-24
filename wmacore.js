@@ -1040,7 +1040,7 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
                 }
                 // otherwise follow the link (allows for middle click opening the commons page)
               }
-            } ).attr( 'href', '//commons.wikimedia.org/wiki/Image:' + l[i].img );
+            } ).attr( 'href', '//commons.wikimedia.org/wiki/File:' + l[i].img );
           })(l[i].img,l[i].w,l[i].h,l[i].m5);
 
           w = ( parseInt(l[i].w) > parseInt(l[i].h) ) ? (l[i].style==-2?24:48) : Math.floor((l[i].style==-2?24:48)*l[i].w/l[i].h);
@@ -1836,8 +1836,8 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
     }
 
     wmaci.link
-      .attr('href','//commons.wikimedia.org/wiki/Image:' + name )
-      .text('[[:commons:Image:' + decodeURIComponent(name) + ']]');
+      .attr('href','//commons.wikimedia.org/wiki/File:' + name )
+      .text('[[:commons:File:' + decodeURIComponent(name) + ']]');
 
     wmaci.panel.fadeIn(200);
     wmaci.shown = true;
@@ -1920,6 +1920,18 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
     if( ( 'minlon' in d ) && ( 'maxlon' in d ) ) {
       if( !('maxlon' in wmakml) || d.maxlon > wmakml.maxlon ) { wmakml.maxlon = d.maxlon; }
       if( !('minlon' in wmakml) || d.minlon < wmakml.minlon ) { wmakml.minlon = d.minlon; }
+    }
+
+    // return the coordinates of the view-box
+    if ( 'getcoords' in d ) {
+      var gci = {
+        query: d.getcoords,
+        response: {
+          topleft: wmaXYToLatLon(wma_gx, wma_gy),
+          rightbottom: wmaXYToLatLon(wma_gx+wma_width,wma_gy+wma_height)
+        }
+      }
+      if (window.parent) { window.parent.postMessage(JSON.stringify(gci), e.origin); }
     }
   }
 
@@ -2178,4 +2190,3 @@ wmaMenu.prototype.hide = function() { this.div.fadeOut(200); this.shown = false;
 wmaMenu.prototype.toggle = function() { this.shown?this.hide():this.show(); }
 wmaMenu.prototype.close = function() { this.hide(); this.parent && this.parent.close(); }
 wmaMenu.prototype.move = function(x,y) { this.div.css({top:y+'px',left:x+'px'}); }
-
