@@ -2,7 +2,7 @@
 // Script to embed interactive maps into pages that have coordinate templates
 // also check my user page [[User:Dschwen]] for more tools
 //
-// Revision 16.7
+// Revision 16.9
 jQuery(function ($) {
  var config = {
   width  : 600,
@@ -22,6 +22,7 @@ jQuery(function ($) {
    af:'Vertoon ligging op \'n interaktiwe kaart.',
    als:'Ort uf dr interaktivä Chartä zeigä',
    ar:'شاهد الموقع على الخريطة التفاعلية',
+   ast:'Ver el llugar nun mapa interactivu',
    'be-tarask':'паказаць месцазнаходжаньне на інтэрактыўнай мапе',
    'be-x-old':'паказаць месцазнаходжаньне на інтэрактыўнай мапе',
    bar:'Ort af da interaktivn Kartn zoagn',
@@ -39,7 +40,7 @@ jQuery(function ($) {
    bn:'সক্রিয় মানচিত্রে অবস্থান চিহ্নিত করুন',
    eo:'Montru lokigon sur interaktiva karto',
    eu:'erakutsi kokalekua mapa interaktibo batean',
-   es:'mostrar el lugar en un mapa interactivo',
+   es:'Mostrar el lugar en un mapa interactivo',
    fr:'Montrer la localisation sur une carte interactive',
    fur:'mostre la localizazion suntune mape interative',
    fy:'it plak op in oanpasbere kaart oanjaan',
@@ -60,7 +61,9 @@ jQuery(function ($) {
    ko:'인터랙티브 지도에 위치를 표시',
    lt:'Rodyti vietą interaktyviame žemėlapyje',
    lv:'Rādīt atrašanās vietu interaktīvajā kartē',
+   min:'Tunjuakan lokasi pado peta',
    mk:'прикажи положба на интерактивна карта',
+   ms:'Tunjukkan lokasi pada peta interaktif',
    nl:'de locatie op een interactieve kaart tonen',
    no:'vis beliggenhet på interaktivt kart',
    nv:'kéyah tʼáá dah siʼą́ą́ ńtʼę́ę́ʼ beʼelyaaígíí',
@@ -85,18 +88,29 @@ jQuery(function ($) {
    'zh-hk':'顯示該地在地圖上的位置'
   },
   map: {
-   en:'Map',
+   ast:'Mapa',
    de:'Karte',
+   en:'Map',
+   es:'Mapa',
+   fa:'نقشه',
    fi:'Kartalla',
    fr:'Carte',
+   gl:'Mapa',
+   id:'peta',
    ilo:'Mapa',
+   ja:'地図',
+   min:'peta',
    mk:'карта',
+   ms:'Peta',
+   nl:'Kaart',
+   pt: 'Mapa',
    ru:'карте'
   },
   close : {
    af:'Sluit',
    als:'Zuä machä',
    ar:'غلق',
+   ast:'zarrar',
    'be-tarask':'закрыць',
    'be-x-old':'закрыць',
    bar:'zuamachn',
@@ -136,7 +150,9 @@ jQuery(function ($) {
    ko:'닫기',
    lt:'uždaryti',
    lv:'aizvērt',
+   min:'tutuik',
    mk:'затвори',
+   ms:'tutup',
    nl:'sluiten',
    no:'lukk',
    pl:'zamknij',
@@ -161,19 +177,25 @@ jQuery(function ($) {
   },
   resize : {
    ar: 'تغيير حجم',
+   ast: 'redimensionar',
    ca: 'redimensionar',
    de: 'Größe ändern',
    dk: 'ændre størrelse',
    en: 'resize',
    es: 'cambiar el tamaño',
+   fa: 'تغییر اندازه',
    fi: 'muuta kokoa',
    fr: 'redimensionner',
+   gl: 'cambiar o tamaño',
    ilo: 'baliwan ti kadakkel',
    ja: 'サイズを変更する',
    kk: 'өлшемін өзгерту',
+   min: 'gadangan',
    mk: 'промени големина',
+   ms: 'ubah saiz',
    nl: 'vergroten of verkleinen',
    no: 'endre størrelse',
+   pt: 'alterar tamanho',
    ro: 'redimensionare',
    sr: 'промени величину',
    sv: 'ändra storlek',
@@ -182,7 +204,13 @@ jQuery(function ($) {
   }
  },
 
- language = '', site = '', awt="0",
+ // Get a specific, localized string
+ _msg = function(k) {
+  return strings[k][language] || strings[k].en
+ },
+ dbName = mw.config.get( 'wgDBname' ),
+ 
+ language = '', site = '', awt="0", rtl = /(^|\s)rtl(\s|$)/.test(document.body.className),
  iframe = { div: null, iframe: null, closebutton: null, resizebutton: null, resizehelper: null, indom: false },
  
  page_title = (mw.config.get('wgNamespaceNumber')==0) ? encodeURIComponent(mw.config.get('wgTitle')) : '',
@@ -194,11 +222,6 @@ jQuery(function ($) {
 
  kml = null,
  mes = null;
-
- // check if we are in a right-to-left-script project
- function isRTL() {
-  return /(^|\s)rtl(\s|$)/.test(document.body.className);
- }
 
  // get position on page
  function yPos(el) {
@@ -328,7 +351,7 @@ jQuery(function ($) {
 
  if( wc.enabled === false ) { return; }
 
- site = ( mw.config.get( 'wgDBname' ) == "commonswiki" ) ? "commons" : wgPageContentLanguage;
+ site = ( dbName == "commonswiki" ) ? "commons" : mw.config.get( 'wgPageContentLanguage' );
  language = mw.config.get( 'wgUserLanguage' );
 
  // remove icons from title coordinates
@@ -345,7 +368,7 @@ jQuery(function ($) {
    return false; // break out of each
   }
 
-  if( !link.href || !coord_filter.exec(link.href) ){ // invalid links do not contain href attribute in IE!
+  if( !('href' in link) || !coord_filter.exec(link.href) ){ // invalid links do not contain href attribute in IE!
    return true;
   }
   marker.lat=(1.0*RegExp.$1) + ((RegExp.$2||0)/60.0) + ((RegExp.$3||0)/3600.0);
@@ -390,12 +413,12 @@ jQuery(function ($) {
    mapbutton = $('<img>').attr('src', wc.buttonImage);
   }
   mapbutton.addClass('wmamapbutton').attr( {
-   title: strings.buttonTooltip[language] || strings.buttonTooltip.en,
+   title: _msg('buttonTooltip'),
    alt: '' 
   } )
   .hover(function (){ $(this).css('opacity', 0.75); }, function () { $(this).css('opacity', ''); })
   .addClass('noprint')
-  .css('padding', isRTL() ? '0px 0px 0px 3px' : '0px 3px 0px 0px' ).css('cursor', 'pointer');
+  .css('padding', rtl ? '0px 0px 0px 3px' : '0px 3px 0px 0px' ).css('cursor', 'pointer');
 
   if( wc.alwaysTooltips || ( wc.flowTextTooltips && $(link).parents('li, table, #coordinates').length == 0 ) ) {
    // insert tooltip rather than icon to improve text readability
@@ -415,7 +438,11 @@ jQuery(function ($) {
   } else {
    // insert icon directly
    ws = $(link).css('whiteSpace');
-   $(link).wrap( $('<span/>').css('whiteSpace', 'nowrap') ).css('whiteSpace', ws).before(mapbutton);
+   if( site !== 'de' || link.parentNode.id !== 'coordinates' ) {
+    $(link).wrap( $('<span/>').css('whiteSpace', 'nowrap') ).css('whiteSpace', ws).before(mapbutton);
+   } else {
+    $('#coordinates').append('<span class="noprint coordinates-separator"> | </span>').append(mapbutton);
+   }
   }
 
   mapbutton.bind( 'click', { param:
@@ -429,51 +456,29 @@ jQuery(function ($) {
   coord_list.push( { lat: marker.lat, lon: marker.lon, obj: link, mb: mapbutton, title: params.title || params.pagename || '' } );
  } ); //end each
 
- // awareness tooltip 
- // (experiment, only shown to anonymous users on en.wp if the browser supports localStorage)
- if( wgUserName === null && wgDBname === 'enwiki' && 
-     window.localStorage ) {
- 
-  var ttc = window.localStorage.getItem('wmatooltipdismissed') || 0;
-  if( ttc<5 && ttc!=='yes') {
-   (function() {
-    // increase display counter
-    window.localStorage.setItem('wmatooltipdismissed',parseInt(ttc)+1);
-    var wrap, span=$('#coordinates>span>span>img')
-      , bubble = $('<div><div>').css( { width: '150px', border: '1px solid #bbb', borderRadius: '8px', position: 'absolute', bottom: '22px', right: '-4px', whiteSpace: 'normal', textAlign: 'left', padding: '0.25em 0.75em 0.25em 0.75em', fontSize: '90%', backgroundColor: '#f9f9f9', boxShadow: '4px 4px 10px rgba(0,0,0,0.2)' } ).text('Click the blue globe to open an interactive map.').append( $('<div></div>').css({position: 'absolute', width: 0, height: 0, bottom: '-10px', right: '10px', borderBottom:0, borderLeft: '5px solid transparent', borderRight:  '5px solid transparent', borderTop:  '10px solid #bbb'})  ).append( $('<div></div>').css({position: 'absolute', width: 0, height: 0, bottom: '-7px', right: '10px', borderBottom:0, borderLeft: '5px solid transparent', borderRight:  '5px solid transparent', borderTop:  '10px solid #f9f9f9'})  ).hide();
-   if( span.length>0 ) {
-     wrap = $('<span></span>').css( { width: '20px', height: '17px', position: 'relative' } );
-     span.wrap(wrap).parent().append(bubble.fadeIn().click(function(){ bubble.fadeOut(); window.localStorage.setItem('wmatooltipdismissed','yes'); awt='c'; }));
-     setTimeout( function() { bubble.fadeOut() }, 10*1000 );
-     awt="1";
-    }
-   })();
-  } else { awt=(ttc=='yes')?'p':ttc; }
- }
-
  var titlebutton = false;
 
-  function addTitleButton( alat, alon, zoomlevel ) {
-    mapbutton = $('<img>')
-     .hover(function (){ $(this).css('opacity', 0.75); }, function () { $(this).css('opacity', ''); })
-     .css('padding', isRTL() ? '0px 3px 0px 0px' : '0px 0px 0px 3px' ).css('cursor', 'pointer')       
-     .attr('src', wc.buttonImage).addClass('wmamapbutton').addClass('noprint')
-     .bind( 'click', { param:
-       alat + '_' + alon + '_' +
-       wc.width + '_' + wc.height + '_' +
-       site + '_' + zoomlevel + '_' + language 
-      }, showIFrame ); // zoomlevel!
+ function addTitleButton( alat, alon, zoomlevel ) {
+  mapbutton = $('<img>')
+   .hover(function (){ $(this).css('opacity', 0.75); }, function () { $(this).css('opacity', ''); })
+   .css('padding', rtl ? '0px 3px 0px 0px' : '0px 0px 0px 3px' ).css('cursor', 'pointer')       
+   .attr('src', wc.buttonImage).addClass('wmamapbutton').addClass('noprint')
+   .bind( 'click', { param:
+    alat + '_' + alon + '_' +
+    wc.width + '_' + wc.height + '_' +
+    site + '_' + zoomlevel + '_' + language 
+   }, showIFrame ); // zoomlevel!
 
-    if(!titlebutton ) { 
-     if( $('#coordinates').length ) {
-      $('#coordinates').find('img').detach();
-      $('#coordinates').append(mapbutton);
-     } else {
-      $('<span id="coordinates">'+(strings.map[language] || strings.map.en)+' </span>').append(mapbutton).appendTo('#bodyContent');
-     }
-     titlebutton = true;
-    }
+  if(!titlebutton ) { 
+   if( $('#coordinates').length ) {
+    $('#coordinates').find('img').detach();
+    $('#coordinates').append(mapbutton);
+   } else {
+    $('<span id="coordinates"></span>').text(_msg('map')).append(mapbutton).appendTo('#bodyContent');
+   }
+   titlebutton = true;
   }
+ }
 
  // detect and load KML
  // also insert globe even if no title coords are given
@@ -510,7 +515,6 @@ jQuery(function ($) {
 
      // initialize transfer datastructure
      kml = { ways: [], areas: [] };
-window.kmldata = xml; // DEBUG!
 
      // ways
      $(xml).find('LineString > coordinates').each(function () {
@@ -546,7 +550,6 @@ window.kmldata = xml; // DEBUG!
      kml.maxlon = lo2;
      kml.minlat = la1;
      kml.maxlat = la2;
-window.kml = kml; // DEBUG!
 
      // already got a request message
      if( mes !== null && kml.ways.length > 0 && typeof JSON !== "undefined" ) {
@@ -575,7 +578,7 @@ window.kml = kml; // DEBUG!
   } // end for
  })();
 
- // detect All Coordinates crap
+ // detect "All Coordinates"
  links = $('#coordinates>span>a');
  if( links.length>0 && links[0].href.substr(0,50) == "http://www.lenz-online.de/cgi-bin/wiki/wiki-osm.pl" ) {
    addTitleButton( 0, 0, 1 );
@@ -589,20 +592,20 @@ window.kml = kml; // DEBUG!
    margin: '0px', padding: '0px', 
    backgroundColor : 'white', border: '1px solid gray',
    position: 'absolute', top: '1em', zIndex: 13, boxShadow: '3px 3px 25px rgba(0,0,0,0.3)'
-  } ).css( isRTL() ? 'left' : 'right', '2em' ).hide();
+  } ).css( rtl ? 'left' : 'right', '2em' ).hide();
 
   var rbrtl = [ '//upload.wikimedia.org/wikipedia/commons/b/b5/Button_resize.png',
                 '//upload.wikimedia.org/wikipedia/commons/3/30/Button_resize_rtl.png' ]
   wi.resizebutton = $('<img>').attr( { 
-   title : strings.resize[language] || strings.resize.en,
-   src : rbrtl[isRTL()?1:0]
+   title : _msg('resize'),
+   src : rbrtl[rtl?1:0]
   } ).hide().attr('ondragstart','return false');
   
   // cover the iframe to prevent loosing the mouse to the iframe during resizing
   wi.resizehelper = $('<div/>').css( { position: 'absolute', top:0, left:0, zIndex: 20 } ).hide();
 
   wi.closebutton = $('<img>').attr( { 
-   title : strings.close[language] || strings.close.en,
+   title : _msg('close'),
    src : '//upload.wikimedia.org/wikipedia/commons/d/d4/Button_hide.png'
   } ).css( {
    zIndex : 15, position : 'absolute', right : '11px', top : '9px', width : '18px', cursor : 'pointer'
@@ -620,7 +623,7 @@ window.kml = kml; // DEBUG!
   wi.div.append(wi.resizehelper);
   wi.div.append(wi.closebutton);
   (function () {
-   var startx, starty, idle = true, dir = isRTL()?-1:1;
+   var startx, starty, idle = true, dir = rtl?-1:1;
    function adjusthelper() {
     wi.resizehelper.css( { width: (wc.width+2)+'px', height: (wc.height+2)+'px' } );
    }
@@ -628,9 +631,9 @@ window.kml = kml; // DEBUG!
     $('<div/>')
      .css( {
        zIndex : 15, position : 'absolute', bottom : '3px', 
-       width : '18px', height: '18px', cursor : (isRTL()?'se-resize':'sw-resize'),
+       width : '18px', height: '18px', cursor : (rtl?'se-resize':'sw-resize'),
        'user-select': 'none', '-moz-user-select': 'none', '-ms-user-select': 'none'
-      } ).css( (isRTL()?'right':'left'), '3px' )
+      } ).css( (rtl?'right':'left'), '3px' )
      .mouseenter( function(e) { wi.resizebutton.fadeIn() } )
      .mouseleave( function(e) { if( idle ) { wi.resizebutton.fadeOut(); } } )
      .mousedown( function(e) {
@@ -665,4 +668,3 @@ window.kml = kml; // DEBUG!
 });
 
 // </nowiki>
-
