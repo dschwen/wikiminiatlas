@@ -203,6 +203,12 @@ jQuery(function ($) {
    'zh-cn': '调整大小'
   }
  },
+ // Get a specific, localized string
+ _msg = function(k) {
+  return strings[k][language] || strings[k].en
+ },
+ dbName = mw.config.get( 'wgDBname' ),
+ 
 
  // Get a specific, localized string
  _msg = function(k) {
