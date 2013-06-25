@@ -181,6 +181,12 @@ jQuery(function ($) {
    'zh-cn': '调整大小'
   }
  },
+ // Get a specific, localized string
+ _msg = function(k) {
+  return strings[k][language] || strings[k].en
+ },
+ dbName = mw.config.get( 'wgDBname' ),
+ 
 
  language = '', site = '', awt="0",
  iframe = { div: null, iframe: null, closebutton: null, resizebutton: null, resizehelper: null, indom: false },
@@ -196,8 +202,9 @@ jQuery(function ($) {
  mes = null;
 
  // check if we are in a right-to-left-script project
+ var rtl = /(^|\s)rtl(\s|$)/.test(document.body.className);
  function isRTL() {
-  return /(^|\s)rtl(\s|$)/.test(document.body.className);
+  return rtl;
  }
 
  // get position on page
@@ -328,7 +335,7 @@ jQuery(function ($) {
 
  if( wc.enabled === false ) { return; }
 
- site = ( mw.config.get( 'wgDBname' ) == "commonswiki" ) ? "commons" : wgPageContentLanguage;
+ site = ( dbName == "commonswiki" ) ? "commons" : mw.config.get( 'wgPageContentLanguage' );
  language = mw.config.get( 'wgUserLanguage' );
 
  // remove icons from title coordinates
@@ -390,7 +397,7 @@ jQuery(function ($) {
    mapbutton = $('<img>').attr('src', wc.buttonImage);
   }
   mapbutton.addClass('wmamapbutton').attr( {
-   title: strings.buttonTooltip[language] || strings.buttonTooltip.en,
+   title: _msg('buttonTooltip'),
    alt: '' 
   } )
   .hover(function (){ $(this).css('opacity', 0.75); }, function () { $(this).css('opacity', ''); })
@@ -431,7 +438,7 @@ jQuery(function ($) {
 
  // awareness tooltip 
  // (experiment, only shown to anonymous users on en.wp if the browser supports localStorage)
- if( wgUserName === null && wgDBname === 'enwiki' && 
+ if( mw.config.get( 'wgUserName' ) === null && dbName === 'enwiki' && 
      window.localStorage ) {
  
   var ttc = window.localStorage.getItem('wmatooltipdismissed') || 0;
@@ -469,7 +476,7 @@ jQuery(function ($) {
       $('#coordinates').find('img').detach();
       $('#coordinates').append(mapbutton);
      } else {
-      $('<span id="coordinates">'+(strings.map[language] || strings.map.en)+' </span>').append(mapbutton).appendTo('#bodyContent');
+      $('<span id="coordinates"></span>').text(_msg('map')).append(mapbutton).appendTo('#bodyContent');
      }
      titlebutton = true;
     }
@@ -594,7 +601,7 @@ window.kml = kml; // DEBUG!
   var rbrtl = [ '//upload.wikimedia.org/wikipedia/commons/b/b5/Button_resize.png',
                 '//upload.wikimedia.org/wikipedia/commons/3/30/Button_resize_rtl.png' ]
   wi.resizebutton = $('<img>').attr( { 
-   title : strings.resize[language] || strings.resize.en,
+   title : _msg('resize'),
    src : rbrtl[isRTL()?1:0]
   } ).hide().attr('ondragstart','return false');
   
@@ -602,7 +609,7 @@ window.kml = kml; // DEBUG!
   wi.resizehelper = $('<div/>').css( { position: 'absolute', top:0, left:0, zIndex: 20 } ).hide();
 
   wi.closebutton = $('<img>').attr( { 
-   title : strings.close[language] || strings.close.en,
+   title : _msg('close'),
    src : '//upload.wikimedia.org/wikipedia/commons/d/d4/Button_hide.png'
   } ).css( {
    zIndex : 15, position : 'absolute', right : '11px', top : '9px', width : '18px', cursor : 'pointer'
@@ -665,4 +672,3 @@ window.kml = kml; // DEBUG!
 });
 
 // </nowiki>
-
