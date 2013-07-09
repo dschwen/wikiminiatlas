@@ -1957,7 +1957,7 @@ var strings =
   fr: { site:'fr', list:['France','Suisse','Guyane'] },
   gl: { site:'gl', list:['España','Galicia'] },
   id: { site:'id', list:['Indonesia','Bali','Papua','Australia','Jakarta'] },
-  ja: { site:'ja', list:['日本列島','北海道','四国','東京都','沖縄本島','淡路島'] },
+  ja: { site:'ja', list:['日本','北海道','四国','東京都','沖縄本島','淡路島'] },
   kk: { site:'kk', list:['Қазақстан'] },
   ko: { site:'ko', list:['대한민국','조선 민주주의 인민 공화국','서울특별시','평양직할시','말레이시아'] },
   min: { site:'min', list:['Indonesia','Padang','Bukit Tinggi','Paris','Jakarta'] },
