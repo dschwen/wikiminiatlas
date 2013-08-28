@@ -124,7 +124,7 @@ var strings =
    'lv': 'Vikikrātuve',
    'lt': 'Vikiteka',
    'hu': 'Wikimédia Commons',
-   'mk': 'Заедничка Ризница',
+   'mk': 'Ризница',
    'ml': 'വിക്കിമീഡിയ കോമൺസ്',
    'xmf': 'ვიკიოწკარუე',
    'arz': 'ويكيميديا كومونز',
@@ -1610,7 +1610,7 @@ var strings =
   ja:'日報 Terra',
   lv:'Daily terra',
   min:'Daily terra',
-  mk:'Дневна зем',
+  mk:'Дневна земска',
   ms:'Terra harian',
   sk:'Denná vlhkosť',
   sl:'Dnevnozemeljska',
@@ -1864,6 +1864,7 @@ var strings =
   ilo:'Kutien ti pannakaituon',
   ja:'オーバーレイ表示を切り替え',
   min:'Tombol lapisan',
+  mk:'Вкл/Искл испис',
   ms:'Tindihan togol'
  },
  dyk: {
