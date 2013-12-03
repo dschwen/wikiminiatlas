@@ -93,6 +93,7 @@ var strings =
    ms: 'Rujukan saiz',
    nl: 'Grootte Vergelijking',
    ru: 'Размер сравнения',
+   sl: 'Primerjava velikosti',
    sr: 'Поређење величина'
  },
  commons : {
@@ -565,6 +566,7 @@ var strings =
    kk: 'Шолпан',
    mk: 'Венера',
    ms: 'Zuhrah',
+   sl: 'Venera',
    sr: 'Венера',
    zh: '金星',
    'zh-hans': '金星'
@@ -584,6 +586,7 @@ var strings =
    min: 'Merkurius',
    mk: 'Меркур',
    ms: 'Utarid',
+   sl: 'Merkur',
    sr: 'Меркур',
    zh: '水星',
    'zh-hans': '水星'
@@ -682,6 +685,7 @@ var strings =
   sco:'Maurs',
   sq:'Marsi',
   scn:'Marti',
+  sl:'Mars',
   so:'Farraare',
   sr:'Марс',
   tl:'Marte',
@@ -1408,6 +1412,7 @@ var strings =
   mk:'полн кран',
   ms:'skrin penuh',
   sk:'celá obrazovka',
+  sl:'celozaslonsko',
   zh:'全屏',
   'zh-hans':'全屏'
  },
@@ -1865,6 +1870,7 @@ var strings =
   ja:'オーバーレイ表示を切り替え',
   min:'Tombol lapisan',
   mk:'Вкл/Искл испис',
+  sl:'Vklop prekrivnega načina',
   ms:'Tindihan togol'
  },
  dyk: {
@@ -1916,6 +1922,10 @@ var strings =
        'Terokai <a href="#" onclick="wmaNews[0]()">Bulan</a>!',
        'Baru di WikiMiniAtlas: <a href="#" onclick="wmaNews[1]()">Bangunan 3D</a>!',
        'Saiz WikiMiniAtlas kini boleh diubah. Hanya gerakkan tetikus di sudut kiri bawah!'],
+  sl: ['Za prikaz povzetka članka pritisnite tipko Ctrl ali ⌘ in pomaknite kazalnik miške nad povezavo.',
+       'Za vklop prekrivnega zemljevida za primerjavo velikosti pritisnite tipko »o« ali pojdite na nastavitve.',
+       'Raziščite <a href="#" onclick="wmaNews[0]()">Mesec</a>!',
+       'Novo v WikiMiniAtlasu: <a href="#" onclick="wmaNews[1]()">3D-zgradbe</a>!'],
   zh: ['按住Ctrl键或⌘键并把鼠标悬停在链接上可以阅读条目摘要。',
        'Press "o" or go to the settings to activate a size-comparison overlay.',
        '探索<a href="#" onclick="wmaNews[0]()">月球</a>！',
@@ -1945,6 +1955,7 @@ var strings =
   nl: 'anderen',
   pl: 'inne',
   pt: 'outros',
+  sl: 'drugo',
   sv: 'andra',
   zh: '其他',
   'zh-hans': '其他'
@@ -1964,6 +1975,7 @@ var strings =
   min: { site:'min', list:['Indonesia','Padang','Bukit Tinggi','Paris','Jakarta'] },
   mk: { site:'mk', list:['Македонија','Скопје','Солун',] },
   ms: { site:'ms', list:['Malaysia','Brunei','Kuala Lumpur','Singapura','Bandar Seri Begawan','Johor Bahru','Pulau Pinang'] },
-  pl: { site:'pl', list:['Polska'] }
+  pl: { site:'pl', list:['Polska'] },
+  sl: { site:'sl', list:['Slovenija'] }
  }
 };
