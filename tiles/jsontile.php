@@ -39,11 +39,14 @@ if( $a!=='query' && $a!=='print' ) {
 function beginsWith($str, $sub) {
   return (strncmp($str, $sub, strlen($sub)) == 0);
 }
-//$dbconn = pg_connect("host=sql-mapnik dbname=osm_mapnik port=5433");
-$dbconn = pg_connect("host=sql-mapnik dbname=osm_mapnik");
 
 // only reply for high zoomlevels!
 if( $z < 12 ) exit;
+
+//exit; // DB server under maintenance
+
+//$dbconn = pg_connect("host=sql-mapnik dbname=osm_mapnik port=5433");
+$dbconn = pg_connect("host=sql-mapnik dbname=osm_mapnik");
 
 // size of zoom level in tiles
 $mx = 3 * ( 2 << $z );

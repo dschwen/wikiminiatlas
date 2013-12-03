@@ -37,7 +37,8 @@ if( $_GET['coord'] )
 }
 
 //echo filemtime('cut');
-//exit;
+
+//exit; // DB server under maintenance
 
 //
 // is the requested URL pointing to a tile set dir?

@@ -1878,6 +1878,7 @@ var strings =
        'Jetzt mit <a href="#" onclick="wmaNews[0]()">Mondkarte</a>!',
        'Neu im WikiMiniAtlas: <a href="#" onclick="wmaNews[1]()">3D-Gebaeude</a>!',
        'Die Groesse des WikiMiniAtlas kann jetzt mit der Maus in der unteren linken Ecke geaendert werden.'],
+  //en: ['Wikiminiatlas is undergoing database maintenance until approximately 10am EST on Thursday.'],
   en: ['Hold Ctrl or ⌘ and hover over a link to read an article summary.',
        'Press "o" or go to the settings to activate a size-comparison overlay.',
        'Explore <a href="#" onclick="wmaNews[0]()">the Moon</a>!',
