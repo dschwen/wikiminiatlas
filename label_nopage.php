@@ -1,5 +1,7 @@
 <?php
 
+// experimental label.php version for labs (does not need a page table!)
+
 //error_reporting(E_ALL);
 //ini_set('display_errors', 1);
 
@@ -40,10 +42,14 @@ else
   $namespace = 0;
 
 $ts_pw = posix_getpwuid(posix_getuid());
-$ts_mycnf = parse_ini_file($ts_pw['dir'] . "/replica.my.cnf");
-$db = mysql_pconnect($lang.'wiki.labsdb', $ts_mycnf['user'], $ts_mycnf['password']);
+$ts_mycnf = parse_ini_file($ts_pw['dir'] . "/.my.cnf");
+$db = mysql_connect(':/var/run/mysqld/mysqld.sock', $ts_mycnf['user'], $ts_mycnf['password']);
 unset($ts_mycnf, $ts_pw);
-mysql_select_db($lang.'wiki_p', $db);
+
+// chose number based on language
+// for l in `echo ar,bg,ca,ceb,commons,...,vec,kk,ilo,ast,uz,oc,sh,tl | sed 's/,/ /g'`; do grep ' '$l'wiki\.labsdb' /etc/hosts | cut -c12; done | paste -s -d,
+$allserv=explode(',',"7,2,7,3,4,2,3,5,3,1,2,7,3,3,7,2,6,3,7,3,3,3,7,2,2,6,7,3,3,3,2,3,2,2,2,7,6,3,3,3,3,2,3,3,2,2,7,7,3,3,2,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3");
+mysql_select_db('wma'.$allserv[$l], $db);
 
 $g=mysql_real_escape_string($g);
 
@@ -83,13 +89,12 @@ if( $r != NULL ) {
     echo "Requesting too many tiles!";
     exit;
   }
-  // with page table
-  // $query = "select p.page_title as title, l.name as name, l.lat as lat, l.lon as lon, l.style as style, t.x as dx, t.y as dy, l.weight as wg, l.page_id as id from  page p, p50380g50921__wma_p.wma_tile t, p50380g50921__wma_p.wma_connect c, p50380g50921__wma_p.wma_label l  WHERE l.lang_id='$l' AND l.globe='$g' AND c.rev='$rev' AND c.tile_id=t.id AND ( ".implode(" OR ",$q)." ) AND c.label_id=l.id AND t.z='$z' AND p.page_id = l.page_id AND c.tile_id = t.id AND page_namespace='$namespace' AND l.page_id=p.page_id;";
   // without page table
-  $query = "select p.page_title as title, l.name as name, l.lat as lat, l.lon as lon, l.style as style, t.x as dx, t.y as dy, l.weight as wg, l.page_id as id from  page p, p50380g50921__wma_p.wma_tile t, p50380g50921__wma_p.wma_connect c, p50380g50921__wma_p.wma_label l  WHERE l.lang_id='$l' AND l.globe='$g' AND c.rev='$rev' AND c.tile_id=t.id AND ( ".implode(" OR ",$q)." ) AND c.label_id=l.id AND t.z='$z' AND c.tile_id = t.id AND page_namespace='$namespace' AND l.page_id=p.page_id;";
+  $query = "select l.name as name, l.lat as lat, l.lon as lon, l.style as style, t.x as dx, t.y as dy, l.weight as wg, l.page_id as id from wma_tile t, wma_connect c, wma_label l  WHERE l.lang_id='$l' AND l.globe='$g' AND c.rev='$rev' AND c.tile_id=t.id AND ( ".implode(" OR ",$q)." ) AND c.label_id=l.id AND t.z='$z' AND c.tile_id = t.id;";
 } else {
-  $query = "select p.page_title as title, l.name as name, l.lat as lat, l.lon as lon, l.style as style, t.x as dx, t.y as dy, l.weight as wg, l.page_id as id from  page p, p50380g50921__wma_p.wma_tile t, p50380g50921__wma_p.wma_connect c, p50380g50921__wma_p.wma_label l  WHERE l.lang_id='$l' AND  l.globe='$g' AND c.rev='$rev' AND c.tile_id=t.id AND t.x='$x' AND c.label_id=l.id  AND t.y='$y' AND t.z='$z' AND c.tile_id = t.id AND page_namespace='$namespace' AND l.page_id=p.page_id;";
+  $query = "select l.name as name, l.lat as lat, l.lon as lon, l.style as style, t.x as dx, t.y as dy, l.weight as wg, l.page_id as id from wma_tile t, wma_connect c, wma_label l  WHERE l.lang_id='$l' AND  l.globe='$g' AND c.rev='$rev' AND c.tile_id=t.id AND t.x='$x' AND c.label_id=l.id  AND t.y='$y' AND t.z='$z' AND c.tile_id = t.id;";
 }
+
 $res = mysql_query( $query );
 
 $items = array();
@@ -109,13 +114,14 @@ while( $row = mysql_fetch_array( $res) )
   $s = $row['style'];
 
   if( $lang == "commons" ) {
-    $n = explode( '|', $row["name"], 4 );
+    $n = explode( '|', $row["name"], 5 );
     $w = $n[0];
     $h = $n[1];
     $head = $n[3];
+    $title = $n[4]; //TODO add it into the db that way!
     $items[] = array( 
       "style" => $s,
-      "img"  => urlencode($row["title"]),
+      "img"  => urlencode($title),
       "tx"   => $tx,
       "ty"   => $ty,
       "w" => $n[0],
@@ -126,13 +132,12 @@ while( $row = mysql_fetch_array( $res) )
       "wg" => intval($row["wg"]),
       "fx" => $fx,
       "fy" => $fy,
-      "m5" => substr(md5($row["title"]),0,2)
+      "m5" => substr(md5($title),0,2)
     );
   } else {
     $items[] = array( 
       "style" => $s,
       "lang"  => $lang,
-      "page"  => urlencode($row["title"]),
       "id"    => $row["id"],
       "tx"    => $tx,
       "ty"    => $ty,
@@ -146,8 +151,10 @@ while( $row = mysql_fetch_array( $res) )
   }
 } // TODO only send fx,fy,wg for max label zoom!
 mysql_close( $db );
+
 //header("Content-type: application/json");
 header("Cache-Control: public, max-age=3600");
 echo json_encode( array( "label" => $items, "z" => $z ) );
+
 //echo json_encode( array( "label" => $items, "z" => $z, "q" => $query ) );
 ?>
