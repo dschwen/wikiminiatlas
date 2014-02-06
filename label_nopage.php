@@ -10,6 +10,7 @@ $lang=$_GET['l'];
 $y=floatval($_GET['a']);
 $x=floatval($_GET['b']);
 $z=intval($_GET['z']);
+//$rev=intval($_GET['rev']);
 
 // globe parameter (defaults to Earth)
 $g=$_GET['g'];
@@ -18,7 +19,12 @@ if(!isset($g)) $g="Earth";
 // experimental compressed query
 $r=$_GET['r'];
 
-//$rev=intval($_GET['rev']);
+// APC - query cache
+$key = md5($x.'|'.$y.'|'.$z.'|'.$lang.'|'.$r);
+if ($result = apc_fetch($key)) {
+  echo $result.' /* chached */';
+  exit;
+}
 
 // get language id
 $alllang=explode(',',"ar,bg,ca,ceb,commons,cs,da,de,el,en,eo,es,et,eu,fa,fi,fr,gl,he,hi,hr,ht,hu,id,it,ja,ko,lt,ms,new,nl,nn,no,pl,pt,ro,ru,simple,sk,sl,sr,sv,sw,te,th,tr,uk,vi,vo,war,zh,af,als,be,bpy,fy,ga,hy,ka,ku,la,lb,lv,mk,ml,nds,nv,os,pam,pms,ta,vec,kk,ilo,ast,uz,oc,sh,tl");
@@ -36,22 +42,17 @@ $rev = $lrev[$lang];
 
 $wikiminiatlas_zoomsize = array( 3.0, 6.0 ,12.0 ,24.0 ,48.0, 96.0, 192.0, 384.0, 768.0, 1536.0,  3072.0, 6144.0, 12288.0, 24576.0, 49152.0, 98304.0 );
 
-if( $lang=="commons" ) 
-  $namespace = 6;
-else
-  $namespace = 0;
-
-$ts_pw = posix_getpwuid(posix_getuid());
-$ts_mycnf = parse_ini_file($ts_pw['dir'] . "/.my.cnf");
-$db = mysql_connect(':/var/run/mysqld/mysqld.sock', $ts_mycnf['user'], $ts_mycnf['password']);
-unset($ts_mycnf, $ts_pw);
-
 // chose number based on language
 // for l in `echo ar,bg,ca,ceb,commons,...,vec,kk,ilo,ast,uz,oc,sh,tl | sed 's/,/ /g'`; do grep ' '$l'wiki\.labsdb' /etc/hosts | cut -c12; done | paste -s -d,
 $allserv=explode(',',"7,2,7,3,4,2,3,5,3,1,2,7,3,3,7,2,6,3,7,3,3,3,7,2,2,6,7,3,3,3,2,3,2,2,2,7,6,3,3,3,3,2,3,3,2,2,7,7,3,3,2,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3");
-mysql_select_db('wma'.$allserv[$l], $db);
 
-$g=mysql_real_escape_string($g);
+// connect to database
+$ts_pw = posix_getpwuid(posix_getuid());
+$ts_mycnf = parse_ini_file($ts_pw['dir'] . "/.my.cnf");
+$db = mysqli_connect('p:localhost', $ts_mycnf['user'], $ts_mycnf['password'], 'wma'.$allserv[$l]);
+unset($ts_mycnf, $ts_pw);
+
+$g=mysqli_real_escape_string($g);
 
 if( $r != NULL ) {
   $co = Array('x','y');
@@ -95,10 +96,10 @@ if( $r != NULL ) {
   $query = "select l.name as name, l.lat as lat, l.lon as lon, l.style as style, t.x as dx, t.y as dy, l.weight as wg, l.page_id as id from wma_tile t, wma_connect c, wma_label l  WHERE l.lang_id='$l' AND  l.globe='$g' AND c.rev='$rev' AND c.tile_id=t.id AND t.x='$x' AND c.label_id=l.id  AND t.y='$y' AND t.z='$z' AND c.tile_id = t.id;";
 }
 
-$res = mysql_query( $query );
+$res = mysqli_query( $query );
 
 $items = array();
-while( $row = mysql_fetch_array( $res) )
+while( $row = mysqli_fetch_assoc( $res) )
 {
   $x = $row['dx'];
   $y = $row['dy'];
@@ -150,11 +151,13 @@ while( $row = mysql_fetch_array( $res) )
     );
   }
 } // TODO only send fx,fy,wg for max label zoom!
-mysql_close( $db );
+mysqli_close( $db );
 
 //header("Content-type: application/json");
 header("Cache-Control: public, max-age=3600");
-echo json_encode( array( "label" => $items, "z" => $z ) );
+$result = json_encode( array( "label" => $items, "z" => $z ) );
+echo $result;
+apc_add($key, $result, 120);
 
 //echo json_encode( array( "label" => $items, "z" => $z, "q" => $query ) );
 ?>
