@@ -1,13 +1,16 @@
 <?php
 
-//error_reporting(E_ALL);
-//ini_set('display_errors', 1);
+// label.php version for labs (acesses the tool-labs db)
+
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
 
 // Apache .htaccess rules
 $lang=$_GET['l'];
 $y=floatval($_GET['a']);
 $x=floatval($_GET['b']);
 $z=intval($_GET['z']);
+//$rev=intval($_GET['rev']);
 
 // globe parameter (defaults to Earth)
 $g=$_GET['g'];
@@ -16,7 +19,12 @@ if(!isset($g)) $g="Earth";
 // experimental compressed query
 $r=$_GET['r'];
 
-//$rev=intval($_GET['rev']);
+// APC - query cache
+$key = md5($x.'|'.$y.'|'.$z.'|'.$lang.'|'.$r);
+if ($result = apc_fetch($key)) {
+  echo $result;
+  exit;
+}
 
 // get language id
 $alllang=explode(',',"ar,bg,ca,ceb,commons,cs,da,de,el,en,eo,es,et,eu,fa,fi,fr,gl,he,hi,hr,ht,hu,id,it,ja,ko,lt,ms,new,nl,nn,no,pl,pt,ro,ru,simple,sk,sl,sr,sv,sw,te,th,tr,uk,vi,vo,war,zh,af,als,be,bpy,fy,ga,hy,ka,ku,la,lb,lv,mk,ml,nds,nv,os,pam,pms,ta,vec,kk,ilo,ast,uz,oc,sh,tl");
@@ -34,18 +42,13 @@ $rev = $lrev[$lang];
 
 $wikiminiatlas_zoomsize = array( 3.0, 6.0 ,12.0 ,24.0 ,48.0, 96.0, 192.0, 384.0, 768.0, 1536.0,  3072.0, 6144.0, 12288.0, 24576.0, 49152.0, 98304.0 );
 
-if( $lang=="commons" ) 
-  $namespace = 6;
-else
-  $namespace = 0;
-
+// connect to database
 $ts_pw = posix_getpwuid(posix_getuid());
-$ts_mycnf = parse_ini_file($ts_pw['dir'] . "/replica.my.cnf");
-$db = mysql_pconnect($lang.'wiki.labsdb', $ts_mycnf['user'], $ts_mycnf['password']);
+$ts_mycnf = parse_ini_file($ts_pw['dir'] . "/.my.cnf");
+$db = mysqli_connect('p:localhost', $ts_mycnf['user'], $ts_mycnf['password'], $lang."wiki.labsdb");
 unset($ts_mycnf, $ts_pw);
-mysql_select_db($lang.'wiki_p', $db);
 
-$g=mysql_real_escape_string($g);
+$g=mysqli_real_escape_string($db, $g);
 
 if( $r != NULL ) {
   $co = Array('x','y');
@@ -83,17 +86,15 @@ if( $r != NULL ) {
     echo "Requesting too many tiles!";
     exit;
   }
-  // with page table
-  // $query = "select p.page_title as title, l.name as name, l.lat as lat, l.lon as lon, l.style as style, t.x as dx, t.y as dy, l.weight as wg, l.page_id as id from  page p, p50380g50921__wma_p.wma_tile t, p50380g50921__wma_p.wma_connect c, p50380g50921__wma_p.wma_label l  WHERE l.lang_id='$l' AND l.globe='$g' AND c.rev='$rev' AND c.tile_id=t.id AND ( ".implode(" OR ",$q)." ) AND c.label_id=l.id AND t.z='$z' AND p.page_id = l.page_id AND c.tile_id = t.id AND page_namespace='$namespace' AND l.page_id=p.page_id;";
-  // without page table
   $query = "select p.page_title as title, l.name as name, l.lat as lat, l.lon as lon, l.style as style, t.x as dx, t.y as dy, l.weight as wg, l.page_id as id from  page p, p50380g50921__wma_p.wma_tile t, p50380g50921__wma_p.wma_connect c, p50380g50921__wma_p.wma_label l  WHERE l.lang_id='$l' AND l.globe='$g' AND c.rev='$rev' AND c.tile_id=t.id AND ( ".implode(" OR ",$q)." ) AND c.label_id=l.id AND t.z='$z' AND c.tile_id = t.id AND page_namespace='$namespace' AND l.page_id=p.page_id;";
 } else {
   $query = "select p.page_title as title, l.name as name, l.lat as lat, l.lon as lon, l.style as style, t.x as dx, t.y as dy, l.weight as wg, l.page_id as id from  page p, p50380g50921__wma_p.wma_tile t, p50380g50921__wma_p.wma_connect c, p50380g50921__wma_p.wma_label l  WHERE l.lang_id='$l' AND  l.globe='$g' AND c.rev='$rev' AND c.tile_id=t.id AND t.x='$x' AND c.label_id=l.id  AND t.y='$y' AND t.z='$z' AND c.tile_id = t.id AND page_namespace='$namespace' AND l.page_id=p.page_id;";
 }
-$res = mysql_query( $query );
+
+$res = mysqli_query($db, $query);
 
 $items = array();
-while( $row = mysql_fetch_array( $res) )
+while( $row = mysqli_fetch_assoc($res) )
 {
   $x = $row['dx'];
   $y = $row['dy'];
@@ -133,7 +134,6 @@ while( $row = mysql_fetch_array( $res) )
       "style" => $s,
       "lang"  => $lang,
       "page"  => urlencode($row["title"]),
-      "id"    => $row["id"],
       "tx"    => $tx,
       "ty"    => $ty,
       "name"  => $row['name'],
@@ -145,9 +145,13 @@ while( $row = mysql_fetch_array( $res) )
     );
   }
 } // TODO only send fx,fy,wg for max label zoom!
-mysql_close( $db );
+mysqli_close( $db );
+
 //header("Content-type: application/json");
 header("Cache-Control: public, max-age=3600");
-echo json_encode( array( "label" => $items, "z" => $z ) );
+$result = json_encode( array( "label" => $items, "z" => $z ) );
+echo $result;
+apc_add($key, $result, 24*60*60); // cache 24h
+
 //echo json_encode( array( "label" => $items, "z" => $z, "q" => $query ) );
 ?>
