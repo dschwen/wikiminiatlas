@@ -2,8 +2,8 @@
 
 // experimental label.php version for labs (does not need a page table!)
 
-//error_reporting(E_ALL);
-//ini_set('display_errors', 1);
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
 
 // Apache .htaccess rules
 $lang=$_GET['l'];
@@ -22,7 +22,7 @@ $r=$_GET['r'];
 // APC - query cache
 $key = md5($x.'|'.$y.'|'.$z.'|'.$lang.'|'.$r);
 if ($result = apc_fetch($key)) {
-  echo $result.' /* chached */';
+  echo $result;
   exit;
 }
 
@@ -52,7 +52,7 @@ $ts_mycnf = parse_ini_file($ts_pw['dir'] . "/.my.cnf");
 $db = mysqli_connect('p:localhost', $ts_mycnf['user'], $ts_mycnf['password'], 'wma'.$allserv[$l]);
 unset($ts_mycnf, $ts_pw);
 
-$g=mysqli_real_escape_string($g);
+$g=mysqli_real_escape_string($db, $g);
 
 if( $r != NULL ) {
   $co = Array('x','y');
@@ -96,10 +96,10 @@ if( $r != NULL ) {
   $query = "select l.name as name, l.lat as lat, l.lon as lon, l.style as style, t.x as dx, t.y as dy, l.weight as wg, l.page_id as id from wma_tile t, wma_connect c, wma_label l  WHERE l.lang_id='$l' AND  l.globe='$g' AND c.rev='$rev' AND c.tile_id=t.id AND t.x='$x' AND c.label_id=l.id  AND t.y='$y' AND t.z='$z' AND c.tile_id = t.id;";
 }
 
-$res = mysqli_query( $query );
+$res = mysqli_query($db, $query);
 
 $items = array();
-while( $row = mysqli_fetch_assoc( $res) )
+while( $row = mysqli_fetch_assoc($res) )
 {
   $x = $row['dx'];
   $y = $row['dy'];
@@ -157,7 +157,7 @@ mysqli_close( $db );
 header("Cache-Control: public, max-age=3600");
 $result = json_encode( array( "label" => $items, "z" => $z ) );
 echo $result;
-apc_add($key, $result, 120);
+apc_add($key, $result, 24*60*60); // cache 24h
 
 //echo json_encode( array( "label" => $items, "z" => $z, "q" => $query ) );
 ?>
