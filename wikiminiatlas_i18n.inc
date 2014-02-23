@@ -81,6 +81,7 @@ var strings =
    ast: 'Referencia de tamañu',
    de: 'Größenvergleich',
    es: 'Comparación de tamaño',
+   el: 'Σύγκριση μεγέθους',
    fa: 'مقایسه اندازه',
    fr: 'Comparaison des dimensions',
    he: 'גודל השוואה',
@@ -546,6 +547,7 @@ var strings =
  mapIo : {
    en: 'Io',
    ast: 'Ío',
+   es: 'Ιώ',
    es: 'Ío',
    fa: 'یو',
    gl: 'Ío',
@@ -559,6 +561,7 @@ var strings =
  },
  mapVenus : {
    en: 'Venus',
+   el: 'Αφροδίτη',
    fa: 'زهره',
    he: 'נוגה',
    ilo: 'Benus',
@@ -574,6 +577,7 @@ var strings =
  mapMercury : {
    en: 'Mercury',
    ast: 'Mercuriu',
+   el: 'Ερμής',
    es: 'Mercurio',
    de: 'Merkur',
    fa: 'عطارد',
@@ -1292,6 +1296,7 @@ var strings =
   da:'henter',
   de:'lade',
   dsb:'zacytujo se',
+  el:'φορτώνει',
   en:'loading',
   es:'cargando',
   fa:'در حال بارگذاری',
@@ -1395,6 +1400,7 @@ var strings =
   cs:'celá obrazovka',
   de:'Vollbild',
   dsb:'połna wobrazowka',
+  el:'πλήρης οθόνη',
   en:'fullscreen',
   es:'pantalla completa',
   fa:'نمایش تمام‌صفحه',
@@ -1865,6 +1871,7 @@ var strings =
   en:'Toggle overlay',
   ast:'(Des)activar tresparencia',
   de:'Artikelspezifische Karteneinblendung (de)aktivieren',
+  el:'Εναλλαγή επικάλυψης',
   id:'Tombol overlay',
   ilo:'Kutien ti pannakaituon',
   ja:'オーバーレイ表示を切り替え',
@@ -1884,7 +1891,11 @@ var strings =
        'Jetzt mit <a href="#" onclick="wmaNews[0]()">Mondkarte</a>!',
        'Neu im WikiMiniAtlas: <a href="#" onclick="wmaNews[1]()">3D-Gebaeude</a>!',
        'Die Groesse des WikiMiniAtlas kann jetzt mit der Maus in der unteren linken Ecke geaendert werden.'],
-  //en: ['Wikiminiatlas is undergoing database maintenance until approximately 10am EST on Thursday.'],
+  el: ['Κρατήστε το Ctrl ή ⌘ και αιωρηθείτε πάνω από ένα σύνδεσμο για να διαβάσετε τη σύνοψη ενός λήμματος.',
+      'Πατήστε "o" (λατινικό) ή πηγαίνετε στις ρυθμίσεις για να ενεργοποιήσετε μια επικάλυψη για σύγκριση μεγεθών.',
+      'Εξερευνήστε <a href="#" onclick="wmaNews[0]()">τη Σελήνη</a>!',
+      'Νέο στο WikiMiniAtlas: <a href="#" onclick="wmaNews[1]()">3D-κτίρια</a>!',
+      'Ο WikiMiniAtlas μπορεί τώρα να αλλάζει μέγεθος. Απλά μετακινήστε το ποντίκι στην κάτω αριστερά γωνία!'],
   en: ['Hold Ctrl or ⌘ and hover over a link to read an article summary.',
        'Press "o" or go to the settings to activate a size-comparison overlay.',
        'Explore <a href="#" onclick="wmaNews[0]()">the Moon</a>!',
@@ -1980,3 +1991,4 @@ var strings =
   sl: { site:'sl', list:['Slovenija'] }
  }
 };
+
