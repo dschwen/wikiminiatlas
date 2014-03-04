@@ -79,6 +79,7 @@ var strings =
    en: 'Size reference',
    ar: 'حجم المقارنة',
    ast: 'Referencia de tamañu',
+   ca: 'Comparació de dimensions',
    de: 'Größenvergleich',
    es: 'Comparación de tamaño',
    el: 'Σύγκριση μεγέθους',
@@ -94,6 +95,7 @@ var strings =
    ms: 'Rujukan saiz',
    nl: 'Grootte Vergelijking',
    ru: 'Размер сравнения',
+   uk: 'Референсний розмір',
    sl: 'Primerjava velikosti',
    sr: 'Поређење величина'
  },
@@ -547,7 +549,7 @@ var strings =
  mapIo : {
    en: 'Io',
    ast: 'Ío',
-   es: 'Ιώ',
+   el: 'Ιώ',
    es: 'Ío',
    fa: 'یو',
    gl: 'Ío',
@@ -555,6 +557,7 @@ var strings =
    ja: 'イオ',
    kk: 'Ио',
    mk: 'Јо',
+   ru: 'Ио',
    sr: 'Ио',
    zh: '木卫一',
    'zh-hans': '木卫一'
@@ -569,14 +572,17 @@ var strings =
    kk: 'Шолпан',
    mk: 'Венера',
    ms: 'Zuhrah',
+   ru: 'Венера',
    sl: 'Venera',
    sr: 'Венера',
+   uk: 'Венера',
    zh: '金星',
    'zh-hans': '金星'
  },
  mapMercury : {
    en: 'Mercury',
    ast: 'Mercuriu',
+   ca: 'Mercuri',
    el: 'Ερμής',
    es: 'Mercurio',
    de: 'Merkur',
@@ -590,8 +596,10 @@ var strings =
    min: 'Merkurius',
    mk: 'Меркур',
    ms: 'Utarid',
+   ru: 'Меркурий',
    sl: 'Merkur',
    sr: 'Меркур',
+   uk: 'Меркурій',
    zh: '水星',
    'zh-hans': '水星'
  },
@@ -1049,7 +1057,7 @@ var strings =
   bg:'Настройки',
   bpy:'হাজানি',
   br:'Dibaboù',
-  ca:'Preferències',
+  ca:'Configuració',
   cs:'Nastavení',
   da:'Indstillinger',
   de:'Einstellungen',
@@ -1158,7 +1166,7 @@ var strings =
   sq:'Lloji i hartës',
   fi:'Kartan tyyppi',
   sv:'Karta',
-  uk:'Режим карти',
+  uk:'Режим мапи',
   vi:'Chế độ bản đồ',
   vo:'Kaedasot',
   zh:'地图模式',
@@ -1239,7 +1247,7 @@ var strings =
   bar:'Zoag in Marka vo',
   bpy:'লেবেলর অঙতাহান',
   br:'Diskouez an tikedennoù evit',
-  ca:'Mostrar etiquetes de',
+  ca:'Mostra etiquetes de',
   cs:'Ukaž tlačítko z',
   da:'Vis etiketter fra',
   de:'Zeige Marker aus',
@@ -1396,7 +1404,7 @@ var strings =
   bpy:'পুরা স্ক্রিনহান',
   bar:'iban gonzn Bildschirm',
   br:'skramm leun',
-  ca:'pantalla completa',
+  ca:'Pantalla completa',
   cs:'celá obrazovka',
   de:'Vollbild',
   dsb:'połna wobrazowka',
@@ -1419,6 +1427,7 @@ var strings =
   ms:'skrin penuh',
   sk:'celá obrazovka',
   sl:'celozaslonsko',
+  uk:'повний екран',
   zh:'全屏',
   'zh-hans':'全屏'
  },
@@ -1567,7 +1576,7 @@ var strings =
   ast:'Día acuáticu',
   bpy:'পানুকা',
   br:'Deiz an dour',
-  ca:'dia-aigua',
+  ca:'"Aqua" diari',
   cs:'Denně vody',
   el:'Ημερήσιος υδατικός',
   en:'Daily aqua',
@@ -1592,6 +1601,7 @@ var strings =
   mk:'Дневна водна',
   ms:'Aqua harian',
   sl:'Dnevnomodra',
+  uk:'Щоденна водна',
   vi:'Xanh biển',
   vo:'Vat delik'
  },
@@ -1600,7 +1610,7 @@ var strings =
   ast:'Día terrestre',
   bpy:'মাটিরা',
   br:'Deiz an Douar',
-  ca:'dia-Terra',
+  ca:'"Terra" diari',
   cs:'Denně vlhkosti',
   da:'Daglig terra',
   dsb:'Wšedna zemja',
@@ -1870,6 +1880,7 @@ var strings =
  kml: {
   en:'Toggle overlay',
   ast:'(Des)activar tresparencia',
+  ca:'Commuta superposició de capes',
   de:'Artikelspezifische Karteneinblendung (de)aktivieren',
   el:'Εναλλαγή επικάλυψης',
   id:'Tombol overlay',
@@ -1877,8 +1888,9 @@ var strings =
   ja:'オーバーレイ表示を切り替え',
   min:'Tombol lapisan',
   mk:'Вкл/Искл испис',
+  ms:'Tindihan togol',
   sl:'Vklop prekrivnega načina',
-  ms:'Tindihan togol'
+  uk:'Перемкнути контур'
  },
  dyk: {
   ast: ['Mantén calcáu Ctrl o ⌘ y pasa\'l mur sobro un enllaz pa lleer un resume del artículu.',
@@ -1886,6 +1898,11 @@ var strings =
        '¡Esplora <a href="#" onclick="wmaNews[0]()">la Lluna</a>!',
        'Nuevo en WikiMiniAtlas: ¡<a href="#" onclick="wmaNews[1]()">Edificios en 3D</a>!',
        '¡WikiMiniAtlas agora pue camudar de tamañu. Val con mover el mur a la esquina inferior izquierda!'],
+  ca: ['Sostingueu Ctrl o ⌘ i situeu el cursor sobre un enllaç per llegir un resum de l\'article.',
+       'Premeu "o", o aneu a la configuració per activar una capa de comparació de dimensions.',
+       'Exploreu <a href="#" onclick="wmaNews[0]()">la Lluna</a>!',
+       'Nou al WikiMiniAtlas: <a href="#" onclick="wmaNews[1]()">edificis en 3D</a>!',
+       'WikiMiniAtlas ara es pot redimensionar: desplaceu amb el cursor el cantó inferior esquerra!'],
   de: ['Halte Strg oder ⌘ und positioniere den Mauspfeil auf einen Link, um eine Artikelzusammenfassung anzuzeigen.',
        'Druecke "o" oder oeffne die Einstellungen um eine Einblendung zum Groessenvergleich zu aktivieren.',
        'Jetzt mit <a href="#" onclick="wmaNews[0]()">Mondkarte</a>!',
@@ -1975,6 +1992,7 @@ var strings =
  // list of objects that are offered for size comparison
  sover: {
   ast: { site:'ast', list:['España','Asturies'] },
+  ca: { site:'ca', list:['Espanya','Catalunya','Mallorca','Andorra'] },
   de: { site:'de', list:['Deutschland','Schweiz','Österreich','Niedersachsen','Berlin'] },
   en: { site:'en', list:['California','United Kingdom','Republic of Ireland','Australia','Rhode Island','Texas','Alaska'] },
   es: { site:'es', list:['Argentina','Bolivia','Chile','Colombia','Costa Rica','Cuba','Ecuador','El Ecuador','El Salvador','España','Guatemala','Guinea Ecuatorial','Honduras','México','Nicaragua','Panamá','Paraguay','Puerto Rico','Perú','República Árabe Saharaui Democrática','República Dominicana','Venezuela','Uruguay'] },
@@ -1988,7 +2006,7 @@ var strings =
   mk: { site:'mk', list:['Македонија','Скопје','Солун',] },
   ms: { site:'ms', list:['Malaysia','Brunei','Kuala Lumpur','Singapura','Bandar Seri Begawan','Johor Bahru','Pulau Pinang'] },
   pl: { site:'pl', list:['Polska'] },
-  sl: { site:'sl', list:['Slovenija'] }
+  sl: { site:'sl', list:['Slovenija'] },
+  uk: { site:'uk', list:['Україна','Крим','Київ'] }
  }
 };
-
