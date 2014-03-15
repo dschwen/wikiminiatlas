@@ -10,7 +10,7 @@ var wmaNews = []; // array of news item actions (needs to be global)
 // global settings
 var wma_imgbase = 'tiles/';
 var wma_database = 'label.php';
-var wma_tilebase = '.www.toolserver.org/~dschwen/wma/tiles/';
+var wma_tilebase = '.wma.wmflabs.org/tiles/';
 var wma_maxlabel = 13;
 var i, wma_zoomsize = [3];
 for(i=1; i<40; i++) { wma_zoomsize[i]=2*wma_zoomsize[i-1]; }
@@ -39,10 +39,10 @@ var wma_tilesets = [
      }
    } else {
      if( z >= 7 ) {
-      return '//' + ( (x+y) % 16 ) + wma_tilebase + 'mapnik/' +
+      return '//' + ( (x+y) % 8 ) + wma_tilebase + 'mapnik/' +
              z + '/' + y + '/tile_' + y + '_' + ( x % ( wma_zoomsize[z] * 2 ) ) + '.png';
      } else {
-      return '//' + ( (x+y) % 16 ) + wma_tilebase + 'mapnik/' +
+      return '//' + ( (x+y) % 8 ) + wma_tilebase + 'mapnik/' +
              z + '/tile_' + y + '_' + ( x % ( wma_zoomsize[z] * 2 ) ) + '.png';
      }
    }
@@ -296,6 +296,7 @@ function wikiminiatlasInstall( wma_widget, url_params ) {
   var wmaGlobeLoadTiles = null;
 
   var hasCanvas = "HTMLCanvasElement" in window;
+  var wma_dpr = ('devicePixelRatio' in window) ? window.devicePixelRatio : 1;
 
   var labelcaption, noticehandler = null;
 
@@ -642,9 +643,10 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
 
     // 3d building outlines
     bldg3d = $('<canvas class="wmakml"></canvas>')
-        .attr( { width: wma_width, height: wma_height } )
-        .css( { zIndex:19, opacity: 0.75 } )
+        .attr( { width: wma_width*wma_dpr, height: wma_height*wma_dpr } )
+        .css( { zIndex:19, opacity: 0.75, width: wma_width+'px', height: wma_height+'px' } )
         .appendTo( $(wma_map) );
+
     if( hasCanvas ) { 
       // try to use webgl
       try {
@@ -655,14 +657,15 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
         // replace canvas
         bldg3d.remove();
         bldg3d = $('<canvas class="wmakml"></canvas>')
-            .attr( { width: wma_width, height: wma_height } )
-            .css( { zIndex:19, opacity: 0.75 } )
+            .attr( { width: wma_width*wma_dpr, height: wma_height*wma_dpr } )
+            .css( { zIndex:19, opacity: 0.75, width: wma_width+'px', height: wma_height+'px' } )
             .appendTo( $(wma_map) );
       }
 
       // wireframe as fallback
       if( !bldg3dc || update3dBuildings===false ) {
         bldg3dc = bldg3d[0].getContext('2d'); 
+        bldg3dc.scale(wma_dpr,wma_dpr);
         update3dBuildings = update3dBuildings_canvas;
       }
     }
@@ -776,8 +779,15 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
       xhr : null
     }
     if( hasCanvas ) {
-      t.can.attr({width:128,height:128});
-      t.ctx = t.can[0].getContext('2d');
+      if (wma_dpr>1) {
+        t.can.attr({width:128*wma_dpr,height:128*wma_dpr})
+             .css({width: '128px',height: '128px'});
+        t.ctx = t.can[0].getContext('2d');
+	t.ctx.scale(wma_dpr,wma_dpr);
+      } else {
+        t.can.attr({width:128,height:128});
+        t.ctx = t.can[0].getContext('2d');
+      }
     }
     $(wma_map).append(t.div);
     return t;
@@ -820,12 +830,17 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
     if( hasCanvas ) {
       // resize kml canvas, if it exists
       if( wmakml.canvas !== null ) {
-        wmakml.canvas.attr( { width: nw, height: nh } );
+        wmakml.canvas
+          .attr({width:nw*wma_dpr,height:nh*wma_dpr})
+          .css({width: nw+'px',height: nh+'px'});
+        wmakml.c.setTransform(wma_dpr, 0, 0, wma_dpr, 0, 0);
       }
       // 3D building canvas
-      bldg3d.attr( { width: nw, height: nh } );
+      bldg3d.attr( { width: nw*wma_dpr, height: nh*wma_dpr } )
+            .css({width: nw+'px',height: nh+'px'});
+
       // set webgl viewport 
-      if( bldg3dc.viewport ) bldg3dc.viewport(0,0,nw,nh);
+      if( bldg3dc.viewport ) bldg3dc.viewport(0,0,nw*wma_dpr,nh*wma_dpr);
 
       // TODO: resize overlay canvas!
     }
@@ -1870,9 +1885,11 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
     // add canvas overlay
     if( geo.canvas === null ) {
       geo.canvas = $('<canvas class="wmakml"></canvas>')
-        .attr( { width: wma_width, height: wma_height } )
+        .attr( { width: wma_width*wma_dpr, height: wma_height*wma_dpr } )
+        .css({width: wma_width+'px',height: wma_height+'px'})
         .appendTo( $(wma_map) );
       geo.c = geo.canvas[0].getContext('2d');
+      geo.c.scale(wma_dpr,wma_dpr);
       geo.shown = true;
       geo.drawn = true;
       if( geo == wmakml ) { $('#button_kml').show(); }
