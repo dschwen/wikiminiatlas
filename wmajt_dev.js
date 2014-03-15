@@ -716,7 +716,7 @@ var wmajt = (function(){
     // request data
     tile.debug.html('tiles/jsontile.php?x='+x+'&y='+y+'&z='+z);
     $.ajax({
-      url: 'tiles/jsontile.php?x='+x+'&y='+y+'&z='+z+(purge===true?'&action=purge':''),
+      url: '/tiles/jsontile.php?x='+x+'&y='+y+'&z='+z+(purge===true?'&action=purge':''),
       dataType: 'json',
       success: gotData,
       context: tile
