@@ -687,7 +687,7 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
         if( e.target.href && synopsis_filter.test(e.target.href) ) {
           l = RegExp.$1;
           t = RegExp.$2;
-          $('#synopsistext').load( '/~dschwen/synopsis/?l=' + l + '&t=' + t, function() { 
+          $('#synopsistext').load( '/summary/?l=' + l + '&t=' + t, function() { 
             $('#synopsistext')
               .css('direction',isRTL(l)?'rtl':'ltr')
               .find('a').attr('target','_top');

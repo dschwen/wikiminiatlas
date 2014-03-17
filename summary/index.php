@@ -1,7 +1,7 @@
 <?php
 
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
+//error_reporting(E_ALL);
+//ini_set('display_errors', 1);
 
 $title = $_GET['t'];
 
@@ -15,8 +15,10 @@ $title = str_replace( ' ', '_', $title );
 $key = $lang.':'.$title;
 
 // check database
+$ts_pw = posix_getpwuid(posix_getuid()); // TODO: cache this!
+$ts_mycnf = parse_ini_file($ts_pw['dir'] . "/user.my.cnf");
 $db = mysqli_connect('p:tools.labsdb', $ts_mycnf['user'], $ts_mycnf['password'], 'u1115__summary');
-$query = 'select synopsis from synopsis where page_title="'.mysql_real_escape_string( $key ).'" AND updated > DATE_SUB(NOW(), INTERVAL 30 DAY);';
+$query = 'select synopsis from synopsis where page_title="'.mysqli_real_escape_string($db, $key).'" AND updated > DATE_SUB(NOW(), INTERVAL 30 DAY);';
 $res = mysqli_query($db, $query);
 $num = mysqli_num_rows( $res );
 
@@ -89,7 +91,7 @@ else
     $query = 'delete from synopsis where page_title="'.mysqli_real_escape_string($db, $key).'"';
     $res = mysqli_query($db, $query);
     $query = 'insert into synopsis (page_title,synopsis) values ("'.mysqli_real_escape_string($db, $key).'","'.mysqli_real_escape_string($db, $html).'")';
-    $res = mysql_query($db, $query);
+    $res = mysqli_query($db, $query);
   }
 }
 
