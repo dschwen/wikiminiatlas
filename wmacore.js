@@ -764,8 +764,9 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
           // tile is probably not ready yet, try again in one second
           // TODO: add max tries
           h = setTimeout( function() {
-            t.img.attr("src",t.img.attr('src') + "?" + Math.random() );
-          }, 1000 );
+            var s = t.img.attr('src');
+            t.img.attr("src", s.replace(/\?.*/,'') + "?" + Math.random() );
+          }, 5*1000 ); // TODO: reduce when OSM db is local
         })
         .appendTo(d),
       can : $('<canvas></canvas>').appendTo(d),
