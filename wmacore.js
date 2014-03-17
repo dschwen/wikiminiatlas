@@ -1048,8 +1048,8 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
                   r.y != wma_mdcoord.y ) {
                  e.preventDefault(); 
               } else {
-                // open the wmaci preview on left click
-                if( e.which == 1 ) {
+                // open the wmaci preview on left click (unless ctrl is pressed -> RMB emulation on mac)
+                if (e.which==1 && (!e.ctrlKey)) {
                   wmaCommonsImage(n,w,h,m5); 
                   e.preventDefault();
                 }
@@ -1090,8 +1090,24 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
               top:  ( l[i].ty - iy[l[i].style] ) + 'px',
               left: ( l[i].tx - ix[l[i].style] ) + 'px',
               direction: isRTL(l[i].lang) ? 'rtl' : 'ltr'
-            } ) 
-           .text(l[i].name);
+            } );
+
+          // get rid of comma and bracket suffixes
+          var m = /(.*?)(\s*\([^\)]*\)$|\s*,[^,\(]*$)/.exec(l[i].name);
+          if (m) {
+            a.text(m[1])
+              .append($('<span class="hell">&hellip;</span>'))
+              .append($('<span class="sufx"></span>').text(m[2]).hide())
+              .hover(function() {
+                $('.hell',this).hide();
+                $('.sufx',this).show();
+              }, function() {
+                $('.hell',this).show();
+                $('.sufx',this).hide();
+              });
+          } else {
+            a.text(l[i].name);
+          }
         }
 
         tile.append(a);
