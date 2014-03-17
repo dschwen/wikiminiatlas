@@ -1,8 +1,8 @@
 WikiMiniAtlas
 =============
 
-This repo contains the client facing scripts and date for the WikiMiniAtlas map plugin in Wikipedia.
-Wikiminiatlas will display maps of Eart, Moon, Venus, Mars, Mercury, Titan and Io, and on those maps
+This repo contains the client facing scripts and data for the WikiMiniAtlas map plugin in Wikipedia.
+Wikiminiatlas will display maps of Earth, Moon, Venus, Mars, Mercury, Titan and Io, and on those maps
 clickable links to Wikipedia articles.
 
 Features include:
