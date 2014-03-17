@@ -44,7 +44,7 @@ option.bg { background-color: #aaaaff }
 
 /* new sprite-based symbols */
 div.sprite {
-  background-image: url('symbols/sprite1.png');
+  background-image: url('/symbols/sprite1.png');
   width: 11px; height: 11px;
   background-position: 0 0;
   position: absolute;
@@ -55,7 +55,7 @@ a.cthumb {
   font-size:7pt;
   z-index:20;
   position: absolute;
-  background-image:url('symbols/label_corner_ul.png');
+  background-image:url('/symbols/label_corner_ul.png');
   background-repeat: no-repeat;
   padding-left:3px;
   padding-top:3px;
@@ -84,22 +84,22 @@ a.cthumb:hover img {
 
 /* directions */
 a.dir { padding-left:12px; padding-top:12px; width:60px; /* 48+3 */ }
-a.dir0 { background-image:url('symbols/dir_0.png'); }
-a.dir1 { background-image:url('symbols/dir_1.png'); }
-a.dir2 { background-image:url('symbols/dir_2.png'); }
-a.dir3 { background-image:url('symbols/dir_3.png'); }
-a.dir4 { background-image:url('symbols/dir_4.png'); }
-a.dir5 { background-image:url('symbols/dir_5.png'); }
-a.dir6 { background-image:url('symbols/dir_6.png'); }
-a.dir7 { background-image:url('symbols/dir_7.png'); }
-a.dir8 { background-image:url('symbols/dir_8.png'); }
-a.dir9 { background-image:url('symbols/dir_9.png'); }
-a.dir10 { background-image:url('symbols/dir_10.png'); }
-a.dir11 { background-image:url('symbols/dir_11.png'); }
-a.dir12 { background-image:url('symbols/dir_12.png'); }
-a.dir13 { background-image:url('symbols/dir_13.png'); }
-a.dir14 { background-image:url('symbols/dir_14.png'); }
-a.dir15 { background-image:url('symbols/dir_15.png'); }
+a.dir0 { background-image:url('/symbols/dir_0.png'); }
+a.dir1 { background-image:url('/symbols/dir_1.png'); }
+a.dir2 { background-image:url('/symbols/dir_2.png'); }
+a.dir3 { background-image:url('/symbols/dir_3.png'); }
+a.dir4 { background-image:url('/symbols/dir_4.png'); }
+a.dir5 { background-image:url('/symbols/dir_5.png'); }
+a.dir6 { background-image:url('/symbols/dir_6.png'); }
+a.dir7 { background-image:url('/symbols/dir_7.png'); }
+a.dir8 { background-image:url('/symbols/dir_8.png'); }
+a.dir9 { background-image:url('/symbols/dir_9.png'); }
+a.dir10 { background-image:url('/symbols/dir_10.png'); }
+a.dir11 { background-image:url('/symbols/dir_11.png'); }
+a.dir12 { background-image:url('/symbols/dir_12.png'); }
+a.dir13 { background-image:url('/symbols/dir_13.png'); }
+a.dir14 { background-image:url('/symbols/dir_14.png'); }
+a.dir15 { background-image:url('/symbols/dir_15.png'); }
 
 /* Standard */
 a.label {
@@ -111,16 +111,16 @@ a.label {
 }
 
 a.label0 {
-   background-image:url('symbols/label_corner_ul.png');
+   background-image:url('/symbols/label_corner_ul.png');
 }
 
 a.label1 {
-   background-image:url('symbols/label_corner_ul.png');
+   background-image:url('/symbols/label_corner_ul.png');
 }
 
 /* Mountain */
 a.label2 {
-   background-image:url('symbols/label_summit.png');
+   background-image:url('/symbols/label_summit.png');
    padding-left:13px;
 }
 
@@ -133,31 +133,31 @@ a.label3 {
 
 /* Landmark */
 a.label4 {
-   background-image:url('symbols/label_corner_ul.png');
+   background-image:url('/symbols/label_corner_ul.png');
 }
 
 /* City < 10000 */
 a.label5 {
-   background-image:url('symbols/label_dot_3.png');
+   background-image:url('/symbols/label_dot_3.png');
 }
 /* City < 100000 */
 a.label6 {
-   background-image:url('symbols/label_dot_5.png');
+   background-image:url('/symbols/label_dot_5.png');
    padding-left:7px;
 }
 /* City < 500000 */
 a.label7 {
-   background-image:url('symbols/label_dot_7.png');
+   background-image:url('/symbols/label_dot_7.png');
    padding-left:9px;
 }
 /* City < 1000000 */
 a.label8 {
-   background-image:url('symbols/label_dot_9.png');
+   background-image:url('/symbols/label_dot_9.png');
    padding-left:11px;
 }
 /* City > 1000000 */
 a.label9 {
-   background-image:url('symbols/label_dot_11.png');
+   background-image:url('/symbols/label_dot_11.png');
    padding-left:13px;
 }
 /* Event */
@@ -228,7 +228,7 @@ p.option {
    left:0px; top: 0px; 
    width:100%; height:100%; 
    //background-color: white; 
-   background-image:url('tiles/white80.png');
+   background-image:url('/tiles/white80.png');
    border: none;
    padding: 1em; 
    margin:0px;
@@ -258,7 +258,7 @@ p.option {
    bottom: 0px; 
    width:100%;
    height:20%;
-   background-image:url('tiles/white80.png');
+   background-image:url('/tiles/white80.png');
    display: none;
    text-overflow: ellipsis;
 }
@@ -290,7 +290,7 @@ span.loading {
   position:absolute; 
   width:11px; 
   height:11px; 
-  background-image:url('tiles/red_dot.png'); 
+  background-image:url('/tiles/red_dot.png'); 
   background-repeat: no-repeat;
 }
 div.emarker { 
@@ -298,7 +298,7 @@ div.emarker {
   position:absolute; 
   width:11px; 
   height:11px; 
-  background-image:url('tiles/blue_dot.png'); 
+  background-image:url('/tiles/blue_dot.png'); 
   background-repeat: no-repeat;
   cursor: pointer;
 }
