@@ -125,7 +125,6 @@ while ($row = mysqli_fetch_assoc($res))
     $n = explode( '|', $row["name"], 4 );
     $w = $n[0];
     $h = $n[1];
-    $head = $n[3];
     $items[] = array( 
       "style" => $s,
       "img"  => urlencode($row["title"]),
@@ -164,6 +163,4 @@ header("Cache-Control: public, max-age=3600");
 $result = json_encode( array( "label" => $items, "z" => $z ) );
 echo $result;
 apc_add($key, $result, 24*60*60); // cache 24h
-
-//echo json_encode( array( "label" => $items, "z" => $z, "q" => $query ) );
 ?>
