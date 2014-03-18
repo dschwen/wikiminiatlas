@@ -1075,7 +1075,10 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
                 title: decodeURIComponent( l[i].img )
               } )
               .error(function(){ $(this).parent().hide() } )
-              .attr('src', wmaCommonsThumb( l[i].img, w, l[i].m5) )
+              .attr( { 
+                src: wmaCommonsThumb( l[i].img, w, l[i].m5),
+                srcset: (2*w <= l[i].w) ? (wmaCommonsThumb( l[i].img, w*2, l[i].m5) + ' 2x') : '' 
+              } )
             );
 
           if( l[i].head < 18 ) {
@@ -1875,8 +1878,15 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
     wmaci.span.find('img').remove();
     var img = $('<img/>', { id: 'wma_wmaci_image' } ).appendTo(wmaci.span);
 
-    if( imgw < w ) {
-      img.attr( 'src', wmaCommonsThumb( name, Math.floor(imgw/10)*10, m5) );
+    if( imgw*2 < w ) {
+      img.attr( { 
+        src: wmaCommonsThumb( name, Math.floor(imgw/10)*10, m5),
+        srcset: wmaCommonsThumb( name, Math.floor(imgw/10)*20, m5) + ' 2x' 
+      } )
+    } else if( imgw < w ) {
+      img.attr( { 
+        src: wmaCommonsThumb( name, Math.floor(imgw/10)*10, m5)
+      } )
     } else {
       img.attr( 'src', '//commons.wikimedia.org/wiki/Special:FilePath/' + name );
     }
