@@ -622,19 +622,19 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
     $('#wmaLabelSet').change( function() { wmaLabelSet( this.value ) } );
     $('#wmaSetSizeOverlay').change( function() { wmaSetSizeOverlay( strings.sover[UILang].site, this.value ) } );
    
-    $('#button_plus').bind('mousedown', wmaZoomIn );
-    $('#button_minus').bind('mousedown', wmaZoomOut );
-    $('#button_target').click(wmaMoveToTarget);
-    $('#button_kml').click(wmaToggleKML);
+    $('#button_plus').on('mousedown', wmaZoomIn );
+    $('#button_minus').on('mousedown', wmaZoomOut );
+    $('#button_target').on('click', wmaMoveToTarget);
+    $('#button_kml').on('click', wmaToggleKML);
 
     //document.body.oncontextmenu = function() { return false; };
-    $(document).keydown(wmaKeypress);
-    $(document).bind('contextmenu', function() { return false; } );
+    $(document).on('keydown', wmaKeypress);
+    $(document).on('contextmenu', function() { return false; } );
 
     $('body').bind('dragstart', function() { return false; } )
     $('#wma_map').click( function(e) { 
         // only count clicks if the mouse pointer has not moved between mouse down and mouse up! 
-        var r = wmaMouseCoords(e.originalEvent);
+        var r = wmaMouseCoords(e); //TODO: VERIFY this!!!!
         if( r.x != wma_mdcoord.x || 
             r.y != wma_mdcoord.y ) return false; 
       } );
@@ -742,17 +742,20 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
   }
 
   function wmaNewTile() {
-    var d = $('<div></div>').addClass('wmatile').mousedown(mouseDownWikiMiniAtlasMap).click(function(e){
-          // only count clicks if the mouse pointer has not moved between mouse down and mouse up! 
-          var s, r = wmaMouseCoords(e.originalEvent);
-          if( r.x != wma_mdcoord.x || 
-              r.y != wma_mdcoord.y ||
-              !t.csrender ) return true; 
-          s = wmajt.detectPointer(e,t);
-          if(s) {
-            wmaNotice(s);
-          }
-        })
+    var d = $('<div></div>')
+      .addClass('wmatile')
+      .on('mousedown touchstart', mouseDownWikiMiniAtlasMap)
+      .click(function(e){
+        // only count clicks if the mouse pointer has not moved between mouse down and mouse up! 
+        var s, r = wmaMouseCoords(e);
+        if( r.x != wma_mdcoord.x || 
+            r.y != wma_mdcoord.y ||
+            !t.csrender ) return true; 
+        s = wmajt.detectPointer(e,t);
+        if(s) {
+          wmaNotice(s);
+        }
+      })
       , h = null
       , t = {
       div : d,
@@ -800,9 +803,15 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
     if(wma_map === null)
     {
       $(document)
-        .mousemove(mouseMoveWikiMiniAtlasMap)
-        .mouseup( function(){ wma_dragging = null; } );
-      $('#wma_map').dblclick(wmaDblclick).mousedown(mouseDownWikiMiniAtlasMap);
+        .on('mousemove touchmove', function(e) {
+          mouseMoveWikiMiniAtlasMap(e);
+          e.preventDefault();
+        })
+        .on('mouseup touchend', function(){ wma_dragging = null; } );
+      $('#wma_map')
+        .on('dblclick', wmaDblclick)
+        .on('mousedown touchstart', mouseDownWikiMiniAtlasMap);
+
       wma_map = document.getElementById('wma_map');
 
       wma_nx = Math.floor(wma_width/tsx)+2;
@@ -1044,7 +1053,7 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
           (function(n,w,h,m5){
             a.click( function(e) {
               // this is necessary to allow dragging the map on thumbnails in Firefox
-              var r = wmaMouseCoords(e.originalEvent);
+              var r = wmaMouseCoords(e);
               if( r.x != wma_mdcoord.x || 
                   r.y != wma_mdcoord.y ) {
                  e.preventDefault(); 
@@ -1608,7 +1617,12 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
   }
 
   function wmaMouseCoords(ev) {
-   return {x:ev.pageX, y:ev.pageY};
+    var oe = ev.originalEvent;
+    if ('touches' in oe) {
+      return {x:oe.touches[0].pageX, y:oe.touches[0].pageY};
+    } else {
+      return {x:ev.pageX, y:ev.pageY};
+    }
   }
 
   function lHash(y,x,z) {
