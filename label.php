@@ -2,8 +2,8 @@
 
 // label.php version for labs (acesses the tool-labs db)
 
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
+//error_reporting(E_ALL);
+//ini_set('display_errors', 1);
 
 // Apache .htaccess rules
 $lang=$_GET['l'];

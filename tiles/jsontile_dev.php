@@ -1,10 +1,13 @@
 <?php
+//error_reporting(E_ALL);
+//ini_set('display_errors', 1);
 
 $x = intval($_GET['x']);
 $y = intval($_GET['y']);
 $z = intval($_GET['z']);
 
-$a = $_GET['action'];
+$a = NULL;
+if (array_key_exists('action', $_GET)) $a=$_GET['action'];
 
 $tfile = "jsontile/$z/$y/$x";
 $f = '';
@@ -17,14 +20,13 @@ if( $a!=='query' && $a!=='print' ) {
   if( $a !== 'purge' ) {
     if( file_exists( $tfile.'.gz' ) ) {
       // gzipped tile
-      header("Cache-Control: public, max-age=3600");
-      $f = implode("\n",gzfile($tfile.'.gz'));
+      $f = implode("",gzfile($tfile.'.gz'));
     } else if( file_exists( $tfile ) ) {
       // old unpacked file
       $f = file_get_contents($tfile);
     }
 
-    if( $f!='' ) {
+    if ($f!='') {
       header("Cache-Control: public, max-age=3600");
       // parse json and check tile version ( or timestamp, or check file time)
       $d = json_decode($f);
@@ -39,11 +41,14 @@ if( $a!=='query' && $a!=='print' ) {
 function beginsWith($str, $sub) {
   return (strncmp($str, $sub, strlen($sub)) == 0);
 }
-//$dbconn = pg_connect("host=sql-mapnik dbname=osm_mapnik port=5433");
-$dbconn = pg_connect("host=sql-mapnik dbname=osm_mapnik");
 
 // only reply for high zoomlevels!
 if( $z < 12 ) exit;
+
+//exit; // DB server under maintenance
+
+//$dbconn = pg_connect("host=sql-mapnik dbname=osm_mapnik port=5433");
+$dbconn = pg_connect("host=sql-mapnik dbname=osm_mapnik user=dschwen");
 
 // size of zoom level in tiles
 $mx = 3 * ( 2 << $z );

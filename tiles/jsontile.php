@@ -6,7 +6,8 @@ $x = intval($_GET['x']);
 $y = intval($_GET['y']);
 $z = intval($_GET['z']);
 
-$a = $_GET['action'];
+$a = NULL;
+if (array_key_exists('action', $_GET)) $a=$_GET['action'];
 
 $tfile = "jsontile/$z/$y/$x";
 $f = '';
