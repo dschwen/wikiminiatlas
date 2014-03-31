@@ -1,1 +1,0 @@
-wikiminiatlas_extern.php

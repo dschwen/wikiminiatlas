@@ -14,6 +14,12 @@ if( $chars == 0 ) $chars = 500;
 $title = str_replace( ' ', '_', $title );
 $key = $lang.':'.$title;
 
+// APC
+if ($html = apc_fetch($key)) {
+  echo $html;
+  exit;
+}
+
 // check database
 $ts_pw = posix_getpwuid(posix_getuid()); // TODO: cache this!
 $ts_mycnf = parse_ini_file($ts_pw['dir'] . "/user.my.cnf");
@@ -28,6 +34,8 @@ if( $num > 0 )
   $row = mysqli_fetch_row( $res );
   $html = $row[0];
   echo $html;
+
+  apc_add($key, $html, 24*60*60); // cache 24h
 }
 else
 {
@@ -86,13 +94,14 @@ else
 
   $html = $out->saveHTML();
   echo $html;
+  apc_add($key, $html, 24*60*60); // cache 24h
 
-  if( !$fromcache ) {
+  //if( !$fromcache ) {
     $query = 'delete from synopsis where page_title="'.mysqli_real_escape_string($db, $key).'"';
     $res = mysqli_query($db, $query);
     $query = 'insert into synopsis (page_title,synopsis) values ("'.mysqli_real_escape_string($db, $key).'","'.mysqli_real_escape_string($db, $html).'")';
     $res = mysqli_query($db, $query);
-  }
+  //}
 }
 
 ?>
