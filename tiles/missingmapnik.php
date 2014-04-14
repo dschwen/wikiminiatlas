@@ -111,6 +111,11 @@ if( substr($url,0,strlen($base)) == $base )
   //else if( preg_match('{^merc/vmap0/([0-9]+)\/([0-9]+)\/([0-9]+)\.png$}',substr($url,strlen($base)), $matches) )
   else  if( preg_match('{^sat/([0-9]+)\/([0-9]+)\/([0-9]+)_([0-9]+)\.png}',substr($url,strlen($base)), $matches) )
   {
+     // sat updates are deactivated for now, as the onearth server went down :-(
+     header( 'Cache-Control: no-cache' );
+     header( "Location: /tiles/dummy.png" );
+     exit;
+
    $z = intval($matches[1]);
    $y = intval($matches[2]);
    $y2 = intval($matches[3]);

@@ -769,7 +769,7 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
           h = setTimeout( function() {
             var s = t.img.attr('src');
             t.img.attr("src", s.replace(/\?.*/,'') + "?" + Math.random() );
-          }, 5*1000 ); // TODO: reduce when OSM db is local
+          }, 1*1000 );
         })
         .appendTo(d),
       can : $('<canvas></canvas>').appendTo(d),
