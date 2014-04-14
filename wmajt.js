@@ -11,9 +11,8 @@ var wmajt = (function(){
     , dash = null
     , style = {
       Polygon: [
-        ['natural',{ocean:1}, // actually it's land!
-          [ { fillStyle: "rgb(250,250,208)" },
-            { lineWidth: 1, strokeStyle: "rgb(125,125,104)"} ]
+        ['natural',{land_polygons:1},
+          [ { fillStyle: "rgb(250,250,208)" } ]
         ],
         ['railway',{platform:1},
           [ { fillStyle: "rgb(220,220,220)" } ]
@@ -123,6 +122,9 @@ var wmajt = (function(){
         ]*/
       ],
       LineString: [
+        ['natural',{coastlines:1},
+          [ { lineWidth: 1, strokeStyle: "rgb(125,125,104)"} ]
+        ],
         ['waterway',{canal:1},
           [ { lineCap: 'butt', lineWidth: 3, strokeStyle: "rgb(158,199,243)" } ]
         ],
@@ -714,9 +716,9 @@ var wmajt = (function(){
     } 
 
     // request data
-    tile.debug.html('tiles/jsontile.php?x='+x+'&y='+y+'&z='+z);
+    tile.debug.html('/tiles/jsontile.php?x='+x+'&y='+y+'&z='+z);
     $.ajax({
-      url: 'tiles/jsontile.php?x='+x+'&y='+y+'&z='+z+(purge===true?'&action=purge':''),
+      url: '/tiles/jsontile.php?x='+x+'&y='+y+'&z='+z+(purge===true?'&action=purge':''),
       dataType: 'json',
       success: gotData,
       context: tile
