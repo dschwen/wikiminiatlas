@@ -48,7 +48,7 @@ if( $z < 12 ) exit;
 //exit; // DB server under maintenance
 
 //$dbconn = pg_connect("host=sql-mapnik dbname=osm_mapnik port=5433");
-$dbconn = pg_connect("host=sql-mapnik dbname=osm_mapnik user=dschwen");
+$dbconn = pg_connect("host=sql-mapnik dbname=gis user=osm");
 
 // size of zoom level in tiles
 $mx = 3 * ( 2 << $z );
@@ -96,14 +96,14 @@ $intersect = "
           )";
 //transform( ST_GeomFromText('POLYGON(($llx $ury, $urx $ury, $urx $lly, $llx $lly, $llx $ury))', 4326 ), 900913 )
 $table = array( 
-  array('planet_polygon','building IS NULL AND  not exist(hstore(tags),\'building:part\') AND',$intersect), 
-  array('planet_line','building IS NULL AND  not exist(hstore(tags),\'building:part\') AND',$intersect)
+  array('planet_osm_polygon','building IS NULL AND  not exist(hstore(tags),\'building:part\') AND',$intersect), 
+  array('planet_osm_line','building IS NULL AND  not exist(hstore(tags),\'building:part\') AND',$intersect)
 );
 
 // also return buildings for large zoom levels
 if( $z>=14 ) {
-  $table[] = array('planet_polygon','(building IS NOT NULL OR exist(hstore(tags),\'building:part\')) AND','way');
-  $table[] = array('planet_line','(building IS NOT NULL OR exist(hstore(tags),\'building:part\')) AND','way');
+  $table[] = array('planet_osm_polygon','(building IS NOT NULL OR exist(hstore(tags),\'building:part\')) AND','way');
+  $table[] = array('planet_osm_line','(building IS NOT NULL OR exist(hstore(tags),\'building:part\')) AND','way');
 }
 
 $geo = array();
@@ -181,17 +181,24 @@ for( $i=0; $i<count($table); $i++ ) {
 
 if( $a === 'print' ) exit;
 
-// get ocean data
+// make sure the longitude is between -180 and 180
+if ($urx>180.0) {
+  $urx -= 360.0;
+  $llx -= 360.0;
+}
+
+// get landmass polygons
 $query = "
   select 
-    ST_AsGeoJSON( transform( 
+    ST_AsGeoJSON( 
       ST_Intersection( 
-        the_geom,
-        SetSRID('BOX3D($mllx $mlly, $murx $mury)'::box3d,900913)
-      ) ,4326), 9 )
-    from coastlines
+        SetSRID(the_geom, 4326),
+        SetSRID('BOX3D($llx $lly, $urx $ury)'::box3d, 4326)
+      )
+    , 9 )
+    from land_polygons
   where
-    the_geom && SetSRID('BOX3D($mllx $mlly, $murx $mury)'::box3d,900913);
+    the_geom && SetSRID('BOX3D($llx $lly, $urx $ury)'::box3d,4326);
 ";
 //    ST_IsValid(the_geom) AND the_geom && SetSRID('BOX3D($mllx $mlly, $murx $mury)'::box3d,900913);
 //transform( ST_GeomFromText('POLYGON(($llx $ury, $urx $ury, $urx $lly, $llx $lly, $llx $ury))', 4326 ), 900913 )
@@ -218,7 +225,7 @@ while ($row = pg_fetch_row($result)) {
   $geo[] = array( "geo" => json_decode($row[0]), "tags" => $type );
 }
 
-//$s = json_encode( array( "data" => $geo, "x" => $x, "y" => $y, "z" => $z, "f" => $tagfound, "v" => 2, "idx" => $idx, "bbox" => "$mllx $mlly, $murx $mury" ) );
+//$s = json_encode( array( "data" => $geo, "x" => $x, "y" => $y, "z" => $z, "f" => $tagfound, "v" => 2, "idx" => $idx, "mbbox" => "$mllx $mlly, $murx $mury", "bbox" => "$llx $lly, $urx $ury" ) );
 $s = json_encode( array( "data" => $geo, "x" => $x, "y" => $y, "z" => $z, "f" => $tagfound, "v" => 5, "idx" => $idx, "t" => time() ) );
 
 // do not cache purge action
