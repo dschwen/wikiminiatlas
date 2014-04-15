@@ -322,9 +322,9 @@ function wikiminiatlasInstall( wma_widget, url_params ) {
     }
 
     // GeoIP request (sets global variable geoip)
-    $.getScript( '/~para/geoip.fcgi', function() {
+    /*$.getScript( '/~para/geoip.fcgi', function() {
       // modify home button
-    } );
+    } );*/
 
     // setup the globe
     wmaGlobeLoadTiles = (function(){
@@ -506,7 +506,7 @@ function wikiminiatlasInstall( wma_widget, url_params ) {
     }
     WikiMiniAtlasHTML +=
      '</select></p>' +
-     '<a href="//wiki.toolserver.org/" target="_top"><img src="//toolserver.org/images/wikimedia-toolserver-button.png" border="0"></a>' +
+     '<a href="//wma.wmflabs.org/" target="_top"><img src="//upload.wikimedia.org/wikipedia/commons/4/46/Powered_by_labs_button.png" border="0"></a>' +
      '</div>';
 
     wma_widget
@@ -769,7 +769,7 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
           h = setTimeout( function() {
             var s = t.img.attr('src');
             t.img.attr("src", s.replace(/\?.*/,'') + "?" + Math.random() );
-          }, 5*1000 ); // TODO: reduce when OSM db is local
+          }, 1*1000 );
         })
         .appendTo(d),
       can : $('<canvas></canvas>').appendTo(d),
