@@ -1,6 +1,7 @@
 <?php
 //error_reporting(E_ALL);
 //ini_set('display_errors', 1);
+error_reporting(E_ERROR | E_PARSE);
 
 $x = intval($_GET['x']);
 $y = intval($_GET['y']);
@@ -12,7 +13,7 @@ if (array_key_exists('action', $_GET)) $a=$_GET['action'];
 $tfile = "jsontile/$z/$y/$x";
 $f = '';
 ob_start("ob_gzhandler");
-if( $a!=='query' && $a!=='print' ) {
+if ($a!=='query' && $a!=='print') {
   // set content type
   header( 'Content-type: application/json' );
 
@@ -43,7 +44,7 @@ function beginsWith($str, $sub) {
 }
 
 // only reply for high zoomlevels!
-if( $z < 12 ) exit;
+if ($z<12) exit;
 
 //exit; // DB server under maintenance
 
@@ -122,7 +123,7 @@ for( $i=0; $i<count($table); $i++ ) {
   ";
 
   // debug
-  if( $a === 'query' ) {
+  if ($a === 'query') {
     echo $query,"\n\n";
   }
 
@@ -147,7 +148,13 @@ for( $i=0; $i<count($table); $i++ ) {
       if( $row[$j+2] !== null ) {
         //$type[$table[$i][3][$j]]=$row[$j+1];
         $type[$tags[$j]]=$row[$j+2];
-        $tagfound[$tags[$j]]++;
+
+        if (array_key_exists($tags[$j], $tagfound)) {
+          $tagfound[$tags[$j]]++;
+        } else {
+          $tagfound[$tags[$j]] = 1;
+        }
+        
         // server side index
         if( array_key_exists($tags[$j], $idx) ) {
           $idx[$tags[$j]][] = count($geo);
@@ -164,7 +171,13 @@ for( $i=0; $i<count($table); $i++ ) {
         //if( beginsWith($j,'name:') ||  beginsWith($j,'tiger:')  ||  beginsWith($j,'nist:') ) continue;   
         if( beginsWith($j,'tiger:')  ||  beginsWith($j,'nist:') ) continue;   
         $type[$j]=$val;
-        $tagfound[$j]++;
+
+        if (array_key_exists($j, $tagfound)) {
+          $tagfound[$j]++;
+        } else {
+          $tagfound[$j] = 1;
+        }
+
         // server side index
         if( array_key_exists($j, $idx) ) {
           $idx[$j][] = count($geo);
@@ -214,7 +227,12 @@ for ($i=0; $i<2; $i++) {
   // get result, set tag natural=>land_polygons or coastlines
   $type = array( "natural" => $table[$i] );
   while ($row = pg_fetch_row($result)) {
-    $tagfound['natural']++;
+
+    if (array_key_exists('natural', $tagfound)) {
+      $tagfound['natural']++;
+    } else {
+      $tagfound['natural'] = 1;
+    }
 
     // server side index
     if( array_key_exists('natural', $idx) ) {
