@@ -1991,6 +1991,17 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
       }
       if (window.parent) { window.parent.postMessage(JSON.stringify(gci), e.origin); }
     }
+
+    // move the view port to new target coordinates
+    if ('moveto' in d) {
+      var t = d.moveto;
+      if ('lat' in t && 'lon' in t) {
+        wmaMoveToCoord( t.lat, t.lon );
+      }
+      if ('zoom' in t) {
+        wmaSetZoom(t.zoom);
+      }
+    }
   }
 
   // reproject and insert the WIWOSM geoJSON data
