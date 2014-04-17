@@ -4,7 +4,7 @@
   <style type="text/css">
     @media (min-width: 842px) {
       #content { 
-        width: 800px; height: 100%;
+        width: 800px; /*height: 100%;*/
         position: absolute;
         left: 50%;
         margin-left: -420px; 
@@ -31,12 +31,25 @@
   </style>
   <script type="text/javascript" src="min/jquery.min.js"></script>
   <script>
+    var poi = [
+      { lat: 41.88333333333333, lon: 12.4833333333, title: "Rome", zoom: 7},
+      { lat: 41.881944, lon: -87.627778, title: "Chicago", zoom: 9}
+    ], n = 1, ps = null;
+
+    function cycle() {
+      ps.postMessage(JSON.stringify({moveto: poi[n]}), '*');
+      n = (n+1) % poi.length;
+      setTimeout(cycle, 10000);
+    }
+
     function wmaMessageHub(e) {
       e = e.originalEvent;
-      if( e.data == 'request' ) {
-        e.source.postMessage('{"coords":[{"lat":41.88333333333333,"lon":12.483333333333333,"title":"Rome_(stad)"},{"lat":42.05,"lon":12.616666666666667,"title":"Monterotondo"},{"lat":42.02388888888889,"lon":12.401388888888889,"title":"Veii"},{"lat":42.02388888888889,"lon":12.401388888888889,"title":"Veii"},{"lat":42.02388888888889,"lon":12.401388888888889,"title":"Veii"},{"lat":41.7111111111,"lon":12.3469444444,"title":"Laurentum"}]}','*');
+      if (e.data == 'request') {
+        e.source.postMessage(JSON.stringify( {coords: poi} ), '*');
+        ps = e.source;
+        setTimeout(cycle, 10000);
       }
-      if( e.data == 'kml' ) {
+      if (e.data == 'kml') {
         e.source.postMessage('1,1','*');
       }
     }

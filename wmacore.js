@@ -1995,11 +1995,12 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
     // move the view port to new target coordinates
     if ('moveto' in d) {
       var t = d.moveto;
-      if ('lat' in t && 'lon' in t) {
-        wmaMoveToCoord( t.lat, t.lon );
-      }
       if ('zoom' in t) {
         wmaSetZoom(t.zoom);
+      }
+      if ('lat' in t && 'lon' in t) {
+        wmaMoveToCoord(t.lat, t.lon);
+        wmaGlobe && wmaGlobe.setLatLon(t.lat, t.lon);
       }
     }
   }
