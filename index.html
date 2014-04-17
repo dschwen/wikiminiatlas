@@ -1,0 +1,58 @@
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <style type="text/css">
+    @media (min-width: 842px) {
+      #content { 
+        width: 800px; height: 100%;
+        position: absolute;
+        left: 50%;
+        margin-left: -420px; 
+        border: 1px solid gray;
+        border-top: none;
+      }
+      body {
+        background-color: #eeeeee;
+      }
+    }
+    #content { 
+      padding: 20px;
+      background-color: white;
+    }
+    body {
+      margin: 0;
+    }
+    h1 {
+      font-family: sans-serif;
+    }
+    p {
+      margin-top: 2em;
+    }
+  </style>
+  <script type="text/javascript" src="min/jquery.min.js"></script>
+  <script>
+    function wmaMessageHub(e) {
+      e = e.originalEvent;
+      if( e.data == 'request' ) {
+        e.source.postMessage('{"coords":[{"lat":41.88333333333333,"lon":12.483333333333333,"title":"Rome_(stad)"},{"lat":42.05,"lon":12.616666666666667,"title":"Monterotondo"},{"lat":42.02388888888889,"lon":12.401388888888889,"title":"Veii"},{"lat":42.02388888888889,"lon":12.401388888888889,"title":"Veii"},{"lat":42.02388888888889,"lon":12.401388888888889,"title":"Veii"},{"lat":41.7111111111,"lon":12.3469444444,"title":"Laurentum"}]}','*');
+      }
+      if( e.data == 'kml' ) {
+        e.source.postMessage('1,1','*');
+      }
+    }
+    $(window).bind('message',wmaMessageHub);
+  </script>
+</head>
+<body>
+<div id="content">
+  <h1>WikiMiniAtlas</h1>
+  <!--<iframe scrolling="no" frameborder="0" width="800" height="600" src="iframe_dev.html?40.7833_-73.966_800_600_en_13_en" style="width:800px; height:600px; border: 1px solid gray; padding: 0px; margin: 0px; resize: both">-->
+  <iframe scrolling="no" frameborder="0" width="800" height="600" src="iframe.html?wma=41.881944_-87.627778_700_500_en_15_en&globe=Earth&lang=en&page=Chicago" style="width:800px; height:600px; border: 1px solid gray; padding: 0px; margin: 0px; resize: both">
+You need a browser that supports iframes
+  </iframe>
+  
+  <p><b>WikiMiniAtlas</b> is a JavaScript plugin to display a draggable, zoomable, and clickable worldmap (as well as Moon, Mars, Venus, Mercury, Io and Titan imagery) in geocoded Wikipedia articles. The map contains links to all other geocoded articles in Wikipedia and can be magnified down to streetlevel. 3D building models are displayed in modern browsers.</p>
+  <a href="https://meta.wikimedia.org/wiki/WikiMiniAtlas">More...</a>
+</div>
+</body>
+</html>
