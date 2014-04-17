@@ -8,10 +8,10 @@ $title = $_GET['t'];
 $lang  = $_GET['l'];
 if( $lang =='' ) $lang = 'en';
 
-$chars = intval($_GET['c']);
-if( $chars == 0 ) $chars = 500;
+$chars = 500;
+if (array_key_exists('c', $_GET)) $chars =intval($_GET['c']);
 
-$title = str_replace( ' ', '_', $title );
+$title = str_replace(' ', '_', $title);
 $key = $lang.':'.$title;
 
 // APC
@@ -29,16 +29,13 @@ $res = mysqli_query($db, $query);
 $num = mysqli_num_rows( $res );
 
 // if a result is found, use it, if not generate a new synopsis
-if( $num > 0 )
-{
+if ($num > 0) {
   $row = mysqli_fetch_row( $res );
   $html = $row[0];
   echo $html;
 
   apc_add($key, $html, 24*60*60); // cache 24h
-}
-else
-{
+} else {
   // obtain page text
   $opts = array(
     'http' => array(
@@ -83,6 +80,7 @@ else
   // remove #-links, set target top on regular links
   $nodearr=array();
   $nodelist = $out->getElementsByTagName('a');
+  
   foreach( $nodelist as $node ) {
     if( substr($node->attributes->getNamedItem('href')->value,0,1) == '#' ) {
       $nodearr[] = $node;
@@ -90,18 +88,19 @@ else
       $node->setAttribute("target", "_top");
     }*/
   }
-  foreach( $nodearr as $node ) { $node->parentNode->removeChild($node); }
+  
+  foreach ($nodearr as $node) { 
+    $node->parentNode->removeChild($node); 
+  }
 
   $html = $out->saveHTML();
   echo $html;
   apc_add($key, $html, 24*60*60); // cache 24h
 
-  //if( !$fromcache ) {
-    $query = 'delete from synopsis where page_title="'.mysqli_real_escape_string($db, $key).'"';
-    $res = mysqli_query($db, $query);
-    $query = 'insert into synopsis (page_title,synopsis) values ("'.mysqli_real_escape_string($db, $key).'","'.mysqli_real_escape_string($db, $html).'")';
-    $res = mysqli_query($db, $query);
-  //}
+  $query = 'delete from synopsis where page_title="'.mysqli_real_escape_string($db, $key).'"';
+  $res = mysqli_query($db, $query);
+  $query = 'insert into synopsis (page_title,synopsis) values ("'.mysqli_real_escape_string($db, $key).'","'.mysqli_real_escape_string($db, $html).'")';
+  $res = mysqli_query($db, $query);
 }
 
 ?>
