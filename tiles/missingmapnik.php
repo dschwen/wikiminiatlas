@@ -22,6 +22,7 @@
 
 //error_reporting(E_ALL);
 //ini_set('display_errors', 1);
+error_reporting(E_ERROR | E_PARSE);
 
 $base = "/tiles/mapnik/";
 $url = $_SERVER["REQUEST_URI"]; // apache
