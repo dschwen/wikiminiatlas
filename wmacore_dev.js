@@ -315,7 +315,7 @@ function wikiminiatlasInstall( wma_widget, url_params ) {
     // launch the WIWOSM request (if a page was passed)
     if( page && hasCanvas ) {
       $.ajax({
-        url: '//toolserver.org/~master/osmjson/getGeoJSON.php?lang='+lang+'&article='+page,
+        url: '//tools.wmflabs.org/wiwosm/osmjson/getGeoJSON.php?lang='+lang+'&article='+page,
         dataType: 'json',
         success: processWIWOSM
       });
@@ -1546,7 +1546,7 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
 
   function wmaLoadSizeOverlay(lang,page) {
     $.ajax({
-      url: '//toolserver.org/~master/osmjson/getGeoJSON.php?lang='+lang+'&article='+page,
+      url: '//tools.wmflabs.org/wiwosm/osmjson/getGeoJSON.php?lang='+lang+'&article='+page,
       dataType: 'json',
       success: processSizeOverlay
     });
