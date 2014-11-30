@@ -49,7 +49,7 @@ if ($z<12) exit;
 //exit; // DB server under maintenance
 
 //$dbconn = pg_connect("host=sql-mapnik dbname=osm_mapnik port=5433");
-$dbconn = pg_connect("host=sql-mapnik dbname=gis user=osm");
+$dbconn = pg_connect("host=osmdb.eqiad.wmnet dbname=gis user=osm");
 
 // size of zoom level in tiles
 $mx = 3 * ( 2 << $z );
