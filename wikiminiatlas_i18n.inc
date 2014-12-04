@@ -1,3 +1,31 @@
+var wikiminiatlas_sites = {
+  commons:'Wikimedia Commons',
+  ar:'العربية',
+  ca:'Català',
+  de:'Deutsch',
+  el:'Ελληνικά',
+  en:'English',
+  eo:'Esperanto',
+  es:'Español',
+  eu:'Euskara',
+  fa:'فارسی',
+  fr:'Français',
+  he:'עברית',
+  ja:'日本語',
+  is:'Íslenska',
+  it:'Italiano',
+  ko:'한국어',
+  hu:'Magyar',
+  lt:'Lietuvių',
+  ml:'മലയാളം',
+  nl:'Nederlands',
+  no:'Norsk (bokmål)',
+  pl:'Polski',
+  pt:'Português',
+  ru:'Русский',
+  sv:'Svenska'
+};
+
 var strings =
 {
  mapTitan: {
