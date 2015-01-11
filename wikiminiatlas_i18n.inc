@@ -1690,7 +1690,7 @@ var strings =
   sl:'Dnevnomodra',
   uk:'Щоденна водна',
   vi:'Xanh biển',
-  vo:'Vat delik'
+  vo:'Vat delik',
   zh:'每日Auua',
   'zh-hant':'每日Auua',
   'zh-hk':'每日Auua',
@@ -1836,7 +1836,7 @@ var strings =
   sl:'modra',
   uk:'блакитний',
   vi:'xanh',
-  vo:'blövik'
+  vo:'blövik',
   zh:'藍色'
  },
  red: {
@@ -2003,7 +2003,7 @@ var strings =
   ms:'Tindihan togol',
   sco:'Toggle owerlay',
   sl:'Vklop prekrivnega načina',
-  uk:'Перемкнути контур'
+  uk:'Перемкнути контур',
   zh:'啟用重疊顯示',
   'zh-hant':'啟用重疊顯示',
   'zh-hk':'啟用重疊顯示',
