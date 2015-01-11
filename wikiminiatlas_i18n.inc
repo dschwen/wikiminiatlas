@@ -1,30 +1,4 @@
-var wikiminiatlas_sites = {
- commons:'Wikimedia Commons',
- ar:'العربية',
- ca:'Català',
- de:'Deutsch',
- el:'Ελληνικά',
- en:'English',
- eo:'Esperanto',
- es:'Español',
- eu:'Euskara',
- fa:'فارسی',
- fr:'Français',
- he:'עברית',
- ja:'日本語',
- is:'Íslenska',
- it:'Italiano',
- ko:'한국어',
- hu:'Magyar',
- lt:'Lietuvių',
- ml:'മലയാളം',
- nl:'Nederlands',
- no:'Norsk (bokmål)',
- pl:'Polski',
- pt:'Português',
- ru:'Русский',
- sv:'Svenska'
-};
+var wikiminiatlas_sites = { "commons":"Wikimedia Commons","af":"Afrikaans","als":"Alemannisch","ar":"العربية","ast":"Asturianu","be":"Беларуская","bg":"Български","ca":"Català","ceb":"Cebuano","cs":"Čeština","da":"Dansk","el":"Ελληνικά","en":"English","eo":"Esperanto","es":"Español","et":"Eesti","eu":"Euskara","fa":"فارسی","fi":"Suomi","fr":"Français","fy":"Frysk","ga":"Gaeilge","gl":"Galego","he":"עברית","hi":"हिन्दी","hr":"Hrvatski","ht":"Kreyòl ayisyen","hu":"Magyar","hy":"Հայերեն","id":"Bahasa Indonesia","ilo":"Ilokano","it":"Italiano","ja":"日本語","ka":"ქართული","kk":"Қазақша","ko":"한국어","ku":"Kurdî","la":"Latina","lb":"Lëtzebuergesch","lt":"Lietuvių","lv":"Latviešu","mk":"Македонски","ml":"മലയാളം","ms":"Bahasa Melayu","nds":"Plattdüütsch","nl":"Nederlands","nn":"Norsk nynorsk","no":"Norsk bokmål","oc":"Occitan","os":"Ирон","pam":"Kapampangan","pl":"Polski","pms":"Piemontèis","pt":"Português","ro":"Română","ru":"Русский","sco":"Scots","sh":"Srpskohrvatski / српскохрватски","simple":"Simple English","sk":"Slovenčina","sl":"Slovenščina","sr":"Српски / srpski","sv":"Svenska","sw":"Kiswahili","ta":"தமிழ்","te":"తెలుగు","th":"ไทย","tl":"Tagalog","tr":"Türkçe","uk":"Українська","uz":"Oʻzbekcha","vec":"Vèneto","vi":"Tiếng Việt","vo":"Volapük","war":"Winaray","zh":"中文" };
 
 var strings =
 {
