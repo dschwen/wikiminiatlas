@@ -1,4 +1,4 @@
-<? 
+<?php 
 ob_start("ob_gzhandler"); 
 header('Content-type: text/javascript');
 ?>
@@ -20,7 +20,7 @@ header('Content-type: text/javascript');
  ************************************************************************/
 
 // include files
-<? 
+<?php 
 require( 'min/jquery.min.js' );
 echo "\n";
 require( 'min/json2.min.js' ); 

@@ -10,7 +10,7 @@ var wmaNews = []; // array of news item actions (needs to be global)
 // global settings
 var wma_imgbase = 'tiles/';
 var wma_database = 'label.php';
-var wma_tilebase = '.www.toolserver.org/~dschwen/wma/tiles/';
+var wma_tilebase = '.wma.wmflabs.org/tiles/';
 var wma_maxlabel = 13;
 var i, wma_zoomsize = [3];
 for(i=1; i<40; i++) { wma_zoomsize[i]=2*wma_zoomsize[i-1]; }
@@ -39,10 +39,10 @@ var wma_tilesets = [
      }
    } else {
      if( z >= 7 ) {
-      return '//' + ( (x+y) % 16 ) + wma_tilebase + 'mapnik/' +
+      return '//' + ( (x+y) % 8 ) + wma_tilebase + 'mapnik/' +
              z + '/' + y + '/tile_' + y + '_' + ( x % ( wma_zoomsize[z] * 2 ) ) + '.png';
      } else {
-      return '//' + ( (x+y) % 16 ) + wma_tilebase + 'mapnik/' +
+      return '//' + ( (x+y) % 8 ) + wma_tilebase + 'mapnik/' +
              z + '/tile_' + y + '_' + ( x % ( wma_zoomsize[z] * 2 ) ) + '.png';
      }
    }
@@ -296,6 +296,7 @@ function wikiminiatlasInstall( wma_widget, url_params ) {
   var wmaGlobeLoadTiles = null;
 
   var hasCanvas = "HTMLCanvasElement" in window;
+  var wma_dpr = ('devicePixelRatio' in window) ? window.devicePixelRatio : 1;
 
   var labelcaption, noticehandler = null;
 
@@ -314,16 +315,16 @@ function wikiminiatlasInstall( wma_widget, url_params ) {
     // launch the WIWOSM request (if a page was passed)
     if( page && hasCanvas ) {
       $.ajax({
-        url: '//toolserver.org/~master/osmjson/getGeoJSON.php?lang='+lang+'&article='+page,
+        url: '//tools.wmflabs.org/wiwosm/osmjson/getGeoJSON.php?lang='+lang+'&article='+page,
         dataType: 'json',
         success: processWIWOSM
       });
     }
 
     // GeoIP request (sets global variable geoip)
-    $.getScript( '/~para/geoip.fcgi', function() {
+    /*$.getScript( '/~para/geoip.fcgi', function() {
       // modify home button
-    } );
+    } );*/
 
     // setup the globe
     wmaGlobeLoadTiles = (function(){
@@ -505,7 +506,7 @@ function wikiminiatlasInstall( wma_widget, url_params ) {
     }
     WikiMiniAtlasHTML +=
      '</select></p>' +
-     '<a href="//wiki.toolserver.org/" target="_top"><img src="//toolserver.org/images/wikimedia-toolserver-button.png" border="0"></a>' +
+     '<a href="//wma.wmflabs.org/" target="_top"><img src="//upload.wikimedia.org/wikipedia/commons/4/46/Powered_by_labs_button.png" border="0"></a>' +
      '</div>';
 
     wma_widget
@@ -621,19 +622,19 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
     $('#wmaLabelSet').change( function() { wmaLabelSet( this.value ) } );
     $('#wmaSetSizeOverlay').change( function() { wmaSetSizeOverlay( strings.sover[UILang].site, this.value ) } );
    
-    $('#button_plus').bind('mousedown', wmaZoomIn );
-    $('#button_minus').bind('mousedown', wmaZoomOut );
-    $('#button_target').click(wmaMoveToTarget);
-    $('#button_kml').click(wmaToggleKML);
+    $('#button_plus').on('mousedown', wmaZoomIn );
+    $('#button_minus').on('mousedown', wmaZoomOut );
+    $('#button_target').on('click', wmaMoveToTarget);
+    $('#button_kml').on('click', wmaToggleKML);
 
     //document.body.oncontextmenu = function() { return false; };
-    $(document).keydown(wmaKeypress);
-    $(document).bind('contextmenu', function() { return false; } );
+    $(document).on('keydown', wmaKeypress);
+    $(document).on('contextmenu', function() { return false; } );
 
     $('body').bind('dragstart', function() { return false; } )
     $('#wma_map').click( function(e) { 
         // only count clicks if the mouse pointer has not moved between mouse down and mouse up! 
-        var r = wmaMouseCoords(e.originalEvent);
+        var r = wmaMouseCoords(e); //TODO: VERIFY this!!!!
         if( r.x != wma_mdcoord.x || 
             r.y != wma_mdcoord.y ) return false; 
       } );
@@ -642,9 +643,10 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
 
     // 3d building outlines
     bldg3d = $('<canvas class="wmakml"></canvas>')
-        .attr( { width: wma_width, height: wma_height } )
-        .css( { zIndex:19, opacity: 0.75 } )
+        .attr( { width: wma_width*wma_dpr, height: wma_height*wma_dpr } )
+        .css( { zIndex:19, opacity: 0.75, width: wma_width+'px', height: wma_height+'px' } )
         .appendTo( $(wma_map) );
+
     if( hasCanvas ) { 
       // try to use webgl
       try {
@@ -655,14 +657,15 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
         // replace canvas
         bldg3d.remove();
         bldg3d = $('<canvas class="wmakml"></canvas>')
-            .attr( { width: wma_width, height: wma_height } )
-            .css( { zIndex:19, opacity: 0.75 } )
+            .attr( { width: wma_width*wma_dpr, height: wma_height*wma_dpr } )
+            .css( { zIndex:19, opacity: 0.75, width: wma_width+'px', height: wma_height+'px' } )
             .appendTo( $(wma_map) );
       }
 
       // wireframe as fallback
       if( !bldg3dc || update3dBuildings===false ) {
         bldg3dc = bldg3d[0].getContext('2d'); 
+        bldg3dc.scale(wma_dpr,wma_dpr);
         update3dBuildings = update3dBuildings_canvas;
       }
     }
@@ -684,7 +687,7 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
         if( e.target.href && synopsis_filter.test(e.target.href) ) {
           l = RegExp.$1;
           t = RegExp.$2;
-          $('#synopsistext').load( '/~dschwen/synopsis/?l=' + l + '&t=' + t, function() { 
+          $('#synopsistext').load( '/summary/?l=' + l + '&t=' + t, function() { 
             $('#synopsistext')
               .css('direction',isRTL(l)?'rtl':'ltr')
               .find('a').attr('target','_top');
@@ -739,17 +742,20 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
   }
 
   function wmaNewTile() {
-    var d = $('<div></div>').addClass('wmatile').mousedown(mouseDownWikiMiniAtlasMap).click(function(e){
-          // only count clicks if the mouse pointer has not moved between mouse down and mouse up! 
-          var s, r = wmaMouseCoords(e.originalEvent);
-          if( r.x != wma_mdcoord.x || 
-              r.y != wma_mdcoord.y ||
-              !t.csrender ) return true; 
-          s = wmajt.detectPointer(e,t);
-          if(s) {
-            wmaNotice(s);
-          }
-        })
+    var d = $('<div></div>')
+      .addClass('wmatile')
+      .on('mousedown touchstart', mouseDownWikiMiniAtlasMap)
+      .click(function(e){
+        // only count clicks if the mouse pointer has not moved between mouse down and mouse up! 
+        var s, r = wmaMouseCoords(e);
+        if( r.x != wma_mdcoord.x || 
+            r.y != wma_mdcoord.y ||
+            !t.csrender ) return true; 
+        s = wmajt.detectPointer(e,t);
+        if(s) {
+          wmaNotice(s);
+        }
+      })
       , h = null
       , t = {
       div : d,
@@ -761,8 +767,9 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
           // tile is probably not ready yet, try again in one second
           // TODO: add max tries
           h = setTimeout( function() {
-            t.img.attr("src",t.img.attr('src') + "?" + Math.random() );
-          }, 1000 );
+            var s = t.img.attr('src');
+            t.img.attr("src", s.replace(/\?.*/,'') + "?" + Math.random() );
+          }, 1*1000 );
         })
         .appendTo(d),
       can : $('<canvas></canvas>').appendTo(d),
@@ -776,8 +783,15 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
       xhr : null
     }
     if( hasCanvas ) {
-      t.can.attr({width:128,height:128});
-      t.ctx = t.can[0].getContext('2d');
+      if (wma_dpr>1) {
+        t.can.attr({width:128*wma_dpr,height:128*wma_dpr})
+             .css({width: '128px',height: '128px'});
+        t.ctx = t.can[0].getContext('2d');
+	t.ctx.scale(wma_dpr,wma_dpr);
+      } else {
+        t.can.attr({width:128,height:128});
+        t.ctx = t.can[0].getContext('2d');
+      }
     }
     $(wma_map).append(t.div);
     return t;
@@ -789,9 +803,15 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
     if(wma_map === null)
     {
       $(document)
-        .mousemove(mouseMoveWikiMiniAtlasMap)
-        .mouseup( function(){ wma_dragging = null; } );
-      $('#wma_map').dblclick(wmaDblclick).mousedown(mouseDownWikiMiniAtlasMap);
+        .on('mousemove touchmove', function(e) {
+          mouseMoveWikiMiniAtlasMap(e);
+          e.preventDefault();
+        })
+        .on('mouseup touchend', function(){ wma_dragging = null; } );
+      $('#wma_map')
+        .on('dblclick', wmaDblclick)
+        .on('mousedown touchstart', mouseDownWikiMiniAtlasMap);
+
       wma_map = document.getElementById('wma_map');
 
       wma_nx = Math.floor(wma_width/tsx)+2;
@@ -820,12 +840,17 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
     if( hasCanvas ) {
       // resize kml canvas, if it exists
       if( wmakml.canvas !== null ) {
-        wmakml.canvas.attr( { width: nw, height: nh } );
+        wmakml.canvas
+          .attr({width:nw*wma_dpr,height:nh*wma_dpr})
+          .css({width: nw+'px',height: nh+'px'});
+        wmakml.c.setTransform(wma_dpr, 0, 0, wma_dpr, 0, 0);
       }
       // 3D building canvas
-      bldg3d.attr( { width: nw, height: nh } );
+      bldg3d.attr( { width: nw*wma_dpr, height: nh*wma_dpr } )
+            .css({width: nw+'px',height: nh+'px'});
+
       // set webgl viewport 
-      if( bldg3dc.viewport ) bldg3dc.viewport(0,0,nw,nh);
+      if( bldg3dc.viewport ) bldg3dc.viewport(0,0,nw*wma_dpr,nh*wma_dpr);
 
       // TODO: resize overlay canvas!
     }
@@ -1028,13 +1053,13 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
           (function(n,w,h,m5){
             a.click( function(e) {
               // this is necessary to allow dragging the map on thumbnails in Firefox
-              var r = wmaMouseCoords(e.originalEvent);
+              var r = wmaMouseCoords(e);
               if( r.x != wma_mdcoord.x || 
                   r.y != wma_mdcoord.y ) {
                  e.preventDefault(); 
               } else {
-                // open the wmaci preview on left click
-                if( e.which == 1 ) {
+                // open the wmaci preview on left click (unless ctrl is pressed -> RMB emulation on mac)
+                if (e.which==1 && (!e.ctrlKey)) {
                   wmaCommonsImage(n,w,h,m5); 
                   e.preventDefault();
                 }
@@ -1050,7 +1075,10 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
                 title: decodeURIComponent( l[i].img )
               } )
               .error(function(){ $(this).parent().hide() } )
-              .attr('src', wmaCommonsThumb( l[i].img, w, l[i].m5) )
+              .attr( { 
+                src: wmaCommonsThumb( l[i].img, w, l[i].m5),
+                srcset: (2*w <= l[i].w) ? (wmaCommonsThumb( l[i].img, w*2, l[i].m5) + ' 2x') : '' 
+              } )
             );
 
           if( l[i].head < 18 ) {
@@ -1075,8 +1103,24 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
               top:  ( l[i].ty - iy[l[i].style] ) + 'px',
               left: ( l[i].tx - ix[l[i].style] ) + 'px',
               direction: isRTL(l[i].lang) ? 'rtl' : 'ltr'
-            } ) 
-           .text(l[i].name);
+            } );
+
+          // get rid of comma and bracket suffixes
+          var m = /(.*?)(\s*\([^\)]*\)$|\s*,[^,\(]*$)/.exec(l[i].name);
+          if (m) {
+            a.text(m[1])
+              .append($('<span class="hell">&hellip;</span>'))
+              .append($('<span class="sufx"></span>').text(m[2]).hide())
+              .hover(function() {
+                $('.hell',this).hide();
+                $('.sufx',this).show();
+              }, function() {
+                $('.hell',this).show();
+                $('.sufx',this).hide();
+              });
+          } else {
+            a.text(l[i].name);
+          }
         }
 
         tile.append(a);
@@ -1502,7 +1546,7 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
 
   function wmaLoadSizeOverlay(lang,page) {
     $.ajax({
-      url: '//toolserver.org/~master/osmjson/getGeoJSON.php?lang='+lang+'&article='+page,
+      url: '//tools.wmflabs.org/wiwosm/osmjson/getGeoJSON.php?lang='+lang+'&article='+page,
       dataType: 'json',
       success: processSizeOverlay
     });
@@ -1576,7 +1620,12 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
   }
 
   function wmaMouseCoords(ev) {
-   return {x:ev.pageX, y:ev.pageY};
+    var oe = ev.originalEvent;
+    if ('touches' in oe) {
+      return {x:oe.touches[0].pageX, y:oe.touches[0].pageY};
+    } else {
+      return {x:ev.pageX, y:ev.pageY};
+    }
   }
 
   function lHash(y,x,z) {
@@ -1829,8 +1878,15 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
     wmaci.span.find('img').remove();
     var img = $('<img/>', { id: 'wma_wmaci_image' } ).appendTo(wmaci.span);
 
-    if( imgw < w ) {
-      img.attr( 'src', wmaCommonsThumb( name, Math.floor(imgw/10)*10, m5) );
+    if( imgw*2 < w ) {
+      img.attr( { 
+        src: wmaCommonsThumb( name, Math.floor(imgw/10)*10, m5),
+        srcset: wmaCommonsThumb( name, Math.floor(imgw/10)*20, m5) + ' 2x' 
+      } )
+    } else if( imgw < w ) {
+      img.attr( { 
+        src: wmaCommonsThumb( name, Math.floor(imgw/10)*10, m5)
+      } )
     } else {
       img.attr( 'src', '//commons.wikimedia.org/wiki/Special:FilePath/' + name );
     }
@@ -1870,9 +1926,11 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
     // add canvas overlay
     if( geo.canvas === null ) {
       geo.canvas = $('<canvas class="wmakml"></canvas>')
-        .attr( { width: wma_width, height: wma_height } )
+        .attr( { width: wma_width*wma_dpr, height: wma_height*wma_dpr } )
+        .css({width: wma_width+'px',height: wma_height+'px'})
         .appendTo( $(wma_map) );
       geo.c = geo.canvas[0].getContext('2d');
+      geo.c.scale(wma_dpr,wma_dpr);
       geo.shown = true;
       geo.drawn = true;
       if( geo == wmakml ) { $('#button_kml').show(); }
@@ -1932,6 +1990,18 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
         }
       }
       if (window.parent) { window.parent.postMessage(JSON.stringify(gci), e.origin); }
+    }
+
+    // move the view port to new target coordinates
+    if ('moveto' in d) {
+      var t = d.moveto;
+      if ('zoom' in t) {
+        wmaSetZoom(t.zoom);
+      }
+      if ('lat' in t && 'lon' in t) {
+        wmaMoveToCoord(t.lat, t.lon);
+        wmaGlobe && wmaGlobe.setLatLon(t.lat, t.lon);
+      }
     }
   }
 

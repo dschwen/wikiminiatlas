@@ -1,15 +1,19 @@
 <?php
+//error_reporting(E_ALL);
+//ini_set('display_errors', 1);
+error_reporting(E_ERROR | E_PARSE);
 
 $x = intval($_GET['x']);
 $y = intval($_GET['y']);
 $z = intval($_GET['z']);
 
-$a = $_GET['action'];
+$a = NULL;
+if (array_key_exists('action', $_GET)) $a=$_GET['action'];
 
 $tfile = "jsontile/$z/$y/$x";
 $f = '';
 ob_start("ob_gzhandler");
-if( $a!=='query' && $a!=='print' ) {
+if ($a!=='query' && $a!=='print') {
   // set content type
   header( 'Content-type: application/json' );
 
@@ -17,18 +21,17 @@ if( $a!=='query' && $a!=='print' ) {
   if( $a !== 'purge' ) {
     if( file_exists( $tfile.'.gz' ) ) {
       // gzipped tile
-      header("Cache-Control: public, max-age=3600");
-      $f = implode("\n",gzfile($tfile.'.gz'));
+      $f = implode("",gzfile($tfile.'.gz'));
     } else if( file_exists( $tfile ) ) {
       // old unpacked file
       $f = file_get_contents($tfile);
     }
 
-    if( $f!='' ) {
+    if ($f!='') {
       header("Cache-Control: public, max-age=3600");
       // parse json and check tile version ( or timestamp, or check file time)
       $d = json_decode($f);
-      if( $d->v >= 4 ) {
+      if( $d->v >= 6 ) {
         echo $f;
         exit;
       }
@@ -39,11 +42,14 @@ if( $a!=='query' && $a!=='print' ) {
 function beginsWith($str, $sub) {
   return (strncmp($str, $sub, strlen($sub)) == 0);
 }
-//$dbconn = pg_connect("host=sql-mapnik dbname=osm_mapnik port=5433");
-$dbconn = pg_connect("host=sql-mapnik dbname=osm_mapnik");
 
 // only reply for high zoomlevels!
-if( $z < 12 ) exit;
+if ($z<12) exit;
+
+//exit; // DB server under maintenance
+
+//$dbconn = pg_connect("host=sql-mapnik dbname=osm_mapnik port=5433");
+$dbconn = pg_connect("host=osmdb.eqiad.wmnet dbname=gis user=osm");
 
 // size of zoom level in tiles
 $mx = 3 * ( 2 << $z );
@@ -91,14 +97,14 @@ $intersect = "
           )";
 //transform( ST_GeomFromText('POLYGON(($llx $ury, $urx $ury, $urx $lly, $llx $lly, $llx $ury))', 4326 ), 900913 )
 $table = array( 
-  array('planet_polygon','building IS NULL AND  not exist(hstore(tags),\'building:part\') AND',$intersect), 
-  array('planet_line','building IS NULL AND  not exist(hstore(tags),\'building:part\') AND',$intersect)
+  array('planet_osm_polygon','building IS NULL AND  not exist(hstore(tags),\'building:part\') AND',$intersect), 
+  array('planet_osm_line','building IS NULL AND  not exist(hstore(tags),\'building:part\') AND',$intersect)
 );
 
 // also return buildings for large zoom levels
 if( $z>=14 ) {
-  $table[] = array('planet_polygon','(building IS NOT NULL OR exist(hstore(tags),\'building:part\')) AND','way');
-  $table[] = array('planet_line','(building IS NOT NULL OR exist(hstore(tags),\'building:part\')) AND','way');
+  $table[] = array('planet_osm_polygon','(building IS NOT NULL OR exist(hstore(tags),\'building:part\')) AND','way');
+  $table[] = array('planet_osm_line','(building IS NOT NULL OR exist(hstore(tags),\'building:part\')) AND','way');
 }
 
 $geo = array();
@@ -117,7 +123,7 @@ for( $i=0; $i<count($table); $i++ ) {
   ";
 
   // debug
-  if( $a === 'query' ) {
+  if ($a === 'query') {
     echo $query,"\n\n";
   }
 
@@ -142,7 +148,13 @@ for( $i=0; $i<count($table); $i++ ) {
       if( $row[$j+2] !== null ) {
         //$type[$table[$i][3][$j]]=$row[$j+1];
         $type[$tags[$j]]=$row[$j+2];
-        $tagfound[$tags[$j]]++;
+
+        if (array_key_exists($tags[$j], $tagfound)) {
+          $tagfound[$tags[$j]]++;
+        } else {
+          $tagfound[$tags[$j]] = 1;
+        }
+        
         // server side index
         if( array_key_exists($tags[$j], $idx) ) {
           $idx[$tags[$j]][] = count($geo);
@@ -159,7 +171,13 @@ for( $i=0; $i<count($table); $i++ ) {
         //if( beginsWith($j,'name:') ||  beginsWith($j,'tiger:')  ||  beginsWith($j,'nist:') ) continue;   
         if( beginsWith($j,'tiger:')  ||  beginsWith($j,'nist:') ) continue;   
         $type[$j]=$val;
-        $tagfound[$j]++;
+
+        if (array_key_exists($j, $tagfound)) {
+          $tagfound[$j]++;
+        } else {
+          $tagfound[$j] = 1;
+        }
+
         // server side index
         if( array_key_exists($j, $idx) ) {
           $idx[$j][] = count($geo);
@@ -176,45 +194,59 @@ for( $i=0; $i<count($table); $i++ ) {
 
 if( $a === 'print' ) exit;
 
-// get ocean data
-$query = "
-  select 
-    ST_AsGeoJSON( transform( 
-      ST_Intersection( 
-        the_geom,
-        SetSRID('BOX3D($mllx $mlly, $murx $mury)'::box3d,900913)
-      ) ,4326), 9 )
-    from coastlines
-  where
-    the_geom && SetSRID('BOX3D($mllx $mlly, $murx $mury)'::box3d,900913);
-";
-//    ST_IsValid(the_geom) AND the_geom && SetSRID('BOX3D($mllx $mlly, $murx $mury)'::box3d,900913);
-//transform( ST_GeomFromText('POLYGON(($llx $ury, $urx $ury, $urx $lly, $llx $lly, $llx $ury))', 4326 ), 900913 )
-
-// perform query
-$result = pg_query($dbconn, $query);
-if( !$result ) {
-  echo pg_last_error($dbconn);
-  exit;
+// make sure the longitude is between -180 and 180
+if ($urx>180.0) {
+  $urx -= 360.0;
+  $llx -= 360.0;
 }
 
-// get result, set tag natural=>ocean
-$type = array( "natural" => "ocean" );
-while ($row = pg_fetch_row($result)) {
-  $tagfound['natural']++;
+// get landmass polygons and coastlines
+$table = array('land_polygons','coastlines');
+for ($i=0; $i<2; $i++) {
+  // set up query
+  $query = "
+    select 
+      ST_AsGeoJSON( 
+        ST_Intersection( 
+          SetSRID(the_geom, 4326),
+          SetSRID('BOX3D($llx $lly, $urx $ury)'::box3d, 4326)
+        )
+      , 9 )
+      from ".$table[$i]."
+    where
+      the_geom && SetSRID('BOX3D($llx $lly, $urx $ury)'::box3d,4326);
+  ";
 
-  // server side index
-  if( array_key_exists('natural', $idx) ) {
-    $idx['natural'][] = count($geo);
-  } else {
-    $idx['natural'] = array( count($geo) );
+  // perform query
+  $result = pg_query($dbconn, $query);
+  if( !$result ) {
+    echo pg_last_error($dbconn);
+    exit;
   }
 
-  $geo[] = array( "geo" => json_decode($row[0]), "tags" => $type );
+  // get result, set tag natural=>land_polygons or coastlines
+  $type = array( "natural" => $table[$i] );
+  while ($row = pg_fetch_row($result)) {
+
+    if (array_key_exists('natural', $tagfound)) {
+      $tagfound['natural']++;
+    } else {
+      $tagfound['natural'] = 1;
+    }
+
+    // server side index
+    if( array_key_exists('natural', $idx) ) {
+      $idx['natural'][] = count($geo);
+    } else {
+      $idx['natural'] = array( count($geo) );
+    }
+
+    $geo[] = array( "geo" => json_decode($row[0]), "tags" => $type );
+  }
 }
 
-//$s = json_encode( array( "data" => $geo, "x" => $x, "y" => $y, "z" => $z, "f" => $tagfound, "v" => 2, "idx" => $idx, "bbox" => "$mllx $mlly, $murx $mury" ) );
-$s = json_encode( array( "data" => $geo, "x" => $x, "y" => $y, "z" => $z, "f" => $tagfound, "v" => 5, "idx" => $idx, "t" => time() ) );
+//$s = json_encode( array( "data" => $geo, "x" => $x, "y" => $y, "z" => $z, "f" => $tagfound, "v" => 6, "idx" => $idx, "mbbox" => "$mllx $mlly, $murx $mury", "bbox" => "$llx $lly, $urx $ury" ) );
+$s = json_encode( array( "data" => $geo, "x" => $x, "y" => $y, "z" => $z, "f" => $tagfound, "v" => 6, "idx" => $idx, "t" => time() ) );
 
 // do not cache purge action
 if( $a !== 'purge' ) {
