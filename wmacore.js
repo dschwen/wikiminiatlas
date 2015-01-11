@@ -524,21 +524,29 @@ function wikiminiatlasInstall( wma_widget, url_params ) {
     
     var menu = new wmaMenu(UIrtl);
     (function(){
-      var i,j,l=[],g;
+      var i,j,l=[],g,select;
 
       // Label selection menu section
       menu.addTitle(strings.labelSet[UILang],UIrtl);
-      WikiMiniAtlasHTML = '<select id="wmaLabelSet">';
-      for( i in wikiminiatlas_sites ) {
-       if( i !== 'commons' ) {
-         WikiMiniAtlasHTML += '<option value="' + i + '"';
-          if( i == wma_site ) { WikiMiniAtlasHTML += 'selected="selected"'; }
-         WikiMiniAtlasHTML += '>' + wikiminiatlas_sites[i] + '</option>';
+      select = '<select id="wmaLabelSet">';
+      // add site and ui language as top choices
+      if (wma_site in wikiminiatlas_sites) {
+        select += '<option value="' + wma_site + '" selected="selected">' + wikiminiatlas_sites[wma_site] + '</option>';
+      }
+      if (wma_site !== UILang && UILang in wikiminiatlas_sites) {
+        select += '<option value="' + UILang + '">' + wikiminiatlas_sites[UILang] + '</option>';
+      }
+      if (wma_site in wikiminiatlas_sites || UILang in wikiminiatlas_sites) {
+        select += '<option disabled></option>';
+      }
+      for (i in wikiminiatlas_sites) {
+       if (i !== 'commons') {
+         select += '<option value="' + i + '">' + wikiminiatlas_sites[i] + '</option>';
        }
       } 
-      WikiMiniAtlasHTML += '</select>';
+      select += '</select>';
       g = menu.addGroup([
-        ['LANG',WikiMiniAtlasHTML],
+        ['LANG',select],
         ['commons',strings['commons'][UILang]]
       ],function(s) {
         if(s=='LANG') {
