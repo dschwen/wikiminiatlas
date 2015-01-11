@@ -74,7 +74,9 @@ var strings =
   'zh-yue': '土衞六',
   'zh': '土卫六',
   'zh-cn': '土卫六',
-  'zh-hant': '土衞六'
+  'zh-hant': '土衞六',
+  'zh-hk':'土衛六',
+  'zh-tw':'土衛六'
  },
  sizeRef : {
   en: 'Size reference',
@@ -101,7 +103,12 @@ var strings =
   ru: 'Размер сравнения',
   uk: 'Референсний розмір',
   sl: 'Primerjava velikosti',
-  sr: 'Поређење величина'
+  sr: 'Поређење величина',
+  zh: '大小參考值',
+  'zh-cn':'大小参考值',
+  'zh-sg':'大小参考值',
+  'zh-tw':'大小參考值',
+  'zh-hk':'大小參考值'
  },
  commons : {
   'en': 'Wikimedia Commons',
@@ -159,7 +166,10 @@ var strings =
   'zh-yue': '維基同享',
   'bat-smg': 'Vikitėka',
   'zh': '维基共享资源',
-  'zh-hans': '维基共享资源'
+  'zh-hans': '维基共享资源',
+  'zh-hant': '維基共享資源',
+  'zh-hk':'維基共享資源',
+  'zh-tw': '維基共享資源'
  },
  mapEarth : {
   'en': 'Earth',
@@ -372,7 +382,10 @@ var strings =
   'diq': 'Dınya',
   'bat-smg': 'Žemė',
   'zh': '地球',
-  'zh-hans': '地球'
+  'zh-hans': '地球',
+  'zh-hant': '地球',
+  'zh-hk': '地球',
+  'zh-tw': '地球'
  },
  solarSystem : {
   'en': 'Solar System',
@@ -549,7 +562,10 @@ var strings =
   'diq': 'Sistemê Roci',
   'bat-smg': 'Saulės sėstema',
   'zh': '太阳系',
-  'zh-hans': '太阳系'
+  'zh-hans': '太阳系',
+  'zh-hant': '太陽系',
+  'zh-hk': '地球',
+  'zh-tw': '地球'
  },
  mapIo : {
   en: 'Io',
@@ -567,7 +583,10 @@ var strings =
   ru: 'Ио',
   sr: 'Ио',
   zh: '木卫一',
-  'zh-hans': '木卫一'
+  'zh-hans': '木卫一',
+  'zh-hant': '木衛一',
+  'zh-hk': '木衛一',
+  'zh-tw': '木衛一'
  },
  mapVenus : {
   en: 'Venus',
@@ -586,7 +605,10 @@ var strings =
   sr: 'Венера',
   uk: 'Венера',
   zh: '金星',
-  'zh-hans': '金星'
+  'zh-hans': '金星',
+  'zh-hant': '金星',
+  'zh-hk': '金星',
+  'zh-tw': '金星'
  },
  mapMercury : {
   en: 'Mercury',
@@ -613,7 +635,10 @@ var strings =
   sr: 'Меркур',
   uk: 'Меркурій',
   zh: '水星',
-  'zh-hans': '水星'
+  'zh-hans': '水星',
+  'zh-hant': '水星',
+  'zh-hk': '水星',
+  'zh-tw': '水星'
  },
  mapMars : {
   am:'ማርስ',
@@ -733,7 +758,10 @@ var strings =
   yo:'Mársì',
   'zh-yue':'火星',
   zh:'火星',
-  'zh-hans':'火星'
+  'zh-hans':'火星',
+  'zh-hant':'火星',
+  'zh-hk':'火星',
+  'zh-tw':'火星'
  },
  mapCoastline : {
   af:'Kuslyn',
@@ -994,8 +1022,8 @@ var strings =
   zh:'放大（右击最大化）',
   'zh-cn':'放大（右击最大化）',
   'zh-sg':'放大（右击最大化）',
-  'zh-tw':'放大（右擊最大化）',
-  'zh-hk':'放大（右擊最大化）'
+  'zh-tw':'放大（點擊最大化）',
+  'zh-hk':'放大（點擊最大化）'
  },
  zoomOut: {
   af:'Verklein',
@@ -1060,8 +1088,8 @@ var strings =
   zh:'缩小（右击最小化）',
   'zh-cn':'缩小（右击最小化）',
   'zh-sg':'缩小（右击最小化）',
-  'zh-tw':'縮小（右擊最小化）',
-  'zh-hk':'縮小（右擊最小化）'
+  'zh-tw':'縮小（點擊最小化）',
+  'zh-hk':'縮小（點擊最小化）'
  },
  settings: {
   af:'Instellings',
@@ -1127,8 +1155,8 @@ var strings =
   zh:'设置',
   'zh-cn':'设置',
   'zh-sg':'设置',
-  'zh-tw':'設置',
-  'zh-hk':'設置'
+  'zh-tw':'設定',
+  'zh-hk':'設定'
  },
  mode: {
   af:'Kaarttipe',
@@ -1363,7 +1391,10 @@ var strings =
   vi:'đang tải',
   vo:'lodön',
   zh:'载入中',
-  'zh-hans':'载入中'
+  'zh-hans':'载入中',
+  'zh-hant':'載入中',
+  'zh-hk':'載入中',
+  'zh-tw':'載入中'
  },
  close: {
   af:'Sluit',
@@ -1461,7 +1492,10 @@ var strings =
   sl:'celozaslonsko',
   uk:'повний екран',
   zh:'全屏',
-  'zh-hans':'全屏'
+  'zh-hans':'全屏',
+  'zh-hant':'全螢幕',
+  'zh-hk':'全螢幕',
+  'zh-tw':'全螢幕'
  },
  mapFull: {
   af:'Volledige basiskaart',
@@ -1511,7 +1545,10 @@ var strings =
   vi:'Bản đồ nền đầy đủ',
   vo:'Stabakaed fulik',
   zh:'标准地图',
-  'zh-hans':'标准地图'
+  'zh-hans':'标准地图',
+  'zh-hant':'標準地圖',
+  'zh-hk':'標準地圖',
+  'zh-tw':'標準地圖'
  },
  mapPhysical: {
   af:'Fisiese',
@@ -1561,7 +1598,10 @@ var strings =
   vi:'Vật lý',
   vo:'füsüdik',
   zh:'地形图',
-  'zh-hans':'地形图'
+  'zh-hans':'地形图',
+  'zh-hant':'地形圖',
+  'zh-hk':'地形圖',
+  'zh-tw':'地形圖'
  },
  mapMinimal: {
   ar:'خريطة أساسية أقل ما يمكن (أشرطة ساحلية)',
@@ -1610,7 +1650,10 @@ var strings =
   vi:'Bản đồ nền tối thiểu (bờ biển)',
   vo:'Stabakaed balugikün (jolaliens)',
   zh:'最小地图 (海岸线)',
-  'zh-hans':'最小地图 (海岸线)'
+  'zh-hans':'最小地图 (海岸线)',
+  'zh-hant':'最小地圖 (海岸線)',
+  'zh-hk':'最小地圖 (海岸線)',
+  'zh-tw':'最小地圖 (海岸線)'
  },
  // Daily updates from the Aqua satellite
  DailyAqua: {
@@ -1648,6 +1691,10 @@ var strings =
   uk:'Щоденна водна',
   vi:'Xanh biển',
   vo:'Vat delik'
+  zh:'每日Auua',
+  'zh-hant':'每日Auua',
+  'zh-hk':'每日Auua',
+  'zh-tw':'每日Auua'
  },
  // Daily updates from the Terra satellite
  DailyTerra: {
@@ -1737,7 +1784,10 @@ var strings =
   vi:'Mặt trăng',
   vo:'Mun',
   zh:'月球',
-  'zh-hans':'月球'
+  'zh-hans':'月球',
+  'zh-hant':'月球',
+  'zh-hk':'月球',
+  'zh-tw':'月球'
  },
  blue: {
   af:'Blou',
@@ -1787,6 +1837,7 @@ var strings =
   uk:'блакитний',
   vi:'xanh',
   vo:'blövik'
+  zh:'藍色'
  },
  red: {
   af:'Rooi',
@@ -1953,6 +2004,11 @@ var strings =
   sco:'Toggle owerlay',
   sl:'Vklop prekrivnega načina',
   uk:'Перемкнути контур'
+  zh:'啟用重疊顯示',
+  'zh-hant':'啟用重疊顯示',
+  'zh-hk':'啟用重疊顯示',
+  'zh-tw':'啟用重疊顯示'
+
  },
  dyk: {
   ast: ['Mantén calcáu Ctrl o ⌘ y pasa\'l mur sobro un enllaz pa lleer un resume del artículu.',
