@@ -416,13 +416,13 @@ function wikiminiatlasInstall( wma_widget, url_params ) {
       wma_width = $(window).width();
       wma_height= $(window).height();
 
-      coord_filter = /([\d+-.]+)_([\d+-.]+)_([\d]+)_([\d]+)_([a-z]+)/;
+      coord_filter = /([\d+-.]+)_([\d+-.]+)_([\d]+)_([\d]+)_([a-z-]+)/;
       if( coord_filter.test(coord_params) ) {
         coord_filter.exec(coord_params);
         wma_site = RegExp.$5;
       }
      
-     coord_filter = /([\d+-.]+)_([\d+-.]+)_([\d]+)_([\d]+)_([a-z]+)_([\d]+)/;
+     coord_filter = /([\d+-.]+)_([\d+-.]+)_([\d]+)_([\d]+)_([a-z-]+)_([\d]+)/;
      if( coord_filter.test(coord_params) ) {
       coord_filter.exec(coord_params);
       wma_defaultzoom = parseInt( RegExp.$6, 10 );
@@ -433,7 +433,7 @@ function wikiminiatlasInstall( wma_widget, url_params ) {
       wmaSetZoom( Math.max( wma_zoom, wma_tilesets[wma_tileset].minzoom ) );
      }
 
-     coord_filter = /([\d+-.]+)_([\d+-.]+)_([\d]+)_([\d]+)_([a-z]+)_([\d]+)_([a-z]+)/;
+     coord_filter = /([\d+-.]+)_([\d+-.]+)_([\d]+)_([\d]+)_([a-z-]+)_([\d]+)_([a-z-]+)/;
      if(coord_filter.test(coord_params)) {
       coord_filter.exec(coord_params);
       wma_language = RegExp.$7;
@@ -441,7 +441,7 @@ function wikiminiatlasInstall( wma_widget, url_params ) {
       wma_language = wma_site;
      }
 
-     coord_filter = /([\d+-.]+)_([\d+-.]+)_([\d]+)_([\d]+)_([a-z]+)_([\d]+)_([a-z]+)_([\d+-.]+)_([\d+-.]+)/;
+     coord_filter = /([\d+-.]+)_([\d+-.]+)_([\d]+)_([\d]+)_([a-z-]+)_([\d]+)_([a-z-]+)_([\d+-.]+)_([\d+-.]+)/;
      if(coord_filter.test(coord_params)) {
        newcoords = wmaLatLonToXY( RegExp.$8, RegExp.$9 );
        wma_marker_locked = false;
@@ -455,6 +455,10 @@ function wikiminiatlasInstall( wma_widget, url_params ) {
      wma_gy = newcoords.y-wma_height/2;
     }
 
+    // strip variants for now (until we have automatic conversion running)
+    wma_site = wma_site.split('-')[0];
+
+    // set wma user interface language (assume en for commons if none other was specified)
     UILang = wma_language;
     if( UILang == 'co' || UILang == 'commons' ) UILang = 'en';
     UIrtl = isRTL(UILang);
