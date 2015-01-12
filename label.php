@@ -2,8 +2,8 @@
 
 // label.php version for labs (acesses the tool-labs db)
 
-//error_reporting(E_ALL);
-//ini_set('display_errors', 1);
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
 
 // Apache .htaccess rules
 $lang=$_GET['l'];
@@ -45,10 +45,10 @@ if (count($langvariant) == 2) {
   }
 
   // set the mediawiki path for the mediawiki-zhconverter
-  define("MEDIAWIKI_PATH", "/home/dschwen/mediawiki");
+  define("MEDIAWIKI_PATH", "/opt/mediawiki");
 
   // include character set converter
-  require_once "mediawiki-zhconverter.inc.php";
+  require_once "mediawiki-zhconverter/mediawiki-zhconverter.inc.php";
 } else {
   $variant = "";
 }
