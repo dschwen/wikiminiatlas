@@ -32,6 +32,29 @@ if ($result = apc_fetch($key)) {
 
 // get language id
 $alllang=explode(',',"ar,bg,ca,ceb,commons,cs,da,de,el,en,eo,es,et,eu,fa,fi,fr,gl,he,hi,hr,ht,hu,id,it,ja,ko,lt,ms,new,nl,nn,no,pl,pt,ro,ru,simple,sk,sl,sr,sv,sw,te,th,tr,uk,vi,vo,war,zh,af,als,be,bpy,fy,ga,hy,ka,ku,la,lb,lv,mk,ml,nds,nv,os,pam,pms,ta,vec,kk,ilo,ast,uz,oc,sh,tl,sco");
+
+$langvariant = explode("-", $lang, 2);
+
+// if a variant was provided check if it is supported
+if (count($langvariant) == 2) {
+  $allvariant = explode(',',"zh-hans,zh-hant,zh-cn,zh-hk,zh-mo,zh-sg,zh-tw");
+  $variant = $lang;
+  if (array_search($variant, $allvariant) === FALSE) {
+    echo "";
+    exit;
+  }
+
+  // set the mediawiki path for the mediawiki-zhconverter
+  define("MEDIAWIKI_PATH", "/home/dschwen/mediawiki");
+
+  // include character set converter
+  require_once "mediawiki-zhconverter.inc.php";
+} else {
+  $variant = "";
+}
+
+// set and validate language code
+$lang = $langvariant[0];
 $l = array_search( $lang, $alllang );
 if ($l===FALSE) {
   echo "";
@@ -141,6 +164,11 @@ while ($row = mysqli_fetch_assoc($res))
       "m5" => substr(md5($row["title"]),0,2)
     );
   } else {
+    if ($variant == "")
+      $name = $row['name'];
+    else
+      $name = MediaWikiZhConverter::convert($row['name'], $variant);
+
     $items[] = array( 
       "style" => $s,
       "lang"  => $lang,
