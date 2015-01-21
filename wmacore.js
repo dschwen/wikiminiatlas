@@ -1106,7 +1106,7 @@ labelcaption = $('<div></div>').css({position:'absolute', top: '30px', left:'60p
           } );
         } else {
           // text labels
-          a.addClass('label').addClass( 'label' + l[i].style ).css(wmaLinkStyle)
+          a.addClass('label').addClass( 'label' + l[i].style ).addClass('label-'+l[i].lang).css(wmaLinkStyle)
             .attr( { 
               href: '//' + l[i].lang + '.wikipedia.org/wiki/' + l[i].page,
               target: '_top' 
