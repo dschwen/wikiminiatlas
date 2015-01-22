@@ -101,15 +101,6 @@ a.dir13 { background-image:url('/symbols/dir_13.png'); }
 a.dir14 { background-image:url('/symbols/dir_14.png'); }
 a.dir15 { background-image:url('/symbols/dir_15.png'); }
 
-/* Standard */
-/*a.label {
-   font-size:7pt;
-   z-index:20;
-   position: absolute;
-   background-repeat: no-repeat;
-   padding-left:5px;
-}*/
-
 a.label0 {
    background-image:url('/symbols/label_corner_ul.png');
 }
