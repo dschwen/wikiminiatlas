@@ -2027,7 +2027,7 @@ var strings =
   'Press "o" or go to the settings to activate a size-comparison overlay.',
   'Explore <a href="#" onclick="wmaNews[0]()">the Moon</a>!',
   'New in WikiMiniAtlas: <a href="#" onclick="wmaNews[1]()">3D-buildings</a>!',
-  'WikiMiniAtlas is now resizable. Just move the mouse in the bottom left corner!'],
+  'WikiMiniAtlas is now resizable. Just move the mouse to the bottom left corner!'],
   eo: ['Tenu Stir aŭ ⌘ kaj ŝvebu super ligilo por legi resumon de artikolo.'],
   es: ['Mantén pulsado Ctrl o ⌘ y colócate encima de un enlace para leer el resumen de un artículo.',
   'Pulsa "o" o ve a las preferencias para activar una transparencia de comparación de tamaño.',
