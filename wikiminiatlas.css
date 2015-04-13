@@ -167,7 +167,8 @@ a.label10:hover {
 
 /* language tweaks */
 
-a.label.label-zh {
+a.label.label-zh, 
+a.label.label-kn {
    font-size:9pt;
 }
 
