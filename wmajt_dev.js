@@ -942,7 +942,7 @@ var wmajt = (function(){
 
   function shapeGabled(d, b, h, hilted)
   {
-    var c, i, j, k , l, ls, cx = [], cy = [],
+    var c, i, j, k , l, ls = [], cx = [], cy = [],
         dx1, dy1, dx2, dy2, dz2, nx, ny, nz;
 
     // assumes a 4 corner poly
