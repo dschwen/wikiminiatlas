@@ -233,46 +233,58 @@ var wmajt = (function(){
           [ { dash: [2,5], lineWidth: 3, strokeStyle: "rgb(255,0,0)" } ]
         ]*/
       ]
-    };  
+    };
 
 
   function union(a1,a2) {
-    var a=a1.concat(a2), r = [], s = {};
-    for( i in a ) {
-      if( a.hasOwnProperty(i) ) {
-        if( !(a[i] in s) ) {
-          s[a[i]]=true;
+    var a = a1.concat(a2), r = [], s = {};
+    for (i in a)
+    {
+      if (a.hasOwnProperty(i) )
+      {
+        if (!(a[i] in s))
+        {
+          s[a[i]] = true;
           r.push(a[i]);
         }
       }
     }
     return r;
   };
-  
 
-  function hash(x,y,z) {
-    return x+'_'+y+'_'+z;
+  function hash(x, y, z)
+  {
+    return x + '_' + y + '_' + z;
   }
 
-  function gotData(data) {
+  function gotData(data)
+  {
     // insert response into cache
-    if( data === null ) return; // server error
+    if (data === null) return; // server error
     d = data.data;
 
     // TODO sort accorsing to layer and tunnel flag (but that kills the index!)
-    var idx, lay={0:1}, d, i, j;
+    var idx, lay = {0: 1}, d, i, j;
 
     // index of objects by tag
-    if( data.v && data.v >= 2 ) {
+    if (data.v && data.v >= 2)
+    {
       idx = data.idx;
-    } else {
+    }
+    else
+    {
       // generate index client side
       idx = {};
-      for(i=0; i<d.length; ++i ) {
-        for( j in d[i].tags ) {
-          if( j in idx ) {
+      for (i = 0; i < d.length; ++i)
+      {
+        for (j in d[i].tags)
+        {
+          if (j in idx)
+          {
             idx[j].push(i);
-          } else {
+          }
+          else
+          {
             idx[j] = [i];
           }
         }
@@ -280,30 +292,49 @@ var wmajt = (function(){
     }
 
     // list of all layers in this tile
-    for(i=0; i<d.length; ++i ) {
-      if( 'layer' in d[i].tags ) { lay[d[i].tags['layer']]=1; }
+    for (i = 0; i < d.length; ++i)
+    {
+      if ('layer' in d[i].tags)
+      {
+        lay[d[i].tags['layer']] = 1;
+      }
     }
 
     // build cache entry
-    cache[hash(data.x,data.y,data.z)] = { data: data.data, building: {}, f: data.f||{}, idx: idx, lay: lay };
+    cache[hash(data.x, data.y, data.z)] = {
+      data: data.data,
+      building: {},
+      f: data.f || {},
+      idx: idx,
+      lay: lay
+    };
 
     // propagate buildings to low zoom levels above the building threshold
-    var d=data.data, zz, xx=data.x, yy=data.y, ca;
-    if( data.z >= buildingzoom ) {
-      for( zz=data.z; zz>=minzoom; zz-- ) {
-        ca = cache[hash(xx,yy,zz)];
-        if( zz<buildingzoom && ca && ca.data  ) {
+    var d = data.data, zz, xx = data.x, yy = data.y, ca;
+    if (data.z >= buildingzoom)
+    {
+      for (zz = data.z; zz >= minzoom; --zz)
+      {
+        ca = cache[hash(xx, yy, zz)];
+        if (zz < buildingzoom && ca && ca.data)
+        {
           // iterate over all data entries and insert buildings into higher cache level
-          for(i =0; i<d.length; ++i ) {
+          for (i = 0; i < d.length; ++i)
+          {
             // check against shape type and tags
-            if( 'osm_id' in d[i].tags && 
-                ( 'building' in d[i].tags || 'building:part' in d[i].tags ) &&
-                !(d[i].tags['osm_id'] in ca.building) ) {
+            if('osm_id' in d[i].tags &&
+                ('building' in d[i].tags || 'building:part' in d[i].tags) &&
+                !(d[i].tags['osm_id'] in ca.building))
+            {
               // update the index
-              for( j in d[i].tags ) {
-                if( j in ca.idx ) {
+              for (j in d[i].tags)
+              {
+                if (j in ca.idx)
+                {
                   ca.idx[j].push(ca.data.length);
-                } else {
+                }
+                else
+                {
                   ca.idx[j] = [ca.data.length];
                 }
               }
@@ -312,75 +343,88 @@ var wmajt = (function(){
             }
           }
         }
-        xx=Math.floor(xx/2);
-        yy=Math.floor(yy/2);
+        xx = Math.floor(xx / 2);
+        yy = Math.floor(yy / 2);
       }
-    } else {
+    }
+    else
+    {
       // TODO: look for lower zoom levels with building data, but there may be A LOT!
       // SOLUTION: just look at building zoom
     }
 
     // (re-)draw the tile
-    update(this.csx,this.csy,this.csz,this);
+    update(this.csx, this.csy, this.csz, this);
   }
 
   // create path from coordinate data in g
-  function drawPath(g,c) {
-    if( dash ) {
+  function drawPath(g, c)
+  {
+    if (dash)
+    {
       // iterate over all nodes
       if( g.length > 0 ) {
-        var px = (g[0][0]-bx1)*128.0/bw
-          , py = 128.0-(g[0][1]-by1)*128.0/bh
-          , dx, dy, di=0,dl=dash.length,dc=0.0
+        var px = (g[0][0]-bx1) * 128.0 / bw
+          , py = 128.0 - (g[0][1] - by1) * 128.0 / bh
+          , dx, dy, di = 0, dl = dash.length, dc = 0.0
           , mx, my, r, rr, j, done;
-        for( j=1; j<g.length; ++j ) {
+
+        for (j = 1; j < g.length; ++j)
+        {
           // move to start
-          c.moveTo(px,py);
+          c.moveTo(px, py);
           rr = -dc;
 
-          // destination point   
-          dx = (g[j][0]-bx1)*128.0/bw;
-          dy = 128.0-(g[j][1]-by1)*128.0/bh;
+          // destination point
+          dx = (g[j][0] - bx1) * 128.0 / bw;
+          dy = 128.0 - (g[j][1] - by1) * 128.0 / bh;
 
           // stepvector and length
           mx = dx-px;
           my = dy-py;
-          r = Math.sqrt(mx*mx+my*my);
+          r = Math.sqrt(mx * mx + my * my);
           mx /= r;
           my /= r;
 
           // loop over segment
           done = false;
-          while(true) {
+          while(true)
+          {
             rr += dash[di];
-            if( rr>r ) {
-              done=true;
+            if (rr > r)
+            {
+              done = true;
               dc = rr-r;
               rr = r;
             }
-            c[di%2?'moveTo':'lineTo'](rr*mx+px,rr*my+py);
-            if(done) break;
-            di=(di+1)%dl;
+            c[di % 2 ? 'moveTo' : 'lineTo'](rr * mx + px, rr * my + py);
+            if (done) break;
+            di = (di + 1) % dl;
           }
 
           // new starting point
-          px=dx;
-          py=dy;
+          px = dx;
+          py = dy;
         }
       }
-    } else {
+    }
+    else
+    {
       // iterate over all nodes
-      if( g.length > 0 ) {
-        c.moveTo((g[0][0]-bx1)*128/bw,128-(g[0][1]-by1)*128/bh);
-        for( j=1; j<g.length; ++j ) {
-          c.lineTo((g[j][0]-bx1)*128/bw,128-(g[j][1]-by1)*128/bh);
+      if( g.length > 0 )
+      {
+        c.moveTo((g[0][0] - bx1) * 128 / bw, 128 - (g[0][1] - by1) * 128 / bh);
+        for (j = 1; j < g.length; ++j)
+        {
+          c.lineTo((g[j][0] - bx1) * 128 / bw, 128 - (g[j][1]-by1) * 128 / bh);
         }
       }
     }
   }
 
   // detect mouse pointer proximity
-  function detectPointer( e, tile ) {
+  function detectPointer( e, tile )
+  {
     var rmin = null, mmin = {}
       , o = tile.div.offset()
       , mx = e.pageX - o.left
@@ -388,15 +432,18 @@ var wmajt = (function(){
       , d = tile.csca.data || []
       , m, i, t, s = '';
 
-    function detectPath(g,c,m) {
+    function detectPath(g,c,m)
+    {
       var px, py, r;
 
       // iterate over all nodes
-      for( j=1; j<g.length; ++j ) {
-        px = (g[j][0]-bx1)*128/bw - mx;
-        py = 128-(g[j][1]-by1)*128/bh - my;
-        r = px*px + py*py;
-        if( ( rmin === null || r<rmin ) && ( ('name:'+UILang) in m.tags || 'name' in m.tags || 'addr:street' in m.tags ) ) {
+      for (j = 1; j < g.length; ++j)
+      {
+        px = (g[j][0] - bx1) * 128 / bw - mx;
+        py = 128 - (g[j][1] - by1) * 128 / bh - my;
+        r = px * px + py * py;
+        if ((rmin === null || r<rmin) && (('name:' + UILang) in m.tags || 'name' in m.tags || 'addr:street' in m.tags))
+        {
           rmin = r;
           mmin = m;
         }
@@ -404,98 +451,119 @@ var wmajt = (function(){
     }
 
     // set globals for current tile coordinates
-    bx1 = tile.csx*60.0/(1<<tile.csz)
-    by1 = 90.0 - ( ((tile.csy+1.0)*60.0) / (1<<tile.csz) )
-    bx2 = (tile.csx+1) * 60.0 / (1<<tile.csz)
-    by2 = 90.0 - ( (tile.csy*60.0) / (1<<tile.csz) )
-    bw = bx2-bx1
-    bh = by2-by1
-    if(bx1>180.0) bx1-=360;
+    bx1 = tile.csx * 60.0 / (1 << tile.csz)
+    by1 = 90.0 - (((tile.csy + 1.0) * 60.0) / (1 << tile.csz) )
+    bx2 = (tile.csx + 1) * 60.0 / (1 << tile.csz)
+    by2 = 90.0 - ((tile.csy * 60.0) / (1 << tile.csz))
+    bw = bx2 - bx1
+    bh = by2 - by1
+    if (bx1 > 180.0) bx1 -= 360;
 
-    // loop over tag index objects 
-    for(i =0; i<d.length; ++i ) {
+    // loop over tag index objects
+    for (i = 0; i < d.length; ++i)
+    {
       m = d[i];
-      processShape(m,'Polygon',null,detectPath);
-      if( m.geo.type == 'GeometryCollection'  ) {
-        processShape(m,'Line',null,detectPath);
+      processShape(m, 'Polygon', null, detectPath);
+      if (m.geo.type == 'GeometryCollection')
+      {
+        processShape(m, 'Line', null, detectPath);
       }
     }
 
     t = mmin.tags || {};
     // has name
-    if( ('name' in t) || (('name:'+UILang) in t) ) { 
-      s = t[('name:'+UILang)] || t.name; 
-      if( 'loc_name' in t ) {
+    if (('name' in t) || (('name:' + UILang) in t))
+    {
+      s = t[('name:' + UILang)] || t.name;
+      if ('loc_name' in t)
+      {
         s += ' "' + t.loc_name + '"';
       }
-      if( 'artist_name' in t ) {
+      if('artist_name' in t)
+      {
         s += ' (' + t.artist_name + ')';
       }
       return s;
-    } 
+    }
 
     // has address
-    if( 'addr:street' in t ) {
+    if ('addr:street' in t)
+    {
       s = t['addr:street'];
-      if( 'addr:housenumber' in t ) {
+      if( 'addr:housenumber' in t )
+      {
         s = t['addr:housenumber'] + ' ' + s;
       }
       return s;
     }
 
-    // misc 
-    var tags = ['landuse','historic','highway','building'];
-    for( i=0; i<tags.length; ++i ) {
-      if( tags[i] in t ) return tags[i] + ' ' + t[tags[i]];
+    // misc
+    var tags = ['landuse', 'historic', 'highway', 'building'];
+    for( i=0; i<tags.length; ++i )
+    {
+      if (tags[i] in t)
+        return tags[i] + ' ' + t[tags[i]];
     }
 
     return null;
   }
 
   // quick hack for shape type
-  function processShape(m,s,c,path) {
+  function processShape(m,s,c,path)
+  {
     var k, l, g;
-    switch(m.geo.type) {
+    switch(m.geo.type)
+    {
       case 'Polygon':
-        // TODO 
-        path( m.geo.coordinates[0],c,m );
+        // TODO
+        path(m.geo.coordinates[0], c, m);
         break;
       case 'LineString':
-        path( m.geo.coordinates,c,m );
+        path(m.geo.coordinates, c, m);
         break;
       case 'MultiLineString':
-        for(k=0; k<m.geo.coordinates.length; k++ ) {
-          path( m.geo.coordinates[k],c,m );
+        for (k = 0; k < m.geo.coordinates.length; ++k)
+        {
+          path(m.geo.coordinates[k], c, m);
         }
         break;
       case 'MultiPolygon':
-        for(k=0; k<m.geo.coordinates.length; k++ ) {
-          path( m.geo.coordinates[k][0],c,m );
+        for (k = 0; k < m.geo.coordinates.length; ++k)
+        {
+          path(m.geo.coordinates[k][0], c, m);
         }
         break;
       case 'GeometryCollection':
         g = m.geo.geometries;
-        for( l=0; l<g.length; l++ ) {
-          if( s === 'Polygon' ) {
-            switch(g[l].type) {
+        for (l = 0; l < g.length; ++l)
+        {
+          if (s === 'Polygon')
+          {
+            switch(g[l].type)
+            {
               case 'Polygon':
-                // TODO 
-                path( g[l].coordinates[0],c,m );
+                // TODO
+                path(g[l].coordinates[0], c, m);
                 break;
               case 'MultiPolygon':
-                for(k=0; k<g[l].coordinates.length; k++ ) {
-                  path( g[l].coordinates[k][0],c,m );
+                for (k = 0; k < g[l].coordinates.length; ++k)
+                {
+                  path(g[l].coordinates[k][0], c, m);
                 }
                 break;
             }
-          } else {
-            switch(g[l].type) {
+          }
+          else
+          {
+            switch(g[l].type)
+            {
               case 'LineString':
-                path( g[l].coordinates,c,m );
+                path(g[l].coordinates, c, m);
                 break;
               case 'MultiLineString':
-                for(k=0; k<g[l].coordinates.length; k++ ) {
-                  path( g[l].coordinates[k],c,m );
+                for (k = 0; k < g[l].coordinates.length; ++k)
+                {
+                  path(g[l].coordinates[k], c, m);
                 }
                 break;
             }
@@ -505,7 +573,8 @@ var wmajt = (function(){
     }
   }
 
-  function update(x,y,z,tile,purge) {
+  function update(x, y, z, tile, purge)
+  {
     var c = tile.ctx, glRedraw = false, bldgh, bldgm, g, roofh, roofs;
 
     // set globals for current tile coordinates
@@ -513,33 +582,40 @@ var wmajt = (function(){
     by1 = 90.0 - ( ((y+1.0)*60.0) / (1<<z) )
     bx2 = (x+1) * 60.0 / (1<<z)
     by2 = 90.0 - ( (y*60.0) / (1<<z) )
-    bw = bx2-bx1
-    bh = by2-by1
-    if(bx1>180.0) bx1-=360;
+    bw = bx2 - bx1
+    bh = by2 - by1
+    if (bx1 > 180.0)
+    {
+      bx1-=360;
+    }
 
     // draw the data
-    function drawGeoJSON(ca) {
+    function drawGeoJSON(ca)
+    {
       var i, j, k, g, s, o, d = ca.data, m, idx;
-      
+
       c.lineWidth = 1.0;
 
       // TODO: handle coastlines properly!!
       c.fillStyle = 'rgb(158,199,243)';
-      c.fillRect(0,0,128,128);
+      c.fillRect(0, 0, 128, 128);
 
-      for( s in style ) {
-        for( o=0; o < style[s].length; o++ ) {
+      for (s in style)
+      {
+        for (o = 0; o < style[s].length; ++o)
+        {
           c.beginPath();
-         
+
           // skip styles whose tag does not occur
-          if( !(style[s][o][0] in ca.idx) ) continue;
+          if (!(style[s][o][0] in ca.idx)) continue;
 
           // set dash style global
           dash = style[s][o][2][0].dash || null;
 
-          // loop over tag index objects 
+          // loop over tag index objects
           idx = ca.idx[style[s][o][0]];
-          for(i =0; i<idx.length; ++i ) {
+          for (i = 0; i < idx.length; ++i)
+          {
             m = d[idx[i]];
             // check against shape type and tags
             if( ( s !== m.geo.type && ("Multi"+s) !== m.geo.type && m.geo.type !== 'GeometryCollection' ) ||
@@ -550,8 +626,16 @@ var wmajt = (function(){
 
           // iterate over the style components
           g = style[s][o][2]
-          for( i=0; i<g.length; i++ ) {
-            for( j in g[i] ) { if(j!='dash') { c[j] = g[i][j]; } }
+          for (i = 0; i < g.length; i++)
+          {
+            for (j in g[i])
+            {
+              if (j != 'dash')
+              {
+                c[j] = g[i][j];
+              }
+            }
+
             if( 'strokeStyle' in g[i] ) {
               c.stroke();
             }
@@ -561,20 +645,22 @@ var wmajt = (function(){
           }
         }
       }
-
     }
 
     function parseHeight(s) {
       var m;
-      if( s === undefined ) return null;
+      if (s === undefined)
+        return null;
 
       // meters (or implicit meters)
       m = /^(\d+(\.\d*)?)(\s*m)?$/.exec(s);
-      if( m !== null ) return parseFloat(m[1]);
+      if (m !== null)
+        return parseFloat(m[1]);
 
       // feet and inches
       m = /^((\d+(\.\d*)?)')?((\d+(\.\d*)?)")?$/.exec(s);
-      if( m !== null ) return parseFloat(m[2]||'0')*0.3048 + parseFloat(m[5]||'0')*0.0254;
+      if (m !== null)
+        return parseFloat(m[2]||'0')*0.3048 + parseFloat(m[5]||'0')*0.0254;
 
       return 0.0;
     }
@@ -587,34 +673,44 @@ var wmajt = (function(){
 
     // seach cache for data
     var zz, xx=x, yy=y, ca, d,v, idx;
-    for( zz=z; zz>=minzoom; zz-- ) {
+    for (zz = z; zz >= minzoom; --zz)
+    {
       ca = cache[hash(xx,yy,zz)];
-      if( ca && ca.data && !purge ) {
+      if (ca && ca.data && !purge)
+      {
         // subtract old tile from reference counters
-        if( tile.csca ) {
+        if (tile.csca)
+        {
           d = tile.csca.data;
-          if( trackstartdate && 'start_date' in tile.csca.idx ) {
+          if (trackstartdate && 'start_date' in tile.csca.idx)
+          {
             idx = tile.csca.idx['start_date']
-            for(i=0; i<idx.length; ++i ) {
+            for (i = 0; i < idx.length; ++i)
+            {
               v = d[idx[i]].tags['start_date'];
-              if( v in ref_sd ) {
+              if (v in ref_sd) {
                 ref_sd[v]--;
                 if(ref_sd[v]==0) delete ref_sd[v];
-              } 
+              }
             }
           }
           // union index
-          if( trackzbuild && z>buildingzoom ) {
+          if (trackzbuild && z > buildingzoom)
+          {
             idx = union( tile.csca.idx['building:levels']||[], tile.csca.idx['height']||[] );
             //if( z>buildingzoom && 'building:levels' in tile.csca.idx ) {
             //  idx = tile.csca.idx['building:levels']
-            for(i=0; i<idx.length; ++i ) {
-              if( 'osm_id' in d[idx[i]].tags ) {
+            for (i = 0; i < idx.length; ++i)
+            {
+              if ('osm_id' in d[idx[i]].tags)
+              {
                 v = d[idx[i]].tags['osm_id'];
-                if( v in ref_z ) {
+                if (v in ref_z)
+                {
                   ref_z[v]--;
-                  if(ref_z[v]==0) delete ref_z[v];
-                } 
+                  if(ref_z[v] == 0)
+                    delete ref_z[v];
+                }
               }
             }
           }
@@ -626,102 +722,129 @@ var wmajt = (function(){
         // link current cache object to current tile
         tile.csca = ca;
 
-        // add to reference counters 
+        // add to reference counters
         d = ca.data;
         // this maintains a list of all distinct start dates in the current field of view
         if( trackstartdate && 'start_date' in ca.idx ) {
           idx = ca.idx['start_date']
-          for(i=0; i<idx.length; ++i ) {
+          for (i = 0; i < idx.length; ++i)
+          {
             v = d[idx[i]].tags['start_date'];
             ref_sd[v] = (ref_sd[v]||0) + 1;
           }
         }
+
         // this maintains a list of all buildings with height data  in the field of view
         // and a lookup table of buildings by osm_id
         //if( z>buildingzoom && 'building:levels' in ca.idx ) {
         // union index
-        if( trackzbuild && z>buildingzoom ) {
-          idx = union( ca.idx['building:levels']||[], ca.idx['height']||[] );
+        if (trackzbuild && z > buildingzoom)
+        {
+          idx = union(ca.idx['building:levels'] || [], ca.idx['height'] || [] );
           //idx = ca.idx['building:levels']
-          for(i=0; i<idx.length; ++i ) {
-            if( 'osm_id' in d[idx[i]].tags ) {
+          for (i = 0; i < idx.length; ++i)
+          {
+            if ('osm_id' in d[idx[i]].tags)
+            {
               v = d[idx[i]].tags['osm_id'];
               ref_z[v] = (ref_z[v]||0) + 1;
-              if( !(v in zbuild ) ) {
+              if (!(v in zbuild))
+              {
                 zbuild[v] = d[idx[i]];
               }
             }
           }
         }
+
         // Hook for WebGL buildings:
         //  just increment ref_z if ref_z is 0 (before the increment)
         //  add the building to the WebGL buffer
         //  otherwise do nothing
-        if( gl !== null ) {
-          idx = union( ca.idx['building:levels']||[], ca.idx['height']||[] );
-          for(i=0; i<idx.length; ++i ) {
-            if( 'osm_id' in d[idx[i]].tags ) {
+        if (gl !== null)
+        {
+          idx = union(ca.idx['building:levels'] || [], ca.idx['height'] || []);
+          for (i = 0; i < idx.length; ++i)
+          {
+            if ('osm_id' in d[idx[i]].tags)
+            {
               v = d[idx[i]].tags['osm_id'];
-              if( !( v in ref_z ) ) {
+              if (!(v in ref_z))
+              {
                 ref_z[v] = true;
                 v = d[idx[i]];
                 bldgh = parseHeight(v.tags['height']) || (v.tags['building:levels']*3);
                 bldgm = parseHeight(v.tags['min_height']) || (v.tags['building:min_level']*3) || 0;
-                if( v.geo.type === 'Polygon' ) {
+                if (v.geo.type === 'Polygon')
+                {
                   g = v.geo.coordinates;
-                } else if( v.geo.type === 'LineString' ) {
+                }
+                else if (v.geo.type === 'LineString') {
                   g = [v.geo.coordinates];
-                } else {
+                }
+                else
+                {
                   continue;
                 }
 
                 glRedraw = true;
 
                 // old style pyramid
-                if( v.tags['building:shape'] === 'pyramid' ) {
+                if (v.tags['building:shape'] === 'pyramid')
+                {
                   shapePyramid( g, bldgm, bldgh );
                   continue;
-                } 
+                }
 
                 // roofs
-                if( ( 'roof:shape' in v.tags || 'building:roof:shape' in v.tags ) && 
-                    ( 'roof:height' in v.tags || 'building:roof:height' in v.tags ) ) {
+                if (('roof:shape' in v.tags || 'building:roof:shape' in v.tags) &&
+                    ('roof:height' in v.tags || 'building:roof:height' in v.tags))
+                {
                   roofh = parseHeight(v.tags['roof:height'] || v.tags['building:roof:height']);
                   roofs = v.tags['roof:shape'] || v.tags['building:roof:shape'];
+
                   // pyramidal
-                  if( roofs === 'pyramidal' ) {
-                    if( roofh<bldgh) triangulate( g, bldgm, bldgh-roofh, true );
-                    shapePyramid( g, bldgh-roofh, bldgh );
+                  if (roofs === 'pyramidal')
+                  {
+                    if (roofh < bldgh)
+                      triangulate(g, bldgm, bldgh-roofh, true);
+                    shapePyramid(g, bldgh-roofh, bldgh);
                     continue;
                   }
+
                   // gabled and hilted
-                  if( g[0].length == 5 ) {
-                    if( roofs === 'gabled' ||  roofs === 'hilted' ) {
-                      if( roofh<bldgh) triangulate( g, bldgm, bldgh-roofh, true );
-                      shapeGabled( g, bldgh-roofh, bldgh );
+                  if (g[0].length == 5)
+                  {
+                    if (roofs === 'gabled' ||  roofs === 'hilted')
+                    {
+                      if (roofh < bldgh)
+                        triangulate(g, bldgm, bldgh-roofh, true);
+                      shapeGabled(g, bldgh-roofh, bldgh);
                       continue;
                     }
                   }
-                } 
+                }
 
-                triangulate( g, bldgm, bldgh );
+                triangulate(g, bldgm, bldgh);
               }
             }
           }
         }
-        
+
         tile.can.show();
-        if( glRedraw ) renderWebGLBuildingData();
-        if( z< buildingzoom || zz >= buildingzoom ) return;
+        if (glRedraw)
+          renderWebGLBuildingData();
+        if (z< buildingzoom || zz >= buildingzoom)
+          return;
       }
-      xx=Math.floor(xx/2);
-      yy=Math.floor(yy/2);
-    } 
+
+      xx = Math.floor(xx/2);
+      yy = Math.floor(yy/2);
+    }
 
     // request data
-    tile.debug.html('/tiles/jsontile.php?x='+x+'&y='+y+'&z='+z);
+    tile.debug.html('/tiles/jsontile.php?x=' + x + '&y=' + y + '&z=' + z);
     $.ajax({
-      url: '/tiles/jsontile.php?x='+x+'&y='+y+'&z='+z+(purge===true?'&action=purge':''),
+      url: '/tiles/jsontile.php?x=' + x + '&y=' + y + '&z=' + z + (purge === true ? '&action=purge' : ''),
       dataType: 'json',
       success: gotData,
       context: tile
@@ -729,19 +852,19 @@ var wmajt = (function(){
   }
 
   function registerWebGLBuildingData( triangleNum, context, program ) {
-    glArrList = []; 
-    glBufList = []; 
+    glArrList = [];
+    glBufList = [];
     glBufSize = triangleNum; // *9 floats
     gl = context;
     glProgram = program;
-    
+
     // setup first buffer array
     var va, na;
     glI = 0;
     glO = 0;
-    va = new Float32Array(glBufSize*9);
-    na = new Float32Array(glBufSize*9);
-    glArrList.push( { v:va, n:na } );
+    va = new Float32Array(glBufSize * 9);
+    na = new Float32Array(glBufSize * 9);
+    glArrList.push({ v:va, n:na });
 
     // switch off the visible building tracking needed for canvas
     trackzbuild = false;
@@ -751,58 +874,71 @@ var wmajt = (function(){
     var i, l, vb, nb, s;
 
     // new data to be copied
-    if( glArrList.length > glBufList.length || glI > glO ) {
-      // copy data, add buffers (may more arrays than buffers!)
-      // start at last entry in glBufList loop up till 
-      s = glBufList.length-1; s=s<0?0:s; 
-      for( i=s; i<glArrList.length; ++i ) {
+    if (glArrList.length > glBufList.length || glI > glO )
+    {
+      // copy data, add buffers (maybe more arrays than buffers!)
+      // start at last entry in glBufList loop up till
+      s = glBufList.length - 1;
+      s = s < 0 ? 0 : s;
+      for (i = s; i < glArrList.length; ++i)
+      {
         // create new buffer
-        if( i>=glBufList.length ) {
+        if (i >= glBufList.length)
+        {
           vb =  gl.createBuffer();
           nb =  gl.createBuffer();
-          glBufList.push( { v: vb, n: nb } );
-        } else {
+          glBufList.push({ v: vb, n: nb });
+        }
+        else
+        {
           vb = glBufList[i].v;
           nb = glBufList[i].n;
         }
 
-        gl.bindBuffer(gl.ARRAY_BUFFER, vb );
-        gl.bufferData( gl.ARRAY_BUFFER, glArrList[i].v, gl.STATIC_DRAW );
-        gl.bindBuffer(gl.ARRAY_BUFFER, nb );
-        gl.bufferData( gl.ARRAY_BUFFER, glArrList[i].n, gl.STATIC_DRAW );
+        gl.bindBuffer(gl.ARRAY_BUFFER, vb);
+        gl.bufferData(gl.ARRAY_BUFFER, glArrList[i].v, gl.STATIC_DRAW);
+        gl.bindBuffer(gl.ARRAY_BUFFER, nb);
+        gl.bufferData(gl.ARRAY_BUFFER, glArrList[i].n, gl.STATIC_DRAW);
       }
 
       glO = glI;
     }
 
-    l = glBufList.length-1;
-    for( i=0; i<=l; ++i ) {
-      gl.bindBuffer(gl.ARRAY_BUFFER, glBufList[i].n );
+    l = glBufList.length - 1;
+    for (i = 0; i <= l; ++i)
+    {
+      gl.bindBuffer(gl.ARRAY_BUFFER, glBufList[i].n);
       gl.vertexAttribPointer(glProgram.normalPosAttrib, 3, gl.FLOAT, false, 0, 0);
-      gl.bindBuffer(gl.ARRAY_BUFFER, glBufList[i].v );
+      gl.bindBuffer(gl.ARRAY_BUFFER, glBufList[i].v);
       gl.vertexAttribPointer(glProgram.vertexPosAttrib, 3, gl.FLOAT, false, 0, 0);
 
       // number of vertices = glBufSize*3
-      gl.drawArrays( gl.TRIANGLES, 0, ((i==l)?glO:glBufSize)*3 );
+      gl.drawArrays(gl.TRIANGLES, 0, ((i == l) ? glO : glBufSize) * 3);
     }
   }
 
   // push vertex coordinates and normals into the Float32Arrays
-  function vnPush(v,n) {
+  function vnPush(v, n)
+  {
     // assert v.length = n.length
-    var l = v.length/9, s=glBufSize, i, j, k, n;
+    var l = v.length/9, s = glBufSize, i, j, k, n;
 
     // entire array fits into current buffer
-    i = glArrList.length-1;
-    if( glI+l <= s ) {
-      glArrList[i].v.set( v, glI*9 );
-      glArrList[i].n.set( n, glI*9 );
+    i = glArrList.length - 1;
+    if (glI + l <= s)
+    {
+      glArrList[i].v.set(v, glI * 9);
+      glArrList[i].n.set(n, glI * 9);
       glI += l;
-    } else {
+    }
+    else
+    {
       // copy as much as fits, then make new array and continue
-      for( j=0; j<l; ++j ) {
+      for (j = 0; j < l; ++j)
+      {
         // copy triangle
-        for( k=0; k<9; ++k ) {
+        for (k = 0; k < 9; ++k)
+        {
           glArrList[i].v[glI*9+k] = v[j*9+k];
         }
 
@@ -810,175 +946,254 @@ var wmajt = (function(){
         glI++;
 
         // end of array
-        if( glI == s ) {
+        if( glI == s )
+        {
           glI = 0;
-          glArrList.push( { v:new Float32Array(glBufSize*9), n:new Float32Array(glBufSize*9) } );
+          glArrList.push({ v:new Float32Array(glBufSize * 9), n:new Float32Array(glBufSize * 9) });
           i++;
         }
       }
     }
 
     // is last buffer filled up?
-    if( glI == s ) {
+    if (glI == s)
+    {
       glI = 0;
-      glArrList.push( { v:new Float32Array(glBufSize*9), n:new Float32Array(glBufSize*9) } );
+      glArrList.push({ v:new Float32Array(glBufSize * 9), n:new Float32Array(glBufSize * 9) });
     }
   }
 
-  function shapeGabled(d,b,h, hilted) {
-    var c, i, j, k , l, ls, cx=[], cy=[], dx1,dy1,dx2,dy2,dz2,nx,ny,nz;
+  function shapeGabled(d,b,h, hilted)
+  {
+    var c, i, j, k , l, ls, cx = [], cy = [],
+        dx1, dy1, dx2, dy2, dz2, nx, ny, nz;
+
     // assumes a 4 corner poly
-    c = d[0]; 
+    c = d[0];
+
     // side lengths
-    for( i=0; i<4; ++i ) {
-      dx1 = c[i][0]-c[i+1][0], dy1 = c[i][1]-c[i+1][1];
-      ls[i] = Math.sqrt(dx1*dx1+dy1*dy1);
+    for (i = 0; i < 4; ++i)
+    {
+      dx1 = c[i][0] - c[i+1][0];
+      dy1 = c[i][1] - c[i+1][1];
+      ls[i] = Math.sqrt(dx1 * dx1 + dy1 * dy1);
     }
+
     // first node of long edge
-    j = ( ls[0]+ls[2] > ls[1]+ls[3] ) ? 0 : 1;
+    j = (ls[0]+ls[2] > ls[1]+ls[3]) ? 0 : 1;
 
     // roofline ends
-    cx[0] = 0.5*(c[j][0]+c[j+3][0]);
-    cy[0] = 0.5*(c[j][1]+c[j+3][1]);
-    cx[1] = 0.5*(c[j+1][0]+c[j+2][0]);
-    cy[1] = 0.5*(c[j+1][1]+c[j+2][1]);
+    cx[0] = 0.5 * (c[j][0] + c[j+3][0]);
+    cy[0] = 0.5 * (c[j][1] + c[j+3][1]);
+    cx[1] = 0.5 * (c[j+1][0] + c[j+2][0]);
+    cy[1] = 0.5 * (c[j+1][1] + c[j+2][1]);
 
     // TODO: modify for hilted roof
-    
+
     dz2 = h-b;
     // rectangular roof surfaces
-    for( k=0; k<2; ++k ) {
-      i=k*2+j;
+    for (k = 0; k < 2; ++k)
+    {
+      i = k * 2 + j;
 
       dx1 = c[i][0] - c[i+1][0];
       dy1 = c[i][1] - c[i+1][1];
       dx2 = cx[k] - c[i][0];
       dy2 = cy[k] - c[i][1];
 
-      nx = -dy1*dz2; ny=dx1*dz2; nz=dy1*dx2-dx1*dy2;
-      r = Math.sqrt(nx*nx+ny*ny+nz*nz);
-      nx /= r; ny /= r; nz /=r;
+      nx = -dy1 * dz2;
+      ny = dx1 * dz2;
+      nz = dy1 * dx2 - dx1 * dy2;
+      r = Math.sqrt(nx * nx + ny * ny + nz * nz);
+      nx /= r;
+      ny /= r;
+      nz /=r;
 
       // triangle at base level
-      vnPush( [ c[i][0],c[i][1],b, c[i+1][0],c[i+1][1],b, cx[k],cy[k],h ],
-              [ nx,ny,nz, nx,ny,nz, nx,ny,nz ] );
+      vnPush([c[i][0], c[i][1], b,
+              c[i+1][0], c[i+1][1], b,
+              cx[k],cy[k], h],
+             [nx,ny,nz,
+              nx,ny,nz,
+              nx,ny,nz ]);
       // triangle at roof level
-      vnPush( [ cx[k],cy[k],h, cx[(k+1)%2],cy[(k+1)%2],h, c[i+1][0],c[i+1][1],b ], 
-              [ nx,ny,nz, nx,ny,nz, nx,ny,nz ] );
+      vnPush([cx[k], cy[k], h,
+              cx[(k+1)%2], cy[(k+1)%2], h,
+              c[i+1][0], c[i+1][1], b],
+             [nx, ny, nz,
+              nx, ny, nz,
+              nx, ny, nz]);
     }
     // triangular roof surfaces
   }
 
   function shapePyramid(d,b,h) {
-    var c, i, j, l, cx=0, cy=0, dx1,dy1,dx2,dy2,dz2,nx,ny,nz;
+    var c, i, j, l, cx = 0, cy = 0,
+        dx1, dy1, dx2, dy2, dz2, nx, ny, nz;
 
     // pyramids only need outer contours
     // winding order and center
-    c = d[0]; l = c.length-1; area=0;
-    if( l<3 ) return;
-    for( i=0; i<l; i++ ) {
+    c = d[0];
+    l = c.length-1; area=0;
+    if (l < 3) return;
+
+    for (i = 0; i < l; ++i)
+    {
       area += (c[i][0] * c[i+1][1]) - (c[i+1][0] * c[i][1]);
-      cx += c[i][0]; cy += c[i][1];
+      cx += c[i][0];
+      cy += c[i][1];
     }
-    if( area>0 ) { c.reverse(); }
-    cx /= l; cy /= l;
+    if (area > 0)
+    {
+      c.reverse();
+    }
+    cx /= l;
+    cy /= l;
 
     dz2 = h-b;
-    for( i=0; i<l; i++ ) {
+    for (i = 0; i < l; ++i)
+    {
       // normal vector (dx,dy,0) x (0,0,1)
       dx1 = c[i][0] - c[i+1][0];
       dy1 = c[i][1] - c[i+1][1];
       dx2 = cx - c[i][0];
       dy2 = cy - c[i][1];
 
-      nx = -dy1*dz2; ny=dx1*dz2; nz=dy1*dx2-dx1*dy2;
-      r = Math.sqrt(nx*nx+ny*ny+nz*nz);
+      nx = -dy1 * dz2;
+      ny = dx1 * dz2;
+      nz = dy1 * dx2 - dx1 * dy2;
+      r = Math.sqrt(nx * nx + ny * ny + nz* nz);
       nx /= r; ny /= r; nz /=r;
 
       // triangle base to top
-      vnPush( [ c[i][0],c[i][1],b, c[i+1][0],c[i+1][1],b, cx,cy,h ],
-              [ nx,ny,nz, nx,ny,nz, nx,ny,nz ] );
+      vnPush([c[i][0], c[i][1], b,
+              c[i+1][0], c[i+1][1], b,
+              cx, cy, h],
+             [nx, ny, nz,
+              nx, ny, nz,
+              nx, ny, nz]);
     }
-
   }
 
-  function triangulate(d,b,h, noroof) { 
+  function triangulate(d, b, h, noroof)
+  {
     var tr, d0, c, i, j, l, good, area, dx,dy;
     noroof = ~~noroof;
 
     // enforce winding orders
-    for( j=0; j<d.length; ++j ) {
-      c = d[j]; l = c.length-1; area=0;
-      if( l<3 ) return;
-      for( i=0; i<l; i++ ) {
+    for (j = 0; j < d.length; ++j)
+    {
+      c = d[j];
+      l = c.length - 1;
+      area=0;
+      if (l < 3) return;
+      for (i = 0; i < l; ++i)
+      {
         area += (c[i][0] * c[i+1][1]) - (c[i+1][0] * c[i][1]);
       }
-      area *= (j==0)?1:-1;
-      if( area>0 ) { c.reverse(); }
+      area *= (j == 0) ? 1 : -1;
+      if (area > 0)
+      {
+        c.reverse();
+      }
     }
 
     // setup walls
-    for( j=0; j<d.length; ++j ) {
+    for (j = 0; j < d.length; ++j)
+    {
       c = d[j]; l = c.length-1;
-      for( i=0; i<l; i++ ) {
+      for (i = 0; i < l; ++i)
+      {
         // normal vector (dx,dy,0) x (0,0,1)
         dx = c[i][0] - c[i+1][0];
         dy = c[i][1] - c[i+1][1];
-        r = Math.sqrt(dx*dx+dy*dy);
-        dx /= r; dy /= r;
+        r = Math.sqrt(dx * dx + dy * dy);
+        dx /= r;
+        dy /= r;
 
         // triangle at base level
-        vnPush( [ c[i][0],c[i][1],b, c[i+1][0],c[i+1][1],b, c[i][0],c[i][1],h ],
-                [ -dy,dx,0.0, -dy,dx,0.0, -dy,dx,0.0 ] );
+        vnPush([c[i][0], c[i][1], b,
+                c[i+1][0], c[i+1][1], b,
+                c[i][0], c[i][1], h],
+               [-dy, dx, 0.0,
+                -dy, dx, 0.0,
+                -dy, dx, 0.0]);
         // triangle at roof level
-        vnPush( [ c[i][0],c[i][1],h, c[i+1][0],c[i+1][1],h, c[i+1][0],c[i+1][1],b ], 
-                [ -dy,dx,0.0, -dy,dx,0.0, -dy,dx,0.0 ] );
+        vnPush([c[i][0], c[i][1], h,
+                c[i+1][0], c[i+1][1], h,
+                c[i+1][0], c[i+1][1], b],
+               [-dy, dx, 0.0,
+                -dy, dx, 0.0,
+                -dy, dx, 0.0]);
       }
     }
 
-    if( noroof) return;
+    if (noroof) return;
 
     // note that the first and last point are always the same
     // thus a triangle has 4 points!
-    if( d.length === 1 && d[0].length <= 5 ) {
+    if (d.length === 1 && d[0].length <= 5)
+    {
       // simple triangulations
-      c=d[0];
+      c = d[0];
       // c.length must be at least 4!
-      if( c.length == 4 ) {
-        vnPush( [ c[0][0],c[0][1],h, c[1][0],c[1][1],h, c[2][0],c[2][1],h ],
-                [ 0,0,1, 0,0,1, 0,0,1 ] );
-      } else {
+      if (c.length == 4)
+      {
+        vnPush([c[0][0], c[0][1], h,
+                c[1][0], c[1][1], h,
+                c[2][0], c[2][1], h],
+                [0, 0, 1,
+                 0, 0, 1,
+                 0, 0, 1]);
+      }
+      else
+      {
         // TODO: not valid for arbitrary concave quads!
-        vnPush( [ c[0][0],c[0][1],h, c[1][0],c[1][1],h, c[2][0],c[2][1],h, c[0][0],c[0][1],h, c[2][0],c[2][1],h, c[3][0],c[3][1],h ],
-                [ 0,0,1, 0,0,1, 0,0,1, 0,0,1, 0,0,1, 0,0,1 ]  );
+        vnPush([c[0][0], c[0][1], h,
+                c[1][0], c[1][1], h,
+                c[2][0], c[2][1], h,
+                c[0][0], c[0][1], h,
+                c[2][0], c[2][1], h,
+                c[3][0], c[3][1], h],
+               [0, 0, 1,
+                0, 0, 1,
+                0, 0, 1,
+                0, 0, 1,
+                0, 0, 1,
+                0, 0, 1]);
       }
       return;
-    } 
+    }
 
     // use poly2tri
-    var pc = [], ph=[];
-    c = d[0]; l = c.length-1;
-    for( i=0; i<l; i++ ) {
-      pc.push( new p2t.Point( c[i][0], c[i][1] ) )
+    var pc = [], ph = [];
+    c = d[0];
+    l = c.length - 1;
+    for (i = 0; i < l; ++i)
+    {
+      pc.push(new p2t.Point(c[i][0], c[i][1]));
     }
+
     var swctx = new p2t.SweepContext(pc);
-    for( j=1; j<d.length; ++j ) {
-      c = d[j]; l = c.length-1;
-      var hole=[];
-      for( i=0; i<l; i++ ) {
-        hole.push( new p2t.Point( c[i][0], c[i][1] ) )
+    for (j = 1; j < d.length; ++j)
+    {
+      c = d[j]; l = c.length - 1;
+      var hole = [];
+      for (i = 0; i < l; ++i)
+      {
+        hole.push(new p2t.Point(c[i][0], c[i][1]));
       }
       swctx.AddHole(hole);
     }
+
     p2t.sweep.Triangulate(swctx);
     tr = swctx.GetTriangles();
-    for( i=0; i<tr.length; ++i ) {
-      var tp = [ tr[i].GetPoint(0), tr[i].GetPoint(1), tr[i].GetPoint(2) ];
-      vnPush( [ tp[0].x,tp[0].y,h, tp[1].x,tp[1].y,h, tp[2].x,tp[2].y,h ],
-              [ 0,0,1, 0,0,1, 0,0,1 ]  );
+    for (i = 0; i < tr.length; ++i)
+    {
+      var tp = [tr[i].GetPoint(0), tr[i].GetPoint(1), tr[i].GetPoint(2)];
+      vnPush([tp[0].x,tp[0].y,h, tp[1].x,tp[1].y,h, tp[2].x,tp[2].y,h],
+             [0,0,1, 0,0,1, 0,0,1]);
     }
-
-
   }
 
   return {
@@ -992,6 +1207,6 @@ var wmajt = (function(){
     },
     registerWebGLBuildingData : registerWebGLBuildingData,
     renderWebGLBuildingData: renderWebGLBuildingData,
-    setUILang: function(l) { UILang=l; }
+    setUILang: function(l) { UILang = l; }
   }
 })();
