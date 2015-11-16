@@ -381,7 +381,7 @@ var wmajt = (function(){
           done = false;
           while(true)
           {
-            rr += dash[di];
+            rr += dash[di] * lineWidthMult;
             if (rr > r)
             {
               done = true;
@@ -569,7 +569,7 @@ var wmajt = (function(){
       bx1-=360;
 
     // set global lineWidth multiplier
-    lineWidthMult = Math.pow(1.5, z - 13);
+    lineWidthMult = Math.pow(1.25, z - 13);
 
     // draw the data
     function drawGeoJSON(ca)
