@@ -6,241 +6,242 @@ var wmajt = (function(){
     , ref_sd = {}, ref_z = {}
     , zbuild = {}
     , trackstartdate = false, trackzbuild = true
-    , bx1,by1,bx2,by2,bw,bh              // used by update and mouse pointer interaction (current tile coords)
+    , bx1, by1, bx2, by2, bw, bh              // used by update and mouse pointer interaction (current tile coords)
     , glProgram, glBufList, glBufSize, glI, glO, gl = null // used to build the webgl building buffers (glI is index to current buffer (last in list))
     , dash = null
     , style = {
       Polygon: [
-        ['natural',{land_polygons:1},
+        ['natural', {land_polygons:1},
           [ { fillStyle: "rgb(250,250,208)" } ]
         ],
-        ['railway',{platform:1},
+        ['railway', {platform:1},
           [ { fillStyle: "rgb(220,220,220)" } ]
         ],
-        ['landuse',{industrial:1,retail:1,commercial:1,residential:1},
+        ['landuse', {industrial:1, retail:1, commercial:1, residential:1},
           [ { fillStyle: "rgb(208,208,208)" } ]
         ],
-        ['landuse',{reservoir:1},
+        ['landuse', {reservoir:1},
           [ { fillStyle: "rgb(200,200,224)" } ]
         ],
-        ['landuse',{military:1,railway:1},
+        ['landuse', {military:1, railway:1},
           [ { fillStyle: "rgb(224,200,200)" } ]
         ],
-        ['landuse',{cemetery:1,recreation_ground:1},
+        ['landuse', {cemetery:1, recreation_ground:1},
           [ { fillStyle: "rgb(190,214,190)" } ]
         ],
-        ['landuse',{grass:1},
+        ['landuse', {grass:1},
           [ { globalAlpha: 0.3, fillStyle: "rgb(0,160,0)" }, { globalAlpha:1} ]
         ],
-        ['leisure',{park:1,orchard:1,meadow:1,village_green:1,golf_course:1,track:1,
-          forrest:1,recreation_ground:1,dog_park:1,garden:1,pitch:1,stadium:1},
+        ['leisure', {park:1, orchard:1, meadow:1, village_green:1, golf_course:1, track:1,
+          forrest:1, recreation_ground:1, dog_park:1, garden:1, pitch:1, stadium:1},
           [ { fillStyle: "rgb(200,224,200)" } ]
         ],
-        ['waterway',{riverbank:1,dock:1},
+        ['waterway', {riverbank:1, dock:1},
           [ { fillStyle: "rgb(158,199,243)" } ]
         ],
-        ['natural',{beach:1,sand:1},
+        ['natural', {beach:1, sand:1},
           [ { fillStyle: "rgb(250,242,175)" } ]
         ],
-        ['natural',{wetland:1,mud:1},
+        ['natural', {wetland:1, mud:1},
           [ { fillStyle: "rgb(200,218,224)" } ]
         ],
-        ['natural',{grassland:1,fell:1},
+        ['natural', {grassland:1, fell:1},
           [ { fillStyle: "rgb(200,224,200)" } ]
         ],
-        ['natural',{scrub:1},
+        ['natural', {scrub:1},
           [ { fillStyle: "rgb(150,214,150)" } ]
         ],
-        ['natural',{wood:1},
+        ['natural', {wood:1},
           [ { fillStyle: "rgb(100,204,100)" } ]
         ],
-        ['natural',{water:1,bay:1},
+        ['natural', {water:1, bay:1},
           [ { fillStyle: "rgb(158,199,243)" },
             { lineWidth: 1, strokeStyle: "rgb(158,199,243)"} ]
         ],
-        ['natural',{glacier:1},
+        ['natural', {glacier:1},
           [ { fillStyle: "rgb(230,245,255)" },
             { lineWidth: 1, strokeStyle: "rgb(255,255,255)"} ]
         ],
-        ['amenity',{university:1},
+        ['amenity', {university:1},
           [ { lineWidth:0.5, strokeStyle: "rgb(240,225,183)" } ]
         ],
-        ['amenity',{parking:1},
+        ['amenity', {parking:1},
           [ { fillStyle: "rgb(240,235,193)" } ]
         ],
-        ['highway',{pedestrian:1},
+        ['highway', {pedestrian:1},
           [ { fillStyle: "rgb(255,255,255)" },
             { lineWidth: 2, strokeStyle: "rgb(168,148,148)" } ]
         ],
-        ['tourism',true,
+        ['tourism', true,
           [ { dash: [3,3], lineWidth: 2, strokeStyle: "rgb(255,255,0)" } ]
         ],
-        ['aeroway',{terminal:1},
+        ['aeroway', {terminal:1},
           [ { fillStyle: "rgb(190,210,190)" },
             { lineWidth: 1, strokeStyle: "rgb(127,137,127)" } ]
         ],
-        ['historic',{memorial:1,monument:1,fort:1,castle:1},
+        ['historic', {memorial:1, monument:1, fort:1, castle:1},
           [ { fillStyle: "rgb(255,190,190)" },
             { lineWidth: 1, strokeStyle: "rgb(167,120,120)" } ]
         ],
-        ['historic',{ship:1,wreck:1},
+        ['historic', {ship:1, wreck:1},
           [ { fillStyle: "rgb(255,190,235)" } ]
         ],
-        ['railway',{station:1},
+        ['railway', {station:1},
           [ { fillStyle: "rgb(210,195,195)" },
             { lineWidth: 1, strokeStyle: "rgb(127,127,127)" } ]
         ],
-        ['natural',{water:1,bay:1},
+        ['natural', {water:1, bay:1},
           [ { fillStyle: "rgb(158,199,243)" },
             { lineWidth: 1, strokeStyle: "rgb(158,199,243)"} ]
         ],
-        /*['building',{yes:1,block:1,office:1,courthouse:1,church:1,school:1,cathedral:1,residential:1,house:1,hut:1,
-          university:1,hospital:1,bunker:1,train_station:1,chapel:1,industrial:1,commercial:1,retail:1,hotel:1,
-          apartments:1,synagogue:1},
+        /*['building', {yes:1, block:1, office:1, courthouse:1, church:1, school:1, cathedral:1, residential:1, house:1, hut:1,
+          university:1, hospital:1, bunker:1, train_station:1, chapel:1, industrial:1, commercial:1, retail:1, hotel:1,
+          apartments:1, synagogue:1},
           [ { fillStyle: "rgb(200,200,200)" },
             { lineWidth: 1, strokeStyle: "rgb(127,127,127)" } ]
-        ],*/
-        ['building',true,
+        ], */
+        ['building', true,
           [ { fillStyle: "rgb(200,200,200)" },
             { lineWidth: 1, strokeStyle: "rgb(127,127,127)" } ]
         ],
-        ['building:part',true,
+        ['building:part', true,
           [ { fillStyle: "rgb(200,200,200)" },
             { lineWidth: 1, strokeStyle: "rgb(127,127,127)" } ]
         ]
-        /*['building:height',true,
+        /*['building:height', true,
           [ { lineWidth: 5, strokeStyle: "rgb(255,0,0)" } ]
         ],
-        ['building:levels',true,
+        ['building:levels', true,
           [ { lineWidth: 3, strokeStyle: "rgb(0,255,0)" } ]
         ],
-        ['building:min_level',true,
+        ['building:min_level', true,
           [ { lineWidth: 1.5, strokeStyle: "rgb(0,0,255)" } ]
         ],
-        ['start_date',true,
+        ['start_date', true,
           [ { dash: [2,5], lineWidth: 3, strokeStyle: "rgb(255,0,0)" } ]
         ]*/
       ],
       LineString: [
-        ['natural',{coastlines:1},
+        ['natural', {coastlines:1},
           [ { lineWidth: 1, strokeStyle: "rgb(125,125,104)"} ]
         ],
-        ['waterway',{canal:1},
+        ['waterway', {canal:1},
           [ { lineCap: 'butt', lineWidth: 3, strokeStyle: "rgb(158,199,243)" } ]
         ],
-        ['waterway',{river:1},
+        ['waterway', {river:1},
           [ { lineWidth: 1.5, strokeStyle: "rgb(126,159,194)" } ]
         ],
-        ['waterway',{stream:1},
+        ['waterway', {stream:1},
           [ { dash: [2,2], lineWidth: 1.5, strokeStyle: "rgb(126,159,194)" } ]
         ],
-        ['route',{ferry:1},
+        ['route', {ferry:1},
           [ { dash: [4,4], lineWidth: 2, strokeStyle: "rgb(126,159,194)" } ]
         ],
-        ['highway',{pedestrian:1},
+        ['highway', {pedestrian:1},
           [ { lineWidth: 5, strokeStyle: "rgb(255,255,255)" } ]
         ],
-        ['highway',{footway:1,pedestrian:1,path:1},
+        ['highway', {footway:1, pedestrian:1, path:1},
           [ { lineWidth: 2, strokeStyle: "rgb(198,178,178)" } ]
           //[ { lineWidth: 2, strokeStyle: "rgb(168,148,148)" } ]
         ],
-        ['highway',{steps:1},
+        ['highway', {steps:1},
           [ { dash:[1.5,1.5], lineWidth: 3, strokeStyle: "rgb(168,148,148)" } ]
         ],
-        ['highway',{service:1,bus_guideway:1},
+        ['highway', {service:1, bus_guideway:1},
           [ { lineWidth: 4, strokeStyle: "rgb(168,168,168)" },
             { lineWidth: 2.5, strokeStyle: "rgb(208,208,208)" } ]
         ],
-        ['highway',{track:1},
+        ['highway', {track:1},
           [ { lineWidth: 3.5, strokeStyle: "rgb(168,168,168)" },
             { lineWidth: 2.5, strokeStyle: "rgb(250,250,208)" } ]
         ],
-        ['highway',{residential:1,unclassified:1},
+        ['highway', {residential:1, unclassified:1},
           [ { lineWidth: 4, strokeStyle: "rgb(200,200,200)" },
             { lineWidth: 2.5, strokeStyle: "rgb(255,255,255)" } ]
         ],
-        ['highway',{tertiary:1},
+        ['highway', {tertiary:1},
           [ { lineWidth: 5, strokeStyle: "rgb(200,200,200)" },
             { lineWidth: 3.5, strokeStyle: "rgb(255,255,235)" } ]
         ],
         // border
-        ['railway',{subway:1},
+        ['railway', {subway:1},
           [ { globalAlpha: 0.2, lineWidth: 3, strokeStyle: "rgb(100,100,100)" },
             { globalAlpha: 1 } ]
         ],
-        ['railway',{rail:1,preserved:1,monorail:1,narrow_gauge:1},
+        ['railway', {rail:1, preserved:1, monorail:1, narrow_gauge:1},
           [ { lineWidth: 3, strokeStyle: "rgb(100,100,100)" } ]
         ],
-        ['highway',{secondary:1,secondary_link:1,primary:1,primary_link:1},
+        ['highway', {secondary:1, secondary_link:1, primary:1, primary_link:1},
           [ { lineCap: 'round', lineWidth: 6, strokeStyle: "rgb(171,158,137)" } ]
         ],
-        ['highway',{motorway:1,motorway_link:1,trunk:1,trunk_link:1},
+        ['highway', {motorway:1, motorway_link:1, trunk:1, trunk_link:1},
           [ { lineWidth: 7, strokeStyle: "rgb(188,149,28)" } ]
         ],
-        ['aeroway',{runway:1},
+        ['aeroway', {runway:1},
           [ { lineWidth: 10, strokeStyle: "rgb(100,130,100)" } ]
         ],
-        ['aeroway',{taxiway:1},
+        ['aeroway', {taxiway:1},
           [ { lineWidth: 4.5, strokeStyle: "rgb(100,130,100)" } ]
         ],
         // fill
-        ['railway',{subway:1},
+        ['railway', {subway:1},
           [ { lineCap: 'butt', globalAlpha: 0.3, dash: [3,3], lineWidth: 1.5, strokeStyle: "rgb(255,255,255)" },
             { globalAlpha: 1 } ]
         ],
-        ['railway',{rail:1,narrow_gauge:1},
+        ['railway', {rail:1, narrow_gauge:1},
           [ { dash: [3,3], lineWidth: 1.5, strokeStyle: "rgb(255,255,255)" } ]
         ],
-        ['railway',{preserved:1},
+        ['railway', {preserved:1},
           [ { dash: [3,3], lineWidth: 1.5, strokeStyle: "rgb(200,200,200)" } ]
         ],
-        ['railway',{monorail:1},
+        ['railway', {monorail:1},
           [ { dash: [1,2,4,2], lineWidth: 1.5, strokeStyle: "rgb(200,200,200)" } ]
         ],
-        ['highway',{bus_guideway:1},
+        ['highway', {bus_guideway:1},
           [ { dash: [3,3], lineWidth: 2, strokeStyle: "rgb(150,150,255)" } ]
         ],
-        ['highway',{secondary:1,secondary_link:1},
+        ['highway', {secondary:1, secondary_link:1},
           [ { lineCap: 'round', lineWidth: 4.5, strokeStyle: "rgb(255,250,115)" } ]
         ],
-        ['highway',{primary:1,primary_link:1},
+        ['highway', {primary:1, primary_link:1},
           [ { lineWidth: 4, strokeStyle: "rgb(255,230,95)" } ]
         ],
-        ['highway',{motorway:1,motorway_link:1,trunk:1,trunk_link:1},
+        ['highway', {motorway:1, motorway_link:1, trunk:1, trunk_link:1},
           [ { lineWidth: 5, strokeStyle: "rgb(242,191,36)" } ]
         ],
-        ['aeroway',{runway:1},
+        ['aeroway', {runway:1},
           [ { lineWidth: 8, strokeStyle: "rgb(150,180,150)" } ]
         ],
-        ['aeroway',{taxiway:1},
+        ['aeroway', {taxiway:1},
           [ { lineWidth: 2.5, strokeStyle: "rgb(150,180,150)" } ]
         ],
-        ['railway',{tram:1},
+        ['railway', {tram:1},
           [ { globalAlpha: 0.4, dash: [3,3], lineWidth: 1.5, strokeStyle: "rgb(0,0,0)" },
             { globalAlpha: 1 } ]
         ],
         // access overlay
-        ['access',{permissive:1},
+        ['access', {permissive:1},
           [ { dash: [1,2], lineWidth: 1, strokeStyle: "rgb(100,200,100)" } ]
         ],
-        ['access',{'private':1,residents:1},
+        ['access', {'private':1, residents:1},
           [ { dash: [1,2], lineWidth: 1, strokeStyle: "rgb(200,100,100)" } ]
         ],
-        ['building:part',true,
+        ['building:part', true,
           [ { lineWidth: 1, strokeStyle: "rgb(127,127,255)" } ]
         ]
-        /*['start_date',true,
+        /*['start_date', true,
           [ { dash: [2,5], lineWidth: 3, strokeStyle: "rgb(255,0,0)" } ]
         ]*/
       ]
     };
 
 
-  function union(a1,a2) {
+  function union(a1, a2)
+  {
     var a = a1.concat(a2), r = [], s = {};
     for (i in a)
     {
-      if (a.hasOwnProperty(i) )
+      if (a.hasOwnProperty(i))
       {
         if (!(a[i] in s))
         {
@@ -259,18 +260,16 @@ var wmajt = (function(){
 
   function gotData(data)
   {
+    // TODO sort accorsing to layer and tunnel flag (but that kills the index!)
+    var idx, lay = {0: 1}, d, i, j;
+
     // insert response into cache
     if (data === null) return; // server error
     d = data.data;
 
-    // TODO sort accorsing to layer and tunnel flag (but that kills the index!)
-    var idx, lay = {0: 1}, d, i, j;
-
     // index of objects by tag
     if (data.v && data.v >= 2)
-    {
       idx = data.idx;
-    }
     else
     {
       // generate index client side
@@ -280,13 +279,9 @@ var wmajt = (function(){
         for (j in d[i].tags)
         {
           if (j in idx)
-          {
             idx[j].push(i);
-          }
           else
-          {
             idx[j] = [i];
-          }
         }
       }
     }
@@ -295,9 +290,7 @@ var wmajt = (function(){
     for (i = 0; i < d.length; ++i)
     {
       if ('layer' in d[i].tags)
-      {
         lay[d[i].tags['layer']] = 1;
-      }
     }
 
     // build cache entry
@@ -322,7 +315,7 @@ var wmajt = (function(){
           for (i = 0; i < d.length; ++i)
           {
             // check against shape type and tags
-            if('osm_id' in d[i].tags &&
+            if ('osm_id' in d[i].tags &&
                 ('building' in d[i].tags || 'building:part' in d[i].tags) &&
                 !(d[i].tags['osm_id'] in ca.building))
             {
@@ -330,13 +323,9 @@ var wmajt = (function(){
               for (j in d[i].tags)
               {
                 if (j in ca.idx)
-                {
                   ca.idx[j].push(ca.data.length);
-                }
                 else
-                {
                   ca.idx[j] = [ca.data.length];
-                }
               }
               ca.data.push(d[i]);
               ca.building[d[i].tags['osm_id']] = 1;
@@ -363,7 +352,8 @@ var wmajt = (function(){
     if (dash)
     {
       // iterate over all nodes
-      if( g.length > 0 ) {
+      if (g.length > 0)
+      {
         var px = (g[0][0]-bx1) * 128.0 / bw
           , py = 128.0 - (g[0][1] - by1) * 128.0 / bh
           , dx, dy, di = 0, dl = dash.length, dc = 0.0
@@ -411,19 +401,17 @@ var wmajt = (function(){
     else
     {
       // iterate over all nodes
-      if( g.length > 0 )
+      if (g.length > 0)
       {
         c.moveTo((g[0][0] - bx1) * 128 / bw, 128 - (g[0][1] - by1) * 128 / bh);
         for (j = 1; j < g.length; ++j)
-        {
           c.lineTo((g[j][0] - bx1) * 128 / bw, 128 - (g[j][1]-by1) * 128 / bh);
-        }
       }
     }
   }
 
   // detect mouse pointer proximity
-  function detectPointer( e, tile )
+  function detectPointer(e, tile)
   {
     var rmin = null, mmin = {}
       , o = tile.div.offset()
@@ -432,7 +420,7 @@ var wmajt = (function(){
       , d = tile.csca.data || []
       , m, i, t, s = '';
 
-    function detectPath(g,c,m)
+    function detectPath(g, c, m)
     {
       var px, py, r;
 
@@ -452,7 +440,7 @@ var wmajt = (function(){
 
     // set globals for current tile coordinates
     bx1 = tile.csx * 60.0 / (1 << tile.csz)
-    by1 = 90.0 - (((tile.csy + 1.0) * 60.0) / (1 << tile.csz) )
+    by1 = 90.0 - (((tile.csy + 1.0) * 60.0) / (1 << tile.csz))
     bx2 = (tile.csx + 1) * 60.0 / (1 << tile.csz)
     by2 = 90.0 - ((tile.csy * 60.0) / (1 << tile.csz))
     bw = bx2 - bx1
@@ -465,9 +453,7 @@ var wmajt = (function(){
       m = d[i];
       processShape(m, 'Polygon', null, detectPath);
       if (m.geo.type == 'GeometryCollection')
-      {
         processShape(m, 'Line', null, detectPath);
-      }
     }
 
     t = mmin.tags || {};
@@ -476,13 +462,9 @@ var wmajt = (function(){
     {
       s = t[('name:' + UILang)] || t.name;
       if ('loc_name' in t)
-      {
         s += ' "' + t.loc_name + '"';
-      }
-      if('artist_name' in t)
-      {
+      if ('artist_name' in t)
         s += ' (' + t.artist_name + ')';
-      }
       return s;
     }
 
@@ -490,16 +472,14 @@ var wmajt = (function(){
     if ('addr:street' in t)
     {
       s = t['addr:street'];
-      if( 'addr:housenumber' in t )
-      {
+      if ('addr:housenumber' in t)
         s = t['addr:housenumber'] + ' ' + s;
-      }
       return s;
     }
 
     // misc
     var tags = ['landuse', 'historic', 'highway', 'building'];
-    for( i=0; i<tags.length; ++i )
+    for (i = 0; i < tags.length; ++i)
     {
       if (tags[i] in t)
         return tags[i] + ' ' + t[tags[i]];
@@ -509,7 +489,7 @@ var wmajt = (function(){
   }
 
   // quick hack for shape type
-  function processShape(m,s,c,path)
+  function processShape(m, s, c, path)
   {
     var k, l, g;
     switch(m.geo.type)
@@ -579,9 +559,9 @@ var wmajt = (function(){
 
     // set globals for current tile coordinates
     bx1 = x*60.0/(1<<z)
-    by1 = 90.0 - ( ((y+1.0)*60.0) / (1<<z) )
+    by1 = 90.0 - (((y+1.0)*60.0) / (1<<z))
     bx2 = (x+1) * 60.0 / (1<<z)
-    by2 = 90.0 - ( (y*60.0) / (1<<z) )
+    by2 = 90.0 - ((y*60.0) / (1<<z))
     bw = bx2 - bx1
     bh = by2 - by1
     if (bx1 > 180.0)
@@ -618,36 +598,33 @@ var wmajt = (function(){
           {
             m = d[idx[i]];
             // check against shape type and tags
-            if( ( s !== m.geo.type && ("Multi"+s) !== m.geo.type && m.geo.type !== 'GeometryCollection' ) ||
-                !( style[s][o][1]===true || m.tags[style[s][o][0]] in style[s][o][1] ) ) continue;
+            if ((s !== m.geo.type && ("Multi"+s) !== m.geo.type && m.geo.type !== 'GeometryCollection') ||
+                !(style[s][o][1]===true || m.tags[style[s][o][0]] in style[s][o][1])) continue;
 
-            processShape(m,s,c,drawPath);
+            processShape(m, s, c, drawPath);
           }
 
           // iterate over the style components
           g = style[s][o][2]
-          for (i = 0; i < g.length; i++)
+          for (i = 0; i < g.length; ++i)
           {
             for (j in g[i])
             {
               if (j != 'dash')
-              {
                 c[j] = g[i][j];
-              }
             }
 
-            if( 'strokeStyle' in g[i] ) {
+            if ('strokeStyle' in g[i])
               c.stroke();
-            }
-            if( 'fillStyle' in g[i] ) {
+            if ('fillStyle' in g[i])
               c.fill();
-            }
           }
         }
       }
     }
 
-    function parseHeight(s) {
+    function parseHeight(s)
+    {
       var m;
       if (s === undefined)
         return null;
@@ -660,7 +637,7 @@ var wmajt = (function(){
       // feet and inches
       m = /^((\d+(\.\d*)?)')?((\d+(\.\d*)?)")?$/.exec(s);
       if (m !== null)
-        return parseFloat(m[2]||'0')*0.3048 + parseFloat(m[5]||'0')*0.0254;
+        return parseFloat(m[2] || '0') * 0.3048 + parseFloat(m[5] || '0') * 0.0254;
 
       return 0.0;
     }
@@ -672,10 +649,10 @@ var wmajt = (function(){
     tile.csz = z;
 
     // seach cache for data
-    var zz, xx=x, yy=y, ca, d,v, idx;
+    var zz, xx = x, yy = y, ca, d, v, idx;
     for (zz = z; zz >= minzoom; --zz)
     {
-      ca = cache[hash(xx,yy,zz)];
+      ca = cache[hash(xx, yy, zz)];
       if (ca && ca.data && !purge)
       {
         // subtract old tile from reference counters
@@ -688,17 +665,19 @@ var wmajt = (function(){
             for (i = 0; i < idx.length; ++i)
             {
               v = d[idx[i]].tags['start_date'];
-              if (v in ref_sd) {
+              if (v in ref_sd)
+              {
                 ref_sd[v]--;
-                if(ref_sd[v]==0) delete ref_sd[v];
+                if (ref_sd[v] == 0)
+                  delete ref_sd[v];
               }
             }
           }
           // union index
           if (trackzbuild && z > buildingzoom)
           {
-            idx = union( tile.csca.idx['building:levels']||[], tile.csca.idx['height']||[] );
-            //if( z>buildingzoom && 'building:levels' in tile.csca.idx ) {
+            idx = union(tile.csca.idx['building:levels']||[], tile.csca.idx['height']||[]);
+            //if (z>buildingzoom && 'building:levels' in tile.csca.idx) {
             //  idx = tile.csca.idx['building:levels']
             for (i = 0; i < idx.length; ++i)
             {
@@ -708,7 +687,7 @@ var wmajt = (function(){
                 if (v in ref_z)
                 {
                   ref_z[v]--;
-                  if(ref_z[v] == 0)
+                  if (ref_z[v] == 0)
                     delete ref_z[v];
                 }
               }
@@ -725,7 +704,8 @@ var wmajt = (function(){
         // add to reference counters
         d = ca.data;
         // this maintains a list of all distinct start dates in the current field of view
-        if( trackstartdate && 'start_date' in ca.idx ) {
+        if (trackstartdate && 'start_date' in ca.idx)
+        {
           idx = ca.idx['start_date']
           for (i = 0; i < idx.length; ++i)
           {
@@ -736,11 +716,11 @@ var wmajt = (function(){
 
         // this maintains a list of all buildings with height data  in the field of view
         // and a lookup table of buildings by osm_id
-        //if( z>buildingzoom && 'building:levels' in ca.idx ) {
+        //if (z>buildingzoom && 'building:levels' in ca.idx) {
         // union index
         if (trackzbuild && z > buildingzoom)
         {
-          idx = union(ca.idx['building:levels'] || [], ca.idx['height'] || [] );
+          idx = union(ca.idx['building:levels'] || [], ca.idx['height'] || []);
           //idx = ca.idx['building:levels']
           for (i = 0; i < idx.length; ++i)
           {
@@ -749,9 +729,7 @@ var wmajt = (function(){
               v = d[idx[i]].tags['osm_id'];
               ref_z[v] = (ref_z[v]||0) + 1;
               if (!(v in zbuild))
-              {
                 zbuild[v] = d[idx[i]];
-              }
             }
           }
         }
@@ -775,23 +753,18 @@ var wmajt = (function(){
                 bldgh = parseHeight(v.tags['height']) || (v.tags['building:levels']*3);
                 bldgm = parseHeight(v.tags['min_height']) || (v.tags['building:min_level']*3) || 0;
                 if (v.geo.type === 'Polygon')
-                {
                   g = v.geo.coordinates;
-                }
-                else if (v.geo.type === 'LineString') {
+                else if (v.geo.type === 'LineString')
                   g = [v.geo.coordinates];
-                }
                 else
-                {
                   continue;
-                }
 
                 glRedraw = true;
 
                 // old style pyramid
                 if (v.tags['building:shape'] === 'pyramid')
                 {
-                  shapePyramid( g, bldgm, bldgh );
+                  shapePyramid(g, bldgm, bldgh);
                   continue;
                 }
 
@@ -851,7 +824,8 @@ var wmajt = (function(){
     });
   }
 
-  function registerWebGLBuildingData( triangleNum, context, program ) {
+  function registerWebGLBuildingData(triangleNum, context, program)
+  {
     glArrList = [];
     glBufList = [];
     glBufSize = triangleNum; // *9 floats
@@ -870,11 +844,12 @@ var wmajt = (function(){
     trackzbuild = false;
   }
 
-  function renderWebGLBuildingData() {
+  function renderWebGLBuildingData()
+  {
     var i, l, vb, nb, s;
 
     // new data to be copied
-    if (glArrList.length > glBufList.length || glI > glO )
+    if (glArrList.length > glBufList.length || glI > glO)
     {
       // copy data, add buffers (maybe more arrays than buffers!)
       // start at last entry in glBufList loop up till
@@ -938,15 +913,13 @@ var wmajt = (function(){
       {
         // copy triangle
         for (k = 0; k < 9; ++k)
-        {
           glArrList[i].v[glI*9+k] = v[j*9+k];
-        }
 
         // increment pointer
         glI++;
 
         // end of array
-        if( glI == s )
+        if (glI == s)
         {
           glI = 0;
           glArrList.push({ v:new Float32Array(glBufSize * 9), n:new Float32Array(glBufSize * 9) });
@@ -963,7 +936,7 @@ var wmajt = (function(){
     }
   }
 
-  function shapeGabled(d,b,h, hilted)
+  function shapeGabled(d, b, h, hilted)
   {
     var c, i, j, k , l, ls, cx = [], cy = [],
         dx1, dy1, dx2, dy2, dz2, nx, ny, nz;
@@ -1012,10 +985,10 @@ var wmajt = (function(){
       // triangle at base level
       vnPush([c[i][0], c[i][1], b,
               c[i+1][0], c[i+1][1], b,
-              cx[k],cy[k], h],
-             [nx,ny,nz,
-              nx,ny,nz,
-              nx,ny,nz ]);
+              cx[k], cy[k], h],
+             [nx, ny, nz,
+              nx, ny, nz,
+              nx, ny, nz ]);
       // triangle at roof level
       vnPush([cx[k], cy[k], h,
               cx[(k+1)%2], cy[(k+1)%2], h,
@@ -1027,7 +1000,8 @@ var wmajt = (function(){
     // triangular roof surfaces
   }
 
-  function shapePyramid(d,b,h) {
+  function shapePyramid(d, b, h)
+  {
     var c, i, j, l, cx = 0, cy = 0,
         dx1, dy1, dx2, dy2, dz2, nx, ny, nz;
 
@@ -1044,16 +1018,15 @@ var wmajt = (function(){
       cy += c[i][1];
     }
     if (area > 0)
-    {
       c.reverse();
-    }
+
     cx /= l;
     cy /= l;
 
     dz2 = h-b;
     for (i = 0; i < l; ++i)
     {
-      // normal vector (dx,dy,0) x (0,0,1)
+      // normal vector (dx, dy, 0) x (0, 0, 1)
       dx1 = c[i][0] - c[i+1][0];
       dy1 = c[i][1] - c[i+1][1];
       dx2 = cx - c[i][0];
@@ -1077,7 +1050,7 @@ var wmajt = (function(){
 
   function triangulate(d, b, h, noroof)
   {
-    var tr, d0, c, i, j, l, good, area, dx,dy;
+    var tr, d0, c, i, j, l, good, area, dx, dy;
     noroof = ~~noroof;
 
     // enforce winding orders
@@ -1087,15 +1060,13 @@ var wmajt = (function(){
       l = c.length - 1;
       area=0;
       if (l < 3) return;
+
       for (i = 0; i < l; ++i)
-      {
         area += (c[i][0] * c[i+1][1]) - (c[i+1][0] * c[i][1]);
-      }
+
       area *= (j == 0) ? 1 : -1;
       if (area > 0)
-      {
         c.reverse();
-      }
     }
 
     // setup walls
@@ -1104,7 +1075,7 @@ var wmajt = (function(){
       c = d[j]; l = c.length-1;
       for (i = 0; i < l; ++i)
       {
-        // normal vector (dx,dy,0) x (0,0,1)
+        // normal vector (dx, dy, 0) x (0, 0, 1)
         dx = c[i][0] - c[i+1][0];
         dy = c[i][1] - c[i+1][1];
         r = Math.sqrt(dx * dx + dy * dy);
@@ -1180,9 +1151,7 @@ var wmajt = (function(){
       c = d[j]; l = c.length - 1;
       var hole = [];
       for (i = 0; i < l; ++i)
-      {
         hole.push(new p2t.Point(c[i][0], c[i][1]));
-      }
       swctx.AddHole(hole);
     }
 
@@ -1191,22 +1160,31 @@ var wmajt = (function(){
     for (i = 0; i < tr.length; ++i)
     {
       var tp = [tr[i].GetPoint(0), tr[i].GetPoint(1), tr[i].GetPoint(2)];
-      vnPush([tp[0].x,tp[0].y,h, tp[1].x,tp[1].y,h, tp[2].x,tp[2].y,h],
-             [0,0,1, 0,0,1, 0,0,1]);
+      vnPush([tp[0].x, tp[0].y, h,
+              tp[1].x, tp[1].y, h,
+              tp[2].x, tp[2].y, h],
+             [0, 0, 1,
+              0, 0, 1,
+              0, 0,1]);
     }
   }
 
   return {
     update: update,
     detectPointer: detectPointer,
-    ref_z : function() {
+    ref_z : function()
+    {
       return ref_z;
     },
-    zbuild : function() {
+    zbuild : function()
+    {
       return zbuild;
     },
     registerWebGLBuildingData : registerWebGLBuildingData,
     renderWebGLBuildingData: renderWebGLBuildingData,
-    setUILang: function(l) { UILang = l; }
+    setUILang: function(l)
+    {
+      UILang = l;
+    }
   }
 })();
