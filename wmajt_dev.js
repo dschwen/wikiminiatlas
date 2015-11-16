@@ -1,13 +1,14 @@
 var wmajt = (function(){
-  var w=128, h=128  // tile size
+  var w = 128, h = 128  // tile size
     , UILang='en'
     , minzoom = 12, buildingzoom = 14
     , cache = {}
     , ref_sd = {}, ref_z = {}
     , zbuild = {}
     , trackstartdate = false, trackzbuild = true
-    , bx1, by1, bx2, by2, bw, bh              // used by update and mouse pointer interaction (current tile coords)
-    , glProgram, glBufList, glBufSize, glI, glO, gl = null // used to build the webgl building buffers (glI is index to current buffer (last in list))
+    , bx1, by1, bx2, by2, bw, bh // used by update and mouse pointer interaction (current tile coords)
+    , lineWidthMult = 1 // lineWidth multiplier
+    , glProgram, glBufList, glBufSize, glI, glO, gl = null // used to build the WebGL building buffers (glI is index to current buffer (last in list))
     , dash = null
     , style = {
       Polygon: [
@@ -565,9 +566,10 @@ var wmajt = (function(){
     bw = bx2 - bx1
     bh = by2 - by1
     if (bx1 > 180.0)
-    {
       bx1-=360;
-    }
+
+    // set global lineWidth multiplier
+    lineWidthMult = Math.pow(1.5, z - 13);
 
     // draw the data
     function drawGeoJSON(ca)
@@ -610,7 +612,9 @@ var wmajt = (function(){
           {
             for (j in g[i])
             {
-              if (j != 'dash')
+              if (j === 'lineWidth')
+                c.lineWidth = g[i].lineWidth * lineWidthMult;
+              else if (j !== 'dash')
                 c[j] = g[i][j];
             }
 
