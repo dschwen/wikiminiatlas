@@ -108,6 +108,10 @@ var wmajt = (function(){
         ['building:part', true,
           [ { fillStyle: "rgb(200,200,200)" },
             { lineWidth: 1, strokeStyle: "rgb(127,127,127)" } ]
+        ],
+        ['aeroway', {runway: 1},
+          [ { fillStyle: "rgb(100,130,100)" },
+            { lineWidth: 1, strokeStyle: "rgb(150,180,150)" } ]
         ]
         /*['building:height', true,
           [ { lineWidth: 5, strokeStyle: "rgb(255,0,0)" } ]
@@ -123,19 +127,19 @@ var wmajt = (function(){
         ]*/
       ],
       LineString: [
-        ['natural', {coastlines:1},
+        ['natural', {coastlines: 1},
           [ { lineWidth: 1, strokeStyle: "rgb(125,125,104)"} ]
         ],
-        ['waterway', {canal:1},
+        ['waterway', {canal: 1},
           [ { lineCap: 'butt', lineWidth: 3, strokeStyle: "rgb(158,199,243)" } ]
         ],
-        ['waterway', {river:1},
+        ['waterway', {river: 1},
           [ { lineWidth: 1.5, strokeStyle: "rgb(126,159,194)" } ]
         ],
-        ['waterway', {stream:1},
+        ['waterway', {stream: 1},
           [ { dash: [2,2], lineWidth: 1.5, strokeStyle: "rgb(126,159,194)" } ]
         ],
-        ['route', {ferry:1},
+        ['route', {ferry: 1},
           [ { dash: [4,4], lineWidth: 2, strokeStyle: "rgb(126,159,194)" } ]
         ],
         ['highway', {pedestrian:1},
