@@ -139,11 +139,11 @@ var wma_tilesets = [
     globe: "Moon",
     getTileURL: function(y, x, z)
     {
-      var x1 = x % (wma_zoomsize[z]*2);
-      if (x1<0) x1+=(wma_zoomsize[z]*2);
+      var x1 = x % (wma_zoomsize[z] * 2);
+      if (x1 < 0)
+        x1 += wma_zoomsize[z] * 2;
 
-
-   return wma_imgbase + 'moon/'+z+'/'+y+'_'+x1+'.jpg';
+      return wma_imgbase + 'moon/'+z+'/'+y+'_'+x1+'.jpg';
     },
     linkcolor: [ "white", "1px 0px 2px black, 0px -1px 2px black, 0px 1px 2px black, -1px 0px 2px black" ],
     equator: 10940.475, // equatorial circumfence in km
@@ -155,11 +155,12 @@ var wma_tilesets = [
     globe: "Mars",
     getTileURL: function(y, x, z)
     {
-      var x1 = (x+wma_zoomsize[z]) % (wma_zoomsize[z]*2);
-      if (x1<0) x1+=(wma_zoomsize[z]*2);
+      var x1 = (x+wma_zoomsize[z]) % (wma_zoomsize[z] * 2);
+      if (x1 < 0)
+        x1 += wma_zoomsize[z] * 2;
 
-
-   return wma_imgbase + 'mars/mars_'+('00'+(5-z))+'_'+('000'+x1).substr(-3)+'_'+('000'+y).substr(-3)+'.png';
+      return wma_imgbase + 'mars/mars_' + ('00' + (5 - z)) + '_'
+             + ('000' + x1).substr(-3) + '_' + ('000' + y).substr(-3) + '.png';
     },
     linkcolor: [ "white", "black 0pt 0pt 2pt" ],
     equator: 21359.975, // equatorial circumfence in km
@@ -171,11 +172,12 @@ var wma_tilesets = [
     globe: "Venus",
     getTileURL: function(y, x, z)
     {
-      var x1 = x % (wma_zoomsize[z]*2);
-      if (x1<0) x1+=(wma_zoomsize[z]*2);
+      var x1 = x % (wma_zoomsize[z] * 2);
+      if (x1 < 0)
+        x1 += wma_zoomsize[z] * 2;
 
-
-   return wma_imgbase + 'venus/venus_'+('00'+(3-z))+'_'+('000'+x1).substr(-3)+'_'+('000'+y).substr(-3)+'.png';
+      return wma_imgbase + 'venus/venus_' + ('00' + (3 - z)) + '_'
+             + ('000' + x1).substr(-3) + '_' + ('000' + y).substr(-3) + '.png';
     },
     linkcolor: [ "white", "1px 0px 2px black, 0px -1px 2px black, 0px 1px 2px black, -1px 0px 2px black" ],
     equator: 38024.6, // equatorial circumfence in km
@@ -187,10 +189,14 @@ var wma_tilesets = [
     globe: "Mercury",
     getTileURL: function(y, x, z)
     {
-      var x1 = (x+1*wma_zoomsize[z]) % (wma_zoomsize[z]*2);
-      if (x1<0) x1+=(wma_zoomsize[z]*2);
-      var z1 = 6-z;
-      return wma_imgbase + 'mercury/'+((z1<3)?(z1+'/'):'')+((z1==0)?(Math.floor(x1/100)+'/'):'')+'merc_'+('00'+z1)+'_'+('000'+x1).substr(-3)+'_'+('000'+y).substr(-3)+'.png';
+      var x1 = (x + 1 * wma_zoomsize[z]) % (wma_zoomsize[z] * 2);
+      if (x1 < 0)
+        x1 += wma_zoomsize[z] * 2;
+      var z1 = 6 - z;
+      return wma_imgbase + 'mercury/' + ((z1 < 3) ? (z1 + '/') : '')
+             + ((z1 == 0) ? (Math.floor(x1 / 100) + '/') : '') + 'merc_'
+             + ('00' + z1) + '_' + ('000' + x1).substr(-3) + '_'
+             + ('000' + y).substr(-3) + '.png';
     },
     linkcolor: [ "white", "1px 0px 2px black, 0px -1px 2px black, 0px 1px 2px black, -1px 0px 2px black" ],
     equator: 15329.1, // equatorial circumfence in km
@@ -202,11 +208,12 @@ var wma_tilesets = [
     globe: "Io",
     getTileURL: function(y, x, z)
     {
-      var x1 = (x+wma_zoomsize[z]) % (wma_zoomsize[z]*2);
-      if (x1<0) x1+=(wma_zoomsize[z]*2);
+      var x1 = (x + wma_zoomsize[z]) % (wma_zoomsize[z] * 2);
+      if (x1 < 0)
+        x1 += wma_zoomsize[z] * 2;
 
-
-   return wma_imgbase + 'io/io_'+('00'+(4-z))+'_'+('000'+x1).substr(-3)+'_'+('000'+y).substr(-3)+'.png';
+      return wma_imgbase + 'io/io_' + ('00' + (4 - z)) + '_'
+            + ('000' + x1).substr(-3) + '_' + ('000' + y).substr(-3) + '.png';
     },
     linkcolor: [ "black", "1px 0px 2px white, 0px -1px 2px white, 0px 1px 2px white, -1px 0px 2px white" ],
     equator: 11443.6, // equatorial circumfence in km
@@ -219,10 +226,11 @@ var wma_tilesets = [
     getTileURL: function(y, x, z)
     {
       var x1 = x % (wma_zoomsize[z]*2);
-      if (x1<0) x1+=(wma_zoomsize[z]*2);
+      if (x1 < 0)
+        x1 += wma_zoomsize[z] * 2;
 
-
-   return wma_imgbase + 'titan/titan_'+('00'+(3-z))+'_'+('000'+x1).substr(-3)+'_'+('000'+y).substr(-3)+'.png';
+      return wma_imgbase + 'titan/titan_' + ('00'+(3-z)) + '_'
+             + ('000' + x1).substr(-3) + '_' + ('000' + y).substr(-3) + '.png';
     },
     linkcolor: [ "black", "1px 0px 2px white, 0px -1px 2px white, 0px 1px 2px white, -1px 0px 2px white" ],
     equator: 16190.3, // equatorial circumfence in km
@@ -231,11 +239,12 @@ var wma_tilesets = [
   }
 ];
 
-
 // parse url parameters into a hash
-function parseParams(url) {
-  var map = {}, h, i, pair = url.substr(url.indexOf('?')+1).split('&');
-  for (i=0; i<pair.length; ++i) {
+function parseParams(url)
+{
+  var map = {}, h, i, pair = url.substr(url.indexOf('?') + 1).split('&');
+  for (i=0; i<pair.length; ++i)
+  {
     h = pair[i].split('=');
     map[h[0]] = h[1];
   }
@@ -243,18 +252,21 @@ function parseParams(url) {
 }
 
 // check if a language given by language code lang is right to left (RTL)
-function isRTL(lang) {
+function isRTL(lang)
+{
   return ($.inArray(lang, ['ar', 'he', 'fa']) >= 0);
 }
 
 //
 // Insert the map Widget into the page.
 //
-function wikiminiatlasInstall(wma_widget, url_params) {
+function wikiminiatlasInstall(wma_widget, url_params)
+{
   // defaults
   var wma_coordinate_region = '';
-  var wma_width = 500;
-  var wma_height = 300;
+  var wma_width = 500,
+      wma_height = 300;
+
   // globals
   var wma_map = null;
   var wma_own_close = false;
@@ -280,13 +292,13 @@ function wikiminiatlasInstall(wma_widget, url_params) {
   var wma_tileset = 0;
   var tsx = 128, tsy = 128; // tile size
 
-  var scalelabel = null;
-  var scalebar = null;
-  var globe = null;
+  var scalelabel = null,
+      scalebar = null,
+      globe = null;
 
-  var synopsis = null;
-  var synopsis_filter = null;
-  var synopsistext = null;
+  var synopsis = null,
+      synopsis_filter = null,
+      synopsistext = null;
 
   var wmaci = {
     shown: false,
@@ -296,12 +308,18 @@ function wikiminiatlasInstall(wma_widget, url_params) {
   };
 
   url_params = url_params || parseParams(window.location.href);
-  var wmasize = {}, wmakml = { shown: false, drawn: false, canvas: null, c: null, ways: null, areas: null, maxlat: -Infinity, minlat: Infinity };
+  var wmasize = {},
+      wmakml = {
+        shown: false, drawn: false,
+        canvas: null, c: null,
+        ways: null, areas: null,
+        maxlat: -Infinity, minlat: Infinity
+      };
 
   var wmaLinkStyle = {};
 
-  var wmaGlobe = false;
-  var wmaGlobeLoadTiles = null;
+  var wmaGlobe = false,
+      wmaGlobeLoadTiles = null;
 
   var hasCanvas = "HTMLCanvasElement" in window;
   var wma_dpr = ('devicePixelRatio' in window) ? window.devicePixelRatio : 1;
@@ -349,18 +367,22 @@ function wikiminiatlasInstall(wma_widget, url_params) {
                    width: '80px', height: '80px', bottom: '20px', right: '5px',
                    zIndex: 50, display: 'none',
                    borderRadius: '40px', '-moz-border-radius': '40px',
-                   boxShadow:'5px 5px 25px rgba(0, 0, 0, 0.3)' }),
+                   boxShadow: '5px 5px 25px rgba(0, 0, 0, 0.3)' }),
           globe = $('<canvas></canvas>')
             .attr({ width: 160, height: 160 })
             .css({ position: 'absolute', width: '80px', height: '80px', bottom: '20px', right: '5px', zIndex: 51, display: 'none' });
 
       // load map tiles
-      function loadTiles() {
-        var i, j, loadcount=0, c = tmap[0].getContext('2d'), cm = map[0].getContext('2d');
+      function loadTiles()
+      {
+        var i, j, loadcount = 0, c = tmap[0].getContext('2d'), cm = map[0].getContext('2d');
         c.clearRect(0, 0, 6*128, 3*128);
-        for (i=0; i<6; ++i) {
-          for (j=0; j<3; ++j) {
-            (function(x, y){
+        for (i=0; i<6; ++i)
+        {
+          for (j=0; j<3; ++j)
+          {
+            (function(x, y)
+            {
               var img = new Image;
               $(img).load(function()
               {
@@ -370,7 +392,8 @@ function wikiminiatlasInstall(wma_widget, url_params) {
                 {
                   cm.drawImage(tmap[0], 0, 0, 6 * 128 * 4/3, 3 * 128 * 4/3);
                   // first globe initialization
-                  if (!wmaGlobe) {
+                  if (!wmaGlobe)
+                  {
                     wmaGlobe = wmaGlobe3d(globe[0], map[0]);
                     if (!wmaGlobe) { return };
                     wmaGlobe.setLatLon(marker.lat, marker.lon);
@@ -389,6 +412,7 @@ function wikiminiatlasInstall(wma_widget, url_params) {
                       wmaGlobe.updateTexture();
                       wmaGlobe.draw();
                     }
+
                     wmaGlobe.updateKML = function() {
                       wmaGlobe.mapContext.clearRect(0, 0, 6*128*4/3, 3*128*4/3);
                       wmaGlobe.mapContext.drawImage(wmaGlobe.tmap, 0, 0, 6*128*4/3, 3*128*4/3);
@@ -402,11 +426,10 @@ function wikiminiatlasInstall(wma_widget, url_params) {
                     }
                   }
                   // check if overlay has already been loaded
-                  if (wmakml.canvas) {
+                  if (wmakml.canvas)
                     wmaGlobe.updateKML();
-                  } else {
+                  else
                     wmaGlobe.updateTiles();
-                  }
                 }
               }).attr('src', wma_tilesets[wma_tileset].getTileURL(y, x, 0, true)); // disable rotating tileservers (causes DOM Security exception)
             })(i, j);
@@ -429,19 +452,25 @@ function wikiminiatlasInstall(wma_widget, url_params) {
       wma_height= $(window).height();
 
       coord_filter = /([\d+-.]+)_([\d+-.]+)_([\d]+)_([\d]+)_([a-z-]+)/;
-      if (coord_filter.test(coord_params)) {
+      if (coord_filter.test(coord_params))
+      {
         coord_filter.exec(coord_params);
         wma_site = RegExp.$5;
       }
 
       coord_filter = /([\d+-.]+)_([\d+-.]+)_([\d]+)_([\d]+)_([a-z-]+)_([\d]+)/;
-      if (coord_filter.test(coord_params)) {
+      if (coord_filter.test(coord_params))
+      {
         coord_filter.exec(coord_params);
         wma_defaultzoom = parseInt(RegExp.$6, 10);
         wmaSetZoom(wma_defaultzoom);
         // make sure zoom is in range
         wmaSetZoom(Math.min(wma_zoom,
-              (wma_tileset != 0 ? wma_tilesets[wma_tileset].maxzoom : ((hasCanvas&&wma_highzoom_activated) ? 15 : 12))));
+          (wma_tileset != 0 ?
+            wma_tilesets[wma_tileset].maxzoom :
+            ((hasCanvas && wma_highzoom_activated) ? 15 : 12)
+          )
+        ));
         wmaSetZoom(Math.max(wma_zoom, wma_tilesets[wma_tileset].minzoom));
       }
 
@@ -476,12 +505,14 @@ function wikiminiatlasInstall(wma_widget, url_params) {
 
     // set wma user interface language (assume en for commons if none other was specified)
     UILang = wma_language;
-    if (UILang == 'co' || UILang == 'commons') UILang = 'en';
+    if (UILang == 'co' || UILang == 'commons')
+      UILang = 'en';
     UIrtl = isRTL(UILang);
     wmajt.setUILang(UILang);
 
     // Fill missing i18n items
-    for (i in strings) {
+    for (i in strings)
+    {
       if (!strings[i][UILang])
         strings[i][UILang] = strings[i].en;
     }
@@ -569,11 +600,10 @@ function wikiminiatlasInstall(wma_widget, url_params) {
           ['commons', strings['commons'][UILang]]
         ], function(s)
         {
-          if (s=='LANG') {
+          if (s == 'LANG')
             s=g.items['LANG'].find('select option:selected').val();
-          }
           wmaLabelSet(s);
-        }, wma_site=='commons'?'commons':'LANG', UIrtl
+        }, wma_site == 'commons' ? 'commons' : 'LANG', UIrtl
       );
 
       g.items['LANG'].find('select')
@@ -590,7 +620,8 @@ function wikiminiatlasInstall(wma_widget, url_params) {
         globes[j].push([i, strings[wma_tilesets[i].name][UILang] || '']);
       }
       WikiMiniAtlasHTML = '<select id="wmaGlobeSet">';
-      for (i in globes) {
+      for (i in globes)
+      {
         WikiMiniAtlasHTML += '<option value="' + i + '"';
         if (i == globe)
           WikiMiniAtlasHTML += 'selected="selected"';
@@ -634,9 +665,9 @@ function wikiminiatlasInstall(wma_widget, url_params) {
     var news = $('<div></div>').html(l[Math.floor(Math.random()*l.length)]).addClass('news');
     labelcaption = $('<div></div>').css(
       {
-        position:'absolute', top: '30px', left:'60px',
-        zIndex:100, fontSize:'40px', color:'white',
-        textShadow:'1px 1px 5px black', fontWeight:'bold'
+        position: 'absolute', top: '30px', left: '60px',
+        zIndex: 100, fontSize: '40px', color: 'white',
+        textShadow: '1px 1px 5px black', fontWeight: 'bold'
       }
     ).appendTo('#wma_widget');
 
@@ -690,7 +721,7 @@ function wikiminiatlasInstall(wma_widget, url_params) {
     // 3d building outlines
     bldg3d = $('<canvas class="wmakml"></canvas>')
       .attr({ width: wma_width*wma_dpr, height: wma_height*wma_dpr })
-      .css({ zIndex:19, opacity: 0.75, width: wma_width+'px', height: wma_height+'px' })
+      .css({ zIndex: 19, opacity: 0.75, width: wma_width+'px', height: wma_height+'px' })
       .appendTo($(wma_map));
 
     if (hasCanvas)
@@ -704,13 +735,13 @@ function wikiminiatlasInstall(wma_widget, url_params) {
         // replace canvas
         bldg3d.remove();
         bldg3d = $('<canvas class="wmakml"></canvas>')
-          .attr({ width: wma_width*wma_dpr, height: wma_height*wma_dpr })
-          .css({ zIndex:19, opacity: 0.75, width: wma_width+'px', height: wma_height+'px' })
+          .attr({ width: wma_width * wma_dpr, height: wma_height * wma_dpr })
+          .css({ zIndex: 19, opacity: 0.75, width: wma_width + 'px', height: wma_height + 'px' })
           .appendTo($(wma_map));
       }
 
       // wireframe as fallback
-      if (!bldg3dc || update3dBuildings===false)
+      if (!bldg3dc || update3dBuildings === false)
       {
         bldg3dc = bldg3d[0].getContext('2d');
         bldg3dc.scale(wma_dpr, wma_dpr);
@@ -741,14 +772,14 @@ function wikiminiatlasInstall(wma_widget, url_params) {
           $('#synopsistext').load('/summary/?l=' + l + '&t=' + t, function()
           {
             $('#synopsistext')
-              .css('direction', isRTL(l)?'rtl':'ltr')
+              .css('direction', isRTL(l) ? 'rtl' : 'ltr')
               .find('a').attr('target', '_top');
             $('#synopsis').fadeIn('slow');
             setTimeout(function()
             {
               var h = $('#synopsistext').outerHeight(true),
                   mh = wma_height/2;
-              $('#synopsis').animate({ height: h<mh ? h : mh });
+              $('#synopsis').animate({ height: h < mh ? h : mh });
             }, 500);
           });
         }
@@ -805,13 +836,11 @@ function wikiminiatlasInstall(wma_widget, url_params) {
       {
         // only count clicks if the mouse pointer has not moved between mouse down and mouse up!
         var s, r = wmaMouseCoords(e);
-        if (r.x != wma_mdcoord.x ||
-            r.y != wma_mdcoord.y ||
-            !t.csrender) return true;
+        if (r.x != wma_mdcoord.x || r.y != wma_mdcoord.y || !t.csrender)
+          return true;
         s = wmajt.detectPointer(e, t);
-        if (s) {
+        if (s)
           wmaNotice(s);
-        }
       })
       , h = null
       , t = {
@@ -832,8 +861,8 @@ function wikiminiatlasInstall(wma_widget, url_params) {
       can : $('<canvas></canvas>').appendTo(d),
       ctx : null,
       csrender: false,
-      csx:0, csy:0, csz:20,
-      lx:0, ly:0, lz:20,
+      csx: 0, csy: 0, csz: 20,
+      lx: 0, ly: 0, lz: 20,
       span : $('<span></span>').appendTo(d),
       debug : $('<span></span>').addClass('wmadbg').css('display', 'none').appendTo(d),
       url : '',
@@ -843,14 +872,14 @@ function wikiminiatlasInstall(wma_widget, url_params) {
     {
       if (wma_dpr > 1)
       {
-        t.can.attr({width:128*wma_dpr, height:128*wma_dpr})
+        t.can.attr({width: 128*wma_dpr, height: 128*wma_dpr})
              .css({width: '128px', height: '128px'});
         t.ctx = t.can[0].getContext('2d');
 	      t.ctx.scale(wma_dpr, wma_dpr);
       }
       else
       {
-        t.can.attr({width:128, height:128});
+        t.can.attr({width: 128, height: 128});
         t.ctx = t.can[0].getContext('2d');
       }
     }
@@ -905,7 +934,7 @@ function wikiminiatlasInstall(wma_widget, url_params) {
       if (wmakml.canvas !== null)
       {
         wmakml.canvas
-          .attr({width:nw*wma_dpr, height:nh*wma_dpr})
+          .attr({width: nw*wma_dpr, height: nh*wma_dpr})
           .css({width: nw+'px', height: nh+'px'});
         wmakml.c.setTransform(wma_dpr, 0, 0, wma_dpr, 0, 0);
       }
@@ -1030,8 +1059,8 @@ function wikiminiatlasInstall(wma_widget, url_params) {
 
     // all parameters optional (used only for updating globe texture)
     hw = hw || wma_zoomsize[wma_zoom]*tsx;
-    ox = (ox!==undefined)?ox:wma_gx; // to allow passing 0 as a parameter!
-    oy = (oy!==undefined)?oy:wma_gy;
+    ox = (ox !== undefined) ? ox : wma_gx; // to allow passing 0 as a parameter!
+    oy = (oy !== undefined) ? oy : wma_gy;
     c = c || wmakml.c;
     gx = ox;
 
@@ -1040,7 +1069,7 @@ function wikiminiatlasInstall(wma_widget, url_params) {
       var k, p, wx = 0, lx, dx;
 
       if ( w[0].lon < wmakml.minlon)
-        wx = 2*hw;
+        wx = 2 * hw;
 
       if (w.length > 0)
       {
@@ -1052,7 +1081,7 @@ function wikiminiatlasInstall(wma_widget, url_params) {
           p = wmaLatLonToXY(w[k].lat, w[k].lon, hw);
           dx = p.x - lx;
           if (Math.abs(dx) > hw)
-            wx -= Math.round(dx/(2*hw))*2*hw;
+            wx -= Math.round(dx / (2*hw)) * 2 * hw;
           lx = p.x;
           c.lineTo(p.x - gx + wx, p.y - oy);
         }
@@ -1922,7 +1951,7 @@ function wikiminiatlasInstall(wma_widget, url_params) {
       credit.html(wma_tilesets[n].credit);
 
     // make sure we are in zoom range for the new tile set
-    if (newz > (n != 0 ? wma_tilesets[n].maxzoom : ((hasCanvas&&wma_highzoom_activated)?15:12)))
+    if (newz > (n != 0 ? wma_tilesets[n].maxzoom : ((hasCanvas && wma_highzoom_activated) ? 15 : 12)))
       newz = wma_tilesets[n].maxzoom;
     if (newz < wma_tilesets[n].minzoom)
       newz = wma_tilesets[n].minzoom;
@@ -2008,8 +2037,8 @@ function wikiminiatlasInstall(wma_widget, url_params) {
   function wmaLatLonToXYnoWrap(lat, lon, hw)
   {
     hw = hw || wma_zoomsize[wma_zoom]*tsx;
-    return { y:Math.floor((0.5-lat/180.0)*hw),
-             x:Math.floor((lon/360.0)    *hw*2) };
+    return { y: Math.floor((0.5-lat/180.0)*hw),
+             x: Math.floor((lon/360.0)    *hw*2) };
   }
 
   function wmaLatLonToXY(lat, lon, hw)
@@ -2018,12 +2047,15 @@ function wikiminiatlasInstall(wma_widget, url_params) {
     var newx = Math.floor((lon/360.0) * hw*2);
     if (newx < 0)
       newx += hw*2;
-    return { y:Math.floor((0.5-lat/180.0)*hw), x:newx };
+    return { y: Math.floor((0.5-lat/180.0)*hw), x: newx };
   }
 
   function wmaXYToLatLon(x, y)
   {
-    return { lat:180.0*(0.5-y/(wma_zoomsize[wma_zoom]*128)), lon:360.0*(x/(wma_zoomsize[wma_zoom]*256)) };
+    return {
+      lat: 180.0 * (0.5 - y / (wma_zoomsize[wma_zoom] * 128)),
+      lon: 360.0 * (x / (wma_zoomsize[wma_zoom] * 256))
+    };
   }
 
   function wmaDebug(text)
@@ -2034,48 +2066,52 @@ function wikiminiatlasInstall(wma_widget, url_params) {
   function wmaCommonsThumb(img, w, m5)
   {
     return m5 ?
-      '//upload.wikimedia.org/wikipedia/commons/thumb/'+ m5[0] +'/'+ m5 +'/'+ img +'/'+ w +'px-'+ img :
-      '//commons.wikimedia.org/w/thumb.php?w='+w+'&f='+img;
+      '//upload.wikimedia.org/wikipedia/commons/thumb/' + m5[0] + '/' + m5 + '/' + img + '/' + w + 'px-' + img :
+      '//commons.wikimedia.org/w/thumb.php?w=' + w + '&f=' + img;
   }
 
-  function wmaCommonsImageClose() {
+  function wmaCommonsImageClose()
+  {
     wmaci.shown = false;
     wmaci.panel.fadeOut(200);
   }
 
-  function wmaCommonsImageBuild() {
-   wmaci.panel = $('<div></div>', { id: 'wma_wmaci_panel' })
-     .append(
-       $('<div></div>', { id: 'wma_wmaci_panel_sub' })
-        .append(wmaci.span = $('<span></span>'))
-        .append($('<br/>'))
-        .append(wmaci.link =  $('<a></a>', { id: 'wma_wmaci_link', target: '_top' })
+  function wmaCommonsImageBuild()
+  {
+    wmaci.panel = $('<div></div>', { id: 'wma_wmaci_panel' })
+      .append(
+        $('<div></div>', { id: 'wma_wmaci_panel_sub' })
+          .append(wmaci.span = $('<span></span>'))
+          .append($('<br/>'))
+          .append(wmaci.link =  $('<a></a>', { id: 'wma_wmaci_link', target: '_top' })
           .click(function(e) { e.stopPropagation(); })
-       )
-    )
-     .css('visibility', 'visible') // TODO, remove once CSS is updated in clients
-     .hide()
-     .click(wmaCommonsImageClose)
-     .appendTo(wma_widget);
+        )
+      )
+      .css('visibility', 'visible') // TODO, remove once CSS is updated in clients
+      .hide()
+      .click(wmaCommonsImageClose)
+      .appendTo(wma_widget);
   }
 
   function wmaCommonsImage(name, w, h, m5)
   {
     // first time viewing an image?
-    if (wmaci.panel == null) {
+    if (wmaci.panel == null)
       wmaCommonsImageBuild();
-    }
 
     var maxw = wma_width - 30;
     var maxh = wma_height - 80;
     var imgw = w;
     var imgh = h;
 
-    if (imgw > maxw) {
+    if (imgw > maxw)
+    {
       imgh = Math.round((imgh * maxw) / imgw);
       imgw = maxw;
     }
-    if (imgh > maxh) {
+
+    if (imgh > maxh)
+    {
       imgw = Math.round((imgw * maxh) / imgh);
       imgh = maxh;
     }
@@ -2084,18 +2120,21 @@ function wikiminiatlasInstall(wma_widget, url_params) {
     wmaci.span.find('img').remove();
     var img = $('<img/>', { id: 'wma_wmaci_image' }).appendTo(wmaci.span);
 
-    if (imgw*2 < w) {
+    if (imgw * 2 < w)
+    {
       img.attr({
-        src: wmaCommonsThumb(name, Math.floor(imgw/10)*10, m5),
-        srcset: wmaCommonsThumb(name, Math.floor(imgw/10)*20, m5) + ' 2x'
-      })
-    } else if (imgw < w) {
-      img.attr({
-        src: wmaCommonsThumb(name, Math.floor(imgw/10)*10, m5)
-      })
-    } else {
-      img.attr('src', '//commons.wikimedia.org/wiki/Special:FilePath/' + name);
+        src: wmaCommonsThumb(name, Math.floor(imgw / 10) * 10, m5),
+        srcset: wmaCommonsThumb(name, Math.floor(imgw / 10) * 20, m5) + ' 2x'
+      });
     }
+    else if (imgw < w)
+    {
+      img.attr({
+        src: wmaCommonsThumb(name, Math.floor(imgw / 10) * 10, m5)
+      })
+    }
+    else
+      img.attr('src', '//commons.wikimedia.org/wiki/Special:FilePath/' + name);
 
     wmaci.link
       .attr('href', '//commons.wikimedia.org/wiki/File:' + name)
@@ -2105,12 +2144,14 @@ function wikiminiatlasInstall(wma_widget, url_params) {
     wmaci.shown = true;
   }
 
-  function wmaFullscreen() {
-    var fs = window.open('', 'showwin', 'left=0, top=0, width=' + screen.width + ', height=' + screen.height + ', toolbar=0, resizable=0, fullscreen=1')
-      , page = url_params['page']
-      , lang = url_params['lang']
-      , globe = wma_tilesets[wma_tileset].globe
-      , mapcenter = wmaXYToLatLon(wma_gx + wma_width / 2, wma_gy + wma_height / 2);
+  function wmaFullscreen()
+  {
+    var fs = window.open('', 'showwin', 'left=0, top=0, width=' + screen.width  + ', height='
+                         + screen.height + ', toolbar=0, resizable=0, fullscreen=1'),
+        page = url_params['page'],
+        lang = url_params['lang'],
+        globe = wma_tilesets[wma_tileset].globe,
+        mapcenter = wmaXYToLatLon(wma_gx + wma_width / 2, wma_gy + wma_height / 2);
 
     fs.document.location = document.location.pathname + '?' + marker.lat + '_' + marker.lon + '_' + 0 + '_' + 0 + '_' +
       wma_site + '_' + wma_zoom + '_' + wma_language + '_' + mapcenter.lat + '_' + mapcenter.lon +
@@ -2118,19 +2159,23 @@ function wikiminiatlasInstall(wma_widget, url_params) {
   }
 
   // mouse over handler for extra markers
-  function extraMarkerMessage(index, cmd) {
-   return function(e) {
-    window.parent.postMessage(cmd + ', ' + index, '*');
-   }
+  function extraMarkerMessage(index, cmd)
+  {
+    return function(e)
+    {
+      window.parent.postMessage(cmd + ', ' + index, '*');
+    }
   }
 
   // make and insert a canvas element for KML/WIWOSM data
-  function addKMLCanvas(geo) {
-    if (!hasCanvas) { return; }
+  function addKMLCanvas(geo)
+  {
+    if (!hasCanvas) return;
 
     geo = geo || wmakml;
     // add canvas overlay
-    if (geo.canvas === null) {
+    if (geo.canvas === null)
+    {
       geo.canvas = $('<canvas class="wmakml"></canvas>')
         .attr({ width: wma_width*wma_dpr, height: wma_height*wma_dpr })
         .css({width: wma_width+'px', height: wma_height+'px'})
@@ -2139,25 +2184,29 @@ function wikiminiatlasInstall(wma_widget, url_params) {
       geo.c.scale(wma_dpr, wma_dpr);
       geo.shown = true;
       geo.drawn = true;
-      if (geo == wmakml) { $('#button_kml').show(); }
+      if (geo == wmakml)
+        $('#button_kml').show();
     }
 
     // update globe texture
-    if (geo === wmakml && wmaGlobe) {
+    if (geo === wmakml && wmaGlobe)
       wmaGlobe.updateKML();
-    }
   }
 
   // todo JSON for message passing!
-  function wmaReceiveMessage(e) {
+  function wmaReceiveMessage(e)
+  {
     e = e.originalEvent;
     var d = JSON.parse(e.data), i, j, m;
 
     // process point coordinates
-    if ('coords' in d) {
-      for (i=0; i < d.coords.length; ++i) {
+    if ('coords' in d)
+    {
+      for (i = 0; i < d.coords.length; ++i)
+      {
         m = { obj: null, lat: d.coords[i].lat, lon: d.coords[i].lon };
-        if (Math.abs(m.lat-marker.lat) > 0.0001 || Math.abs(m.lon-marker.lon) > 0.0001) {
+        if (Math.abs(m.lat-marker.lat) > 0.0001 || Math.abs(m.lon-marker.lon) > 0.0001)
+        {
           m.obj = $('<div></div>')
             .attr('title', decodeURIComponent(d.coords[i].title))
             .addClass('emarker')
@@ -2172,7 +2221,8 @@ function wikiminiatlasInstall(wma_widget, url_params) {
     }
 
     // process line coordinates
-    if (('ways' in d) || ('areas' in d)) {
+    if (('ways' in d) || ('areas' in d))
+    {
       addKMLCanvas();
       // copy data
       wmakml.ways  = d.ways  || null;
@@ -2181,13 +2231,17 @@ function wikiminiatlasInstall(wma_widget, url_params) {
     }
 
     // process extent (only longitude for now)
-    if (('minlon' in d) && ('maxlon' in d)) {
-      if (!('maxlon' in wmakml) || d.maxlon > wmakml.maxlon) { wmakml.maxlon = d.maxlon; }
-      if (!('minlon' in wmakml) || d.minlon < wmakml.minlon) { wmakml.minlon = d.minlon; }
+    if (('minlon' in d) && ('maxlon' in d))
+    {
+      if (!('maxlon' in wmakml) || d.maxlon > wmakml.maxlon)
+        wmakml.maxlon = d.maxlon;
+      if (!('minlon' in wmakml) || d.minlon < wmakml.minlon)
+        wmakml.minlon = d.minlon;
     }
 
     // return the coordinates of the view-box
-    if ('getcoords' in d) {
+    if ('getcoords' in d)
+    {
       var gci = {
         query: d.getcoords,
         response: {
@@ -2195,16 +2249,20 @@ function wikiminiatlasInstall(wma_widget, url_params) {
           rightbottom: wmaXYToLatLon(wma_gx+wma_width, wma_gy+wma_height)
         }
       }
-      if (window.parent) { window.parent.postMessage(JSON.stringify(gci), e.origin); }
+
+      if (window.parent)
+        window.parent.postMessage(JSON.stringify(gci), e.origin);
     }
 
     // move the view port to new target coordinates
-    if ('moveto' in d) {
+    if ('moveto' in d)
+    {
       var t = d.moveto;
-      if ('zoom' in t) {
+      if ('zoom' in t)
         wmaSetZoom(t.zoom);
-      }
-      if ('lat' in t && 'lon' in t) {
+
+      if ('lat' in t && 'lon' in t)
+      {
         wmaMoveToCoord(t.lat, t.lon);
         wmaGlobe && wmaGlobe.setLatLon(t.lat, t.lon);
       }
@@ -2212,107 +2270,130 @@ function wikiminiatlasInstall(wma_widget, url_params) {
   }
 
   // reproject and insert the WIWOSM geoJSON data
-  function processGeoJSON(d, geo) {
+  function processGeoJSON(d, geo)
+  {
     // reproject from spherical mercator to WGS84
-    function reproject(c) {
-      var i, lat, lon, pi180 = 180/Math.PI, pi2 = Math.PI/2, mercx = 180.0/20037508.34, way=[]
-        , maxlon = -Infinity, minlon = Infinity, w;
-      for (i=0;  i<c.length; ++i) {
+    function reproject(c)
+    {
+      var i, lat, lon, pi180 = 180 / Math.PI, pi2 = Math.PI / 2,
+          mercx = 180.0/20037508.34, way=[],
+          maxlon = -Infinity, minlon = Infinity, w;
+
+      for (i = 0;  i < c.length; ++i)
+      {
         lon = c[i][0] * mercx;
-        lat = pi180 * (2.0 * Math.atan(Math.exp(c[i][1]*mercx/pi180)) - pi2);
+        lat = pi180 * (2.0 * Math.atan(Math.exp(c[i][1] * mercx / pi180)) - pi2);
         // exploit that OSM objects never cross the 180/-180 line
-        if (lon > maxlon) { maxlon = lon; }
-        if (lon < minlon) { minlon = lon; }
+        if (lon > maxlon) maxlon = lon;
+        if (lon < minlon) minlon = lon;
         // lattitude is not a problem
-        if (lat > geo.maxlat) { geo.maxlat = lat; }
-        if (lat < geo.minlat) { geo.minlat = lat; }
+        if (lat > geo.maxlat) geo.maxlat = lat;
+        if (lat < geo.minlat) geo.minlat = lat;
         way.push({ lat : lat, lon : lon });
       }
       // adjust the longitudinal extents
-      if (!('maxlon' in geo) || !('maxlon' in geo)) {
+      if (!('maxlon' in geo) || !('maxlon' in geo))
+      {
         geo.maxlon = maxlon;
         geo.minlon = minlon;
-      } else {
-        w = [ { r: Math.max(geo.maxlon, maxlon), l: Math.min(geo.minlon, minlon) },
-              { r: Math.max(geo.maxlon, maxlon+360), l: Math.min(geo.minlon, minlon+360)},
-              { r: Math.max(geo.maxlon+360, maxlon), l: Math.min(geo.minlon+360, minlon)} ];
-        w.sort(function(a, b){return (a.r-a.l)-(b.r-b.l)});
+      }
+      else
+      {
+        w = [{ r: Math.max(geo.maxlon, maxlon), l: Math.min(geo.minlon, minlon) },
+             { r: Math.max(geo.maxlon, maxlon + 360), l: Math.min(geo.minlon, minlon + 360)},
+             { r: Math.max(geo.maxlon + 360, maxlon), l: Math.min(geo.minlon + 360, minlon)}];
+        w.sort(function(a, b) { return (a.r - a.l) - (b.r - b.l); });
         geo.minlon = w[0].l;
         geo.maxlon = w[0].r;
       }
       return way;
     }
 
-    function parsePolygon(p) {
+    function parsePolygon(p)
+    {
       var area = { outer: [], inner: [] }, i;
       area.outer.push(reproject(p[0]));
-      for (i=1; i<p.length; i++) {
+      for (i=1; i<p.length; i++)
         area.inner.push(reproject(p[i]));
-      }
-      if (geo.areas) { geo.areas.push(area) }
-      else { geo.areas = [area]; }
-    }
-    function parseLineString(l) {
-      var ways = [ reproject(l) ];
-      if (geo.ways) { geo.ways.push.apply(geo.ways, ways) }
-      else { geo.ways = ways; }
+
+      if (geo.areas)
+        geo.areas.push(area);
+      else
+        geo.areas = [area];
     }
 
-    function parseGeometry(g) {
+    function parseLineString(l)
+    {
+      var ways = [ reproject(l) ];
+      if (geo.ways)
+        geo.ways.push.apply(geo.ways, ways);
+      else
+        geo.ways = ways;
+    }
+
+    function parseGeometry(g)
+    {
       var i;
-      switch(g['type']) {
+      switch (g['type'])
+      {
         case "LineString":
           parseLineString(g['coordinates']);
           break;
+
         case "MultiLineString":
-          for (i=0; i<g['coordinates'].length; i++) {
+          for (i=0; i<g['coordinates'].length; i++)
             parseLineString(g['coordinates'][i]);
-          }
           break;
+
         case "Polygon":
           parsePolygon(g['coordinates']);
           break;
+
         case "MultiPolygon":
-          for (i=0; i<g['coordinates'].length; i++) {
+          for (i=0; i<g['coordinates'].length; i++)
             parsePolygon(g['coordinates'][i]);
-          }
           break;
       }
     }
     // process different types
     var i;
-    if (!('type' in d)) { return; }
+    if (!('type' in d))  return;
 
-    if (d['type'] == 'GeometryCollection') {
-      for (i=0; i<d['geometries'].length; ++i) {
+    if (d['type'] == 'GeometryCollection')
+    {
+      for (i = 0; i < d['geometries'].length; ++i)
         parseGeometry(d['geometries'][i]);
-      }
-    } else {
-      parseGeometry(d);
     }
+    else
+      parseGeometry(d);
   }
 
-  function processWIWOSM(d) {
+  function processWIWOSM(d)
+  {
     // process the returned data
     processGeoJSON(d, wmakml);
 
     // set up canvas
-    if (wmakml.ways || wmakml.areas) {
+    if (wmakml.ways || wmakml.areas)
+    {
       addKMLCanvas();
       wmaDrawKML();
     }
 
     // zoom and center to wmakml data
-    if (wmakml.maxlon && wmakml.minlon && wmakml.maxlat>-Infinity && wmakml.minlat < Infinity) {
-      var clon = (wmakml.maxlon + wmakml.minlon)/2.0
-        , clat = (wmakml.maxlat + wmakml.minlat)/2.0
-        , ex = (wmakml.maxlon - wmakml.minlon)/180.0 * 3.0*128 // TODO: Mercator is 1:1
-        , ey = (wmakml.maxlat - wmakml.minlat)/180.0 * 3.0*128 // max extent in degrees, zoom0 has 3*128/180 px/degree
-        , i;
+    if (wmakml.maxlon && wmakml.minlon && wmakml.maxlat>-Infinity && wmakml.minlat < Infinity)
+    {
+      var clon = (wmakml.maxlon + wmakml.minlon) / 2.0,
+          clat = (wmakml.maxlat + wmakml.minlat) / 2.0,
+          ex = (wmakml.maxlon - wmakml.minlon) / 180.0 * 3.0 * 128, // TODO: Mercator is 1:1
+          ey = (wmakml.maxlat - wmakml.minlat) / 180.0 * 3.0 * 128, // max extent in degrees, zoom0 has 3*128/180 px/degree
+          i;
 
-      for (i = 0; i < 12; ++i) {
-        if (ex>wma_width/2 || ey>wma_height/2) break;
-        ex *= 2; ey *= 2;
+      for (i = 0; i < 12; ++i)
+      {
+        if (ex > wma_width / 2 || ey > wma_height / 2) break;
+        ex *= 2;
+        ey *= 2;
       }
       wmaSetZoom(i);
       wmaMoveToCoord(clat, clon);
@@ -2320,35 +2401,56 @@ function wikiminiatlasInstall(wma_widget, url_params) {
   }
 
   // wrapper to load a size comparison overlay object
-  function processSizeOverlay(d) {
+  function processSizeOverlay(d)
+  {
     var c = wmasize.c, canvas = wmasize.canvas;
     if (canvas) {
-      wmasize = { shown: true, drawn: false, canvas: canvas, c: c, ways: null, areas: null, maxlat: -Infinity, minlat: Infinity };
-    } else {
-      wmasize = { shown: true, drawn: false, canvas: null, c: null, ways: null, areas: null, maxlat: -Infinity, minlat: Infinity };
+      wmasize = {
+        shown: true, drawn: false, canvas: canvas,
+        c: c, ways: null, areas: null,
+        maxlat: -Infinity, minlat: Infinity
+      };
+    }
+    else
+    {
+      wmasize = {
+        shown: true, drawn: false, canvas: null,
+        c: null, ways: null, areas: null,
+        maxlat: -Infinity, minlat: Infinity
+      };
       addKMLCanvas(wmasize);
     }
     processGeoJSON(d, wmasize);
 
     // postprocess data
-    var a=wmasize.areas, w=wmasize.ways, clon = (wmasize.maxlon + wmasize.minlon)/2.0, clat = (wmasize.maxlat + wmasize.minlat)/2.0
-    function norm(w){
+    var a = wmasize.areas, w = wmasize.ways,
+        clon = (wmasize.maxlon + wmasize.minlon) / 2.0,
+        clat = (wmasize.maxlat + wmasize.minlat) / 2.0
+    function norm(w)
+    {
       var k, dx = 0.0;
-      if ( w[0].lon < wmasize.minlon) { dx = 360.0; }
-      for (k = 0; k < w.length; ++k) {
-        w[k].lon -= clon-dx;
-        w[k].lon *= Math.cos(w[k].lat/180*Math.PI);
+      if (w[0].lon < wmasize.minlon)
+        dx = 360.0;
+      for (k = 0; k < w.length; ++k)
+      {
+        w[k].lon -= clon - dx;
+        w[k].lon *= Math.cos(w[k].lat / 180 * Math.PI);
         w[k].lat -= clat;
       }
     }
-    if (a !== null) {
-      for (i = 0; i<a.length; i++) {
-        for (j = 0; j<a[i].outer.length; ++j) { norm(a[i].outer[j]); }
-        for (j = 0; j<a[i].inner.length; ++j) { norm(a[i].inner[j]); }
+    if (a !== null)
+    {
+      for (i = 0; i < a.length; ++i)
+      {
+        for (j = 0; j<a[i].outer.length; ++j)
+          norm(a[i].outer[j]);
+        for (j = 0; j<a[i].inner.length; ++j)
+          norm(a[i].inner[j]);
       }
     }
     if (w !== null) {
-      for (i =0; i<w.length; ++i) { latNorm(w[i]); }
+      for (i = 0; i < w.length; ++i)
+        latNorm(w[i]);
     }
     wmasize.canvas.fadeIn(200);
   }
@@ -2391,7 +2493,7 @@ wmaMenu.prototype.addMenu = function(html, menu, rtl)
   var item = $('<div></div>')
     .addClass('wmasubmenu')
     .html(html)
-    .css('direction', (rtl===true)?'rtl':'')
+    .css('direction', (rtl === true) ? 'rtl' : '')
     .mouseenter(function(){ item.css('background-color', '#AAA'); })
     .mouseleave(function(){ item.css('background-color', ''); menu.hide(); })
     .click(function()
@@ -2492,6 +2594,6 @@ wmaMenu.prototype.addSep = function() {
 }
 wmaMenu.prototype.show = function() { this.div.fadeIn(200); this.shown = true; }
 wmaMenu.prototype.hide = function() { this.div.fadeOut(200); this.shown = false; }
-wmaMenu.prototype.toggle = function() { this.shown?this.hide():this.show(); }
+wmaMenu.prototype.toggle = function() { this.shown ? this.hide() : this.show(); }
 wmaMenu.prototype.close = function() { this.hide(); this.parent && this.parent.close(); }
-wmaMenu.prototype.move = function(x, y) { this.div.css({top:y+'px', left:x+'px'}); }
+wmaMenu.prototype.move = function(x, y) { this.div.css({top: y+'px', left: x+'px'}); }
