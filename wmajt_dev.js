@@ -37,6 +37,9 @@ var wmajt = (function(){
           forrest: 1, recreation_ground: 1, dog_park: 1, garden: 1, pitch: 1, stadium: 1},
           [ { fillStyle: "rgb(200,224,200)" } ]
         ],
+        ['leisure', {swimming_pool: 1},
+          [ { fillStyle: "rgb(200,200,224)" } ]
+        ],
         ['waterway', {riverbank: 1, dock: 1},
           [ { fillStyle: "rgb(158,199,243)" } ]
         ],
