@@ -536,7 +536,7 @@ function wikiminiatlasInstall(wma_widget, url_params)
                          + 'px; cursor: move; background-color: #aaaaaa;"></div>';
 
     // Scalebar
-    WikiMiniAtlasHTML += '<div id="scalebox"><div id="scalebar"></div>' +
+    WikiMiniAtlasHTML += '<div id="scalebox"><div id="scalebar"></div>'
                          + '<div id="scalelabel">null</div></div>';
 
     // Synopsis box
