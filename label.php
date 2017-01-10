@@ -13,12 +13,14 @@ $z=intval($_GET['z']);
 //$rev=intval($_GET['rev']);
 
 // globe parameter (defaults to Earth)
-$g="Earth";
-if (array_key_exists('g', $_GET)) $g=$_GET['g'];
+$g = "Earth";
+if (array_key_exists('g', $_GET)) 
+  $g = $_GET['g'];
 
 // experimental range query
 $r = NULL;
-if (array_key_exists('r', $_GET)) $r=$_GET['r'];
+if (array_key_exists('r', $_GET)) 
+  $r = $_GET['r'];
 
 // Uncomment briefly to clear the memory cahce
 //apc_clear_cache();
@@ -31,7 +33,7 @@ if ($result = apc_fetch($key)) {
 }
 
 // get language id
-$alllang=explode(',',"ar,bg,ca,ceb,commons,cs,da,de,el,en,eo,es,et,eu,fa,fi,fr,gl,he,hi,hr,ht,hu,id,it,ja,ko,lt,ms,new,nl,nn,no,pl,pt,ro,ru,simple,sk,sl,sr,sv,sw,te,th,tr,uk,vi,vo,war,zh,af,als,be,bpy,fy,ga,hy,ka,ku,la,lb,lv,mk,ml,nds,nv,os,pam,pms,ta,vec,kk,ilo,ast,uz,oc,sh,tl,sco,kn,az");
+$alllang = explode(',',"ar,bg,ca,ceb,commons,cs,da,de,el,en,eo,es,et,eu,fa,fi,fr,gl,he,hi,hr,ht,hu,id,it,ja,ko,lt,ms,new,nl,nn,no,pl,pt,ro,ru,simple,sk,sl,sr,sv,sw,te,th,tr,uk,vi,vo,war,zh,af,als,be,bpy,fy,ga,hy,ka,ku,la,lb,lv,mk,ml,nds,nv,os,pam,pms,ta,vec,kk,ilo,ast,uz,oc,sh,tl,sco,kn,az");
 
 $langvariant = explode("-", $lang, 2);
 
@@ -56,16 +58,16 @@ if (count($langvariant) == 2) {
 // set and validate language code
 $lang = $langvariant[0];
 $l = array_search( $lang, $alllang );
-if ($l===FALSE) {
+if ($l === FALSE) {
   echo "";
   exit;
 }
 
 // set proper namespace for the query below
-if ($lang=='commons') {
-  $namespace=6;
+if ($lang == 'commons') {
+  $namespace = 6;
 } else {
-  $namespace=0;
+  $namespace = 0;
 }
 
 // load table of most current revisions
@@ -82,7 +84,14 @@ $ts_mycnf = parse_ini_file($ts_pw['dir'] . "/replica.my.cnf");
 $db = mysqli_connect('p:'.$lang."wiki.labsdb", $ts_mycnf['user'], $ts_mycnf['password'], $lang."wiki_p");
 unset($ts_mycnf, $ts_pw);
 
-$g=mysqli_real_escape_string($db, $g);
+// connection failed
+if (!$db)
+{
+  echo '{"error": "Too many database connections."}';
+  exit;
+}
+
+$g = mysqli_real_escape_string($db, $g);
 
 if ($r!=NULL) {
   $r = $_GET['r'];
