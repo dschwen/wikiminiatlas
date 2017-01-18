@@ -2,7 +2,7 @@
 // Script to embed interactive maps into pages that have coordinate templates
 // also check my user page [[User:Dschwen]] for more tools
 //
-// Revision 16.10
+// Revision 16.11
 // Source: https://github.com/dschwen/wikiminiatlas/blob/master/wikiminiatlas.js
 /* jshint laxcomma:true, smarttabs:true, quotmark:single, curly:false, es3:true, browser:true */
 /* global mw,jQuery */
@@ -19,7 +19,8 @@ jQuery(function ($) {
   alwaysTooltips: false,
   iframeurl : '//wma.wmflabs.org/iframe.html',
   imgbase   : '//wma.wmflabs.org/tiles/',
-  buttonImage: '//upload.wikimedia.org/wikipedia/commons/thumb/5/55/WMA_button2b.png/17px-WMA_button2b.png'
+  buttonImage: '//upload.wikimedia.org/wikipedia/commons/thumb/5/55/WMA_button2b.png/17px-WMA_button2b.png',
+  buttonImage2x: '//upload.wikimedia.org/wikipedia/commons/thumb/5/55/WMA_button2b.png/34px-WMA_button2b.png'
  },
  strings = {
   buttonTooltip : {
@@ -453,14 +454,13 @@ jQuery(function ($) {
   if (site==='de' && link.parentNode.id!=='coordinates') {
    mapbutton = $('<span>♁</span>').css('color','blue');
   } else {
-   mapbutton = $('<img>').attr('src', wc.buttonImage);
+   mapbutton = $('<img>').attr('src', wc.buttonImage).attr('srcset', wc.buttonImage + ' 1x, ' + wc.buttonImage2x + ' 2x');
   }
-  mapbutton.addClass('wmamapbutton').attr( {
+  mapbutton.addClass('wmamapbutton noprint').attr( {
    title: _msg('buttonTooltip'),
    alt: ''
   } )
   .hover(function (){ $(this).css('opacity', 0.75); }, function () { $(this).css('opacity', ''); })
-  .addClass('noprint')
   .css('padding', rtl ? '0px 0px 0px 3px' : '0px 3px 0px 0px' ).css('cursor', 'pointer');
 
   if (wc.alwaysTooltips || ( wc.flowTextTooltips && $(link).parents('li, table, #coordinates').length===0)) {
@@ -505,7 +505,8 @@ jQuery(function ($) {
   mapbutton = $('<img>')
    .hover(function (){ $(this).css('opacity', 0.75); }, function () { $(this).css('opacity', ''); })
    .css('padding', rtl ? '0px 3px 0px 0px' : '0px 0px 0px 3px' ).css('cursor', 'pointer')
-   .attr('src', wc.buttonImage).addClass('wmamapbutton').addClass('noprint')
+   .attr('src', wc.buttonImage).attr('srcset', wc.buttonImage + ' 1x, ' + wc.buttonImage2x + ' 2x')
+   .addClass('wmamapbutton noprint')
    .bind( 'click', { param:
     alat + '_' + alon + '_' +
     wc.width + '_' + wc.height + '_' +
