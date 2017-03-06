@@ -3,6 +3,7 @@
 // label.php version for labs (acesses the tool-labs db)
 
 //error_reporting(E_ALL);
+error_reporting(0);
 //ini_set('display_errors', 1);
 
 // Apache .htaccess rules
@@ -33,7 +34,7 @@ if ($result = apc_fetch($key)) {
 }
 
 // get language id
-$alllang = explode(',',"ar,bg,ca,ceb,commons,cs,da,de,el,en,eo,es,et,eu,fa,fi,fr,gl,he,hi,hr,ht,hu,id,it,ja,ko,lt,ms,new,nl,nn,no,pl,pt,ro,ru,simple,sk,sl,sr,sv,sw,te,th,tr,uk,vi,vo,war,zh,af,als,be,bpy,fy,ga,hy,ka,ku,la,lb,lv,mk,ml,nds,nv,os,pam,pms,ta,vec,kk,ilo,ast,uz,oc,sh,tl,sco,kn,az");
+$alllang = explode(',',"ar,bg,bh,bn,ca,ceb,commons,cs,da,de,el,en,eo,es,et,eu,fa,fi,fr,gl,he,hi,hr,ht,hu,id,it,ja,ko,lt,ms,new,nl,nn,no,pl,pt,ro,ru,simple,sk,sl,sr,sv,sw,te,th,tr,uk,vi,vo,war,zh,af,als,be,bpy,fy,ga,hy,ka,ku,la,lb,lv,mk,ml,nds,nv,os,pam,pms,ta,vec,kk,ilo,ast,uz,oc,sh,tl,sco,kn,az");
 
 $langvariant = explode("-", $lang, 2);
 
@@ -81,19 +82,21 @@ $wikiminiatlas_zoomsize = array( 3.0, 6.0 ,12.0 ,24.0 ,48.0, 96.0, 192.0, 384.0,
 // connect to database
 $ts_pw = posix_getpwuid(posix_getuid());
 $ts_mycnf = parse_ini_file($ts_pw['dir'] . "/replica.my.cnf");
-$db = mysqli_connect('p:'.$lang."wiki.labsdb", $ts_mycnf['user'], $ts_mycnf['password'], $lang."wiki_p");
+//$db = mysqli_connect('p:' . $lang . "wiki.labsdb", $ts_mycnf['user'], $ts_mycnf['password'], $lang."wiki_p");
+$db = mysqli_connect($lang . "wiki.labsdb", $ts_mycnf['user'], $ts_mycnf['password'], $lang."wiki_p");
 unset($ts_mycnf, $ts_pw);
 
 // connection failed
 if (!$db)
 {
-  echo '{"error": "Too many database connections."}';
+  //echo '{"error": "Too many database connections."}';
+  echo '<!-- error: Too many database connections -->';
   exit;
 }
 
 $g = mysqli_real_escape_string($db, $g);
 
-if ($r!=NULL) {
+if ($r != NULL) {
   $r = $_GET['r'];
   $co = Array('x','y');
   $q = Array();
@@ -101,10 +104,14 @@ if ($r!=NULL) {
 
   // decode compressed query
   $qi = explode("|",$r);
-  if ((count($qi)<1) || (count($qi)>10)) exit;
+  if ((count($qi)<1) || (count($qi)>10)) 
+    exit;
+
   foreach ($qi as $i) {
-    $qp = explode(",",$i);
-    if (count($qp) < 1 || count($qp) > 2) exit;
+    $qp = explode(",", $i);
+    if (count($qp) < 1 || count($qp) > 2)
+      exit;
+
     $s=""; $n2=1;
     for ($j=0; $j<2; $j++) { 
       // = or >= <=
@@ -114,11 +121,12 @@ if ($r!=NULL) {
       } 
       else if (count($k) == 2) {
         $s .= "t.".$co[$j].">=".intval($k[0])." AND t.".$co[$j]."<=".intval($k[1]);
-        $n2 *= max(0,intval($k[1])-intval($k[0]));
+        $n2 *= max(0, intval($k[1]) - intval($k[0]));
       }
       else exit;
 
-      if($j==0) $s .= " AND ";
+      if ($j == 0) 
+        $s .= " AND ";
     }
 
     // add query term
