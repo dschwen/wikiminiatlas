@@ -93,9 +93,9 @@ $tagnum = count($tags);
 $intersect = "
           ST_Intersection( 
             way,
-            ST_SetSRID('BOX3D($mllx $mlly, $murx $mury)'::box3d,900913)
+            ST_SetSRID('BOX3D($mllx $mlly, $murx $mury)'::box3d,3857)
           )";
-//transform( ST_GeomFromText('POLYGON(($llx $ury, $urx $ury, $urx $lly, $llx $lly, $llx $ury))', 4326 ), 900913 )
+//transform( ST_GeomFromText('POLYGON(($llx $ury, $urx $ury, $urx $lly, $llx $lly, $llx $ury))', 4326 ), 3857 )
 $table = array( 
   array('planet_osm_polygon','building IS NULL AND  not exist(hstore(tags),\'building:part\') AND',$intersect), 
   array('planet_osm_line','building IS NULL AND  not exist(hstore(tags),\'building:part\') AND',$intersect)
@@ -119,7 +119,7 @@ for( $i=0; $i<count($table); $i++ ) {
       from ".$table[$i][0]."
     where
       ".$table[$i][1]."
-      ST_IsValid(way) AND way && ST_SetSRID('BOX3D($mllx $mlly, $murx $mury)'::box3d,900913);
+      ST_IsValid(way) AND way && ST_SetSRID('BOX3D($mllx $mlly, $murx $mury)'::box3d,3857);
   ";
 
   // debug
@@ -208,13 +208,13 @@ for ($i=0; $i<2; $i++) {
     select 
       ST_AsGeoJSON( 
         ST_Intersection( 
-          ST_SetSRID(the_geom, 4326),
+          ST_SetSRID(geom, 4326),
           ST_SetSRID('BOX3D($llx $lly, $urx $ury)'::box3d, 4326)
         )
       , 9 )
       from ".$table[$i]."
     where
-      the_geom && ST_SetSRID('BOX3D($llx $lly, $urx $ury)'::box3d,4326);
+      geom && ST_SetSRID('BOX3D($llx $lly, $urx $ury)'::box3d,4326);
   ";
 
   // perform query
