@@ -23,7 +23,7 @@ $r = NULL;
 if (array_key_exists('r', $_GET)) 
   $r = $_GET['r'];
 
-// Uncomment briefly to clear the memory cahce
+// Uncomment briefly to clear the memory cache
 //apc_clear_cache();
 
 // APC - query cache
@@ -33,8 +33,8 @@ if ($result = apc_fetch($key)) {
   exit;
 }
 
-// get language id
-$alllang = explode(',',"ar,bg,bh,bn,ca,ceb,commons,cs,da,de,el,en,eo,es,et,eu,fa,fi,fr,gl,he,hi,hr,ht,hu,id,it,ja,ko,lt,ms,new,nl,nn,no,pl,pt,ro,ru,simple,sk,sl,sr,sv,sw,te,th,tr,uk,vi,vo,war,zh,af,als,be,bpy,fy,ga,hy,ka,ku,la,lb,lv,mk,ml,nds,nv,os,pam,pms,ta,vec,kk,ilo,ast,uz,oc,sh,tl,sco,kn,az");
+// get language id (Append new languages in the back!!)
+$alllang = explode(',',"ar,bg,ca,ceb,commons,cs,da,de,el,en,eo,es,et,eu,fa,fi,fr,gl,he,hi,hr,ht,hu,id,it,ja,ko,lt,ms,new,nl,nn,no,pl,pt,ro,ru,simple,sk,sl,sr,sv,sw,te,th,tr,uk,vi,vo,war,zh,af,als,be,bpy,fy,ga,hy,ka,ku,la,lb,lv,mk,ml,nds,nv,os,pam,pms,ta,vec,kk,ilo,ast,uz,oc,sh,tl,sco,kn,az,bh,bn");
 
 $langvariant = explode("-", $lang, 2);
 
