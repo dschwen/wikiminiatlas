@@ -93,7 +93,7 @@ $tagnum = count($tags);
 $intersect = "
           ST_Intersection( 
             way,
-            SetSRID('BOX3D($mllx $mlly, $murx $mury)'::box3d,900913)
+            ST_SetSRID('BOX3D($mllx $mlly, $murx $mury)'::box3d,900913)
           )";
 //transform( ST_GeomFromText('POLYGON(($llx $ury, $urx $ury, $urx $lly, $llx $lly, $llx $ury))', 4326 ), 900913 )
 $table = array( 
@@ -114,12 +114,12 @@ for( $i=0; $i<count($table); $i++ ) {
   // build query for the cropped data without buildings
   $query = "
     select 
-      ST_AsGeoJSON( transform(".$table[$i][2].",4326), 9 ),
+      ST_AsGeoJSON( ST_Transform(".$table[$i][2].",4326), 9 ),
       tags, $taglist
       from ".$table[$i][0]."
     where
       ".$table[$i][1]."
-      ST_IsValid(way) AND way && SetSRID('BOX3D($mllx $mlly, $murx $mury)'::box3d,900913);
+      ST_IsValid(way) AND way && ST_SetSRID('BOX3D($mllx $mlly, $murx $mury)'::box3d,900913);
   ";
 
   // debug
@@ -208,13 +208,13 @@ for ($i=0; $i<2; $i++) {
     select 
       ST_AsGeoJSON( 
         ST_Intersection( 
-          SetSRID(the_geom, 4326),
-          SetSRID('BOX3D($llx $lly, $urx $ury)'::box3d, 4326)
+          ST_SetSRID(the_geom, 4326),
+          ST_SetSRID('BOX3D($llx $lly, $urx $ury)'::box3d, 4326)
         )
       , 9 )
       from ".$table[$i]."
     where
-      the_geom && SetSRID('BOX3D($llx $lly, $urx $ury)'::box3d,4326);
+      the_geom && ST_SetSRID('BOX3D($llx $lly, $urx $ury)'::box3d,4326);
   ";
 
   // perform query
