@@ -708,7 +708,7 @@ function wikiminiatlasInstall(wma_widget, url_params)
     $(document).on('keydown', wmaKeypress);
     $(document).on('contextmenu', function() { return false; });
 
-    $('body').bind('dragstart', function() { return false; })
+    $('body').on('dragstart', function() { return false; })
     $('#wma_map').click(function(e) {
         // only count clicks if the mouse pointer has not moved between mouse down and mouse up!
         var r = wmaMouseCoords(e); //TODO: VERIFY this!!!!
@@ -797,7 +797,7 @@ function wikiminiatlasInstall(wma_widget, url_params)
     // initialize message passing
     if (window.postMessage)
     {
-      $(window).bind('message', wmaReceiveMessage);
+      $(window).on('message', wmaReceiveMessage);
       if (window != window.top)
       {
         try {
