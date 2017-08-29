@@ -33,6 +33,7 @@ jQuery(function ($) {
    'be-tarask':'паказаць месцазнаходжаньне на інтэрактыўнай мапе',
    'be-x-old':'паказаць месцазнаходжаньне на інтэрактыўнай мапе',
    bg:'Покажи местоположението на интерактивната карта',
+   bh:'इंटरैक्टिव नक्सा पर लोकेशन देखल जाय',
    bpy:'জীবন্ত মানচিত্রগর মা মাপাহান দেখাদিতই',
    br:'diskouez al lec\'hiadur war ur gartenn etrewezhiat',
    ca:'Mostra la localització en un mapa interactiu',
@@ -100,6 +101,7 @@ jQuery(function ($) {
    ast:'Mapa',
    az:'Xəritə',
    bg:'Карта',
+   bh:'नक्सा',
    bn:'মানচিত্র',
    bs:'Karta',
    ca:'Mapa',
@@ -142,6 +144,7 @@ jQuery(function ($) {
    'be-x-old':'закрыць',
    bar:'zuamachn',
    bg:'Затвори',
+   bh:'बंद करीं',
    bpy:'জিপা',
    br:'serriñ',
    bs:'zatvori',
@@ -210,6 +213,7 @@ jQuery(function ($) {
    ast:'redimensionar',
    az:'ölçüləri dəyiş',
    bg:'Промени големина',
+   bh: 'साइज बदलीं',
    bn:'মাপ পরিবর্তন করুন',
    ca:'Redimensiona',
    de:'Größe ändern',
@@ -398,6 +402,9 @@ jQuery(function ($) {
  site = (dbName==='commonswiki') ? 'commons' : (mw.config.get('wgUserVariant') || mw.config.get('wgPageContentLanguage'));
  language = mw.config.get( 'wgUserLanguage' );
 
+ // bhwiki reports bho as language. I do not understand that yet, so let's add an exception
+ if (site === 'bho') site = 'bh';
+
  // remove icons from title coordinates
  $('#coordinates,#coordinates-title,#tpl_Coordinaten').find('a.image').detach();
 
@@ -472,7 +479,7 @@ jQuery(function ($) {
     display: 'none', zIndex : 15
    }).append(mapbutton);
    $(link).wrap(
-    $('<span/>')
+    $('<span>')
      .css( { position: 'relative', whiteSpace: 'nowrap' } )
      .mouseleave(function () { tooltip.fadeOut(); })
     )
@@ -482,7 +489,7 @@ jQuery(function ($) {
    // insert icon directly
    ws = $(link).css('whiteSpace');
    if (site!=='de' || link.parentNode.id!=='coordinates') {
-    $(link).wrap( $('<span/>').css('whiteSpace', 'nowrap') ).css('whiteSpace', ws).before(mapbutton);
+    $(link).wrap( $('<span>').css('whiteSpace', 'nowrap') ).css('whiteSpace', ws).before(mapbutton);
    } else {
     $('#coordinates').append('<span class="noprint coordinates-separator"> | </span>').append(mapbutton);
    }
@@ -635,7 +642,7 @@ jQuery(function ($) {
 
  // prepare iframe to house the map
  if (coordinates!==null) {
-  wi.div = $('<div/>').css( {
+  wi.div = $('<div>').css( {
    width: (wc.width+2)+'px', height: (wc.height+2)+'px',
    margin: '0px', padding: '0px',
    backgroundColor : 'white', border: '1px solid gray',
@@ -650,7 +657,7 @@ jQuery(function ($) {
   } ).hide().attr('ondragstart','return false');
 
   // cover the iframe to prevent loosing the mouse to the iframe during resizing
-  wi.resizehelper = $('<div/>').css( { position: 'absolute', top:0, left:0, zIndex: 20 } ).hide();
+  wi.resizehelper = $('<div>').css( { position: 'absolute', top:0, left:0, zIndex: 20 } ).hide();
 
   wi.closebutton = $('<img>').attr( {
    title : _msg('close'),
@@ -659,7 +666,7 @@ jQuery(function ($) {
    zIndex : 15, position : 'absolute', right : '11px', top : '9px', width : '18px', cursor : 'pointer'
   } ).click( function(e) { wi.div.hide(); } );
 
-  wi.iframe = $('<iframe/>')
+  wi.iframe = $('<iframe>')
    .attr( { scrolling: 'no', frameBorder : 0 } )
    .css( {
     zIndex: 14, position: 'absolute', right: '1px', top: '1px',
@@ -676,7 +683,7 @@ jQuery(function ($) {
     wi.resizehelper.css( { width: (wc.width+2)+'px', height: (wc.height+2)+'px' } );
    }
    wi.div.append(
-    $('<div/>')
+    $('<div>')
      .css( {
        zIndex : 15, position : 'absolute', bottom : '3px',
        width : '18px', height: '18px', cursor : (rtl?'se-resize':'sw-resize'),
