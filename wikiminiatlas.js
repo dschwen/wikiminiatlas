@@ -488,7 +488,7 @@ jQuery(function ($) {
    }
   }
 
-  mapbutton.bind( 'click', { param:
+  mapbutton.on( 'click', { param:
    marker.lat + '_' + marker.lon + '_' +
    wc.width + '_' + wc.height + '_' +
    site + '_' + zoomlevel + '_' + language + '&globe=' + globe }, showIFrame );
@@ -507,7 +507,7 @@ jQuery(function ($) {
    .css('padding', rtl ? '0px 3px 0px 0px' : '0px 0px 0px 3px' ).css('cursor', 'pointer')
    .attr('src', wc.buttonImage).attr('srcset', wc.buttonImage + ' 1x, ' + wc.buttonImage2x + ' 2x')
    .addClass('wmamapbutton noprint')
-   .bind( 'click', { param:
+   .on( 'click', { param:
     alat + '_' + alon + '_' +
     wc.width + '_' + wc.height + '_' +
     site + '_' + zoomlevel + '_' + language
@@ -691,13 +691,13 @@ jQuery(function ($) {
         adjusthelper();
 
         $('body')
-         .bind('mouseup.wmaresize', function(e) {
-          $('body').unbind('mousemove.wmaresize');
-          $('body').unbind('mouseup.wmaresize');
+         .on('mouseup.wmaresize', function(e) {
+          $('body').off('mousemove.wmaresize');
+          $('body').off('mouseup.wmaresize');
           idle = true;
           wi.resizehelper.hide();
          } )
-         .bind('mousemove.wmaresize', function(e) {
+         .on('mousemove.wmaresize', function(e) {
           wc.width -= dir*(e.pageX-lastx);
           wc.height += (e.pageY-lasty);
           lastx = e.pageX; lasty = e.pageY;
@@ -713,7 +713,7 @@ jQuery(function ($) {
    );
   })();
 
-  $(window).bind('message', messageHub);
+  $(window).on('message', messageHub);
 
   // Fire event for other code to extend or integrate with WMA
   if (initPromises.length) {
