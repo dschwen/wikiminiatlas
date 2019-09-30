@@ -467,7 +467,8 @@ jQuery(function ($) {
    title: _msg('buttonTooltip'),
    alt: ''
   } )
-  .hover(function (){ $(this).css('opacity', 0.75); }, function () { $(this).css('opacity', ''); })
+  .on('mouseenter', function (){ $(this).css('opacity', 0.75); })
+  .on('mouseleave', function () { $(this).css('opacity', ''); })
   .css('padding', rtl ? '0px 0px 0px 3px' : '0px 3px 0px 0px' ).css('cursor', 'pointer');
 
   if (wc.alwaysTooltips || ( wc.flowTextTooltips && $(link).parents('li, table, #coordinates').length===0)) {
@@ -481,10 +482,10 @@ jQuery(function ($) {
    $(link).wrap(
     $('<span>')
      .css( { position: 'relative', whiteSpace: 'nowrap' } )
-     .mouseleave(function () { tooltip.fadeOut(); })
+     .on('mouseleave', function () { tooltip.fadeOut(); })
     )
     .before(tooltip)
-    .mouseenter(function () { tooltip.fadeIn(); });
+    .on('mouseenter', function () { tooltip.fadeIn(); });
   } else {
    // insert icon directly
    ws = $(link).css('whiteSpace');
@@ -510,7 +511,8 @@ jQuery(function ($) {
 
  function addTitleButton( alat, alon, zoomlevel ) {
   mapbutton = $('<img>')
-   .hover(function (){ $(this).css('opacity', 0.75); }, function () { $(this).css('opacity', ''); })
+   .on('mouseenter', function (){ $(this).css('opacity', 0.75); })
+   .on('mouseleave', function () { $(this).css('opacity', ''); })
    .css('padding', rtl ? '0px 3px 0px 0px' : '0px 0px 0px 3px' ).css('cursor', 'pointer')
    .attr('src', wc.buttonImage).attr('srcset', wc.buttonImage + ' 1x, ' + wc.buttonImage2x + ' 2x')
    .addClass('wmamapbutton noprint')
@@ -689,9 +691,9 @@ jQuery(function ($) {
        width : '18px', height: '18px', cursor : (rtl?'se-resize':'sw-resize'),
        'user-select': 'none', '-moz-user-select': 'none', '-ms-user-select': 'none'
       } ).css( (rtl?'right':'left'), '3px' )
-     .mouseenter( function(e) { wi.resizebutton.fadeIn(); } )
-     .mouseleave( function(e) { if( idle ) { wi.resizebutton.fadeOut(); } } )
-     .mousedown( function(e) {
+     .on('mouseenter', function(e) { wi.resizebutton.fadeIn(); } )
+     .on('mouseleave', function(e) { if( idle ) { wi.resizebutton.fadeOut(); } } )
+     .on('mousedown', function(e) {
        if (idle) {
         var lastx = e.pageX, lasty = e.pageY;
         wi.resizehelper.show();
