@@ -37,7 +37,7 @@ jQuery(function ($) {
    bpy:'জীবন্ত মানচিত্রগর মা মাপাহান দেখাদিতই',
    br:'diskouez al lec\'hiadur war ur gartenn etrewezhiat',
    ca:'Mostra la localització en un mapa interactiu',
-   cs:'zobraz místo na interaktivní mapě',
+   cs:'zobrazit místo na interaktivní mapě',
    da:'vis beliggenhed på interaktivt kort',
    de:'Ort auf interaktiver Karte anzeigen',
    dsb:'Městno na interaktiwnej kórśe zwobrazniś',
