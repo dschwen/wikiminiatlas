@@ -2,9 +2,9 @@
 
 // label.php version for labs (acesses the tool-labs db)
 
-//error_reporting(E_ALL);
-error_reporting(0);
-//ini_set('display_errors', 1);
+error_reporting(E_ALL);
+//error_reporting(0);
+ini_set('display_errors', 1);
 
 // Apache .htaccess rules
 $lang=$_GET['l'];
@@ -14,9 +14,10 @@ $z=intval($_GET['z']);
 //$rev=intval($_GET['rev']);
 
 // globe parameter (defaults to Earth)
-$g = "Earth";
-if (array_key_exists('g', $_GET)) 
-  $g = $_GET['g'];
+$g = 0;
+// "Earth";
+//if (array_key_exists('g', $_GET)) 
+//  $g = $_GET['g'];
 
 // experimental range query
 $r = NULL;
@@ -24,13 +25,13 @@ if (array_key_exists('r', $_GET))
   $r = $_GET['r'];
 
 // Uncomment briefly to clear the memory cache
-//apc_clear_cache();
+apc_clear_cache();
 
 // APC - query cache
 $key = md5($x.'|'.$y.'|'.$z.'|'.$lang.'|'.$r);
 if ($result = apc_fetch($key)) {
-  echo $result;
-  exit;
+  #echo 'cached' .$result;
+  #exit;
 }
 
 // get language id (Append new languages in the back!!)
@@ -64,13 +65,6 @@ if ($l === FALSE) {
   exit;
 }
 
-// set proper namespace for the query below
-if ($lang == 'commons') {
-  $namespace = 6;
-} else {
-  $namespace = 0;
-}
-
 // load table of most current revisions
 require_once('rev.inc');
 
@@ -82,8 +76,7 @@ $wikiminiatlas_zoomsize = array( 3.0, 6.0 ,12.0 ,24.0 ,48.0, 96.0, 192.0, 384.0,
 // connect to database
 $ts_pw = posix_getpwuid(posix_getuid());
 $ts_mycnf = parse_ini_file($ts_pw['dir'] . "/replica.my.cnf");
-//$db = mysqli_connect('p:' . $lang . "wiki.labsdb", $ts_mycnf['user'], $ts_mycnf['password'], $lang."wiki_p");
-$db = mysqli_connect($lang . "wiki.labsdb", $ts_mycnf['user'], $ts_mycnf['password'], $lang."wiki_p");
+$db = mysqli_connect("tools.db.svc.eqiad.wmflabs", $ts_mycnf['user'], $ts_mycnf['password'], "s51499__wikiminiatlas");
 unset($ts_mycnf, $ts_pw);
 
 // connection failed
@@ -101,6 +94,7 @@ if ($r != NULL) {
   $co = Array('x','y');
   $q = Array();
   $n = 0;
+
 
   // decode compressed query
   $qi = explode("|",$r);
@@ -138,9 +132,9 @@ if ($r != NULL) {
     echo "Requesting too many tiles!";
     exit;
   }
-  $query = "select p.page_title as title, l.name as name, l.lat as lat, l.lon as lon, l.style as style, t.x as dx, t.y as dy, l.weight as wg, l.page_id as id from  page p, p50380g50921__wma_p.wma_tile t, p50380g50921__wma_p.wma_connect c, p50380g50921__wma_p.wma_label l  WHERE l.lang_id='$l' AND l.globe='$g' AND c.rev='$rev' AND c.tile_id=t.id AND ( ".implode(" OR ",$q)." ) AND c.label_id=l.id AND t.z='$z' AND c.tile_id = t.id AND page_namespace='$namespace' AND l.page_id=p.page_id";
+  $query = "select p.page_title as title, l.name as name, l.lat as lat, l.lon as lon, l.style as style, t.x as dx, t.y as dy, l.weight as wg, l.page_id as id from  page_$lang p, wma_tile t, wma_connect c, wma_label l  WHERE l.lang_id='$l' AND l.globe='$g' AND c.rev='$rev' AND c.tile_id=t.id AND ( ".implode(" OR ",$q)." ) AND c.label_id=l.id AND t.z='$z' AND c.tile_id = t.id AND l.page_id=p.page_id";
 } else {
-  $query = "select p.page_title as title, l.name as name, l.lat as lat, l.lon as lon, l.style as style, t.x as dx, t.y as dy, l.weight as wg, l.page_id as id from  page p, p50380g50921__wma_p.wma_tile t, p50380g50921__wma_p.wma_connect c, p50380g50921__wma_p.wma_label l  WHERE l.lang_id='$l' AND  l.globe='$g' AND c.rev='$rev' AND c.tile_id=t.id AND t.x='$x' AND c.label_id=l.id  AND t.y='$y' AND t.z='$z' AND c.tile_id = t.id AND page_namespace='$namespace' AND l.page_id=p.page_id";
+  $query = "select p.page_title as title, l.name as name, l.lat as lat, l.lon as lon, l.style as style, t.x as dx, t.y as dy, l.weight as wg, l.page_id as id from  page_$lang p, wma_tile t, wma_connect c, wma_label l  WHERE l.lang_id='$l' AND  l.globe='$g' AND c.rev='$rev' AND c.tile_id=t.id AND t.x='$x' AND c.label_id=l.id  AND t.y='$y' AND t.z='$z' AND c.tile_id = t.id AND l.page_id=p.page_id";
 }
 
 $res = mysqli_query($db, $query);
