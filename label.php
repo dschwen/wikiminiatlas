@@ -1,42 +1,46 @@
 <?php
 
-// label.php version for labs (acesses the tool-labs db)
+//
+// label.php version for WMF Cloud, (c) 2021 Daniel Schwen
+//
 
-error_reporting(E_ALL);
-//error_reporting(0);
-ini_set('display_errors', 1);
+require 'master.inc';
 
-// Apache .htaccess rules
+// no errors
+error_reporting(0);
+
+// get parameters
 $lang=$_GET['l'];
 $y=floatval($_GET['a']);
 $x=floatval($_GET['b']);
 $z=intval($_GET['z']);
-//$rev=intval($_GET['rev']);
 
 // globe parameter (defaults to Earth)
 $g = 0;
-// "Earth";
-//if (array_key_exists('g', $_GET)) 
-//  $g = $_GET['g'];
+if (array_key_exists('g', $_GET)) {
+  $globe = strtolower($_GET['g']);
+  if (array_key_exists($globe, $globes)) {
+    $g = $globes[$globe];
+  }
+}
 
 // experimental range query
 $r = NULL;
-if (array_key_exists('r', $_GET)) 
+if (array_key_exists('r', $_GET)) {
   $r = $_GET['r'];
+}
 
 // Uncomment briefly to clear the memory cache
 apc_clear_cache();
 
 // APC - query cache
-$key = md5($x.'|'.$y.'|'.$z.'|'.$lang.'|'.$r);
+$key = md5($x.'|'.$y.'|'.$z.'|'.$lang.'|'.$g.'|'.$r);
 if ($result = apc_fetch($key)) {
-  #echo 'cached' .$result;
-  #exit;
+  echo $result;
+  exit;
 }
 
 // get language id (Append new languages in the back!!)
-$alllang = explode(',',"ar,bg,ca,ceb,commons,cs,da,de,el,en,eo,es,et,eu,fa,fi,fr,gl,he,hi,hr,ht,hu,id,it,ja,ko,lt,ms,new,nl,nn,no,pl,pt,ro,ru,simple,sk,sl,sr,sv,sw,te,th,tr,uk,vi,vo,war,zh,af,als,be,bpy,fy,ga,hy,ka,ku,la,lb,lv,mk,ml,nds,nv,os,pam,pms,ta,vec,kk,ilo,ast,uz,oc,sh,tl,sco,kn,az,bh,bn");
-
 $langvariant = explode("-", $lang, 2);
 
 // if a variant was provided check if it is supported
@@ -59,18 +63,16 @@ if (count($langvariant) == 2) {
 
 // set and validate language code
 $lang = $langvariant[0];
-$l = array_search( $lang, $alllang );
+$l = $langs[$lang];
 if ($l === FALSE) {
   echo "";
   exit;
 }
 
-// load table of most current revisions
-require_once('rev.inc');
-
 // select current revision
 $rev = $lrev[$lang];
 
+// zoom multiplier
 $wikiminiatlas_zoomsize = array( 3.0, 6.0 ,12.0 ,24.0 ,48.0, 96.0, 192.0, 384.0, 768.0, 1536.0,  3072.0, 6144.0, 12288.0, 24576.0, 49152.0, 98304.0 );
 
 // connect to database
@@ -82,19 +84,15 @@ unset($ts_mycnf, $ts_pw);
 // connection failed
 if (!$db)
 {
-  //echo '{"error": "Too many database connections."}';
   echo '<!-- error: Too many database connections -->';
   exit;
 }
-
-$g = mysqli_real_escape_string($db, $g);
 
 if ($r != NULL) {
   $r = $_GET['r'];
   $co = Array('x','y');
   $q = Array();
   $n = 0;
-
 
   // decode compressed query
   $qi = explode("|",$r);
@@ -195,6 +193,8 @@ while ($row = mysqli_fetch_assoc($res))
     );
   }
 } // TODO only send fx,fy,wg for max label zoom!
+
+// close database connection
 mysqli_close($db);
 
 //header("Content-type: application/json");
