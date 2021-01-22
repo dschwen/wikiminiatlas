@@ -38,8 +38,8 @@ require( 'wikiminiatlas_i18n.inc' );
 
 if( true ) {
   require( 'wmajt_dev.js' ); 
-  //require( 'wmacore_dev.js' );
-  require( 'min/wmacore_dev.min.js' );
+  require( 'wmacore_dev.js' );
+  //require( 'min/wmacore_dev.min.js' );
 } else {
   require( 'min/wmajt_dev.min.js' ); 
   require( 'min/wmacore_dev.min.js' );
