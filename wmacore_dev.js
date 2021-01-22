@@ -774,7 +774,7 @@ function wikiminiatlasInstall(wma_widget, url_params)
               var sim = new Image();
               var imw = data.thumbnail.width / 2;
               var imh = data.thumbnail.height / 2;
-              var side = (dir == 'ltr' ? 'left': 'right');
+              var side = (data.dir == 'ltr' ? 'left': 'right');
               $(sim)
                 .css({'width': imw + 'px', 'height': imh + 'px', 'position': 'absolute', side: '10px', 'bottom': '0.5em' })
                 .load(() => {
