@@ -749,7 +749,7 @@ function wikiminiatlasInstall(wma_widget, url_params)
 
     // select tileset compatible with globe parameter
     var WikiMiniAtlasHTML, i;
-    for (i = 0; i < wma_tilesets.length && wma_tilesets[i].globe != globe; ++i);
+    for (i = 0; i < wma_tilesets.length && wma_tilesets[i].globe != globe; ++i) {}
     wmaSelectTileset(i, true);
 
     moveWikiMiniAtlasMapTo();
