@@ -5,8 +5,8 @@ function wmaGlobe3d(canvas,textureCanvas) {
   function getShader(gl, id) {
     var ss = $('#'+id), str = ss.text(), shader;
 
-    switch(ss.attr('type')) { 
-      case "x-shader/x-fragment" : 
+    switch(ss.attr('type')) {
+      case "x-shader/x-fragment" :
         shader = gl.createShader(gl.FRAGMENT_SHADER);
         break;
       case "x-shader/x-vertex" :
@@ -123,12 +123,13 @@ function wmaGlobe3d(canvas,textureCanvas) {
     var vertexPositionData = [];
     var normalData = [];
     var textureCoordData = [];
-    for (var latNumber=0; latNumber <= latitudeBands; latNumber++) {
+    var latNumber, longNumber;
+    for (latNumber = 0; latNumber <= latitudeBands; latNumber++) {
       var theta = latNumber * Math.PI / latitudeBands;
       var sinTheta = Math.sin(theta);
       var cosTheta = Math.cos(theta);
 
-      for (var longNumber=0; longNumber <= longitudeBands; longNumber++) {
+      for (longNumber=0; longNumber <= longitudeBands; longNumber++) {
         var phi = longNumber * 2 * Math.PI / longitudeBands;
         var sinPhi = Math.sin(phi);
         var cosPhi = Math.cos(phi);
@@ -151,8 +152,8 @@ function wmaGlobe3d(canvas,textureCanvas) {
     }
 
     var indexData = [];
-    for (var latNumber=0; latNumber < latitudeBands; latNumber++) {
-      for (var longNumber=0; longNumber < longitudeBands; longNumber++) {
+    for (latNumber = 0; latNumber < latitudeBands; latNumber++) {
+      for (longNumber = 0; longNumber < longitudeBands; longNumber++) {
         var first = (latNumber * (longitudeBands + 1)) + longNumber;
         var second = first + longitudeBands + 1;
         indexData.push(first);
@@ -251,7 +252,7 @@ function wmaGlobe3d(canvas,textureCanvas) {
      //alert("Could not initialise WebGL, sorry :-(");
     return false;
   }
-  
+
   if( !initShaders() ) {return false; }
   initBuffers();
   initTexture();
@@ -273,8 +274,8 @@ function wmaGlobe3d(canvas,textureCanvas) {
     setLatLon : setLatLon,
     updateTexture: updateTexture,
     draw: drawScene
-  }
+  };
 }
 
 // export for closure compiler
-window['wmaGlobe3d']=wmaGlobe3d;
+window.wmaGlobe3d = wmaGlobe3d;
