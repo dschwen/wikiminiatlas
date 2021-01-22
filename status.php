@@ -14,6 +14,9 @@ error_reporting(0);
 <head><title></title></head>
 <body>
 
+<h2>Extraction logs</h2>
+<p><a href="/logs">Cick here</a></p>
+
 <h2>Label revisions</h2>
 <table>
 
