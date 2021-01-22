@@ -776,10 +776,11 @@ function wikiminiatlasInstall(wma_widget, url_params)
               var imh = data.thumbnail.height / 2;
               var side = (data.dir == 'ltr' ? 'left': 'right');
               $(sim)
-                .css({'width': imw + 'px', 'height': imh + 'px', 'position': 'absolute', side: '10px', 'bottom': '0.5em' })
+                .css({'width': imw + 'px', 'height': imh + 'px', 'position': 'absolute', 'bottom': '0.5em' })
+                .css(side, '10px')
                 .load(() => {
                   $('#synopsistext')
-                    .css('padding-' + side, (imw + 10) + 'px')
+                    .css('padding-' + side, (imw + 20) + 'px')
                     .append($(sim));
                 })
                 .attr('src', data.thumbnail.source);
