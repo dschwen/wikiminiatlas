@@ -21,12 +21,26 @@ error_reporting(0);
 <table>
 
 <?php
+
+$coords = array(
+  "de" => "Coordinate"
+);
+
 foreach ($lrev as $lang => $rev)
 {
+  if (array_key_exists($lang, $coords))
+    $coord = $coords[$lang];
+  else
+    $coord = "Coord";
+
+  $url = "https://" .$lang . "." . ($lang == 'commons' ? 'wikimedia' : 'wikipedia') . ".org/";
 ?>
 
 <tr>
-<td><a href="https://<?= $lang ?>.<?= $lang == 'commons' ? 'wikimedia' : 'wikipedia' ?>.org/"><?= $lang ?></a></td>
+<td>
+<a href="<?= $url ?>/"><?= $lang ?></a>
+<sup><a href="<?= $url ?>/wiki/Template_talk:<?= $coord ?>">coord</a>, <a href="https://meta.wikimedia.org/wiki/WikiMiniAtlas/<?= $lang ?>">meta</a></sup>
+</td>
 <td><?= $rev ?></td>
 </tr>
 
