@@ -44,7 +44,7 @@ if ($result = apc_fetch($key)) {
 $langvariant = explode("-", $lang, 2);
 
 // if a variant was provided check if it is supported
-if (count($langvariant) == 2) {
+if (count($langvariant) == 2 && false) {
   $allvariant = explode(',',"zh-hans,zh-hant,zh-cn,zh-hk,zh-mo,zh-sg,zh-tw");
   $variant = $lang;
   if (array_search($variant, $allvariant) === FALSE) {
@@ -53,7 +53,7 @@ if (count($langvariant) == 2) {
   }
 
   // set the mediawiki path for the mediawiki-zhconverter
-  define("MEDIAWIKI_PATH", "/opt/mediawiki");
+  define("MEDIAWIKI_PATH", "/opt/mediawiki-1.35.1");
 
   // include character set converter
   require_once "mediawiki-zhconverter/mediawiki-zhconverter.inc.php";

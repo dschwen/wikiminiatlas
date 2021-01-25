@@ -23,7 +23,19 @@ error_reporting(0);
 <?php
 
 $coords = array(
-  "de" => "Coordinate"
+  "de" => "Coordinate",
+  "eo" => "Koord",
+  "eu" => "Koord",
+  "gl" => "Coordenadas",
+  "ko" => "좌표",
+  "ku" => "Koord",
+  "hu" => "Koord",
+  "nl" => "Coor_title_dms",
+  "nn" => "Koord",
+  "no" => "Koord",
+  "pl" => "Współrzędne",
+  "sl" => "Koord",
+  "tr" => "Koordinat"
 );
 
 foreach ($lrev as $lang => $rev)
@@ -39,7 +51,12 @@ foreach ($lrev as $lang => $rev)
 <tr>
 <td>
 <a href="<?= $url ?>/"><?= $lang ?></a>
-<sup><a href="<?= $url ?>/wiki/Template_talk:<?= $coord ?>">coord</a>, <a href="https://meta.wikimedia.org/wiki/WikiMiniAtlas/<?= $lang ?>">meta</a></sup>
+<sup>
+  <a href="<?= $url ?>/wiki/Template_talk:<?= $coord ?>">coord</a>, 
+  <a href="https://meta.wikimedia.org/wiki/WikiMiniAtlas/<?= $lang ?>">meta</a>,
+  <a href="/logs/log_<?= $lang ?>.html">log</a>,
+  <a href="/#<?= $lang ?>">map</a> 
+</sup>
 </td>
 <td><?= $rev ?></td>
 </tr>
