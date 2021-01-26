@@ -31,11 +31,11 @@ if (array_key_exists('r', $_GET)) {
 }
 
 // Uncomment briefly to clear the memory cache
-apc_clear_cache();
+// apc_clear_cache();
 
 // APC - query cache
 $key = md5($x.'|'.$y.'|'.$z.'|'.$lang.'|'.$g.'|'.$r);
-if ($result = apc_fetch($key)) {
+if ($result = apcu_fetch($key)) {
   echo $result;
   exit;
 }
@@ -44,7 +44,7 @@ if ($result = apc_fetch($key)) {
 $langvariant = explode("-", $lang, 2);
 
 // if a variant was provided check if it is supported
-if (count($langvariant) == 2 && false) {
+if (count($langvariant) == 2) {
   $allvariant = explode(',',"zh-hans,zh-hant,zh-cn,zh-hk,zh-mo,zh-sg,zh-tw");
   $variant = $lang;
   if (array_search($variant, $allvariant) === FALSE) {
@@ -53,7 +53,7 @@ if (count($langvariant) == 2 && false) {
   }
 
   // set the mediawiki path for the mediawiki-zhconverter
-  define("MEDIAWIKI_PATH", "/opt/mediawiki-1.35.1");
+  define("MEDIAWIKI_PATH", "/opt/mediawiki-1.26.2");
 
   // include character set converter
   require_once "mediawiki-zhconverter/mediawiki-zhconverter.inc.php";
@@ -130,9 +130,9 @@ if ($r != NULL) {
     echo "Requesting too many tiles!";
     exit;
   }
-  $query = "select p.page_title as title, l.name as name, l.lat as lat, l.lon as lon, l.style as style, t.x as dx, t.y as dy, l.weight as wg, l.page_id as id from  page_$lang p, wma_tile t, wma_connect c, wma_label l  WHERE l.lang_id='$l' AND l.globe='$g' AND c.rev='$rev' AND c.tile_id=t.id AND ( ".implode(" OR ",$q)." ) AND c.label_id=l.id AND t.z='$z' AND c.tile_id = t.id AND l.page_id=p.page_id";
+  $query = "select p.page_title as title, l.name as name, l.lat as lat, l.lon as lon, l.style as style, t.x as dx, t.y as dy, l.weight as wg, l.page_id as id from  page_$lang p, wma_tile t, wma_connect_$lang c, wma_label_$lang l  WHERE l.globe='$g' AND c.rev='$rev' AND c.tile_id=t.id AND ( ".implode(" OR ",$q)." ) AND c.label_id=l.id AND t.z='$z' AND c.tile_id = t.id AND l.page_id=p.page_id";
 } else {
-  $query = "select p.page_title as title, l.name as name, l.lat as lat, l.lon as lon, l.style as style, t.x as dx, t.y as dy, l.weight as wg, l.page_id as id from  page_$lang p, wma_tile t, wma_connect c, wma_label l  WHERE l.lang_id='$l' AND  l.globe='$g' AND c.rev='$rev' AND c.tile_id=t.id AND t.x='$x' AND c.label_id=l.id  AND t.y='$y' AND t.z='$z' AND c.tile_id = t.id AND l.page_id=p.page_id";
+  $query = "select p.page_title as title, l.name as name, l.lat as lat, l.lon as lon, l.style as style, t.x as dx, t.y as dy, l.weight as wg, l.page_id as id from  page_$lang p, wma_tile t, wma_connect_$lang c, wma_label_$lang l  WHERE l.globe='$g' AND c.rev='$rev' AND c.tile_id=t.id AND t.x='$x' AND c.label_id=l.id  AND t.y='$y' AND t.z='$z' AND c.tile_id = t.id AND l.page_id=p.page_id";
 }
 
 $res = mysqli_query($db, $query);
@@ -201,5 +201,5 @@ mysqli_close($db);
 header("Cache-Control: public, max-age=3600");
 $result = json_encode( array( "label" => $items, "z" => $z ) );
 echo $result;
-apc_add($key, $result, 24*60*60); // cache 24h
+apcu_store($key, $result, 24*60*60); // cache 24h
 ?>
