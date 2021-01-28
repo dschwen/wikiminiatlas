@@ -130,9 +130,18 @@ if ($r != NULL) {
     echo "Requesting too many tiles!";
     exit;
   }
-  $query = "select p.page_title as title, l.name as name, l.lat as lat, l.lon as lon, l.style as style, t.x as dx, t.y as dy, l.weight as wg, l.page_id as id from  page_$lang p, wma_tile t, wma_connect_$lang c, wma_label_$lang l  WHERE l.globe='$g' AND c.rev='$rev' AND c.tile_id=t.id AND ( ".implode(" OR ",$q)." ) AND c.label_id=l.id AND t.z='$z' AND c.tile_id = t.id AND l.page_id=p.page_id";
+  if ($lang=='commons') {
+    $query = "select l.name as name, l.lat as lat, l.lon as lon, l.style as style, t.x as dx, t.y as dy, l.weight as wg from wma_tile t, wma_connect_$lang c, wma_label_$lang l  WHERE l.globe='$g' AND c.rev='$rev' AND c.tile_id=t.id AND ( ".implode(" OR ",$q)." ) AND c.label_id=l.id AND t.z='$z' AND c.tile_id = t.id";
+  } else {
+    $query = "select p.page_title as title, l.name as name, l.lat as lat, l.lon as lon, l.style as style, t.x as dx, t.y as dy, l.weight as wg, l.page_id as id from  page_$lang p, wma_tile t, wma_connect_$lang c, wma_label_$lang l  WHERE l.globe='$g' AND c.rev='$rev' AND c.tile_id=t.id AND ( ".implode(" OR ",$q)." ) AND c.label_id=l.id AND t.z='$z' AND c.tile_id = t.id AND l.page_id=p.page_id";
+  }
 } else {
-  $query = "select p.page_title as title, l.name as name, l.lat as lat, l.lon as lon, l.style as style, t.x as dx, t.y as dy, l.weight as wg, l.page_id as id from  page_$lang p, wma_tile t, wma_connect_$lang c, wma_label_$lang l  WHERE l.globe='$g' AND c.rev='$rev' AND c.tile_id=t.id AND t.x='$x' AND c.label_id=l.id  AND t.y='$y' AND t.z='$z' AND c.tile_id = t.id AND l.page_id=p.page_id";
+  if ($lang=='commons') {
+    $query = "select l.name as name, l.lat as lat, l.lon as lon, l.style as style, t.x as dx, t.y as dy, l.weight as wg from  wma_tile t, wma_connect_$lang c, wma_label_$lang l  WHERE l.globe='$g' AND c.rev='$rev' AND c.tile_id=t.id AND t.x='$x' AND c.label_id=l.id  AND t.y='$y' AND t.z='$z' AND c.tile_id = t.id";
+    //echo $query;
+  } else {
+    $query = "select p.page_title as title, l.name as name, l.lat as lat, l.lon as lon, l.style as style, t.x as dx, t.y as dy, l.weight as wg, l.page_id as id from  page_$lang p, wma_tile t, wma_connect_$lang c, wma_label_$lang l  WHERE l.globe='$g' AND c.rev='$rev' AND c.tile_id=t.id AND t.x='$x' AND c.label_id=l.id  AND t.y='$y' AND t.z='$z' AND c.tile_id = t.id AND l.page_id=p.page_id";
+  }
 }
 
 $res = mysqli_query($db, $query);
@@ -155,22 +164,20 @@ while ($row = mysqli_fetch_assoc($res))
 
   if ($lang=="commons") {
     $n = explode( '|', $row["name"], 4 );
-    $w = $n[0];
-    $h = $n[1];
     $items[] = array( 
       "style" => $s,
-      "img"  => urlencode($row["title"]),
+      "img"  => urlencode($n[0]),
       "tx"   => $tx,
       "ty"   => $ty,
-      "w" => $n[0],
-      "h" => $n[1],
-      "head"  => $n[2],
+      "w" => $n[1],
+      "h" => $n[2],
+      "head"  => $n[3],
       "dx" => $x,
       "dy" => $y,
       "wg" => intval($row["wg"]),
       "fx" => $fx,
       "fy" => $fy,
-      "m5" => substr(md5($row["title"]),0,2)
+      "m5" => substr(md5($n["0"]),0,2)
     );
   } else {
     if ($variant == "")
