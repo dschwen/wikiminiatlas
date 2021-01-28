@@ -1150,9 +1150,27 @@ function wikiminiatlasInstall(wma_widget, url_params)
   {
     function parseLabels(tile, l)
     {
-      var w, a, i, io,
+      var w, h, a, i, io,
           ix=[0, 0, 5, 0, 0, 2, 3, 4, 5, 6, 6],
           iy=[0, 0, 8, 0, 0, 2, 3, 4, 5, 6, 6];
+
+      function thumbLink(a, n, w, h, m5) {
+        a.click(function(e) {
+          // this is necessary to allow dragging the map on thumbnails in Firefox
+          var r = wmaMouseCoords(e);
+          if (r.x != wma_mdcoord.x || r.y != wma_mdcoord.y)
+            e.preventDefault();
+          else
+          {
+            // open the wmaci preview on left click (unless ctrl is pressed -> RMB emulation on mac)
+            if (e.which==1 && (!e.ctrlKey)) {
+              wmaCommonsImage(n, w, h, m5);
+              e.preventDefault();
+            }
+            // otherwise follow the link (allows for middle click opening the commons page)
+          }
+        }).attr('href', '//commons.wikimedia.org/wiki/File:' + n);
+      }
 
       tile.text('');
       for (i=0; i<l.length; ++i) {
@@ -1160,29 +1178,12 @@ function wikiminiatlasInstall(wma_widget, url_params)
 
         if ("img" in l[i]) {
           // thumbnails
-          (function(n, w, h, m5) {
-            a.click(function(e)
-            {
-              // this is necessary to allow dragging the map on thumbnails in Firefox
-              var r = wmaMouseCoords(e);
-              if (r.x != wma_mdcoord.x || r.y != wma_mdcoord.y)
-                e.preventDefault();
-              else
-              {
-                // open the wmaci preview on left click (unless ctrl is pressed -> RMB emulation on mac)
-                if (e.which==1 && (!e.ctrlKey))
-                {
-                  wmaCommonsImage(n, w, h, m5);
-                  e.preventDefault();
-                }
-                // otherwise follow the link (allows for middle click opening the commons page)
-              }
-            }).attr('href', '//commons.wikimedia.org/wiki/File:' + l[i].img);
-          })(l[i].img, l[i].w, l[i].h, l[i].m5);
+          thumbLink(a, l[i].img, l[i].w, l[i].h, l[i].m5);
 
           w = (parseInt(l[i].w) > parseInt(l[i].h)) ?
             (l[i].style == -2 ? 24 : 48) :
             Math.floor((l[i].style == -2 ? 24 : 48) * l[i].w / l[i].h);
+          h = Math.floor(w / l[i].w * l[i].h);
 
           a.addClass('cthumb')
             .append($('<img/>', {
@@ -1193,6 +1194,7 @@ function wikiminiatlasInstall(wma_widget, url_params)
                 src: wmaCommonsThumb(l[i].img, w, l[i].m5),
                 srcset: (2*w <= l[i].w) ? (wmaCommonsThumb(l[i].img, w*2, l[i].m5) + ' 2x') : ''
               })
+              .css({'width': w + 'px', 'height': h + 'px'})
            );
 
           if (l[i].head < 18)
@@ -2068,9 +2070,19 @@ function wikiminiatlasInstall(wma_widget, url_params)
 
   function wmaCommonsThumb(img, w, m5)
   {
+    var thumb_presize =  [120, 150, 180, 200, 220, 250, 300, 400];
+    function getSize(s) {
+      for (let i = 0; i < thumb_presize.length; i++) {
+        if (s < thumb_presize[i]) {
+              return thumb_presize[i];
+        }
+      }
+      return s;
+    }
+
     return m5 ?
-      '//upload.wikimedia.org/wikipedia/commons/thumb/' + m5[0] + '/' + m5 + '/' + img + '/' + w + 'px-' + img :
-      '//commons.wikimedia.org/w/thumb.php?w=' + w + '&f=' + img;
+      '//upload.wikimedia.org/wikipedia/commons/thumb/' + m5[0] + '/' + m5 + '/' + img + '/' + getSize(w) + 'px-' + img :
+      '//commons.wikimedia.org/w/thumb.php?w=' + getSize(w) + '&f=' + img;
   }
 
   function wmaCommonsImageClose()
