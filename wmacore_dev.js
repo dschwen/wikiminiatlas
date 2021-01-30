@@ -1176,10 +1176,8 @@ function wikiminiatlasInstall(wma_widget, url_params)
       for (i=0; i<l.length; ++i) {
         a = $('<a></a>');
 
-        if (wma_zoom <= 8) {
-          var lang = l[i].lang || 'commons'
-          if (l[i].wg < wma_median_weights[lang][wma_zoom]) continue;
-        }
+        // filter out low weight images in low zooms
+        if (wma_zoom <= 8 && !l[i].lang && l[i].wg < wma_median_weights.commons[wma_zoom]) continue;
 
         if ("img" in l[i]) {
           // thumbnails
@@ -1247,12 +1245,12 @@ function wikiminiatlasInstall(wma_widget, url_params)
             a.text(l[i].name);
         }
 
-        /*if (wma_zoom <= 8) {
+        /* if (wma_zoom <= 8) {
           var lang = l[i].lang || 'commons'
-          if (l[i].wg < wma_median_weights[lang][wma_zoom]/10) {
+          if (l[i].wg < wma_median_weights[lang][wma_zoom]) {
             a.css('border', '2px solid red');
           }
-        }*/
+        } */
         tile.append(a);
       }
     }
