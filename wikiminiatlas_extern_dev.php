@@ -34,6 +34,8 @@ echo "\n";
 require( 'min/poly2tri.min.js' );
 echo "\n";
 
+require( 'medians.js' );
+echo "\n";
 require( 'wikiminiatlas_i18n.inc' );
 
 if( true ) {
