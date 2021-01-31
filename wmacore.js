@@ -1169,12 +1169,15 @@ function wikiminiatlasInstall(wma_widget, url_params)
             }
             // otherwise follow the link (allows for middle click opening the commons page)
           }
-        }).attr('href', '//commons.wikimedia.org/wiki/File:' + n);
+        }).attr('href', 'https://commons.wikimedia.org/wiki/File:' + n);
       }
 
       tile.text('');
       for (i=0; i<l.length; ++i) {
         a = $('<a></a>');
+
+        // filter out low weight images in low zooms
+        if (wma_zoom <= 8 && !l[i].lang && l[i].wg < wma_median_weights.commons[wma_zoom]) continue;
 
         if ("img" in l[i]) {
           // thumbnails
@@ -1214,7 +1217,7 @@ function wikiminiatlasInstall(wma_widget, url_params)
           // text labels
           a.addClass('label').addClass('label' + l[i].style).addClass('label-'+l[i].lang).css(wmaLinkStyle)
             .attr({
-              href: '//' + l[i].lang + '.wikipedia.org/wiki/' + l[i].page,
+              href: 'https://' + l[i].lang + '.wikipedia.org/wiki/' + l[i].page,
               target: '_top'
             })
             .css({
@@ -1242,6 +1245,12 @@ function wikiminiatlasInstall(wma_widget, url_params)
             a.text(l[i].name);
         }
 
+        /* if (wma_zoom <= 8) {
+          var lang = l[i].lang || 'commons'
+          if (l[i].wg < wma_median_weights[lang][wma_zoom]) {
+            a.css('border', '2px solid red');
+          }
+        } */
         tile.append(a);
       }
     }
@@ -1303,9 +1312,9 @@ function wikiminiatlasInstall(wma_widget, url_params)
 
     var t1 = new Date();
 
-    for (var j = 0; j < wma_ny; j++)
+    for (j = 0; j < wma_ny; j++)
     {
-      for (var i = 0; i < wma_nx; i++)
+      for (i = 0; i < wma_nx; i++)
       {
         n = ((i+lx) % wma_nx) + ((j+ly) % wma_ny)*wma_nx;
 
@@ -2081,8 +2090,8 @@ function wikiminiatlasInstall(wma_widget, url_params)
     }
 
     return m5 ?
-      '//upload.wikimedia.org/wikipedia/commons/thumb/' + m5[0] + '/' + m5 + '/' + img + '/' + getSize(w) + 'px-' + img :
-      '//commons.wikimedia.org/w/thumb.php?w=' + getSize(w) + '&f=' + img;
+      'https://upload.wikimedia.org/wikipedia/commons/thumb/' + m5[0] + '/' + m5 + '/' + img + '/' + getSize(w) + 'px-' + img :
+      'https://commons.wikimedia.org/w/thumb.php?w=' + getSize(w) + '&f=' + img;
   }
 
   function wmaCommonsImageClose()

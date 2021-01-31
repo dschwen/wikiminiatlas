@@ -1312,9 +1312,9 @@ function wikiminiatlasInstall(wma_widget, url_params)
 
     var t1 = new Date();
 
-    for (var j = 0; j < wma_ny; j++)
+    for (j = 0; j < wma_ny; j++)
     {
-      for (var i = 0; i < wma_nx; i++)
+      for (i = 0; i < wma_nx; i++)
       {
         n = ((i+lx) % wma_nx) + ((j+ly) % wma_ny)*wma_nx;
 
