@@ -31,7 +31,7 @@ var wma_tilesets = [
       me = wma_tilesets[0];
 
       // rotating tile severs (yes/no)
-      var folder = z > 7 'mapnik/' : 'mapnik.new/';
+      var folder = z > 7 ? 'mapnik/' : 'mapnik.new/';
       if (norot  || document.location.protocol == 'https:')
       {
           if (z >= 7) {
