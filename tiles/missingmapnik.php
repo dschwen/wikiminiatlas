@@ -68,7 +68,7 @@ if( substr($url,0,strlen($base)) == $base )
     umask( 0033 );
    
     $requested = false;
-    $pid = file_get_contents( "/tmp/wikiminiatlas.tile" . $z . ".pid" );
+    $pid = file_get_contents( "/var/run/wma/wikiminiatlas.tile" . $z . ".pid" );
     if( is_dir( "/proc/$pid" ) )
     {
      // plausibility check; is the running process a mapniktile server?
@@ -80,7 +80,7 @@ if( substr($url,0,strlen($base)) == $base )
         mkdir("mapnik/$z/$y",0755); 
         umask($oldumask);
       }
-      $file = fopen( "/tmp/wikiminiatlas.tile" . $z . ".fifo", "w" );
+      $file = fopen( "/var/run/wma/wikiminiatlas.tile" . $z . ".fifo", "w" );
       fwrite( $file, $x . " " . $y . "\n" ); 
       fclose( $file );
       $requested = true;
@@ -90,7 +90,7 @@ if( substr($url,0,strlen($base)) == $base )
     // we should return an "out of service" image here!
     if( !$requested ) exit;
 
-    /*for( $i = 0; $i < 10; $i++ )
+    for( $i = 0; $i < 10; $i++ )
     {
      if( file_exists( $tfile ) ) break;
      usleep( 500 );
@@ -105,7 +105,7 @@ if( substr($url,0,strlen($base)) == $base )
      header( 'Cache-Control: no-cache' );
      //header( "Location: $url?" . rand() );
      header( 'Status: 500' );
-    }*/
+    }
    } 
    else echo "outside range\n";
   }
@@ -134,13 +134,13 @@ if( substr($url,0,strlen($base)) == $base )
     umask( 0033 );
    
     $requested = false;
-    $pid = file_get_contents( "/tmp/wikiminiatlas.sat.pid" );
+    $pid = file_get_contents( "/var/run/wma/wikiminiatlas.sat.pid" );
     if( is_dir( "/proc/$pid" ) )
     {
      // plausibility check; is the running process a mapniktile server?
      if( readlink( "/proc/$pid/cwd" ) == '/var/www/wikiminiatlas/tiles' )
      {
-      $file = fopen( "/tmp/wikiminiatlas.sat.fifo", "w" );
+      $file = fopen( "/var/run/wma/wikiminiatlas.sat.fifo", "w" );
       fwrite( $file, $x . " " . $y . " " . $z . "\n" ); 
       fclose( $file );
       $requested = true;
