@@ -357,7 +357,7 @@ function wikiminiatlasInstall(wma_widget, url_params)
       if (!hasCanvas)
         return function() {};
 
-      var ts = (wma_tileset == 0 ? 256 : 128);
+      var ts = 256;
       var map = $('<canvas></canvas>').attr({ width: 6*ts*4/3, height: 3*ts*4/3 }).css({ display: 'none' }),
           tmap = $('<canvas></canvas>').attr({ width: 6*ts, height: 3*ts }).css({ display: 'none' }),
           omap = $('<canvas></canvas>').attr({ width: 6*ts, height: 3*ts }).css({ display: 'none' }),
@@ -380,7 +380,7 @@ function wikiminiatlasInstall(wma_widget, url_params)
           var img = new Image();
           $(img).load(function()
           {
-            c.drawImage(img, x * ts, y * ts);
+            c.drawImage(img, x * ts, y * ts, ts, ts);
             loadcount++;
             if (loadcount == 3 * 6)
             {
