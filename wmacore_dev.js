@@ -138,15 +138,15 @@ var wma_tilesets = [
     globe: "Moon",
     getTileURL: function(y, x, z)
     {
-      var x1 = x % (wma_zoomsize[z] * 2);
+      var x1 = (x + wma_zoomsize[z]) % (wma_zoomsize[z] * 2);
       if (x1 < 0)
         x1 += wma_zoomsize[z] * 2;
 
-      return wma_imgbase + 'moon/'+z+'/'+y+'_'+x1+'.jpg';
+      return wma_imgbase + 'moon.new/'+(z+3)+'/'+y+'/'+x1+'.jpg';
     },
     linkcolor: [ "white", "1px 0px 2px black, 0px -1px 2px black, 0px 1px 2px black, -1px 0px 2px black" ],
     equator: 10940.475, // equatorial circumfence in km
-    maxzoom: 7,
+    maxzoom: 5,
     minzoom: 0
   },
   {
