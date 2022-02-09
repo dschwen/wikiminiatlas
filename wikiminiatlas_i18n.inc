@@ -1725,6 +1725,18 @@ var strings =
   'zh-tw':'全螢幕',
   'zh-yue':'全螢幕'
  },
+ mapBlueMarble: {
+   'en': 'Blue Marble',
+   'ar': 'الرخام_الأزرق',
+   'de': 'Erde bei nacht',
+   'es': 'La canica azul',
+   'fr': 'La Bille bleue',
+   'ja': 'ザ・ブルー・マーブル',
+   'ko': '푸른_구슬',
+   'tr': 'Mavi Bilye',
+   'zh': '藍色彈珠',
+   'zh-yue': '藍色波子'
+ },
  mapNight: {
    'en': 'Night on Earth',
    'da': 'Jorden om natten',
