@@ -1725,6 +1725,15 @@ var strings =
   'zh-tw':'全螢幕',
   'zh-yue':'全螢幕'
  },
+ mapNight: {
+   'en': 'Night on Earth',
+   'da': 'Jorden om natten',
+   'de': 'Erde bei nacht',
+   'es': 'Noche en la tierra',
+   'it': 'Terra di notte',
+   'ja': '地球上の夜',
+   'zh': '地球上的夜晚'
+ },
  mapFull: {
   'af':'Volledige basiskaart',
   'ar':'خريطة أساسية كاملة',

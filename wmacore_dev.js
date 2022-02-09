@@ -97,6 +97,22 @@ var wma_tilesets = [
     maxzoom: 7,
     minzoom: 0
   },
+  {
+    name: "mapNight",
+    globe: "Earth",
+    getTileURL: function(y, x, z)
+    {
+      var x1 = (x + wma_zoomsize[z]) % (wma_zoomsize[z] * 2);
+      if (x1 < 0)
+        x1 += wma_zoomsize[z] * 2;
+
+      return wma_imgbase + 'nightonearth.new/'+(z+3)+'/'+y+'/'+x1+'.jpg';
+    },
+    linkcolor: [ "white", "1px 0px 2px black, 0px -1px 2px black, 0px 1px 2px black, -1px 0px 2px black" ],
+    equator: 40075.0, // equatorial circumfence in km
+    maxzoom: 6,
+    minzoom: 0
+  },
   /*{
     name: "Daily aqua",
     getTileURL: function(y, x, z) {
