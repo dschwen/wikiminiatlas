@@ -48,8 +48,11 @@ if ($z<12) exit;
 
 //exit; // DB server under maintenance
 
-//$dbconn = pg_connect("host=sql-mapnik dbname=osm_mapnik port=5433");
-$dbconn = pg_connect("host=osmdb.eqiad.wmnet dbname=gis user=osm");
+// connect to database
+$ts_pw = posix_getpwuid(posix_getuid());
+$ts_mycnf = parse_ini_file($ts_pw['dir'] . "/postgres.cnf");
+$dbconn = pg_connect("host=maps-osmdb dbname=gis user=" . $ts_mycnf['user'] . " password=" . $ts_mycnf['password']);
+unset($ts_mycnf, $ts_pw);
 
 // size of zoom level in tiles
 $mx = 3 * ( 2 << $z );
@@ -201,20 +204,20 @@ if ($urx>180.0) {
 }
 
 // get landmass polygons and coastlines
-$table = array('land_polygons','coastlines');
+$table = array('land_polygons','lines');
 for ($i=0; $i<2; $i++) {
   // set up query
   $query = "
     select 
       ST_AsGeoJSON( 
         ST_Intersection( 
-          ST_SetSRID(geom, 4326),
+          ST_SetSRID(wkb_geometry, 4326),
           ST_SetSRID('BOX3D($llx $lly, $urx $ury)'::box3d, 4326)
         )
       , 9 )
       from ".$table[$i]."
     where
-      geom && ST_SetSRID('BOX3D($llx $lly, $urx $ury)'::box3d,4326);
+      wkb_geometry && ST_SetSRID('BOX3D($llx $lly, $urx $ury)'::box3d,4326);
   ";
 
   // perform query
