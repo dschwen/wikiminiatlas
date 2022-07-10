@@ -204,7 +204,7 @@ if ($urx>180.0) {
 }
 
 // get landmass polygons and coastlines
-$table = array('land_polygons','lines');
+$table = array('land_polygons','coastlines');
 for ($i=0; $i<2; $i++) {
   // set up query
   $query = "

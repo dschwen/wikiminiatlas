@@ -360,7 +360,7 @@ var wmajt = (function(){
     if (dash)
     {
       // iterate over all nodes
-      if (g.length > 0)
+      if (g && g.length > 0)
       {
         var px = (g[0][0]-bx1) * 128.0 / bw
           , py = 128.0 - (g[0][1] - by1) * 128.0 / bh
@@ -409,7 +409,7 @@ var wmajt = (function(){
     else
     {
       // iterate over all nodes
-      if (g.length > 0)
+      if (g && g.length > 0)
       {
         c.moveTo((g[0][0] - bx1) * 128 / bw, 128 - (g[0][1] - by1) * 128 / bh);
         for (j = 1; j < g.length; ++j)
@@ -433,6 +433,7 @@ var wmajt = (function(){
       var px, py, r;
 
       // iterate over all nodes
+      if (!g) return;
       for (j = 1; j < g.length; ++j)
       {
         px = (g[j][0] - bx1) * 128 / bw - mx;
@@ -505,6 +506,7 @@ var wmajt = (function(){
       case 'Polygon':
         // TODO
         path(m.geo.coordinates[0], c, m);
+        //path(m.geo.coordinates, c, m);
         break;
       case 'LineString':
         path(m.geo.coordinates, c, m);
