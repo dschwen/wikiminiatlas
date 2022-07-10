@@ -1,6 +1,6 @@
-var wmajt = (function(){
+var wmajt = (function () {
   var w = 128, h = 128  // tile size
-    , UILang='en'
+    , UILang = 'en'
     , minzoom = 12, buildingzoom = 14
     , cache = {}
     , ref_sd = {}, ref_z = {}
@@ -12,88 +12,93 @@ var wmajt = (function(){
     , dash = null
     , style = {
       Polygon: [
-        ['natural', {land_polygons: 1},
-          [ { fillStyle: "rgb(250,250,208)" } ]
+        ['natural', { land_polygons: 1 },
+          [{ fillStyle: "rgb(250,250,208)" }]
         ],
-        ['railway', {platform: 1},
-          [ { fillStyle: "rgb(220,220,220)" } ]
+        ['railway', { platform: 1 },
+          [{ fillStyle: "rgb(220,220,220)" }]
         ],
-        ['landuse', {industrial: 1, retail: 1, commercial: 1, residential: 1},
-          [ { fillStyle: "rgb(208,208,208)" } ]
+        ['landuse', { industrial: 1, retail: 1, commercial: 1, residential: 1 },
+          [{ fillStyle: "rgb(208,208,208)" }]
         ],
-        ['landuse', {reservoir: 1},
-          [ { fillStyle: "rgb(200,200,224)" } ]
+        ['landuse', { reservoir: 1 },
+          [{ fillStyle: "rgb(200,200,224)" }]
         ],
-        ['landuse', {military: 1, railway: 1},
-          [ { fillStyle: "rgb(224,200,200)" } ]
+        ['landuse', { military: 1, railway: 1 },
+          [{ fillStyle: "rgb(224,200,200)" }]
         ],
-        ['landuse', {cemetery: 1, recreation_ground: 1},
-          [ { fillStyle: "rgb(190,214,190)" } ]
+        ['landuse', { cemetery: 1, recreation_ground: 1 },
+          [{ fillStyle: "rgb(190,214,190)" }]
         ],
-        ['landuse', {grass: 1},
-          [ { globalAlpha: 0.3, fillStyle: "rgb(0,160,0)" }, { globalAlpha: 1} ]
+        ['landuse', { grass: 1 },
+          [{ globalAlpha: 0.3, fillStyle: "rgb(0,160,0)" }, { globalAlpha: 1 }]
         ],
-        ['leisure', {park: 1, orchard: 1, meadow: 1, village_green: 1, golf_course: 1, track: 1,
-          forrest: 1, recreation_ground: 1, dog_park: 1, garden: 1, pitch: 1, stadium: 1},
-          [ { fillStyle: "rgb(200,224,200)" } ]
+        ['leisure', {
+          park: 1, orchard: 1, meadow: 1, village_green: 1, golf_course: 1, track: 1,
+          forrest: 1, recreation_ground: 1, dog_park: 1, garden: 1, pitch: 1, stadium: 1
+        },
+          [{ fillStyle: "rgb(200,224,200)" }]
         ],
-        ['waterway', {riverbank: 1, dock: 1},
-          [ { fillStyle: "rgb(158,199,243)" } ]
+        ['leisure', { swimming_pool: 1 },
+          [{ fillStyle: "rgb(200,200,224)" }]
         ],
-        ['natural', {beach: 1, sand: 1},
-          [ { fillStyle: "rgb(250,242,175)" } ]
+        ['waterway', { riverbank: 1, dock: 1 },
+          [{ fillStyle: "rgb(158,199,243)" }]
         ],
-        ['natural', {wetland: 1, mud: 1},
-          [ { fillStyle: "rgb(200,218,224)" } ]
+        ['natural', { beach: 1, sand: 1 },
+          [{ fillStyle: "rgb(250,242,175)" }]
         ],
-        ['natural', {grassland: 1, fell: 1},
-          [ { fillStyle: "rgb(200,224,200)" } ]
+        ['natural', { wetland: 1, mud: 1 },
+          [{ fillStyle: "rgb(200,218,224)" }]
         ],
-        ['natural', {scrub: 1},
-          [ { fillStyle: "rgb(150,214,150)" } ]
+        ['natural', { grassland: 1, fell: 1 },
+          [{ fillStyle: "rgb(200,224,200)" }]
         ],
-        ['natural', {wood: 1},
-          [ { fillStyle: "rgb(100,204,100)" } ]
+        ['natural', { scrub: 1 },
+          [{ fillStyle: "rgb(150,214,150)" }]
         ],
-        ['natural', {water: 1, bay: 1},
-          [ { fillStyle: "rgb(158,199,243)" },
-            { lineWidth: 1, strokeStyle: "rgb(158,199,243)"} ]
+        ['natural', { wood: 1 },
+          [{ fillStyle: "rgb(100,204,100)" }]
         ],
-        ['natural', {glacier: 1},
-          [ { fillStyle: "rgb(230,245,255)" },
-            { lineWidth: 1, strokeStyle: "rgb(255,255,255)"} ]
+        ['natural', { water: 1, bay: 1 },
+          [{ fillStyle: "rgb(158,199,243)" },
+          { lineWidth: 1, strokeStyle: "rgb(158,199,243)" }]
         ],
-        ['amenity', {university: 1},
-          [ { lineWidth:0.5, strokeStyle: "rgb(240,225,183)" } ]
+        ['natural', { glacier: 1 },
+          [{ fillStyle: "rgb(230,245,255)" },
+          { lineWidth: 1, strokeStyle: "rgb(255,255,255)" }]
         ],
-        ['amenity', {parking: 1},
-          [ { fillStyle: "rgb(240,235,193)" } ]
+        ['amenity', { university: 1 },
+          [{ lineWidth: 0.5, strokeStyle: "rgb(240,225,183)" }]
         ],
-        ['highway', {pedestrian: 1},
-          [ { fillStyle: "rgb(255,255,255)" },
-            { lineWidth: 2, strokeStyle: "rgb(168,148,148)" } ]
+        ['amenity', { parking: 1 },
+          [{ fillStyle: "rgb(240,235,193)" }]
+        ],
+        ['highway', { pedestrian: 1 },
+          [{ fillStyle: "rgb(255,255,255)" },
+          { lineWidth: 2, strokeStyle: "rgb(168,148,148)" }]
         ],
         ['tourism', true,
-          [ { dash: [3,3], lineWidth: 2, strokeStyle: "rgb(255,255,0)" } ]
+          [{ dash: [3, 3], lineWidth: 2, strokeStyle: "rgb(255,255,0)" }]
         ],
-        ['aeroway', {terminal: 1},
-          [ { fillStyle: "rgb(190,210,190)" },
-            { lineWidth: 1, strokeStyle: "rgb(127,137,127)" } ]
+        ['aeroway', { terminal: 1 },
+          [{ fillStyle: "rgb(190,210,190)" },
+          { lineWidth: 1, strokeStyle: "rgb(127,137,127)" }]
         ],
-        ['historic', {memorial: 1, monument: 1, fort: 1, castle: 1},
-          [ { fillStyle: "rgb(255,190,190)" },
-            { lineWidth: 1, strokeStyle: "rgb(167,120,120)" } ]
+        ['historic', { memorial: 1, monument: 1, fort: 1, castle: 1 },
+          [{ fillStyle: "rgb(255,190,190)" },
+          { lineWidth: 1, strokeStyle: "rgb(167,120,120)" }]
         ],
-        ['historic', {ship: 1, wreck: 1},
-          [ { fillStyle: "rgb(255,190,235)" } ]
+        ['historic', { ship: 1, wreck: 1 },
+          [{ fillStyle: "rgb(255,190,235)" }]
         ],
-        ['railway', {station: 1},
-          [ { fillStyle: "rgb(210,195,195)" },
-            { lineWidth: 1, strokeStyle: "rgb(127,127,127)" } ]
+        ['railway', { station: 1 },
+          [{ fillStyle: "rgb(210,195,195)" },
+          { lineWidth: 1, strokeStyle: "rgb(127,127,127)" }]
         ],
-        ['natural', {water: 1, bay: 1},
-          [ { fillStyle: "rgb(158,199,243)" },
-            { lineWidth: 1, strokeStyle: "rgb(158,199,243)"} ]
+        ['natural', { water: 1, bay: 1 },
+          [{ fillStyle: "rgb(158,199,243)" },
+          { lineWidth: 1, strokeStyle: "rgb(158,199,243)" }]
         ],
         /*['building', {yes: 1, block: 1, office: 1, courthouse: 1, church: 1, school: 1, cathedral: 1, residential: 1, house: 1, hut: 1,
           university: 1, hospital: 1, bunker: 1, train_station: 1, chapel: 1, industrial: 1, commercial: 1, retail: 1, hotel: 1,
@@ -102,16 +107,16 @@ var wmajt = (function(){
             { lineWidth: 1, strokeStyle: "rgb(127,127,127)" } ]
         ], */
         ['building', true,
-          [ { fillStyle: "rgb(200,200,200)" },
-            { lineWidth: 1, strokeStyle: "rgb(127,127,127)" } ]
+          [{ fillStyle: "rgb(200,200,200)" },
+          { lineWidth: 1, strokeStyle: "rgb(127,127,127)" }]
         ],
         ['building:part', true,
-          [ { fillStyle: "rgb(200,200,200)" },
-            { lineWidth: 1, strokeStyle: "rgb(127,127,127)" } ]
+          [{ fillStyle: "rgb(200,200,200)" },
+          { lineWidth: 1, strokeStyle: "rgb(127,127,127)" }]
         ],
-        ['aeroway', {runway: 1, taxiway: 1, apron: 1},
-          [ { fillStyle: "rgb(100,130,100)" },
-            { lineWidth: 1, strokeStyle: "rgb(150,180,150)" } ]
+        ['aeroway', { runway: 1, taxiway: 1, apron: 1 },
+          [{ fillStyle: "rgb(100,130,100)" },
+          { lineWidth: 1, strokeStyle: "rgb(150,180,150)" }]
         ]
         /*['building:height', true,
           [ { lineWidth: 5, strokeStyle: "rgb(255,0,0)" } ]
@@ -127,112 +132,112 @@ var wmajt = (function(){
         ]*/
       ],
       LineString: [
-        ['natural', {coastlines: 1},
-          [ { lineWidth: 1, strokeStyle: "rgb(125,125,104)"} ]
+        ['natural', { coastlines: 1 },
+          [{ lineWidth: 1, strokeStyle: "rgb(125,125,104)" }]
         ],
-        ['waterway', {canal: 1},
-          [ { lineCap: 'butt', lineWidth: 3, strokeStyle: "rgb(158,199,243)" } ]
+        ['waterway', { canal: 1 },
+          [{ lineCap: 'butt', lineWidth: 3, strokeStyle: "rgb(158,199,243)" }]
         ],
-        ['waterway', {river: 1},
-          [ { lineWidth: 1.5, strokeStyle: "rgb(126,159,194)" } ]
+        ['waterway', { river: 1 },
+          [{ lineWidth: 1.5, strokeStyle: "rgb(126,159,194)" }]
         ],
-        ['waterway', {stream: 1},
-          [ { dash: [2,2], lineWidth: 1.5, strokeStyle: "rgb(126,159,194)" } ]
+        ['waterway', { stream: 1 },
+          [{ dash: [2, 2], lineWidth: 1.5, strokeStyle: "rgb(126,159,194)" }]
         ],
-        ['route', {ferry: 1},
-          [ { dash: [4,4], lineWidth: 2, strokeStyle: "rgb(126,159,194)" } ]
+        ['route', { ferry: 1 },
+          [{ dash: [4, 4], lineWidth: 2, strokeStyle: "rgb(126,159,194)" }]
         ],
-        ['highway', {pedestrian: 1},
-          [ { lineWidth: 5, strokeStyle: "rgb(255,255,255)" } ]
+        ['highway', { pedestrian: 1 },
+          [{ lineWidth: 5, strokeStyle: "rgb(255,255,255)" }]
         ],
-        ['highway', {footway: 1, pedestrian: 1, path: 1},
-          [ { lineWidth: 2, strokeStyle: "rgb(198,178,178)" } ]
+        ['highway', { footway: 1, pedestrian: 1, path: 1 },
+          [{ lineWidth: 2, strokeStyle: "rgb(198,178,178)" }]
           //[ { lineWidth: 2, strokeStyle: "rgb(168,148,148)" } ]
         ],
-        ['highway', {steps: 1},
-          [ { dash:[1.5,1.5], lineWidth: 3, strokeStyle: "rgb(168,148,148)" } ]
+        ['highway', { steps: 1 },
+          [{ dash: [1.5, 1.5], lineWidth: 3, strokeStyle: "rgb(168,148,148)" }]
         ],
-        ['highway', {service: 1, bus_guideway: 1},
-          [ { lineWidth: 4, strokeStyle: "rgb(168,168,168)" },
-            { lineWidth: 2.5, strokeStyle: "rgb(208,208,208)" } ]
+        ['highway', { service: 1, bus_guideway: 1 },
+          [{ lineWidth: 4, strokeStyle: "rgb(168,168,168)" },
+          { lineWidth: 2.5, strokeStyle: "rgb(208,208,208)" }]
         ],
-        ['highway', {track: 1},
-          [ { lineWidth: 3.5, strokeStyle: "rgb(168,168,168)" },
-            { lineWidth: 2.5, strokeStyle: "rgb(250,250,208)" } ]
+        ['highway', { track: 1 },
+          [{ lineWidth: 3.5, strokeStyle: "rgb(168,168,168)" },
+          { lineWidth: 2.5, strokeStyle: "rgb(250,250,208)" }]
         ],
-        ['highway', {residential: 1, unclassified: 1},
-          [ { lineWidth: 4, strokeStyle: "rgb(200,200,200)" },
-            { lineWidth: 2.5, strokeStyle: "rgb(255,255,255)" } ]
+        ['highway', { residential: 1, unclassified: 1 },
+          [{ lineWidth: 4, strokeStyle: "rgb(200,200,200)" },
+          { lineWidth: 2.5, strokeStyle: "rgb(255,255,255)" }]
         ],
-        ['highway', {tertiary: 1},
-          [ { lineWidth: 5, strokeStyle: "rgb(200,200,200)" },
-            { lineWidth: 3.5, strokeStyle: "rgb(255,255,235)" } ]
+        ['highway', { tertiary: 1 },
+          [{ lineWidth: 5, strokeStyle: "rgb(200,200,200)" },
+          { lineWidth: 3.5, strokeStyle: "rgb(255,255,235)" }]
         ],
         // border
-        ['railway', {subway: 1},
-          [ { globalAlpha: 0.2, lineWidth: 3, strokeStyle: "rgb(100,100,100)" },
-            { globalAlpha: 1 } ]
+        ['railway', { subway: 1 },
+          [{ globalAlpha: 0.2, lineWidth: 3, strokeStyle: "rgb(100,100,100)" },
+          { globalAlpha: 1 }]
         ],
-        ['railway', {rail: 1, preserved: 1, monorail: 1, narrow_gauge: 1},
-          [ { lineWidth: 3, strokeStyle: "rgb(100,100,100)" } ]
+        ['railway', { rail: 1, preserved: 1, monorail: 1, narrow_gauge: 1 },
+          [{ lineWidth: 3, strokeStyle: "rgb(100,100,100)" }]
         ],
-        ['highway', {secondary: 1, secondary_link: 1, primary: 1, primary_link: 1},
-          [ { lineCap: 'round', lineWidth: 6, strokeStyle: "rgb(171,158,137)" } ]
+        ['highway', { secondary: 1, secondary_link: 1, primary: 1, primary_link: 1 },
+          [{ lineCap: 'round', lineWidth: 6, strokeStyle: "rgb(171,158,137)" }]
         ],
-        ['highway', {motorway: 1, motorway_link: 1, trunk: 1, trunk_link: 1},
-          [ { lineWidth: 7, strokeStyle: "rgb(188,149,28)" } ]
+        ['highway', { motorway: 1, motorway_link: 1, trunk: 1, trunk_link: 1 },
+          [{ lineWidth: 7, strokeStyle: "rgb(188,149,28)" }]
         ],
-        ['aeroway', {runway: 1},
-          [ { lineWidth: 10, strokeStyle: "rgb(100,130,100)" } ]
+        ['aeroway', { runway: 1 },
+          [{ lineWidth: 10, strokeStyle: "rgb(100,130,100)" }]
         ],
-        ['aeroway', {taxiway: 1},
-          [ { lineWidth: 4.5, strokeStyle: "rgb(100,130,100)" } ]
+        ['aeroway', { taxiway: 1 },
+          [{ lineWidth: 4.5, strokeStyle: "rgb(100,130,100)" }]
         ],
         // fill
-        ['railway', {subway: 1},
-          [ { lineCap: 'butt', globalAlpha: 0.3, dash: [3,3], lineWidth: 1.5, strokeStyle: "rgb(255,255,255)" },
-            { globalAlpha: 1 } ]
+        ['railway', { subway: 1 },
+          [{ lineCap: 'butt', globalAlpha: 0.3, dash: [3, 3], lineWidth: 1.5, strokeStyle: "rgb(255,255,255)" },
+          { globalAlpha: 1 }]
         ],
-        ['railway', {rail: 1, narrow_gauge: 1},
-          [ { dash: [3,3], lineWidth: 1.5, strokeStyle: "rgb(255,255,255)" } ]
+        ['railway', { rail: 1, narrow_gauge: 1 },
+          [{ dash: [3, 3], lineWidth: 1.5, strokeStyle: "rgb(255,255,255)" }]
         ],
-        ['railway', {preserved: 1},
-          [ { dash: [3,3], lineWidth: 1.5, strokeStyle: "rgb(200,200,200)" } ]
+        ['railway', { preserved: 1 },
+          [{ dash: [3, 3], lineWidth: 1.5, strokeStyle: "rgb(200,200,200)" }]
         ],
-        ['railway', {monorail: 1},
-          [ { dash: [1,2,4,2], lineWidth: 1.5, strokeStyle: "rgb(200,200,200)" } ]
+        ['railway', { monorail: 1 },
+          [{ dash: [1, 2, 4, 2], lineWidth: 1.5, strokeStyle: "rgb(200,200,200)" }]
         ],
-        ['highway', {bus_guideway: 1},
-          [ { dash: [3,3], lineWidth: 2, strokeStyle: "rgb(150,150,255)" } ]
+        ['highway', { bus_guideway: 1 },
+          [{ dash: [3, 3], lineWidth: 2, strokeStyle: "rgb(150,150,255)" }]
         ],
-        ['highway', {secondary: 1, secondary_link: 1},
-          [ { lineCap: 'round', lineWidth: 4.5, strokeStyle: "rgb(255,250,115)" } ]
+        ['highway', { secondary: 1, secondary_link: 1 },
+          [{ lineCap: 'round', lineWidth: 4.5, strokeStyle: "rgb(255,250,115)" }]
         ],
-        ['highway', {primary: 1, primary_link: 1},
-          [ { lineWidth: 4, strokeStyle: "rgb(255,230,95)" } ]
+        ['highway', { primary: 1, primary_link: 1 },
+          [{ lineWidth: 4, strokeStyle: "rgb(255,230,95)" }]
         ],
-        ['highway', {motorway: 1, motorway_link: 1, trunk: 1, trunk_link: 1},
-          [ { lineWidth: 5, strokeStyle: "rgb(242,191,36)" } ]
+        ['highway', { motorway: 1, motorway_link: 1, trunk: 1, trunk_link: 1 },
+          [{ lineWidth: 5, strokeStyle: "rgb(242,191,36)" }]
         ],
-        ['aeroway', {runway: 1},
-          [ { lineWidth: 8, strokeStyle: "rgb(150,180,150)" } ]
+        ['aeroway', { runway: 1 },
+          [{ lineWidth: 8, strokeStyle: "rgb(150,180,150)" }]
         ],
-        ['aeroway', {taxiway: 1},
-          [ { lineWidth: 2.5, strokeStyle: "rgb(150,180,150)" } ]
+        ['aeroway', { taxiway: 1 },
+          [{ lineWidth: 2.5, strokeStyle: "rgb(150,180,150)" }]
         ],
-        ['railway', {tram: 1},
-          [ { globalAlpha: 0.4, dash: [3,3], lineWidth: 1.5, strokeStyle: "rgb(0,0,0)" },
-            { globalAlpha: 1 } ]
+        ['railway', { tram: 1 },
+          [{ globalAlpha: 0.4, dash: [3, 3], lineWidth: 1.5, strokeStyle: "rgb(0,0,0)" },
+          { globalAlpha: 1 }]
         ],
         // access overlay
-        ['access', {permissive: 1},
-          [ { dash: [1,2], lineWidth: 1, strokeStyle: "rgb(100,200,100)" } ]
+        ['access', { permissive: 1 },
+          [{ dash: [1, 2], lineWidth: 1, strokeStyle: "rgb(100,200,100)" }]
         ],
-        ['access', {'private': 1, residents: 1},
-          [ { dash: [1,2], lineWidth: 1, strokeStyle: "rgb(200,100,100)" } ]
+        ['access', { 'private': 1, residents: 1 },
+          [{ dash: [1, 2], lineWidth: 1, strokeStyle: "rgb(200,100,100)" }]
         ],
         ['building:part', true,
-          [ { lineWidth: 1, strokeStyle: "rgb(127,127,255)" } ]
+          [{ lineWidth: 1, strokeStyle: "rgb(127,127,255)" }]
         ]
         /*['start_date', true,
           [ { dash: [2,5], lineWidth: 3, strokeStyle: "rgb(255,0,0)" } ]
@@ -241,15 +246,11 @@ var wmajt = (function(){
     };
 
 
-  function union(a1, a2)
-  {
+  function union(a1, a2) {
     var a = a1.concat(a2), r = [], s = {};
-    for (i in a)
-    {
-      if (a.hasOwnProperty(i))
-      {
-        if (!(a[i] in s))
-        {
+    for (i in a) {
+      if (a.hasOwnProperty(i)) {
+        if (!(a[i] in s)) {
           s[a[i]] = true;
           r.push(a[i]);
         }
@@ -258,15 +259,13 @@ var wmajt = (function(){
     return r;
   };
 
-  function hash(x, y, z)
-  {
+  function hash(x, y, z) {
     return x + '_' + y + '_' + z;
   }
 
-  function gotData(data)
-  {
+  function gotData(data) {
     // TODO sort accorsing to layer and tunnel flag (but that kills the index!)
-    var idx, lay = {0: 1}, d, i, j;
+    var idx, lay = { 0: 1 }, d, i, j;
 
     // insert response into cache
     if (data === null) return; // server error
@@ -275,14 +274,11 @@ var wmajt = (function(){
     // index of objects by tag
     if (data.v && data.v >= 2)
       idx = data.idx;
-    else
-    {
+    else {
       // generate index client side
       idx = {};
-      for (i = 0; i < d.length; ++i)
-      {
-        for (j in d[i].tags)
-        {
+      for (i = 0; i < d.length; ++i) {
+        for (j in d[i].tags) {
           if (j in idx)
             idx[j].push(i);
           else
@@ -292,8 +288,7 @@ var wmajt = (function(){
     }
 
     // list of all layers in this tile
-    for (i = 0; i < d.length; ++i)
-    {
+    for (i = 0; i < d.length; ++i) {
       if ('layer' in d[i].tags)
         lay[d[i].tags['layer']] = 1;
     }
@@ -309,24 +304,18 @@ var wmajt = (function(){
 
     // propagate buildings to low zoom levels above the building threshold
     var d = data.data, zz, xx = data.x, yy = data.y, ca;
-    if (data.z >= buildingzoom)
-    {
-      for (zz = data.z; zz >= minzoom; --zz)
-      {
+    if (data.z >= buildingzoom) {
+      for (zz = data.z; zz >= minzoom; --zz) {
         ca = cache[hash(xx, yy, zz)];
-        if (zz < buildingzoom && ca && ca.data)
-        {
+        if (zz < buildingzoom && ca && ca.data) {
           // iterate over all data entries and insert buildings into higher cache level
-          for (i = 0; i < d.length; ++i)
-          {
+          for (i = 0; i < d.length; ++i) {
             // check against shape type and tags
             if ('osm_id' in d[i].tags &&
-                ('building' in d[i].tags || 'building:part' in d[i].tags) &&
-                !(d[i].tags['osm_id'] in ca.building))
-            {
+              ('building' in d[i].tags || 'building:part' in d[i].tags) &&
+              !(d[i].tags['osm_id'] in ca.building)) {
               // update the index
-              for (j in d[i].tags)
-              {
+              for (j in d[i].tags) {
                 if (j in ca.idx)
                   ca.idx[j].push(ca.data.length);
                 else
@@ -341,8 +330,7 @@ var wmajt = (function(){
         yy = Math.floor(yy / 2);
       }
     }
-    else
-    {
+    else {
       // TODO: look for lower zoom levels with building data, but there may be A LOT!
       // SOLUTION: just look at building zoom
     }
@@ -352,20 +340,16 @@ var wmajt = (function(){
   }
 
   // create path from coordinate data in g
-  function drawPath(g, c)
-  {
-    if (dash)
-    {
+  function drawPath(g, c) {
+    if (dash) {
       // iterate over all nodes
-      if (g.length > 0)
-      {
-        var px = (g[0][0]-bx1) * 128.0 / bw
+      if (g && g.length > 0) {
+        var px = (g[0][0] - bx1) * 128.0 / bw
           , py = 128.0 - (g[0][1] - by1) * 128.0 / bh
           , dx, dy, di = 0, dl = dash.length, dc = 0.0
           , mx, my, r, rr, j, done;
 
-        for (j = 1; j < g.length; ++j)
-        {
+        for (j = 1; j < g.length; ++j) {
           // move to start
           c.moveTo(px, py);
           rr = -dc;
@@ -375,21 +359,19 @@ var wmajt = (function(){
           dy = 128.0 - (g[j][1] - by1) * 128.0 / bh;
 
           // stepvector and length
-          mx = dx-px;
-          my = dy-py;
+          mx = dx - px;
+          my = dy - py;
           r = Math.sqrt(mx * mx + my * my);
           mx /= r;
           my /= r;
 
           // loop over segment
           done = false;
-          while(true)
-          {
+          while (true) {
             rr += dash[di] * lineWidthMult;
-            if (rr > r)
-            {
+            if (rr > r) {
               done = true;
-              dc = rr-r;
+              dc = rr - r;
               rr = r;
             }
             c[di % 2 ? 'moveTo' : 'lineTo'](rr * mx + px, rr * my + py);
@@ -403,21 +385,18 @@ var wmajt = (function(){
         }
       }
     }
-    else
-    {
+    else {
       // iterate over all nodes
-      if (g.length > 0)
-      {
+      if (g && g.length > 0) {
         c.moveTo((g[0][0] - bx1) * 128 / bw, 128 - (g[0][1] - by1) * 128 / bh);
         for (j = 1; j < g.length; ++j)
-          c.lineTo((g[j][0] - bx1) * 128 / bw, 128 - (g[j][1]-by1) * 128 / bh);
+          c.lineTo((g[j][0] - bx1) * 128 / bw, 128 - (g[j][1] - by1) * 128 / bh);
       }
     }
   }
 
   // detect mouse pointer proximity
-  function detectPointer(e, tile)
-  {
+  function detectPointer(e, tile) {
     var rmin = null, mmin = {}
       , o = tile.div.offset()
       , mx = e.pageX - o.left
@@ -425,18 +404,16 @@ var wmajt = (function(){
       , d = tile.csca.data || []
       , m, i, t, s = '';
 
-    function detectPath(g, c, m)
-    {
+    function detectPath(g, c, m) {
       var px, py, r;
 
       // iterate over all nodes
-      for (j = 1; j < g.length; ++j)
-      {
+      if (!g) return;
+      for (j = 1; j < g.length; ++j) {
         px = (g[j][0] - bx1) * 128 / bw - mx;
         py = 128 - (g[j][1] - by1) * 128 / bh - my;
         r = px * px + py * py;
-        if ((rmin === null || r<rmin) && (('name:' + UILang) in m.tags || 'name' in m.tags || 'addr:street' in m.tags))
-        {
+        if ((rmin === null || r < rmin) && (('name:' + UILang) in m.tags || 'name' in m.tags || 'addr:street' in m.tags)) {
           rmin = r;
           mmin = m;
         }
@@ -453,8 +430,7 @@ var wmajt = (function(){
     if (bx1 > 180.0) bx1 -= 360;
 
     // loop over tag index objects
-    for (i = 0; i < d.length; ++i)
-    {
+    for (i = 0; i < d.length; ++i) {
       m = d[i];
       processShape(m, 'Polygon', null, detectPath);
       if (m.geo.type == 'GeometryCollection')
@@ -463,8 +439,7 @@ var wmajt = (function(){
 
     t = mmin.tags || {};
     // has name
-    if (('name' in t) || (('name:' + UILang) in t))
-    {
+    if (('name' in t) || (('name:' + UILang) in t)) {
       s = t[('name:' + UILang)] || t.name;
       if ('loc_name' in t)
         s += ' "' + t.loc_name + '"';
@@ -474,8 +449,7 @@ var wmajt = (function(){
     }
 
     // has address
-    if ('addr:street' in t)
-    {
+    if ('addr:street' in t) {
       s = t['addr:street'];
       if ('addr:housenumber' in t)
         s = t['addr:housenumber'] + ' ' + s;
@@ -484,8 +458,7 @@ var wmajt = (function(){
 
     // misc
     var tags = ['landuse', 'historic', 'highway', 'building'];
-    for (i = 0; i < tags.length; ++i)
-    {
+    for (i = 0; i < tags.length; ++i) {
       if (tags[i] in t)
         return tags[i] + ' ' + t[tags[i]];
     }
@@ -494,60 +467,50 @@ var wmajt = (function(){
   }
 
   // quick hack for shape type
-  function processShape(m, s, c, path)
-  {
+  function processShape(m, s, c, path) {
     var k, l, g;
-    switch(m.geo.type)
-    {
+    switch (m.geo.type) {
       case 'Polygon':
         // TODO
         path(m.geo.coordinates[0], c, m);
+        //path(m.geo.coordinates, c, m);
         break;
       case 'LineString':
         path(m.geo.coordinates, c, m);
         break;
       case 'MultiLineString':
-        for (k = 0; k < m.geo.coordinates.length; ++k)
-        {
+        for (k = 0; k < m.geo.coordinates.length; ++k) {
           path(m.geo.coordinates[k], c, m);
         }
         break;
       case 'MultiPolygon':
-        for (k = 0; k < m.geo.coordinates.length; ++k)
-        {
+        for (k = 0; k < m.geo.coordinates.length; ++k) {
           path(m.geo.coordinates[k][0], c, m);
         }
         break;
       case 'GeometryCollection':
         g = m.geo.geometries;
-        for (l = 0; l < g.length; ++l)
-        {
-          if (s === 'Polygon')
-          {
-            switch(g[l].type)
-            {
+        for (l = 0; l < g.length; ++l) {
+          if (s === 'Polygon') {
+            switch (g[l].type) {
               case 'Polygon':
                 // TODO
                 path(g[l].coordinates[0], c, m);
                 break;
               case 'MultiPolygon':
-                for (k = 0; k < g[l].coordinates.length; ++k)
-                {
+                for (k = 0; k < g[l].coordinates.length; ++k) {
                   path(g[l].coordinates[k][0], c, m);
                 }
                 break;
             }
           }
-          else
-          {
-            switch(g[l].type)
-            {
+          else {
+            switch (g[l].type) {
               case 'LineString':
                 path(g[l].coordinates, c, m);
                 break;
               case 'MultiLineString':
-                for (k = 0; k < g[l].coordinates.length; ++k)
-                {
+                for (k = 0; k < g[l].coordinates.length; ++k) {
                   path(g[l].coordinates[k], c, m);
                 }
                 break;
@@ -558,26 +521,24 @@ var wmajt = (function(){
     }
   }
 
-  function update(x, y, z, tile, purge)
-  {
+  function update(x, y, z, tile, purge) {
     var c = tile.ctx, glRedraw = false, bldgh, bldgm, g, roofh, roofs;
 
     // set globals for current tile coordinates
-    bx1 = x*60.0/(1<<z)
-    by1 = 90.0 - (((y+1.0)*60.0) / (1<<z))
-    bx2 = (x+1) * 60.0 / (1<<z)
-    by2 = 90.0 - ((y*60.0) / (1<<z))
+    bx1 = x * 60.0 / (1 << z)
+    by1 = 90.0 - (((y + 1.0) * 60.0) / (1 << z))
+    bx2 = (x + 1) * 60.0 / (1 << z)
+    by2 = 90.0 - ((y * 60.0) / (1 << z))
     bw = bx2 - bx1
     bh = by2 - by1
     if (bx1 > 180.0)
-      bx1-=360;
+      bx1 -= 360;
 
     // set global lineWidth multiplier
     lineWidthMult = Math.pow(1.25, z - 13);
 
     // draw the data
-    function drawGeoJSON(ca)
-    {
+    function drawGeoJSON(ca) {
       var i, j, k, g, s, o, d = ca.data, m, idx;
 
       c.lineWidth = 1.0;
@@ -586,10 +547,8 @@ var wmajt = (function(){
       c.fillStyle = 'rgb(158,199,243)';
       c.fillRect(0, 0, 128, 128);
 
-      for (s in style)
-      {
-        for (o = 0; o < style[s].length; ++o)
-        {
+      for (s in style) {
+        for (o = 0; o < style[s].length; ++o) {
           c.beginPath();
 
           // skip styles whose tag does not occur
@@ -600,22 +559,19 @@ var wmajt = (function(){
 
           // loop over tag index objects
           idx = ca.idx[style[s][o][0]];
-          for (i = 0; i < idx.length; ++i)
-          {
+          for (i = 0; i < idx.length; ++i) {
             m = d[idx[i]];
             // check against shape type and tags
-            if ((s !== m.geo.type && ("Multi"+s) !== m.geo.type && m.geo.type !== 'GeometryCollection') ||
-                !(style[s][o][1]===true || m.tags[style[s][o][0]] in style[s][o][1])) continue;
+            if ((s !== m.geo.type && ("Multi" + s) !== m.geo.type && m.geo.type !== 'GeometryCollection') ||
+              !(style[s][o][1] === true || m.tags[style[s][o][0]] in style[s][o][1])) continue;
 
             processShape(m, s, c, drawPath);
           }
 
           // iterate over the style components
           g = style[s][o][2]
-          for (i = 0; i < g.length; ++i)
-          {
-            for (j in g[i])
-            {
+          for (i = 0; i < g.length; ++i) {
+            for (j in g[i]) {
               if (j === 'lineWidth')
                 c.lineWidth = g[i].lineWidth * lineWidthMult;
               else if (j !== 'dash')
@@ -631,8 +587,7 @@ var wmajt = (function(){
       }
     }
 
-    function parseHeight(s)
-    {
+    function parseHeight(s) {
       var m;
       if (s === undefined)
         return null;
@@ -658,23 +613,17 @@ var wmajt = (function(){
 
     // seach cache for data
     var zz, xx = x, yy = y, ca, d, v, idx;
-    for (zz = z; zz >= minzoom; --zz)
-    {
+    for (zz = z; zz >= minzoom; --zz) {
       ca = cache[hash(xx, yy, zz)];
-      if (ca && ca.data && !purge)
-      {
+      if (ca && ca.data && !purge) {
         // subtract old tile from reference counters
-        if (tile.csca)
-        {
+        if (tile.csca) {
           d = tile.csca.data;
-          if (trackstartdate && 'start_date' in tile.csca.idx)
-          {
+          if (trackstartdate && 'start_date' in tile.csca.idx) {
             idx = tile.csca.idx['start_date']
-            for (i = 0; i < idx.length; ++i)
-            {
+            for (i = 0; i < idx.length; ++i) {
               v = d[idx[i]].tags['start_date'];
-              if (v in ref_sd)
-              {
+              if (v in ref_sd) {
                 ref_sd[v]--;
                 if (ref_sd[v] == 0)
                   delete ref_sd[v];
@@ -682,18 +631,14 @@ var wmajt = (function(){
             }
           }
           // union index
-          if (trackzbuild && z > buildingzoom)
-          {
-            idx = union(tile.csca.idx['building:levels']||[], tile.csca.idx['height']||[]);
+          if (trackzbuild && z > buildingzoom) {
+            idx = union(tile.csca.idx['building:levels'] || [], tile.csca.idx['height'] || []);
             //if (z>buildingzoom && 'building:levels' in tile.csca.idx) {
             //  idx = tile.csca.idx['building:levels']
-            for (i = 0; i < idx.length; ++i)
-            {
-              if ('osm_id' in d[idx[i]].tags)
-              {
+            for (i = 0; i < idx.length; ++i) {
+              if ('osm_id' in d[idx[i]].tags) {
                 v = d[idx[i]].tags['osm_id'];
-                if (v in ref_z)
-                {
+                if (v in ref_z) {
                   ref_z[v]--;
                   if (ref_z[v] == 0)
                     delete ref_z[v];
@@ -712,13 +657,11 @@ var wmajt = (function(){
         // add to reference counters
         d = ca.data;
         // this maintains a list of all distinct start dates in the current field of view
-        if (trackstartdate && 'start_date' in ca.idx)
-        {
+        if (trackstartdate && 'start_date' in ca.idx) {
           idx = ca.idx['start_date']
-          for (i = 0; i < idx.length; ++i)
-          {
+          for (i = 0; i < idx.length; ++i) {
             v = d[idx[i]].tags['start_date'];
-            ref_sd[v] = (ref_sd[v]||0) + 1;
+            ref_sd[v] = (ref_sd[v] || 0) + 1;
           }
         }
 
@@ -726,16 +669,13 @@ var wmajt = (function(){
         // and a lookup table of buildings by osm_id
         //if (z>buildingzoom && 'building:levels' in ca.idx) {
         // union index
-        if (trackzbuild && z > buildingzoom)
-        {
+        if (trackzbuild && z > buildingzoom) {
           idx = union(ca.idx['building:levels'] || [], ca.idx['height'] || []);
           //idx = ca.idx['building:levels']
-          for (i = 0; i < idx.length; ++i)
-          {
-            if ('osm_id' in d[idx[i]].tags)
-            {
+          for (i = 0; i < idx.length; ++i) {
+            if ('osm_id' in d[idx[i]].tags) {
               v = d[idx[i]].tags['osm_id'];
-              ref_z[v] = (ref_z[v]||0) + 1;
+              ref_z[v] = (ref_z[v] || 0) + 1;
               if (!(v in zbuild))
                 zbuild[v] = d[idx[i]];
             }
@@ -746,20 +686,16 @@ var wmajt = (function(){
         //  just increment ref_z if ref_z is 0 (before the increment)
         //  add the building to the WebGL buffer
         //  otherwise do nothing
-        if (gl !== null)
-        {
+        if (gl !== null) {
           idx = union(ca.idx['building:levels'] || [], ca.idx['height'] || []);
-          for (i = 0; i < idx.length; ++i)
-          {
-            if ('osm_id' in d[idx[i]].tags)
-            {
+          for (i = 0; i < idx.length; ++i) {
+            if ('osm_id' in d[idx[i]].tags) {
               v = d[idx[i]].tags['osm_id'];
-              if (!(v in ref_z))
-              {
+              if (!(v in ref_z)) {
                 ref_z[v] = true;
                 v = d[idx[i]];
-                bldgh = parseHeight(v.tags['height']) || (v.tags['building:levels']*3);
-                bldgm = parseHeight(v.tags['min_height']) || (v.tags['building:min_level']*3) || 0;
+                bldgh = parseHeight(v.tags['height']) || (v.tags['building:levels'] * 3);
+                bldgm = parseHeight(v.tags['min_height']) || (v.tags['building:min_level'] * 3) || 0;
                 if (v.geo.type === 'Polygon')
                   g = v.geo.coordinates;
                 else if (v.geo.type === 'LineString')
@@ -770,36 +706,31 @@ var wmajt = (function(){
                 glRedraw = true;
 
                 // old style pyramid
-                if (v.tags['building:shape'] === 'pyramid')
-                {
+                if (v.tags['building:shape'] === 'pyramid') {
                   shapePyramid(g, bldgm, bldgh);
                   continue;
                 }
 
                 // roofs
                 if (('roof:shape' in v.tags || 'building:roof:shape' in v.tags) &&
-                    ('roof:height' in v.tags || 'building:roof:height' in v.tags))
-                {
+                  ('roof:height' in v.tags || 'building:roof:height' in v.tags)) {
                   roofh = parseHeight(v.tags['roof:height'] || v.tags['building:roof:height']);
                   roofs = v.tags['roof:shape'] || v.tags['building:roof:shape'];
 
                   // pyramidal
-                  if (roofs === 'pyramidal')
-                  {
+                  if (roofs === 'pyramidal') {
                     if (roofh < bldgh)
-                      triangulate(g, bldgm, bldgh-roofh, true);
-                    shapePyramid(g, bldgh-roofh, bldgh);
+                      triangulate(g, bldgm, bldgh - roofh, true);
+                    shapePyramid(g, bldgh - roofh, bldgh);
                     continue;
                   }
 
                   // gabled and hilted
-                  if (g[0].length == 5)
-                  {
-                    if (roofs === 'gabled' ||  roofs === 'hilted')
-                    {
+                  if (g[0].length == 5) {
+                    if (roofs === 'gabled' || roofs === 'hilted') {
                       if (roofh < bldgh)
-                        triangulate(g, bldgm, bldgh-roofh, true);
-                      shapeGabled(g, bldgh-roofh, bldgh);
+                        triangulate(g, bldgm, bldgh - roofh, true);
+                      shapeGabled(g, bldgh - roofh, bldgh);
                       continue;
                     }
                   }
@@ -814,12 +745,12 @@ var wmajt = (function(){
         tile.can.show();
         if (glRedraw)
           renderWebGLBuildingData();
-        if (z< buildingzoom || zz >= buildingzoom)
+        if (z < buildingzoom || zz >= buildingzoom)
           return;
       }
 
-      xx = Math.floor(xx/2);
-      yy = Math.floor(yy/2);
+      xx = Math.floor(xx / 2);
+      yy = Math.floor(yy / 2);
     }
 
     // request data
@@ -832,8 +763,7 @@ var wmajt = (function(){
     });
   }
 
-  function registerWebGLBuildingData(triangleNum, context, program)
-  {
+  function registerWebGLBuildingData(triangleNum, context, program) {
     glArrList = [];
     glBufList = [];
     glBufSize = triangleNum; // *9 floats
@@ -846,34 +776,29 @@ var wmajt = (function(){
     glO = 0;
     va = new Float32Array(glBufSize * 9);
     na = new Float32Array(glBufSize * 9);
-    glArrList.push({ v:va, n:na });
+    glArrList.push({ v: va, n: na });
 
     // switch off the visible building tracking needed for canvas
     trackzbuild = false;
   }
 
-  function renderWebGLBuildingData()
-  {
+  function renderWebGLBuildingData() {
     var i, l, vb, nb, s;
 
     // new data to be copied
-    if (glArrList.length > glBufList.length || glI > glO)
-    {
+    if (glArrList.length > glBufList.length || glI > glO) {
       // copy data, add buffers (maybe more arrays than buffers!)
       // start at last entry in glBufList loop up till
       s = glBufList.length - 1;
       s = s < 0 ? 0 : s;
-      for (i = s; i < glArrList.length; ++i)
-      {
+      for (i = s; i < glArrList.length; ++i) {
         // create new buffer
-        if (i >= glBufList.length)
-        {
-          vb =  gl.createBuffer();
-          nb =  gl.createBuffer();
+        if (i >= glBufList.length) {
+          vb = gl.createBuffer();
+          nb = gl.createBuffer();
           glBufList.push({ v: vb, n: nb });
         }
-        else
-        {
+        else {
           vb = glBufList[i].v;
           nb = glBufList[i].n;
         }
@@ -888,8 +813,7 @@ var wmajt = (function(){
     }
 
     l = glBufList.length - 1;
-    for (i = 0; i <= l; ++i)
-    {
+    for (i = 0; i <= l; ++i) {
       gl.bindBuffer(gl.ARRAY_BUFFER, glBufList[i].n);
       gl.vertexAttribPointer(glProgram.normalPosAttrib, 3, gl.FLOAT, false, 0, 0);
       gl.bindBuffer(gl.ARRAY_BUFFER, glBufList[i].v);
@@ -901,84 +825,75 @@ var wmajt = (function(){
   }
 
   // push vertex coordinates and normals into the Float32Arrays
-  function vnPush(v, n)
-  {
+  function vnPush(v, n) {
     // assert v.length = n.length
-    var l = v.length/9, s = glBufSize, i, j, k, n;
+    var l = v.length / 9, s = glBufSize, i, j, k, n;
 
     // entire array fits into current buffer
     i = glArrList.length - 1;
-    if (glI + l <= s)
-    {
+    if (glI + l <= s) {
       glArrList[i].v.set(v, glI * 9);
       glArrList[i].n.set(n, glI * 9);
       glI += l;
     }
-    else
-    {
+    else {
       // copy as much as fits, then make new array and continue
-      for (j = 0; j < l; ++j)
-      {
+      for (j = 0; j < l; ++j) {
         // copy triangle
         for (k = 0; k < 9; ++k)
-          glArrList[i].v[glI*9+k] = v[j*9+k];
+          glArrList[i].v[glI * 9 + k] = v[j * 9 + k];
 
         // increment pointer
         glI++;
 
         // end of array
-        if (glI == s)
-        {
+        if (glI == s) {
           glI = 0;
-          glArrList.push({ v:new Float32Array(glBufSize * 9), n:new Float32Array(glBufSize * 9) });
+          glArrList.push({ v: new Float32Array(glBufSize * 9), n: new Float32Array(glBufSize * 9) });
           i++;
         }
       }
     }
 
     // is last buffer filled up?
-    if (glI == s)
-    {
+    if (glI == s) {
       glI = 0;
-      glArrList.push({ v:new Float32Array(glBufSize * 9), n:new Float32Array(glBufSize * 9) });
+      glArrList.push({ v: new Float32Array(glBufSize * 9), n: new Float32Array(glBufSize * 9) });
     }
   }
 
-  function shapeGabled(d, b, h, hilted)
-  {
-    var c, i, j, k , l, ls = [], cx = [], cy = [],
-        dx1, dy1, dx2, dy2, dz2, nx, ny, nz;
+  function shapeGabled(d, b, h, hilted) {
+    var c, i, j, k, l, ls = [], cx = [], cy = [],
+      dx1, dy1, dx2, dy2, dz2, nx, ny, nz;
 
     // assumes a 4 corner poly
     c = d[0];
 
     // side lengths
-    for (i = 0; i < 4; ++i)
-    {
-      dx1 = c[i][0] - c[i+1][0];
-      dy1 = c[i][1] - c[i+1][1];
+    for (i = 0; i < 4; ++i) {
+      dx1 = c[i][0] - c[i + 1][0];
+      dy1 = c[i][1] - c[i + 1][1];
       ls[i] = Math.sqrt(dx1 * dx1 + dy1 * dy1);
     }
 
     // first node of long edge
-    j = (ls[0]+ls[2] > ls[1]+ls[3]) ? 0 : 1;
+    j = (ls[0] + ls[2] > ls[1] + ls[3]) ? 0 : 1;
 
     // roofline ends
-    cx[0] = 0.5 * (c[j][0] + c[j+3][0]);
-    cy[0] = 0.5 * (c[j][1] + c[j+3][1]);
-    cx[1] = 0.5 * (c[j+1][0] + c[j+2][0]);
-    cy[1] = 0.5 * (c[j+1][1] + c[j+2][1]);
+    cx[0] = 0.5 * (c[j][0] + c[j + 3][0]);
+    cy[0] = 0.5 * (c[j][1] + c[j + 3][1]);
+    cx[1] = 0.5 * (c[j + 1][0] + c[j + 2][0]);
+    cy[1] = 0.5 * (c[j + 1][1] + c[j + 2][1]);
 
     // TODO: modify for hilted roof
 
-    dz2 = h-b;
+    dz2 = h - b;
     // rectangular roof surfaces
-    for (k = 0; k < 2; ++k)
-    {
+    for (k = 0; k < 2; ++k) {
       i = k * 2 + j;
 
-      dx1 = c[i][0] - c[i+1][0];
-      dy1 = c[i][1] - c[i+1][1];
+      dx1 = c[i][0] - c[i + 1][0];
+      dy1 = c[i][1] - c[i + 1][1];
       dx2 = cx[k] - c[i][0];
       dy2 = cy[k] - c[i][1];
 
@@ -988,40 +903,38 @@ var wmajt = (function(){
       r = Math.sqrt(nx * nx + ny * ny + nz * nz);
       nx /= r;
       ny /= r;
-      nz /=r;
+      nz /= r;
 
       // triangle at base level
       vnPush([c[i][0], c[i][1], b,
-              c[i+1][0], c[i+1][1], b,
-              cx[k], cy[k], h],
-             [nx, ny, nz,
-              nx, ny, nz,
-              nx, ny, nz ]);
+      c[i + 1][0], c[i + 1][1], b,
+      cx[k], cy[k], h],
+        [nx, ny, nz,
+          nx, ny, nz,
+          nx, ny, nz]);
       // triangle at roof level
       vnPush([cx[k], cy[k], h,
-              cx[(k+1)%2], cy[(k+1)%2], h,
-              c[i+1][0], c[i+1][1], b],
-             [nx, ny, nz,
-              nx, ny, nz,
-              nx, ny, nz]);
+      cx[(k + 1) % 2], cy[(k + 1) % 2], h,
+      c[i + 1][0], c[i + 1][1], b],
+        [nx, ny, nz,
+          nx, ny, nz,
+          nx, ny, nz]);
     }
     // triangular roof surfaces
   }
 
-  function shapePyramid(d, b, h)
-  {
+  function shapePyramid(d, b, h) {
     var c, i, j, l, cx = 0, cy = 0,
-        dx1, dy1, dx2, dy2, dz2, nx, ny, nz;
+      dx1, dy1, dx2, dy2, dz2, nx, ny, nz;
 
     // pyramids only need outer contours
     // winding order and center
     c = d[0];
-    l = c.length-1; area=0;
+    l = c.length - 1; area = 0;
     if (l < 3) return;
 
-    for (i = 0; i < l; ++i)
-    {
-      area += (c[i][0] * c[i+1][1]) - (c[i+1][0] * c[i][1]);
+    for (i = 0; i < l; ++i) {
+      area += (c[i][0] * c[i + 1][1]) - (c[i + 1][0] * c[i][1]);
       cx += c[i][0];
       cy += c[i][1];
     }
@@ -1031,46 +944,43 @@ var wmajt = (function(){
     cx /= l;
     cy /= l;
 
-    dz2 = h-b;
-    for (i = 0; i < l; ++i)
-    {
+    dz2 = h - b;
+    for (i = 0; i < l; ++i) {
       // normal vector (dx, dy, 0) x (0, 0, 1)
-      dx1 = c[i][0] - c[i+1][0];
-      dy1 = c[i][1] - c[i+1][1];
+      dx1 = c[i][0] - c[i + 1][0];
+      dy1 = c[i][1] - c[i + 1][1];
       dx2 = cx - c[i][0];
       dy2 = cy - c[i][1];
 
       nx = -dy1 * dz2;
       ny = dx1 * dz2;
       nz = dy1 * dx2 - dx1 * dy2;
-      r = Math.sqrt(nx * nx + ny * ny + nz* nz);
-      nx /= r; ny /= r; nz /=r;
+      r = Math.sqrt(nx * nx + ny * ny + nz * nz);
+      nx /= r; ny /= r; nz /= r;
 
       // triangle base to top
       vnPush([c[i][0], c[i][1], b,
-              c[i+1][0], c[i+1][1], b,
-              cx, cy, h],
-             [nx, ny, nz,
-              nx, ny, nz,
-              nx, ny, nz]);
+      c[i + 1][0], c[i + 1][1], b,
+        cx, cy, h],
+        [nx, ny, nz,
+          nx, ny, nz,
+          nx, ny, nz]);
     }
   }
 
-  function triangulate(d, b, h, noroof)
-  {
+  function triangulate(d, b, h, noroof) {
     var tr, d0, c, i, j, l, good, area, dx, dy;
     noroof = ~~noroof;
 
     // enforce winding orders
-    for (j = 0; j < d.length; ++j)
-    {
+    for (j = 0; j < d.length; ++j) {
       c = d[j];
       l = c.length - 1;
-      area=0;
+      area = 0;
       if (l < 3) return;
 
       for (i = 0; i < l; ++i)
-        area += (c[i][0] * c[i+1][1]) - (c[i+1][0] * c[i][1]);
+        area += (c[i][0] * c[i + 1][1]) - (c[i + 1][0] * c[i][1]);
 
       area *= (j == 0) ? 1 : -1;
       if (area > 0)
@@ -1078,32 +988,30 @@ var wmajt = (function(){
     }
 
     // setup walls
-    for (j = 0; j < d.length; ++j)
-    {
-      c = d[j]; l = c.length-1;
-      for (i = 0; i < l; ++i)
-      {
+    for (j = 0; j < d.length; ++j) {
+      c = d[j]; l = c.length - 1;
+      for (i = 0; i < l; ++i) {
         // normal vector (dx, dy, 0) x (0, 0, 1)
-        dx = c[i][0] - c[i+1][0];
-        dy = c[i][1] - c[i+1][1];
+        dx = c[i][0] - c[i + 1][0];
+        dy = c[i][1] - c[i + 1][1];
         r = Math.sqrt(dx * dx + dy * dy);
         dx /= r;
         dy /= r;
 
         // triangle at base level
         vnPush([c[i][0], c[i][1], b,
-                c[i+1][0], c[i+1][1], b,
-                c[i][0], c[i][1], h],
-               [-dy, dx, 0.0,
-                -dy, dx, 0.0,
-                -dy, dx, 0.0]);
+        c[i + 1][0], c[i + 1][1], b,
+        c[i][0], c[i][1], h],
+          [-dy, dx, 0.0,
+          -dy, dx, 0.0,
+          -dy, dx, 0.0]);
         // triangle at roof level
         vnPush([c[i][0], c[i][1], h,
-                c[i+1][0], c[i+1][1], h,
-                c[i+1][0], c[i+1][1], b],
-               [-dy, dx, 0.0,
-                -dy, dx, 0.0,
-                -dy, dx, 0.0]);
+        c[i + 1][0], c[i + 1][1], h,
+        c[i + 1][0], c[i + 1][1], b],
+          [-dy, dx, 0.0,
+          -dy, dx, 0.0,
+          -dy, dx, 0.0]);
       }
     }
 
@@ -1111,35 +1019,32 @@ var wmajt = (function(){
 
     // note that the first and last point are always the same
     // thus a triangle has 4 points!
-    if (d.length === 1 && d[0].length <= 5)
-    {
+    if (d.length === 1 && d[0].length <= 5) {
       // simple triangulations
       c = d[0];
       // c.length must be at least 4!
-      if (c.length == 4)
-      {
+      if (c.length == 4) {
         vnPush([c[0][0], c[0][1], h,
-                c[1][0], c[1][1], h,
-                c[2][0], c[2][1], h],
-                [0, 0, 1,
-                 0, 0, 1,
-                 0, 0, 1]);
+        c[1][0], c[1][1], h,
+        c[2][0], c[2][1], h],
+          [0, 0, 1,
+            0, 0, 1,
+            0, 0, 1]);
       }
-      else
-      {
+      else {
         // TODO: not valid for arbitrary concave quads!
         vnPush([c[0][0], c[0][1], h,
-                c[1][0], c[1][1], h,
-                c[2][0], c[2][1], h,
-                c[0][0], c[0][1], h,
-                c[2][0], c[2][1], h,
-                c[3][0], c[3][1], h],
-               [0, 0, 1,
-                0, 0, 1,
-                0, 0, 1,
-                0, 0, 1,
-                0, 0, 1,
-                0, 0, 1]);
+        c[1][0], c[1][1], h,
+        c[2][0], c[2][1], h,
+        c[0][0], c[0][1], h,
+        c[2][0], c[2][1], h,
+        c[3][0], c[3][1], h],
+          [0, 0, 1,
+            0, 0, 1,
+            0, 0, 1,
+            0, 0, 1,
+            0, 0, 1,
+            0, 0, 1]);
       }
       return;
     }
@@ -1148,14 +1053,12 @@ var wmajt = (function(){
     var pc = [], ph = [];
     c = d[0];
     l = c.length - 1;
-    for (i = 0; i < l; ++i)
-    {
+    for (i = 0; i < l; ++i) {
       pc.push(new p2t.Point(c[i][0], c[i][1]));
     }
 
     var swctx = new p2t.SweepContext(pc);
-    for (j = 1; j < d.length; ++j)
-    {
+    for (j = 1; j < d.length; ++j) {
       c = d[j]; l = c.length - 1;
       var hole = [];
       for (i = 0; i < l; ++i)
@@ -1165,33 +1068,29 @@ var wmajt = (function(){
 
     p2t.sweep.Triangulate(swctx);
     tr = swctx.GetTriangles();
-    for (i = 0; i < tr.length; ++i)
-    {
+    for (i = 0; i < tr.length; ++i) {
       var tp = [tr[i].GetPoint(0), tr[i].GetPoint(1), tr[i].GetPoint(2)];
       vnPush([tp[0].x, tp[0].y, h,
-              tp[1].x, tp[1].y, h,
-              tp[2].x, tp[2].y, h],
-             [0, 0, 1,
-              0, 0, 1,
-              0, 0,1]);
+      tp[1].x, tp[1].y, h,
+      tp[2].x, tp[2].y, h],
+        [0, 0, 1,
+          0, 0, 1,
+          0, 0, 1]);
     }
   }
 
   return {
     update: update,
     detectPointer: detectPointer,
-    ref_z : function()
-    {
+    ref_z: function () {
       return ref_z;
     },
-    zbuild : function()
-    {
+    zbuild: function () {
       return zbuild;
     },
-    registerWebGLBuildingData : registerWebGLBuildingData,
+    registerWebGLBuildingData: registerWebGLBuildingData,
     renderWebGLBuildingData: renderWebGLBuildingData,
-    setUILang: function(l)
-    {
+    setUILang: function (l) {
       UILang = l;
     }
   }
