@@ -75,6 +75,12 @@ $lly = 90.0 - ( (($y+1.0)*60.0) / (1<<$z) );
 $urx = ($x+1) * 60.0 / (1<<$z);
 $ury = 90.0 - ( ($y*60.0) / (1<<$z) );
 
+// make sure the longitude is between -180 and 180
+if ($urx>180.0) {
+  $urx -= 360.0;
+  $llx -= 360.0;
+}
+
 // add ten pixel worth of padding
 $dx = ($urx-$llx)*10/128;
 $dy = ($ury-$lly)*10/128;
@@ -84,24 +90,21 @@ $urx += $dx;
 $ury += $dy;
 
 // get mercator bounds
-$mllx = deg2rad($llx>180?($llx-360.0):$llx)*6378137.0;
+$mllx = deg2rad($llx)*6378137.0;
 $mlly = log(tan(M_PI_4 + deg2rad($lly) / 2.0)) * 6378137.0;
-$murx = deg2rad($urx>180?($urx-360.0):$urx)*6378137.0;
+$murx = deg2rad($urx)*6378137.0;
 $mury = log(tan(M_PI_4 + deg2rad($ury) / 2.0)) * 6378137.0;
 
 
-$tags = array( "highway", "railway", "waterway", "landuse", "leisure", "building", "natural", "amenity", "name", "boundary", "osm_id","layer","access","route", "historic", "tunnel", "aeroway", "aerialway", "tourism" );
+$tags = array( "highway", "railway", "waterway", "landuse", "leisure", "building", "natural", "amenity", "name", "boundary", "osm_id","layer","access","route", "historic", "tunnel", "aeroway", "aerialway", "tourism", "man_made" );
 $taglist = '"'.implode($tags,'", "').'"';
 $tagnum = count($tags);
-$intersect = "
-          ST_Intersection( 
-            way,
-            ST_SetSRID('BOX3D($mllx $mlly, $murx $mury)'::box3d,3857)
-          )";
+$box = "ST_Transform(ST_SetSRID('BOX3D( $llx $lly, $urx $ury )'::box3d,4326),3857)";
+$intersect = "ST_Intersection(way, $box)";
 //transform( ST_GeomFromText('POLYGON(($llx $ury, $urx $ury, $urx $lly, $llx $lly, $llx $ury))', 4326 ), 3857 )
-$table = array( 
-  array('planet_osm_polygon','building IS NULL AND  not exist(hstore(tags),\'building:part\') AND',$intersect), 
-  array('planet_osm_line','building IS NULL AND  not exist(hstore(tags),\'building:part\') AND',$intersect)
+$table = array(
+  array('planet_osm_polygon','building IS NULL AND (tags IS NULL OR NOT exist(hstore(tags),\'building:part\')) AND',$intersect),
+  array('planet_osm_line','building IS NULL AND (tags IS NULL OR NOT exist(hstore(tags),\'building:part\')) AND',$intersect)
 );
 
 // also return buildings for large zoom levels
@@ -116,14 +119,14 @@ $idx = array();
 for( $i=0; $i<count($table); $i++ ) {
   // build query for the cropped data without buildings
   $query = "
-    select 
+    select
       ST_AsGeoJSON( ST_Transform(".$table[$i][2].",4326), 9 ),
       tags, $taglist
       from ".$table[$i][0]."
     where
-      ".$table[$i][1]."
-      ST_IsValid(way) AND way && ST_SetSRID('BOX3D($mllx $mlly, $murx $mury)'::box3d,3857);
-  ";
+      ".$table[$i][1]." ST_IsValid(way) AND ST_Intersects(way, $box);";
+      // ".$table[$i][1]." ST_IsValid(way) AND way && $box;";
+  // ST_IsValid(way) AND way && ST_SetSRID('BOX3D($llx $lly, $urx $ury)'::box3d,4326);
 
   // debug
   if ($a === 'query') {
@@ -138,7 +141,7 @@ for( $i=0; $i<count($table); $i++ ) {
   }
 
   while ($row = pg_fetch_row($result)) {
-    // decode geometry 
+    // decode geometry
     $thisgeo = json_decode($row[0]);
 
     // is the geometry empty? then fetch next
@@ -157,7 +160,7 @@ for( $i=0; $i<count($table); $i++ ) {
         } else {
           $tagfound[$tags[$j]] = 1;
         }
-        
+
         // server side index
         if( array_key_exists($tags[$j], $idx) ) {
           $idx[$tags[$j]][] = count($geo);
@@ -171,8 +174,8 @@ for( $i=0; $i<count($table); $i++ ) {
     if( $row[1] !== null ) {
       $hstore = json_decode('{' . str_replace('"=>"', '":"', $row[1]) . '}', true);
       foreach( $hstore as $j => $val ) {
-        //if( beginsWith($j,'name:') ||  beginsWith($j,'tiger:')  ||  beginsWith($j,'nist:') ) continue;   
-        if( beginsWith($j,'tiger:')  ||  beginsWith($j,'nist:') ) continue;   
+        //if( beginsWith($j,'name:') ||  beginsWith($j,'tiger:')  ||  beginsWith($j,'nist:') ) continue;
+        if( beginsWith($j,'tiger:')  ||  beginsWith($j,'nist:') ) continue;
         $type[$j]=$val;
 
         if (array_key_exists($j, $tagfound)) {
@@ -197,27 +200,21 @@ for( $i=0; $i<count($table); $i++ ) {
 
 if( $a === 'print' ) exit;
 
-// make sure the longitude is between -180 and 180
-if ($urx>180.0) {
-  $urx -= 360.0;
-  $llx -= 360.0;
-}
-
 // get landmass polygons and coastlines
 $table = array('land_polygons','coastlines');
 for ($i=0; $i<2; $i++) {
   // set up query
   $query = "
-    select 
-      ST_AsGeoJSON( 
-        ST_Intersection( 
+    select
+      ST_AsGeoJSON(
+        ST_Intersection(
           ST_SetSRID(wkb_geometry, 4326),
           ST_SetSRID('BOX3D($llx $lly, $urx $ury)'::box3d, 4326)
         )
       , 9 )
       from ".$table[$i]."
     where
-      wkb_geometry && ST_SetSRID('BOX3D($llx $lly, $urx $ury)'::box3d,4326);
+      ST_Intersects(wkb_geometry, ST_SetSRID('BOX3D($llx $lly, $urx $ury)'::box3d,4326));
   ";
 
   // perform query
@@ -248,7 +245,7 @@ for ($i=0; $i<2; $i++) {
   }
 }
 
-//$s = json_encode( array( "data" => $geo, "x" => $x, "y" => $y, "z" => $z, "f" => $tagfound, "v" => 6, "idx" => $idx, "mbbox" => "$mllx $mlly, $murx $mury", "bbox" => "$llx $lly, $urx $ury" ) );
+//$s = json_encode( array( "data" => $geo, "x" => $x, "y" => $y, "z" => $z, "f" => $tagfound, "v" => 6, "idx" => $idx, "t" => time(), "mbbox" => "$mllx $mlly, $murx $mury", "bbox" => "$llx $lly, $urx $ury" ) );
 $s = json_encode( array( "data" => $geo, "x" => $x, "y" => $y, "z" => $z, "f" => $tagfound, "v" => 6, "idx" => $idx, "t" => time() ) );
 
 // do not cache purge action
@@ -262,7 +259,7 @@ echo $s;
 // write to cache
 if( !is_dir( "jsontile/$z/$y" ) ) {
   $oldumask = umask(0);
-  mkdir("jsontile/$z/$y",0755); 
+  mkdir("jsontile/$z/$y",0755);
   umask($oldumask);
 }
 

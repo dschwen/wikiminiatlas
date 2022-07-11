@@ -33,17 +33,25 @@ var wmajt = (function () {
         ['landuse', { grass: 1 },
           [{ globalAlpha: 0.3, fillStyle: "rgb(0,160,0)" }, { globalAlpha: 1 }]
         ],
+        ['waterway', { riverbank: 1, dock: 1 },
+          [{ fillStyle: "rgb(158,199,243)" }]
+        ],
+        ['waterway', { dam: 1 },
+          [{ fillStyle: "rgb(150,150,150)" }]
+        ],
         ['leisure', {
           park: 1, orchard: 1, meadow: 1, village_green: 1, golf_course: 1, track: 1,
-          forrest: 1, recreation_ground: 1, dog_park: 1, garden: 1, pitch: 1, stadium: 1
+          forrest: 1, recreation_ground: 1, dog_park: 1
         },
           [{ fillStyle: "rgb(200,224,200)" }]
         ],
+        ['leisure', {
+          garden: 1, pitch: 1, stadium: 1
+        },
+          [{ fillStyle: "rgb(180,224,180)" }]
+        ],
         ['leisure', { swimming_pool: 1 },
           [{ fillStyle: "rgb(200,200,224)" }]
-        ],
-        ['waterway', { riverbank: 1, dock: 1 },
-          [{ fillStyle: "rgb(158,199,243)" }]
         ],
         ['natural', { beach: 1, sand: 1 },
           [{ fillStyle: "rgb(250,242,175)" }]
@@ -64,11 +72,19 @@ var wmajt = (function () {
           [{ fillStyle: "rgb(158,199,243)" },
           { lineWidth: 1, strokeStyle: "rgb(158,199,243)" }]
         ],
+        ['natural', { reef: 1 },
+          [{ fillStyle: "rgb(148,189,223)" },
+          { lineWidth: 1, strokeStyle: "rgb(158,199,243)" }]
+        ],
+        ['man_made', { wastewater_plant: 1, breakwater: 1, pier: 1 },
+          [{ fillStyle: "rgb(168,178,178)" },
+          { lineWidth: 1, strokeStyle: "rgb(140,145,145)" }]
+        ],
         ['natural', { glacier: 1 },
           [{ fillStyle: "rgb(230,245,255)" },
           { lineWidth: 1, strokeStyle: "rgb(255,255,255)" }]
         ],
-        ['amenity', { university: 1 },
+        ['amenity', { university: 1, school: 1 },
           [{ lineWidth: 0.5, strokeStyle: "rgb(240,225,183)" }]
         ],
         ['amenity', { parking: 1 },
@@ -95,10 +111,6 @@ var wmajt = (function () {
         ['railway', { station: 1 },
           [{ fillStyle: "rgb(210,195,195)" },
           { lineWidth: 1, strokeStyle: "rgb(127,127,127)" }]
-        ],
-        ['natural', { water: 1, bay: 1 },
-          [{ fillStyle: "rgb(158,199,243)" },
-          { lineWidth: 1, strokeStyle: "rgb(158,199,243)" }]
         ],
         /*['building', {yes: 1, block: 1, office: 1, courthouse: 1, church: 1, school: 1, cathedral: 1, residential: 1, house: 1, hut: 1,
           university: 1, hospital: 1, bunker: 1, train_station: 1, chapel: 1, industrial: 1, commercial: 1, retail: 1, hotel: 1,
@@ -147,10 +159,7 @@ var wmajt = (function () {
         ['route', { ferry: 1 },
           [{ dash: [4, 4], lineWidth: 2, strokeStyle: "rgb(126,159,194)" }]
         ],
-        ['highway', { pedestrian: 1 },
-          [{ lineWidth: 5, strokeStyle: "rgb(255,255,255)" }]
-        ],
-        ['highway', { footway: 1, pedestrian: 1, path: 1 },
+        ['highway', { footway: 1, pedestrian: 1, path: 1, cycleway: 1 },
           [{ lineWidth: 2, strokeStyle: "rgb(198,178,178)" }]
           //[ { lineWidth: 2, strokeStyle: "rgb(168,148,148)" } ]
         ],
