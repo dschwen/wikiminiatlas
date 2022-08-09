@@ -1663,6 +1663,7 @@ function wikiminiatlasInstall(wma_widget, url_params)
   function mouseDownWikiMiniAtlasMap(ev)
   {
     wma_mdcoord = wma_dragging = wmaMouseCoords(ev);
+    ev.preventDefault();
   }
 
   // Mouse move handler

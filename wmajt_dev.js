@@ -68,17 +68,21 @@ var wmajt = (function () {
         ['natural', { wood: 1 },
           [{ fillStyle: "rgb(100,204,100)" }]
         ],
-        ['natural', { water: 1, bay: 1 },
+        ['natural', { bay: 1 },
           [{ fillStyle: "rgb(158,199,243)" },
-          { lineWidth: 1, strokeStyle: "rgb(158,199,243)" }]
-        ],
-        ['natural', { reef: 1 },
-          [{ fillStyle: "rgb(148,189,223)" },
           { lineWidth: 1, strokeStyle: "rgb(158,199,243)" }]
         ],
         ['man_made', { wastewater_plant: 1, breakwater: 1, pier: 1 },
           [{ fillStyle: "rgb(168,178,178)" },
           { lineWidth: 1, strokeStyle: "rgb(140,145,145)" }]
+        ],
+        ['natural', { reef: 1 },
+          [{ fillStyle: "rgb(148,189,223)" },
+          { lineWidth: 1, strokeStyle: "rgb(158,199,243)" }]
+        ],
+        ['natural', { water: 1 },
+          [{ fillStyle: "rgb(158,199,243)" },
+          { lineWidth: 1, strokeStyle: "rgb(158,199,243)" }]
         ],
         ['natural', { glacier: 1 },
           [{ fillStyle: "rgb(230,245,255)" },
