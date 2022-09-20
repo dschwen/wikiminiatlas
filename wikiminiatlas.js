@@ -408,7 +408,7 @@ jQuery(function ($) {
  if (site === 'bho') site = 'bh';
 
  // remove icons from title coordinates
- $('#coordinates,#coordinates-title,#tpl_Coordinaten').find('a.image').detach();
+ $('#coordinates,#coordinates-title,#tpl_Coordinaten').find('a.image, span[typeof*="mw:File"]').detach();
 
  bodyc = $( wc.onlytitle ? '#coordinates,#coordinates-title' : 'html' );
  startTime = (new Date()).getTime();
