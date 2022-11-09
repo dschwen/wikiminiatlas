@@ -1728,7 +1728,7 @@ var strings =
  mapBlueMarble: {
    'en': 'Blue Marble',
    'ar': 'الرخام_الأزرق',
-   'de': 'Erde bei nacht',
+   'de': 'Erde bei Tag',
    'es': 'La canica azul',
    'fr': 'La Bille bleue',
    'ja': 'ザ・ブルー・マーブル',
@@ -1740,7 +1740,7 @@ var strings =
  mapNight: {
    'en': 'Night on Earth',
    'da': 'Jorden om natten',
-   'de': 'Erde bei nacht',
+   'de': 'Erde bei Nacht',
    'es': 'Noche en la tierra',
    'it': 'Terra di notte',
    'ja': '地球上の夜',

@@ -59,12 +59,18 @@ var wma_tilesets = [
   {
     name: "mapPhysical",
     globe: "Earth",
+    credit: ' / <a href="https://www.naturalearthdata.com/" title="Made with Natural Earth. Free vector and raster map data @ naturalearthdata.com">Natural Earth</a>',
     getTileURL: function(y, x, z) {
-      return wma_imgbase+'relief/' + z + '/' + y + '_' + (x % (wma_zoomsize[z] * 2)) + '.png';
+      //return wma_imgbase+'relief/' + z + '/' + y + '_' + (x % (wma_zoomsize[z] * 2)) + '.png';
+      var x1 = (x + wma_zoomsize[z]) % (wma_zoomsize[z] * 2);
+      if (x1 < 0)
+        x1 += wma_zoomsize[z] * 2;
+
+      return wma_imgbase + 'relief.new/'+(z+3)+'/'+y+'/'+x1+'.jpg';
     },
     linkcolor: [ "#2255aa", "white 0pt 0pt 2pt" ],
     equator: 40075.0, // equatorial circumfence in km
-    maxzoom: 5,
+    maxzoom: 4,
     minzoom: 0
   },
   {
@@ -100,6 +106,7 @@ var wma_tilesets = [
   {
     name: "mapBlueMarble",
     globe: "Earth",
+    credit: ' / <a href="https://visibleearth.nasa.gov/" title="NASA Visible Earth">NASA</a>',
     getTileURL: function(y, x, z)
     {
       var x1 = (x + wma_zoomsize[z]) % (wma_zoomsize[z] * 2);
@@ -116,13 +123,14 @@ var wma_tilesets = [
    {
     name: "mapNight",
     globe: "Earth",
+    credit: ' / <a href="https://visibleearth.nasa.gov/" title="NASA Visible Earth">NASA</a>',
     getTileURL: function(y, x, z)
     {
       var x1 = (x + wma_zoomsize[z]) % (wma_zoomsize[z] * 2);
       if (x1 < 0)
         x1 += wma_zoomsize[z] * 2;
 
-      return wma_imgbase + 'nightonearth.new/'+(z+3)+'/'+y+'/'+x1+'.jpg';
+      return wma_imgbase + 'black_marble/'+(z+3)+'/'+y+'/'+x1+'.jpg';
     },
     linkcolor: [ "white", "1px 0px 2px black, 0px -1px 2px black, 0px 1px 2px black, -1px 0px 2px black" ],
     equator: 40075.0, // equatorial circumfence in km
