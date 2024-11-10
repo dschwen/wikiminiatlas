@@ -10,7 +10,7 @@ var wmaNews = []; // array of news item actions (needs to be global)
 // global settings
 var wma_imgbase = 'tiles/';
 var wma_database = 'label.php';
-var wma_tilebase = '.wma.wmflabs.org/tiles/';
+var wma_tilebase = '.wma.wmcloud.org/tiles/';
 var wma_maxlabel = 13;
 var i, wma_zoomsize = [3];
 for (i=1; i<40; i++) { wma_zoomsize[i]=2*wma_zoomsize[i-1]; }
@@ -380,7 +380,7 @@ function wikiminiatlasInstall(wma_widget, url_params)
     // launch the WIWOSM request (if a page was passed)
     if (page && hasCanvas) {
       $.ajax({
-        url: '//tools.wmflabs.org/wiwosm/osmjson/getGeoJSON.php?lang=' + lang + '&article=' + page,
+        url: '//tools.wmcloud.org/wiwosm/osmjson/getGeoJSON.php?lang=' + lang + '&article=' + page,
         dataType: 'json',
         success: processWIWOSM
       });
@@ -593,7 +593,7 @@ function wikiminiatlasInstall(wma_widget, url_params)
     for (i in l)
       WikiMiniAtlasHTML += '<option value="' + l[i] + '">' + l[i] + '</option>';
 
-    WikiMiniAtlasHTML += '</select></p><a href="//wma.wmflabs.org/" target="_top">' +
+    WikiMiniAtlasHTML += '</select></p><a href="//wma.wmcloud.org/" target="_top">' +
                          '<img src="//upload.wikimedia.org/wikipedia/commons/4/46/Powered_by_labs_button.png" border="0">' +
                          '</a></div>';
 
@@ -1768,7 +1768,7 @@ function wikiminiatlasInstall(wma_widget, url_params)
   function wmaLoadSizeOverlay(lang, page)
   {
     $.ajax({
-      url: '//tools.wmflabs.org/wiwosm/osmjson/getGeoJSON.php?lang='+lang+'&article='+page,
+      url: '//tools.wmcloud.org/wiwosm/osmjson/getGeoJSON.php?lang='+lang+'&article='+page,
       dataType: 'json',
       success: processSizeOverlay
     });

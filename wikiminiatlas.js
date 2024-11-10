@@ -17,8 +17,8 @@ jQuery(function ($) {
   onlytitle : false,
   flowTextTooltips: (location.host==='en.wikipedia.org'),
   alwaysTooltips: false,
-  iframeurl : '//wma.wmflabs.org/iframe.html',
-  imgbase   : '//wma.wmflabs.org/tiles/',
+  iframeurl : '//wma.wmcloud.org/iframe.html',
+  imgbase   : '//wma.wmcloud.org/tiles/',
   buttonImage: '//upload.wikimedia.org/wikipedia/commons/thumb/5/55/WMA_button2b.png/17px-WMA_button2b.png',
   buttonImage2x: '//upload.wikimedia.org/wikipedia/commons/thumb/5/55/WMA_button2b.png/34px-WMA_button2b.png'
  },
@@ -252,7 +252,7 @@ jQuery(function ($) {
   }
  },
  // domain of the WMA
- wma_domain = '//wma.wmflabs.org',
+ wma_domain = '//wma.wmcloud.org',
 
  language = '', site = '', awt='0', rtl = /(^|\s)rtl(\s|$)/.test(document.body.className),
 
