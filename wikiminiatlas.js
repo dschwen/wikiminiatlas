@@ -19,8 +19,10 @@ jQuery(function ($) {
   alwaysTooltips: false,
   iframeurl : '//wma.wmflabs.org/iframe.html',
   imgbase   : '//wma.wmflabs.org/tiles/',
-  buttonImage: '//upload.wikimedia.org/wikipedia/commons/thumb/5/55/WMA_button2b.png/17px-WMA_button2b.png',
-  buttonImage2x: '//upload.wikimedia.org/wikipedia/commons/thumb/5/55/WMA_button2b.png/34px-WMA_button2b.png'
+  buttonImage: '//upload.wikimedia.org/wikipedia/commons/thumb/5/55/WMA_button2b.png/20px-WMA_button2b.png',
+  buttonImage2x: '//upload.wikimedia.org/wikipedia/commons/thumb/5/55/WMA_button2b.png/40px-WMA_button2b.png',
+  buttonWidth: 17,
+  buttonHeight: 17
  },
  strings = {
   buttonTooltip : {
@@ -463,7 +465,8 @@ jQuery(function ($) {
   if (site==='de' && link.parentNode.id!=='coordinates') {
    mapbutton = $('<span>♁</span>').css('color','blue');
   } else {
-   mapbutton = $('<img>').attr('src', wc.buttonImage).attr('srcset', wc.buttonImage + ' 1x, ' + wc.buttonImage2x + ' 2x');
+   mapbutton = $('<img>').attr('src', wc.buttonImage).attr('srcset', wc.buttonImage + ' 1x, ' + wc.buttonImage2x + ' 2x')
+    .attr('width', wc.buttonWidth).attr('height', wc.buttonHeight);
   }
   mapbutton.addClass('wmamapbutton noprint').attr( {
    title: _msg('buttonTooltip'),
@@ -517,6 +520,7 @@ jQuery(function ($) {
    .on('mouseleave', function () { $(this).css('opacity', ''); })
    .css('padding', rtl ? '0px 3px 0px 0px' : '0px 0px 0px 3px' ).css('cursor', 'pointer')
    .attr('src', wc.buttonImage).attr('srcset', wc.buttonImage + ' 1x, ' + wc.buttonImage2x + ' 2x')
+   .attr('width', wc.buttonWidth).attr('height', wc.buttonHeight)
    .addClass('wmamapbutton noprint')
    .on( 'click', { param:
     alat + '_' + alon + '_' +
