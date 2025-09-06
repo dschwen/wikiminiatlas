@@ -2,8 +2,9 @@
 // Script to embed interactive maps into pages that have coordinate templates
 // also check my user page [[User:Dschwen]] for more tools
 //
-// Revision 16.11
+// Revision 16.12
 // Source: https://github.com/dschwen/wikiminiatlas/blob/master/wikiminiatlas.js
+// License: CC BY-SA 4.0 and GFDL
 /* jshint laxcomma:true, smarttabs:true, quotmark:single, curly:false, es3:true, browser:true */
 /* global mw,jQuery */
 jQuery(function ($) {
