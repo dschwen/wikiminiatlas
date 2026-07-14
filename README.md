@@ -14,3 +14,5 @@ Features include:
 * Article summary display
 
 Visit http://meta.wikimedia.org/wiki/WikiMiniAtlas for documentation and licensing details.
+
+Developer documentation: [client design and technical assessment](docs/DESIGN.md).
