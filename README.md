@@ -16,3 +16,5 @@ Features include:
 Visit http://meta.wikimedia.org/wiki/WikiMiniAtlas for documentation and licensing details.
 
 Developer documentation: [client design and technical assessment](docs/DESIGN.md).
+
+Globe overhaul: [implementation plan](docs/3D_GLOBE_PLAN.md) and [prototype](globe/README.md).
