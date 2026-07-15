@@ -10,6 +10,8 @@ Implemented so far:
 - hierarchical horizon/frustum culling and budgeted front-surface tile selection;
 - progressive parent-tile fallback while detailed imagery loads;
 - bounded texture memory, metadata, and concurrent image requests;
+- batched legacy label loading with globe projection and horizon culling;
+- weight-ordered collision filtering and accessible Wikipedia links;
 - one-finger orbit, two-finger pan/pinch, and wheel zoom controls; and
 - a shared procedural placeholder before any ancestor imagery is available.
 
@@ -25,6 +27,14 @@ By default the demo requests the existing relative `tiles/mapnik` hierarchy. A d
 
 ```text
 http://localhost:8000/globe/?tileBase=https://example.org/tiles&maxZoom=15
+```
+
+Labels use `../label.php`, English Wikipedia, and the Earth dataset by default.
+These settings can be changed independently, or labels can be disabled:
+
+```text
+http://localhost:8000/globe/?labelBase=https://example.org/label.php&lang=de&globe=earth
+http://localhost:8000/globe/?labels=0
 ```
 
 For camera-range testing, the initial center distance can also be specified;
@@ -55,5 +65,10 @@ gestures, new detail requests pause for 120 ms; already loaded imagery remains
 visible. High-detail patches use a reduced shared mesh because their curvature is
 negligible at screen scale.
 
-The next slice will add label candidate loading and globe-to-screen projection
-while keeping the labels as accessible HTML links.
+Label requests preserve the existing plate carrée boxes and the label service's
+south-to-north row numbering. Up to ten boxes at the same zoom are combined in
+one range request, with four requests active at once and 256 label tiles cached.
+The overlay displays at most 80 labels, prefers higher-weight candidates, reuses
+stable DOM nodes, and removes candidates behind the geometric horizon. Older
+label responses remain supported by reconstructing latitude/longitude from their
+tile-local coordinates.

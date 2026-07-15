@@ -38,12 +38,91 @@ main {
   cursor: grabbing;
 }
 
+#labels {
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.globe-label {
+  position: absolute;
+  top: 0;
+  left: 0;
+  max-width: 210px;
+  overflow: hidden;
+  color: #f7fbff;
+  font-size: 11px;
+  line-height: 16px;
+  text-decoration: none;
+  text-overflow: ellipsis;
+  text-shadow:
+    0 1px 2px #000,
+    0 0 4px #000;
+  white-space: nowrap;
+  translate: -5px -50%;
+  pointer-events: auto;
+  will-change: transform;
+}
+
+.globe-label::before {
+  display: inline-block;
+  width: 5px;
+  height: 5px;
+  margin: 0 4px 1px 0;
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  border-radius: 50%;
+  background: #6ba9e9;
+  box-shadow: 0 1px 3px #000;
+  content: '';
+}
+
+.globe-label:hover,
+.globe-label:focus-visible {
+  z-index: 2;
+  color: #fff;
+  outline: 1px solid rgba(190, 221, 255, 0.8);
+  outline-offset: 2px;
+  background: rgba(4, 10, 24, 0.72);
+}
+
+.globe-label-2::before {
+  border-radius: 0;
+  background: #e9edf5;
+  rotate: 45deg;
+}
+
+.globe-label-3 {
+  font-size: 12px;
+  font-weight: 700;
+  text-align: center;
+  translate: -50% -50%;
+}
+
+.globe-label-3::before {
+  display: none;
+}
+
+.globe-label-6::before,
+.globe-label-7::before {
+  width: 7px;
+  height: 7px;
+}
+
+.globe-label-8::before,
+.globe-label-9::before,
+.globe-label-10::before {
+  width: 9px;
+  height: 9px;
+}
+
 .title,
 #status,
 #help,
 #error {
   position: absolute;
-  z-index: 1;
+  z-index: 3;
   margin: 0;
   border: 1px solid rgba(185, 205, 239, 0.18);
   border-radius: 8px;
@@ -100,4 +179,3 @@ main {
     display: none;
   }
 }
-

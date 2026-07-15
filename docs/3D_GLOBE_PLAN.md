@@ -45,13 +45,16 @@ loads, 384 resident textures, and 32 MiB of estimated RGBA texture data. A leaf
 requests only the next missing level in its ancestry. Consequently, coarse imagery
 appears first and progressively sharpens without displaying an uninitialized tile.
 
-### 3. Labels
+### 3. Labels — in progress
 
-- Extend the label response to include explicit `lat`, `lon`, and a stable ID.
-- Fetch candidates using the existing latitude/longitude tile boxes.
-- Cull labels behind the horizon and project anchors to screen coordinates.
-- Resolve collisions by weight and maintain temporal stability while moving.
-- Initially render labels as accessible HTML links above the WebGL canvas.
+- Extend the label response to include explicit `lat`, `lon`, and a stable ID. (Complete, backward-compatible.)
+- Fetch candidates using the existing latitude/longitude tile boxes. (Complete.)
+- Batch up to ten boxes per request and bound concurrency/cache size. (Complete.)
+- Cull labels behind the horizon and project anchors to screen coordinates. (Complete.)
+- Resolve collisions by weight and reuse stable DOM nodes while moving. (Initial implementation complete.)
+- Render text labels as accessible Wikipedia links above the WebGL canvas. (Complete.)
+- Replace estimated text bounds with measured collision boxes and avoid UI chrome.
+- Add the legacy Commons thumbnail-label behavior.
 
 ### 4. Vector geography and buildings
 

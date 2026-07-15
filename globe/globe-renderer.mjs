@@ -183,6 +183,8 @@ export class GlobeRenderer {
     maximumConcurrentRequests = 12,
     maximumResidentTextures = 384,
     maximumTextureBytes = 32 * 1024 * 1024,
+    maximumLabelZoom = 13,
+    maximumLabelTiles = 128,
     refinementDelayMilliseconds = 120,
     initialDistance = 3.1,
     onStateChange = () => {}
@@ -202,6 +204,8 @@ export class GlobeRenderer {
     this.tileUrl = tileUrl;
     this.maximumZoom = maximumZoom;
     this.maximumVisibleTiles = maximumVisibleTiles;
+    this.maximumLabelZoom = Math.min(maximumZoom, maximumLabelZoom);
+    this.maximumLabelTiles = maximumLabelTiles;
     this.refinementDelayMilliseconds = refinementDelayMilliseconds;
     this.onStateChange = onStateChange;
     this.longitude = -112;
@@ -445,6 +449,28 @@ export class GlobeRenderer {
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, mesh.indexBuffer);
   }
 
+  labelTilesFor(renderTiles) {
+    const labelTiles = new Map();
+    for (const tile of renderTiles) {
+      const zoom = Math.min(tile.z, this.maximumLabelZoom);
+      const divisor = 2 ** (tile.z - zoom);
+      const labelTile = {
+        x: Math.floor(tile.x / divisor),
+        y: Math.floor(tile.y / divisor),
+        z: zoom,
+        priority: tile.projectedPixels * divisor
+      };
+      const key = this.grid.tileKey(labelTile.x, labelTile.y, labelTile.z);
+      const previous = labelTiles.get(key);
+      if (!previous || previous.priority < labelTile.priority) {
+        labelTiles.set(key, labelTile);
+      }
+    }
+    return [...labelTiles.values()]
+      .sort((a, b) => b.priority - a.priority)
+      .slice(0, this.maximumLabelTiles);
+  }
+
   resizeCanvas() {
     const devicePixelRatio = window.devicePixelRatio || 1;
     const width = Math.max(1, Math.round(this.canvas.clientWidth * devicePixelRatio));
@@ -493,6 +519,7 @@ export class GlobeRenderer {
     });
     const tiles = selection.tiles.sort((a, b) => a.z - b.z);
     const renderedZooms = tiles.map((tile) => tile.z);
+    const labelTiles = this.labelTilesFor(tiles);
 
     this.resources.beginFrame();
     const draws = [];
@@ -580,6 +607,11 @@ export class GlobeRenderer {
       visitedTileNodes: selection.visitedNodes,
       tileBudgetLimited: selection.budgetLimited,
       refinementBlocked: this.refinementBlocked,
+      labelTiles,
+      eyeDirection,
+      viewProjection,
+      viewportWidth: Math.max(1, this.canvas.clientWidth),
+      viewportHeight: Math.max(1, this.canvas.clientHeight),
       ...resourceStats
     });
   }
