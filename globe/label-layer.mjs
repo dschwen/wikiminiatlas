@@ -55,6 +55,8 @@ export class GlobeLabelLayer {
     this.queue = new Set();
     this.loads = new Set();
     this.nodes = new Map();
+    this.desiredKeys = new Set();
+    this.activeLabels = new Map();
     this.frame = 0;
     this.frameState = null;
     this.destroyed = false;
@@ -90,6 +92,11 @@ export class GlobeLabelLayer {
     }
     this.frame += 1;
     this.frameState = frameState;
+    if (frameState.refinementBlocked) {
+      this.render();
+      return;
+    }
+
     const desired = new Set();
 
     for (const tile of frameState.labelTiles || []) {
@@ -98,14 +105,14 @@ export class GlobeLabelLayer {
       entry.lastUsedFrame = this.frame;
       entry.priority = Math.max(entry.priority, tile.priority || 0);
       if (
-        !frameState.refinementBlocked &&
-        (entry.status === 'idle' ||
-          (entry.status === 'error' && performance.now() >= entry.retryAt))
+        entry.status === 'idle' ||
+        (entry.status === 'error' && performance.now() >= entry.retryAt)
       ) {
         entry.status = 'queued';
         this.queue.add(entry.key);
       }
     }
+    this.desiredKeys = desired;
 
     for (const key of [...this.queue]) {
       if (!desired.has(key)) {
@@ -124,6 +131,7 @@ export class GlobeLabelLayer {
     }
 
     this.evict();
+    this.promoteReadyGeneration();
     this.pump();
     this.render();
   }
@@ -232,10 +240,51 @@ export class GlobeLabelLayer {
       this.loads.delete(load);
       if (!this.destroyed) {
         this.evict();
+        this.promoteReadyGeneration();
         this.pump();
         this.render();
       }
     }
+  }
+
+  labelsForDesiredTiles() {
+    const candidates = new Map();
+    for (const key of this.desiredKeys) {
+      const entry = this.entries.get(key);
+      if (!entry || entry.status !== 'ready') {
+        continue;
+      }
+      for (const label of entry.labels) {
+        const previous = candidates.get(label.id);
+        if (!previous || previous.weight < label.weight) {
+          candidates.set(label.id, label);
+        }
+      }
+    }
+    return candidates;
+  }
+
+  promoteReadyGeneration() {
+    if (!this.frameState || this.frameState.refinementBlocked) {
+      return false;
+    }
+    const settled = [...this.desiredKeys].every((key) => {
+      const entry = this.entries.get(key);
+      return entry && (entry.status === 'ready' || entry.status === 'error');
+    });
+    if (!settled && this.activeLabels.size > 0) {
+      return false;
+    }
+
+    const candidates = this.labelsForDesiredTiles();
+    if (settled) {
+      this.activeLabels = candidates;
+    } else {
+      for (const [id, label] of candidates) {
+        this.activeLabels.set(id, label);
+      }
+    }
+    return true;
   }
 
   evict() {
@@ -257,21 +306,8 @@ export class GlobeLabelLayer {
     if (!this.frameState) {
       return;
     }
-    const candidates = new Map();
-    for (const entry of this.entries.values()) {
-      if (entry.status !== 'ready' || entry.lastUsedFrame !== this.frame) {
-        continue;
-      }
-      for (const label of entry.labels) {
-        const previous = candidates.get(label.id);
-        if (!previous || previous.weight < label.weight) {
-          candidates.set(label.id, label);
-        }
-      }
-    }
-
     const projected = [];
-    for (const label of candidates.values()) {
+    for (const label of this.activeLabels.values()) {
       const projection = projectGeographicPoint({
         longitude: label.longitude,
         latitude: label.latitude,
@@ -329,7 +365,7 @@ export class GlobeLabelLayer {
     }
 
     this.onStateChange({
-      candidates: candidates.size,
+      candidates: this.activeLabels.size,
       visible: visible.length,
       cachedTiles: this.entries.size,
       queuedBatches: Math.ceil(this.queue.size / 10),
@@ -345,6 +381,8 @@ export class GlobeLabelLayer {
     this.loads.clear();
     this.queue.clear();
     this.entries.clear();
+    this.desiredKeys.clear();
+    this.activeLabels.clear();
     this.nodes.clear();
     this.container.replaceChildren();
   }

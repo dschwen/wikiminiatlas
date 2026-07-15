@@ -32,13 +32,13 @@ global.document = { createElement: () => new FakeElement() };
 
 const grid = new PlateCarreeGrid();
 
-function frameState(labelTiles) {
+function frameState(labelTiles, refinementBlocked = false) {
   const eyeDirection = lonLatToUnitSphere(-112, 35);
   const distance = 3.1;
   const eye = eyeDirection.map((component) => component * distance);
   return {
     labelTiles,
-    refinementBlocked: false,
+    refinementBlocked,
     eyeDirection,
     distance,
     viewProjection: multiply(
@@ -104,5 +104,49 @@ test('renders successful candidates as projected accessible links', async () => 
     'https://en.wikipedia.org/wiki/Boise%2C_Idaho'
   );
   assert.match(container.children[0].style.transform, /^translate3d\(/);
+  layer.destroy();
+});
+
+test('retains the active label snapshot through gestures and replacement loading', async () => {
+  const container = new FakeElement();
+  let requestCount = 0;
+  let resolveReplacement;
+  const responseFor = (label) => ({
+    ok: true,
+    json: async () => ({ label: [label] })
+  });
+  const layer = new GlobeLabelLayer(container, {
+    grid,
+    fetchImpl: async () => {
+      requestCount += 1;
+      if (requestCount === 1) {
+        return responseFor({
+          id: 'en:boise', name: 'Boise', page: 'Boise%2C_Idaho', lang: 'en',
+          lat: 43.615, lon: -116.2023, dx: 16, dy: 8, style: 9, wg: 100
+        });
+      }
+      return new Promise((resolve) => { resolveReplacement = resolve; });
+    }
+  });
+
+  layer.update(frameState([{ x: 16, y: 3, z: 2 }]));
+  await new Promise((resolve) => setImmediate(resolve));
+  assert.equal(container.children[0].textContent, 'Boise');
+
+  layer.update(frameState([{ x: 17, y: 3, z: 2 }], true));
+  assert.equal(requestCount, 1);
+  assert.equal(container.children[0].textContent, 'Boise');
+
+  layer.update(frameState([{ x: 17, y: 3, z: 2 }]));
+  assert.equal(requestCount, 2);
+  assert.equal(container.children[0].textContent, 'Boise');
+
+  resolveReplacement(responseFor({
+    id: 'en:replacement', name: 'Replacement', page: 'Replacement', lang: 'en',
+    lat: 40, lon: -100, dx: 17, dy: 8, style: 7, wg: 100
+  }));
+  await new Promise((resolve) => setImmediate(resolve));
+  assert.equal(container.children.length, 1);
+  assert.equal(container.children[0].textContent, 'Replacement');
   layer.destroy();
 });

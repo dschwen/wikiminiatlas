@@ -69,6 +69,8 @@ Label requests preserve the existing plate carrée boxes and the label service's
 south-to-north row numbering. Up to ten boxes at the same zoom are combined in
 one range request, with four requests active at once and 256 label tiles cached.
 The overlay displays at most 80 labels, prefers higher-weight candidates, reuses
-stable DOM nodes, and removes candidates behind the geometric horizon. Older
+stable DOM nodes, and removes candidates behind the geometric horizon. During
+camera gestures it retains and reprojects the last coherent candidate snapshot;
+replacement tile batches are swapped in together only after they settle. Older
 label responses remain supported by reconstructing latitude/longitude from their
 tile-local coordinates.

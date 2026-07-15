@@ -51,7 +51,7 @@ appears first and progressively sharpens without displaying an uninitialized til
 - Fetch candidates using the existing latitude/longitude tile boxes. (Complete.)
 - Batch up to ten boxes per request and bound concurrency/cache size. (Complete.)
 - Cull labels behind the horizon and project anchors to screen coordinates. (Complete.)
-- Resolve collisions by weight and reuse stable DOM nodes while moving. (Initial implementation complete.)
+- Resolve collisions by weight, reuse stable DOM nodes, and atomically swap completed candidate generations while moving. (Initial implementation complete.)
 - Render text labels as accessible Wikipedia links above the WebGL canvas. (Complete.)
 - Replace estimated text bounds with measured collision boxes and avoid UI chrome.
 - Add the legacy Commons thumbnail-label behavior.
