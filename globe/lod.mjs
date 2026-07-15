@@ -99,3 +99,30 @@ export function distanceAfterWheel({
   return 1 + altitude;
 }
 
+/**
+ * Pinch zoom scales altitude by the inverse change in finger separation.
+ * Moving fingers apart approaches the surface; moving them together recedes.
+ */
+export function distanceAfterPinch({
+  distance,
+  startSpan,
+  currentSpan,
+  minimumAltitude = 0.0005,
+  maximumAltitude = 50
+}) {
+  assertPositive(distance - 1, 'camera altitude');
+  assertPositive(startSpan, 'startSpan');
+  assertPositive(currentSpan, 'currentSpan');
+  assertPositive(minimumAltitude, 'minimumAltitude');
+  assertPositive(maximumAltitude, 'maximumAltitude');
+  if (maximumAltitude < minimumAltitude) {
+    throw new RangeError('maximumAltitude must not be less than minimumAltitude');
+  }
+
+  const altitude = clamp(
+    (distance - 1) * startSpan / currentSpan,
+    minimumAltitude,
+    maximumAltitude
+  );
+  return 1 + altitude;
+}

@@ -8,7 +8,7 @@ Implemented so far:
 - conversion between render rows and the label service's south-to-north rows;
 - raster tiles rendered as independently textured spherical patches;
 - hierarchical horizon/frustum culling and front-surface pixel-density tile selection;
-- pointer orbit and wheel zoom controls; and
+- one-finger orbit, two-finger pan/pinch, and wheel zoom controls; and
 - procedural placeholders when raster tiles are unavailable.
 
 Run a static server from the repository root:
@@ -43,5 +43,7 @@ node --test globe/*.test.mjs
 The default maximum tile level is 15 and can be raised to 20 through `maxZoom`.
 Wheel zoom scales altitude above the surface from 0.0005 to 50 planet radii;
 pointer sensitivity decreases with the visible surface footprint at close range.
+On touch screens, moving two fingers apart zooms in, moving them together zooms
+out, and moving their midpoint orbits the globe.
 
 The next slice will add parent-tile fallback, followed by label candidate loading and globe-to-screen projection while keeping the labels as accessible HTML links.

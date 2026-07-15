@@ -1,5 +1,6 @@
 import { PlateCarreeGrid, lonLatToUnitSphere } from './plate-carree-grid.mjs';
 import {
+  distanceAfterPinch,
   distanceAfterWheel,
   rotationDegreesPerPixel,
   selectTileZoom
@@ -224,32 +225,114 @@ export class GlobeRenderer {
   }
 
   installControls() {
-    let drag = null;
+    const pointers = new Map();
+    let gesture = null;
+
+    const midpoint = (first, second) => ({
+      x: (first.x + second.x) / 2,
+      y: (first.y + second.y) / 2
+    });
+
+    const startGesture = () => {
+      const active = [...pointers.entries()];
+      if (active.length === 0) {
+        gesture = null;
+        this.canvas.classList.remove('dragging');
+        return;
+      }
+
+      this.canvas.classList.add('dragging');
+      if (active.length === 1) {
+        const [pointerId, point] = active[0];
+        gesture = {
+          mode: 'orbit',
+          pointerId,
+          point,
+          longitude: this.longitude,
+          latitude: this.latitude,
+          distance: this.distance
+        };
+        return;
+      }
+
+      const [firstEntry, secondEntry] = active;
+      const [firstId, first] = firstEntry;
+      const [secondId, second] = secondEntry;
+      gesture = {
+        mode: 'pinch',
+        pointerIds: [firstId, secondId],
+        span: Math.max(1, Math.hypot(second.x - first.x, second.y - first.y)),
+        center: midpoint(first, second),
+        longitude: this.longitude,
+        latitude: this.latitude,
+        distance: this.distance
+      };
+    };
 
     this.onPointerDown = (event) => {
-      drag = {
-        pointerId: event.pointerId,
-        x: event.clientX,
-        y: event.clientY,
-        longitude: this.longitude,
-        latitude: this.latitude
-      };
+      if (event.pointerType === 'mouse' && event.button !== 0) {
+        return;
+      }
+      event.preventDefault();
+      pointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
       this.canvas.setPointerCapture(event.pointerId);
-      this.canvas.classList.add('dragging');
+      startGesture();
     };
 
     this.onPointerMove = (event) => {
-      if (!drag || drag.pointerId !== event.pointerId) {
+      if (!pointers.has(event.pointerId) || gesture === null) {
         return;
       }
+      event.preventDefault();
+      pointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
+
+      if (gesture.mode === 'pinch') {
+        const first = pointers.get(gesture.pointerIds[0]);
+        const second = pointers.get(gesture.pointerIds[1]);
+        if (!first || !second) {
+          startGesture();
+          return;
+        }
+
+        const currentSpan = Math.max(
+          1,
+          Math.hypot(second.x - first.x, second.y - first.y)
+        );
+        const currentCenter = midpoint(first, second);
+        const degreesPerPixel = rotationDegreesPerPixel({
+          viewportHeight: Math.max(1, this.canvas.clientHeight),
+          distance: gesture.distance,
+          fieldOfViewRadians: FIELD_OF_VIEW_RADIANS
+        });
+        this.distance = distanceAfterPinch({
+          distance: gesture.distance,
+          startSpan: gesture.span,
+          currentSpan
+        });
+        this.longitude = gesture.longitude -
+          (currentCenter.x - gesture.center.x) * degreesPerPixel;
+        this.latitude = clamp(
+          gesture.latitude + (currentCenter.y - gesture.center.y) * degreesPerPixel,
+          -89,
+          89
+        );
+        this.requestRender();
+        return;
+      }
+
+      if (gesture.pointerId !== event.pointerId) {
+        return;
+      }
+      const point = pointers.get(event.pointerId);
       const degreesPerPixel = rotationDegreesPerPixel({
         viewportHeight: Math.max(1, this.canvas.clientHeight),
-        distance: this.distance,
+        distance: gesture.distance,
         fieldOfViewRadians: FIELD_OF_VIEW_RADIANS
       });
-      this.longitude = drag.longitude - (event.clientX - drag.x) * degreesPerPixel;
+      this.longitude = gesture.longitude -
+        (point.x - gesture.point.x) * degreesPerPixel;
       this.latitude = clamp(
-        drag.latitude + (event.clientY - drag.y) * degreesPerPixel,
+        gesture.latitude + (point.y - gesture.point.y) * degreesPerPixel,
         -89,
         89
       );
@@ -257,12 +340,15 @@ export class GlobeRenderer {
     };
 
     this.onPointerUp = (event) => {
-      if (!drag || drag.pointerId !== event.pointerId) {
+      if (!pointers.has(event.pointerId)) {
         return;
       }
-      drag = null;
-      this.canvas.releasePointerCapture(event.pointerId);
-      this.canvas.classList.remove('dragging');
+      event.preventDefault();
+      pointers.delete(event.pointerId);
+      if (this.canvas.hasPointerCapture(event.pointerId)) {
+        this.canvas.releasePointerCapture(event.pointerId);
+      }
+      startGesture();
     };
 
     this.onWheel = (event) => {

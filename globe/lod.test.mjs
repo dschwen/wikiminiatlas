@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 
 import {
+  distanceAfterPinch,
   distanceAfterWheel,
   rotationDegreesPerPixel,
   selectTileZoom
@@ -80,4 +81,36 @@ test('zooms exponentially by altitude and supports a wide range', () => {
     distanceAfterWheel({ distance: 51, deltaY: 1000 }),
     51
   );
+});
+
+test('pinching apart zooms in and pinching together zooms out', () => {
+  assert.ok(Math.abs(distanceAfterPinch({
+    distance: 1.1,
+    startSpan: 100,
+    currentSpan: 200
+  }) - 1.05) < 1e-12);
+
+  assert.ok(Math.abs(distanceAfterPinch({
+    distance: 1.1,
+    startSpan: 100,
+    currentSpan: 50
+  }) - 1.2) < 1e-12);
+});
+
+test('pinch zoom honors camera limits and rejects zero-length spans', () => {
+  assert.equal(distanceAfterPinch({
+    distance: 1.001,
+    startSpan: 1,
+    currentSpan: 10000
+  }), 1.0005);
+  assert.equal(distanceAfterPinch({
+    distance: 2,
+    startSpan: 10000,
+    currentSpan: 1
+  }), 51);
+  assert.throws(() => distanceAfterPinch({
+    distance: 2,
+    startSpan: 0,
+    currentSpan: 1
+  }), RangeError);
 });
