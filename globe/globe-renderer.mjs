@@ -6,6 +6,11 @@ import {
   selectTileZoom
 } from './lod.mjs';
 import { lookAt, multiply, perspective } from './mat4.mjs';
+import {
+  ancestorsFromRoot,
+  TileResourceManager
+} from './tile-resource-manager.mjs';
+import { selectVisibleTiles } from './tile-selection.mjs';
 
 const DEG_TO_RAD = Math.PI / 180;
 const FIELD_OF_VIEW_RADIANS = 42 * DEG_TO_RAD;
@@ -16,6 +21,8 @@ const VERTEX_SHADER = `
 
   uniform mat4 u_viewProjection;
   uniform vec4 u_bounds;
+  uniform vec2 u_uvOffset;
+  uniform vec2 u_uvScale;
 
   varying vec2 v_uv;
   varying float v_light;
@@ -32,7 +39,7 @@ const VERTEX_SHADER = `
 
     vec3 lightDirection = normalize(vec3(0.8, 0.55, 1.0));
     v_light = 0.72 + 0.28 * max(dot(position, lightDirection), 0.0);
-    v_uv = a_uv;
+    v_uv = u_uvOffset + a_uv * u_uvScale;
     gl_Position = u_viewProjection * vec4(position, 1.0);
   }
 `;
@@ -53,23 +60,6 @@ const FRAGMENT_SHADER = `
 
 function clamp(value, minimum, maximum) {
   return Math.max(minimum, Math.min(maximum, value));
-}
-
-function dot(a, b) {
-  return a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
-}
-
-function cross(a, b) {
-  return [
-    a[1] * b[2] - a[2] * b[1],
-    a[2] * b[0] - a[0] * b[2],
-    a[0] * b[1] - a[1] * b[0]
-  ];
-}
-
-function normalize(vector) {
-  const length = Math.hypot(vector[0], vector[1], vector[2]);
-  return vector.map((component) => component / length);
 }
 
 function compileShader(gl, type, source) {
@@ -134,22 +124,45 @@ function createPatchMesh(gl, segments) {
   return { vertexBuffer, indexBuffer, indexCount: indices.length };
 }
 
-function makePlaceholder(tileSize, x, y, zoom) {
+function makePlaceholder(tileSize) {
   const canvas = document.createElement('canvas');
   canvas.width = tileSize;
   canvas.height = tileSize;
   const context = canvas.getContext('2d');
-  const hue = (x * 37 + y * 61 + zoom * 29) % 360;
-  context.fillStyle = `hsl(${hue} 22% 23%)`;
+  context.fillStyle = '#253044';
   context.fillRect(0, 0, tileSize, tileSize);
-  context.strokeStyle = 'rgba(255, 255, 255, 0.25)';
-  context.lineWidth = 2;
-  context.strokeRect(1, 1, tileSize - 2, tileSize - 2);
-  context.fillStyle = 'rgba(255, 255, 255, 0.8)';
-  context.font = '12px system-ui, sans-serif';
-  context.textAlign = 'center';
-  context.fillText(`z${zoom} x${x} y${y}`, tileSize / 2, tileSize / 2 + 4);
+  context.strokeStyle = 'rgba(255, 255, 255, 0.08)';
+  context.lineWidth = 1;
+  const step = Math.max(8, tileSize / 8);
+  for (let offset = 0; offset <= tileSize; offset += step) {
+    context.beginPath();
+    context.moveTo(offset, 0);
+    context.lineTo(offset, tileSize);
+    context.stroke();
+    context.beginPath();
+    context.moveTo(0, offset);
+    context.lineTo(tileSize, offset);
+    context.stroke();
+  }
   return canvas;
+}
+
+function createPlaceholderTexture(gl, tileSize) {
+  const texture = gl.createTexture();
+  gl.bindTexture(gl.TEXTURE_2D, texture);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+  gl.texImage2D(
+    gl.TEXTURE_2D,
+    0,
+    gl.RGBA,
+    gl.RGBA,
+    gl.UNSIGNED_BYTE,
+    makePlaceholder(tileSize)
+  );
+  return texture;
 }
 
 export function legacyRasterTileUrl(tileBase, { x, y, z }) {
@@ -166,6 +179,11 @@ export class GlobeRenderer {
     tileUrl,
     maximumZoom = 15,
     patchSegments = 12,
+    maximumVisibleTiles = 256,
+    maximumConcurrentRequests = 12,
+    maximumResidentTextures = 384,
+    maximumTextureBytes = 32 * 1024 * 1024,
+    refinementDelayMilliseconds = 120,
     initialDistance = 3.1,
     onStateChange = () => {}
   } = {}) {
@@ -183,14 +201,17 @@ export class GlobeRenderer {
     this.grid = grid;
     this.tileUrl = tileUrl;
     this.maximumZoom = maximumZoom;
+    this.maximumVisibleTiles = maximumVisibleTiles;
+    this.refinementDelayMilliseconds = refinementDelayMilliseconds;
     this.onStateChange = onStateChange;
     this.longitude = -112;
     this.latitude = 35;
     this.distance = Number.isFinite(initialDistance)
       ? clamp(initialDistance, 1.0005, 51)
       : 3.1;
-    this.textureCache = new Map();
     this.frame = null;
+    this.refinementTimer = null;
+    this.refinementBlocked = false;
     this.destroyed = false;
 
     const gl = canvas.getContext('webgl', {
@@ -204,13 +225,30 @@ export class GlobeRenderer {
     }
     this.gl = gl;
     this.program = createProgram(gl);
-    this.mesh = createPatchMesh(gl, patchSegments);
+    this.meshes = [
+      { maximumZoom: 1, mesh: createPatchMesh(gl, patchSegments) },
+      { maximumZoom: 4, mesh: createPatchMesh(gl, Math.min(6, patchSegments)) },
+      { maximumZoom: Infinity, mesh: createPatchMesh(gl, Math.min(2, patchSegments)) }
+    ];
+    this.placeholderTexture = createPlaceholderTexture(gl, grid.tileSize);
     this.locations = {
       uv: gl.getAttribLocation(this.program, 'a_uv'),
       viewProjection: gl.getUniformLocation(this.program, 'u_viewProjection'),
       bounds: gl.getUniformLocation(this.program, 'u_bounds'),
+      uvOffset: gl.getUniformLocation(this.program, 'u_uvOffset'),
+      uvScale: gl.getUniformLocation(this.program, 'u_uvScale'),
       texture: gl.getUniformLocation(this.program, 'u_texture')
     };
+    this.resources = new TileResourceManager({
+      gl,
+      tileKey: (x, y, z) => grid.tileKey(x, y, z),
+      tileUrl,
+      tileSize: grid.tileSize,
+      onChange: () => this.requestRender(),
+      maximumConcurrentRequests,
+      maximumResidentTextures,
+      maximumTextureBytes
+    });
 
     gl.clearColor(0.015, 0.025, 0.055, 1);
     gl.enable(gl.DEPTH_TEST);
@@ -277,6 +315,7 @@ export class GlobeRenderer {
       pointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
       this.canvas.setPointerCapture(event.pointerId);
       startGesture();
+      this.deferRefinement();
     };
 
     this.onPointerMove = (event) => {
@@ -285,6 +324,7 @@ export class GlobeRenderer {
       }
       event.preventDefault();
       pointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
+      this.deferRefinement();
 
       if (gesture.mode === 'pinch') {
         const first = pointers.get(gesture.pointerIds[0]);
@@ -349,6 +389,7 @@ export class GlobeRenderer {
         this.canvas.releasePointerCapture(event.pointerId);
       }
       startGesture();
+      this.deferRefinement();
     };
 
     this.onWheel = (event) => {
@@ -357,6 +398,7 @@ export class GlobeRenderer {
         distance: this.distance,
         deltaY: event.deltaY
       });
+      this.deferRefinement();
       this.requestRender();
     };
 
@@ -379,163 +421,28 @@ export class GlobeRenderer {
     });
   }
 
-  visibleTiles(zoom, eyeDirection) {
-    const horizonAngle = Math.acos(1 / this.distance);
-    const tiles = [];
-    const aspect = this.canvas.width / this.canvas.height;
-    const tangent = Math.tan(FIELD_OF_VIEW_RADIANS / 2);
-    const right = normalize(cross([0, 1, 0], eyeDirection));
-    const up = cross(eyeDirection, right);
-    const eye = eyeDirection.map((component) => component * this.distance);
-    const near = Math.max(0.00005, (this.distance - 1) * 0.1);
-    const far = this.distance + 1.1;
-    const desiredTilePixels = this.grid.tileSize * TARGET_SCREEN_PIXELS_PER_TEXEL;
-
-    const projectedTileSize = (bounds) => {
-      const longitudes = [bounds.west, (bounds.west + bounds.east) / 2, bounds.east];
-      const latitudes = [bounds.south, (bounds.south + bounds.north) / 2, bounds.north];
-      let minimumX = Infinity;
-      let maximumX = -Infinity;
-      let minimumY = Infinity;
-      let maximumY = -Infinity;
-
-      for (const longitude of longitudes) {
-        for (const latitude of latitudes) {
-          const point = lonLatToUnitSphere(longitude, latitude);
-          const relative = [
-            point[0] - eye[0],
-            point[1] - eye[1],
-            point[2] - eye[2]
-          ];
-          const depth = -dot(relative, eyeDirection);
-          if (depth <= 0) {
-            continue;
-          }
-          const screenX = dot(relative, right) / (depth * tangent * aspect) *
-            this.canvas.width / 2;
-          const screenY = dot(relative, up) / (depth * tangent) *
-            this.canvas.height / 2;
-          minimumX = Math.min(minimumX, screenX);
-          maximumX = Math.max(maximumX, screenX);
-          minimumY = Math.min(minimumY, screenY);
-          maximumY = Math.max(maximumY, screenY);
-        }
-      }
-
-      return Math.max(maximumX - minimumX, maximumY - minimumY);
-    };
-
-    const visit = (x, y, z) => {
-      const bounds = this.grid.tileBounds(x, y, z);
-      const center = lonLatToUnitSphere(
-        (bounds.west + bounds.east) / 2,
-        (bounds.south + bounds.north) / 2
-      );
-      const angularRadius = Math.min(
-        Math.PI,
-        this.grid.angularTileSize(z) * DEG_TO_RAD * Math.SQRT2 * 0.55
-      );
-      const centerAngle = Math.acos(clamp(dot(center, eyeDirection), -1, 1));
-      if (centerAngle > horizonAngle + angularRadius) {
-        return;
-      }
-
-      const boundingRadius = 2 * Math.sin(angularRadius / 2);
-      const relative = [
-        center[0] - eye[0],
-        center[1] - eye[1],
-        center[2] - eye[2]
-      ];
-      const cameraX = dot(relative, right);
-      const cameraY = dot(relative, up);
-      const depth = -dot(relative, eyeDirection);
-      const halfHeight = depth * tangent;
-      const halfWidth = halfHeight * aspect;
-      if (
-        depth + boundingRadius < near ||
-        depth - boundingRadius > far ||
-        Math.abs(cameraX) > halfWidth + boundingRadius ||
-        Math.abs(cameraY) > halfHeight + boundingRadius
-      ) {
-        return;
-      }
-
-      if (z === zoom || projectedTileSize(bounds) <= desiredTilePixels) {
-        tiles.push({ x, y, z, bounds });
-        return;
-      }
-
-      const childX = x * 2;
-      const childY = y * 2;
-      visit(childX, childY, z + 1);
-      visit(childX + 1, childY, z + 1);
-      visit(childX, childY + 1, z + 1);
-      visit(childX + 1, childY + 1, z + 1);
-    };
-
-    const root = this.grid.dimensions(0);
-    for (let y = 0; y < root.rows; y += 1) {
-      for (let x = 0; x < root.columns; x += 1) {
-        visit(x, y, 0);
-      }
+  deferRefinement() {
+    this.refinementBlocked = true;
+    if (this.refinementTimer !== null) {
+      clearTimeout(this.refinementTimer);
     }
-    return tiles;
+    this.refinementTimer = setTimeout(() => {
+      this.refinementTimer = null;
+      this.refinementBlocked = false;
+      this.requestRender();
+    }, this.refinementDelayMilliseconds);
   }
 
-  createTexture(tile) {
+  meshForZoom(zoom) {
+    return this.meshes.find((tier) => zoom <= tier.maximumZoom).mesh;
+  }
+
+  bindMesh(mesh) {
     const gl = this.gl;
-    const texture = gl.createTexture();
-    gl.bindTexture(gl.TEXTURE_2D, texture);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-    gl.texImage2D(
-      gl.TEXTURE_2D,
-      0,
-      gl.RGBA,
-      gl.RGBA,
-      gl.UNSIGNED_BYTE,
-      makePlaceholder(this.grid.tileSize, tile.x, tile.y, tile.z)
-    );
-
-    const entry = { texture, status: 'loading', url: this.tileUrl(tile) };
-    const image = new Image();
-    image.decoding = 'async';
-    const imageUrl = new URL(entry.url, document.baseURI);
-    if (imageUrl.origin !== window.location.origin) {
-      image.crossOrigin = 'anonymous';
-    }
-    image.onload = () => {
-      if (this.destroyed) {
-        return;
-      }
-      try {
-        gl.bindTexture(gl.TEXTURE_2D, texture);
-        gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false);
-        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
-        entry.status = 'ready';
-      } catch (error) {
-        entry.status = 'error';
-        entry.error = error;
-      }
-      this.requestRender();
-    };
-    image.onerror = () => {
-      entry.status = 'error';
-      this.requestRender();
-    };
-    image.src = entry.url;
-    entry.image = image;
-    return entry;
-  }
-
-  textureForTile(tile) {
-    const key = this.grid.tileKey(tile.x, tile.y, tile.z);
-    if (!this.textureCache.has(key)) {
-      this.textureCache.set(key, this.createTexture(tile));
-    }
-    return this.textureCache.get(key);
+    gl.bindBuffer(gl.ARRAY_BUFFER, mesh.vertexBuffer);
+    gl.enableVertexAttribArray(this.locations.uv);
+    gl.vertexAttribPointer(this.locations.uv, 2, gl.FLOAT, false, 0, 0);
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, mesh.indexBuffer);
   }
 
   resizeCanvas() {
@@ -573,27 +480,76 @@ export class GlobeRenderer {
     const viewProjection = multiply(projection, view);
     const tileZoom = this.tileZoom();
     const zoom = tileZoom.zoom;
-    const tiles = this.visibleTiles(zoom, eyeDirection);
+    const selection = selectVisibleTiles({
+      grid: this.grid,
+      maximumZoom: zoom,
+      eyeDirection,
+      distance: this.distance,
+      viewportWidth: this.canvas.width,
+      viewportHeight: this.canvas.height,
+      fieldOfViewRadians: FIELD_OF_VIEW_RADIANS,
+      desiredTilePixels: this.grid.tileSize * TARGET_SCREEN_PIXELS_PER_TEXEL,
+      maximumLeafTiles: this.maximumVisibleTiles
+    });
+    const tiles = selection.tiles.sort((a, b) => a.z - b.z);
     const renderedZooms = tiles.map((tile) => tile.z);
+
+    this.resources.beginFrame();
+    const draws = [];
+    let readyCount = 0;
+    let fallbackCount = 0;
+    let placeholderCount = 0;
+    for (const tile of tiles) {
+      let resolved = this.resources.resolve(tile);
+      const ancestry = ancestorsFromRoot(tile);
+
+      if (!this.refinementBlocked) {
+        const nextZoom = resolved ? resolved.entry.tile.z + 1 : 0;
+        if (nextZoom <= tile.z) {
+          this.resources.demand(ancestry[nextZoom], {
+            priority: 100000 - nextZoom * 1000 + tile.projectedPixels,
+            pin: nextZoom === 0
+          });
+        }
+      } else if (!resolved) {
+        this.resources.demand(ancestry[0], {
+          priority: 100000 + tile.projectedPixels,
+          pin: true
+        });
+      }
+
+      resolved = this.resources.resolve(tile);
+      if (!resolved) {
+        placeholderCount += 1;
+      } else if (resolved.fallbackLevels > 0) {
+        fallbackCount += 1;
+      } else {
+        readyCount += 1;
+      }
+      draws.push({ tile, resolved });
+    }
 
     gl.viewport(0, 0, this.canvas.width, this.canvas.height);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
     gl.useProgram(this.program);
     gl.uniformMatrix4fv(this.locations.viewProjection, false, viewProjection);
     gl.uniform1i(this.locations.texture, 0);
-    gl.bindBuffer(gl.ARRAY_BUFFER, this.mesh.vertexBuffer);
-    gl.enableVertexAttribArray(this.locations.uv);
-    gl.vertexAttribPointer(this.locations.uv, 2, gl.FLOAT, false, 0, 0);
-    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.mesh.indexBuffer);
 
-    let readyCount = 0;
-    for (const tile of tiles) {
-      const textureEntry = this.textureForTile(tile);
-      if (textureEntry.status === 'ready') {
-        readyCount += 1;
+    let activeMesh = null;
+    for (const { tile, resolved } of draws) {
+      const mesh = this.meshForZoom(tile.z);
+      if (mesh !== activeMesh) {
+        this.bindMesh(mesh);
+        activeMesh = mesh;
       }
+      const transform = resolved
+        ? resolved.transform
+        : { offsetX: 0, offsetY: 0, scaleX: 1, scaleY: 1 };
       gl.activeTexture(gl.TEXTURE0);
-      gl.bindTexture(gl.TEXTURE_2D, textureEntry.texture);
+      gl.bindTexture(
+        gl.TEXTURE_2D,
+        resolved ? resolved.entry.texture : this.placeholderTexture
+      );
       gl.uniform4f(
         this.locations.bounds,
         tile.bounds.west * DEG_TO_RAD,
@@ -601,19 +557,30 @@ export class GlobeRenderer {
         tile.bounds.east * DEG_TO_RAD,
         tile.bounds.north * DEG_TO_RAD
       );
-      gl.drawElements(gl.TRIANGLES, this.mesh.indexCount, gl.UNSIGNED_SHORT, 0);
+      gl.uniform2f(this.locations.uvOffset, transform.offsetX, transform.offsetY);
+      gl.uniform2f(this.locations.uvScale, transform.scaleX, transform.scaleY);
+      gl.drawElements(gl.TRIANGLES, mesh.indexCount, gl.UNSIGNED_SHORT, 0);
     }
+    this.resources.endFrame();
+    const resourceStats = this.resources.stats();
 
     this.onStateChange({
       latitude: this.latitude,
       longitude: this.grid.normalizeLongitude(this.longitude),
       distance: this.distance,
       zoom,
-      minimumRenderedZoom: Math.min(...renderedZooms),
-      maximumRenderedZoom: Math.max(...renderedZooms),
+      minimumRenderedZoom: renderedZooms.length ? Math.min(...renderedZooms) : 0,
+      maximumRenderedZoom: renderedZooms.length ? Math.max(...renderedZooms) : 0,
       frontTilePixels: tileZoom.frontTilePixels,
       visibleTiles: tiles.length,
-      readyTiles: readyCount
+      readyTiles: readyCount,
+      fallbackTiles: fallbackCount,
+      placeholderTiles: placeholderCount,
+      drawCalls: draws.length,
+      visitedTileNodes: selection.visitedNodes,
+      tileBudgetLimited: selection.budgetLimited,
+      refinementBlocked: this.refinementBlocked,
+      ...resourceStats
     });
   }
 
@@ -625,6 +592,9 @@ export class GlobeRenderer {
     if (this.frame !== null) {
       cancelAnimationFrame(this.frame);
     }
+    if (this.refinementTimer !== null) {
+      clearTimeout(this.refinementTimer);
+    }
     this.resizeObserver.disconnect();
     this.canvas.removeEventListener('pointerdown', this.onPointerDown);
     this.canvas.removeEventListener('pointermove', this.onPointerMove);
@@ -633,13 +603,12 @@ export class GlobeRenderer {
     this.canvas.removeEventListener('wheel', this.onWheel);
 
     const gl = this.gl;
-    for (const entry of this.textureCache.values()) {
-      entry.image.src = '';
-      gl.deleteTexture(entry.texture);
+    this.resources.destroy();
+    gl.deleteTexture(this.placeholderTexture);
+    for (const { mesh } of this.meshes) {
+      gl.deleteBuffer(mesh.vertexBuffer);
+      gl.deleteBuffer(mesh.indexBuffer);
     }
-    gl.deleteBuffer(this.mesh.vertexBuffer);
-    gl.deleteBuffer(this.mesh.indexBuffer);
     gl.deleteProgram(this.program);
-    this.textureCache.clear();
   }
 }

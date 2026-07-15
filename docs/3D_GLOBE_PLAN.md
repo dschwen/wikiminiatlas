@@ -31,11 +31,19 @@ Plate carrée is a data parameterization and spatial index in the new system. Th
 
 ### 2. Tile refinement — in progress
 
-- Render a loaded parent while detailed child tiles are pending.
+- Render a loaded parent while detailed child tiles are pending. (Complete.)
 - Select tile level from front-surface pixel density rather than fixed distance thresholds. (Complete.)
 - Add hierarchical horizon/frustum culling. (Complete.)
-- Add request prioritization and bounded concurrency.
-- Eliminate visible seams between adjacent patches and mixed levels.
+- Add request prioritization and bounded concurrency. (Complete.)
+- Bound visible leaves, texture memory, resident textures, and cache metadata. (Complete.)
+- Delay refinement during active gestures and reduce high-zoom tessellation. (Complete.)
+- Eliminate mixed-level z-fighting by drawing each leaf once with an ancestor UV transform. (Complete.)
+- Remove any remaining subpixel cracks between differently tessellated neighboring levels.
+
+The current safety limits are 256 visible leaf patches, 12 concurrent image
+loads, 384 resident textures, and 32 MiB of estimated RGBA texture data. A leaf
+requests only the next missing level in its ancestry. Consequently, coarse imagery
+appears first and progressively sharpens without displaying an uninitialized tile.
 
 ### 3. Labels
 

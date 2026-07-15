@@ -29,6 +29,7 @@ try {
       const signedLongitude = state.longitude > 180
         ? state.longitude - 360
         : state.longitude;
+      const residentMiB = state.residentBytes / (1024 * 1024);
       status.textContent = [
         `${state.latitude.toFixed(1)}° lat`,
         `${signedLongitude.toFixed(1)}° lon`,
@@ -36,7 +37,9 @@ try {
           ? `tile z${state.zoom}`
           : `front z${state.zoom} · visible z${state.minimumRenderedZoom}–${state.maximumRenderedZoom}`,
         `${state.frontTilePixels.toFixed(0)} px/tile`,
-        `${state.readyTiles}/${state.visibleTiles} loaded`
+        `${state.readyTiles} exact + ${state.fallbackTiles} parent + ${state.placeholderTiles} blank`,
+        `${state.residentTextures} textures (${residentMiB.toFixed(1)} MiB)`,
+        `${state.inFlight} loading${state.tileBudgetLimited ? ' · tile budget reached' : ''}`
       ].join(' · ');
     }
   });
