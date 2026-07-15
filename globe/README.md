@@ -11,7 +11,7 @@ Implemented so far:
 - progressive parent-tile fallback while detailed imagery loads;
 - bounded texture memory, metadata, and concurrent image requests;
 - batched legacy label loading with globe projection and horizon culling;
-- weight-ordered collision filtering and accessible Wikipedia links;
+- legacy label symbol styling, weight-ordered collision filtering, and accessible Wikipedia links;
 - one-finger orbit, two-finger pan/pinch, and wheel zoom controls; and
 - a shared procedural placeholder before any ancestor imagery is available.
 
@@ -74,3 +74,9 @@ camera gestures it retains and reprojects the last coherent candidate snapshot;
 replacement tile batches are swapped in together only after they settle. Older
 label responses remain supported by reconstructing latitude/longitude from their
 tile-local coordinates.
+
+Navigating through a label and returning with the browser Back action preserves
+the live WebGL and label resources when the page enters the back/forward cache.
+The current latitude, longitude, and camera distance are also stored in the
+page's history entry so browsers that reload instead of caching restore the same
+view.

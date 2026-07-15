@@ -187,6 +187,8 @@ export class GlobeRenderer {
     maximumLabelTiles = 128,
     refinementDelayMilliseconds = 120,
     initialDistance = 3.1,
+    initialLongitude = -112,
+    initialLatitude = 35,
     onStateChange = () => {}
   } = {}) {
     if (!(canvas instanceof HTMLCanvasElement)) {
@@ -208,8 +210,10 @@ export class GlobeRenderer {
     this.maximumLabelTiles = maximumLabelTiles;
     this.refinementDelayMilliseconds = refinementDelayMilliseconds;
     this.onStateChange = onStateChange;
-    this.longitude = -112;
-    this.latitude = 35;
+    this.longitude = Number.isFinite(initialLongitude) ? initialLongitude : -112;
+    this.latitude = Number.isFinite(initialLatitude)
+      ? clamp(initialLatitude, -89, 89)
+      : 35;
     this.distance = Number.isFinite(initialDistance)
       ? clamp(initialDistance, 1.0005, 51)
       : 3.1;

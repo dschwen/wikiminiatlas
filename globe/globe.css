@@ -53,29 +53,21 @@ main {
   max-width: 210px;
   overflow: hidden;
   color: #f7fbff;
+  background-image: url('../symbols/label_corner_ul.png');
+  background-repeat: no-repeat;
   font-size: 11px;
   line-height: 16px;
+  padding-bottom: 2px;
+  padding-left: 5px;
   text-decoration: none;
   text-overflow: ellipsis;
   text-shadow:
     0 1px 2px #000,
     0 0 4px #000;
   white-space: nowrap;
-  translate: -5px -50%;
+  translate: 0 0;
   pointer-events: auto;
   will-change: transform;
-}
-
-.globe-label::before {
-  display: inline-block;
-  width: 5px;
-  height: 5px;
-  margin: 0 4px 1px 0;
-  border: 1px solid rgba(255, 255, 255, 0.9);
-  border-radius: 50%;
-  background: #6ba9e9;
-  box-shadow: 0 1px 3px #000;
-  content: '';
 }
 
 .globe-label:hover,
@@ -84,37 +76,62 @@ main {
   color: #fff;
   outline: 1px solid rgba(190, 221, 255, 0.8);
   outline-offset: 2px;
-  background: rgba(4, 10, 24, 0.72);
+  background-color: rgba(4, 10, 24, 0.72);
 }
 
-.globe-label-2::before {
-  border-radius: 0;
-  background: #e9edf5;
-  rotate: 45deg;
+.globe-label-2 {
+  background-image: url('../symbols/label_summit.png');
+  padding-left: 13px;
+  translate: -5px -8px;
 }
 
 .globe-label-3 {
+  background-image: none;
   font-size: 12px;
   font-weight: 700;
+  padding: 0;
   text-align: center;
-  translate: -50% -50%;
 }
 
-.globe-label-3::before {
-  display: none;
+.globe-label-5 {
+  background-image: url('../symbols/label_dot_3.png');
+  translate: -2px -2px;
 }
 
-.globe-label-6::before,
-.globe-label-7::before {
-  width: 7px;
-  height: 7px;
+.globe-label-6 {
+  background-image: url('../symbols/label_dot_5.png');
+  padding-left: 7px;
+  translate: -3px -3px;
 }
 
-.globe-label-8::before,
-.globe-label-9::before,
-.globe-label-10::before {
-  width: 9px;
-  height: 9px;
+.globe-label-7 {
+  background-image: url('../symbols/label_dot_7.png');
+  padding-left: 9px;
+  translate: -4px -4px;
+}
+
+.globe-label-8 {
+  background-image: url('../symbols/label_dot_9.png');
+  padding-left: 11px;
+  translate: -5px -5px;
+}
+
+.globe-label-9 {
+  background-image: url('../symbols/label_dot_11.png');
+  padding-left: 13px;
+  translate: -6px -6px;
+}
+
+.globe-label-10 {
+  background-image: url('https://upload.wikimedia.org/wikipedia/commons/0/0a/Wma_event_11.png');
+  padding-left: 13px;
+  opacity: 0.5;
+  translate: -6px -6px;
+}
+
+.globe-label-10:hover,
+.globe-label-10:focus-visible {
+  opacity: 1;
 }
 
 .title,

@@ -53,6 +53,7 @@ appears first and progressively sharpens without displaying an uninitialized til
 - Cull labels behind the horizon and project anchors to screen coordinates. (Complete.)
 - Resolve collisions by weight, reuse stable DOM nodes, and atomically swap completed candidate generations while moving. (Initial implementation complete.)
 - Render text labels as accessible Wikipedia links above the WebGL canvas. (Complete.)
+- Reuse the legacy per-style label symbols and anchor offsets. (Complete.)
 - Replace estimated text bounds with measured collision boxes and avoid UI chrome.
 - Add the legacy Commons thumbnail-label behavior.
 
@@ -67,6 +68,7 @@ appears first and progressively sharpens without displaying an uninitialized til
 
 - Port markers, layer/body selection, synopsis, Commons previews, and host messaging.
 - Define camera altitude compatibility for existing numeric zoom commands.
+- Preserve camera and renderer state across back/forward navigation. (Complete in prototype.)
 - Add explicit lifecycle and error states.
 - Switch the primary entry point only after side-by-side behavior tests pass.
 

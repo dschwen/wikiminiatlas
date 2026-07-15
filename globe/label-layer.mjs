@@ -16,11 +16,15 @@ function rectanglesOverlap(a, b, padding) {
 }
 
 function labelRectangle(label, projection) {
+  const offsets = [
+    [0, 0], [0, 0], [5, 8], [0, 0], [0, 0], [2, 2],
+    [3, 3], [4, 4], [5, 5], [6, 6], [6, 6]
+  ];
   const width = Math.min(210, Math.max(32, label.name.length * 6.5 + 14));
   const height = label.style === 3 ? 20 : 16;
-  const centered = label.style === 3;
-  const left = centered ? projection.x - width / 2 : projection.x - 5;
-  const top = projection.y - height / 2;
+  const [offsetX, offsetY] = offsets[label.style];
+  const left = projection.x - offsetX;
+  const top = projection.y - offsetY;
   return { left, top, right: left + width, bottom: top + height };
 }
 
