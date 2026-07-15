@@ -22,18 +22,19 @@ Plate carrée is a data parameterization and spatial index in the new system. Th
 
 ## Delivery slices
 
-### 1. Coordinate and raster foundation — in progress
+### 1. Coordinate and raster foundation — complete
 
 - Extract and test the tile-grid contract.
 - Render independently textured curved tile patches.
-- Add orbit controls, horizon culling, and distance-based tile selection.
+- Add orbit controls, horizon culling, and pixel-density tile selection.
 - Retain visible placeholders for missing tiles.
 
-### 2. Tile refinement
+### 2. Tile refinement — in progress
 
 - Render a loaded parent while detailed child tiles are pending.
-- Select tile level from screen-space error rather than fixed distance thresholds.
-- Add frustum culling, request prioritization, and bounded concurrency.
+- Select tile level from front-surface pixel density rather than fixed distance thresholds. (Complete.)
+- Add hierarchical horizon/frustum culling. (Complete.)
+- Add request prioritization and bounded concurrency.
 - Eliminate visible seams between adjacent patches and mixed levels.
 
 ### 3. Labels
@@ -66,4 +67,3 @@ Plate carrée is a data parameterization and spatial index in the new system. Th
 - Dragging orbits the camera and scrolling changes both altitude and tile detail.
 - Tiles wholly beyond the geometric horizon are not submitted.
 - The prototype does not alter the existing application entry points.
-

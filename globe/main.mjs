@@ -6,13 +6,24 @@ const status = document.querySelector('#status');
 const errorPanel = document.querySelector('#error');
 const parameters = new URLSearchParams(window.location.search);
 const tileBase = parameters.get('tileBase') || '../tiles';
-const maximumZoom = Math.max(0, Math.min(6, Number(parameters.get('maxZoom') || 3)));
+const requestedMaximumZoom = Number(parameters.get('maxZoom'));
+const maximumZoom = parameters.has('maxZoom') && Number.isInteger(requestedMaximumZoom)
+  ? Math.max(0, Math.min(20, requestedMaximumZoom))
+  : 15;
+const requestedDistance = Number(parameters.get('distance'));
+const initialDistance = Math.max(
+  1.0005,
+  Math.min(51, Number.isFinite(requestedDistance) && requestedDistance > 1
+    ? requestedDistance
+    : 3.1)
+);
 
 try {
   const grid = new PlateCarreeGrid();
   const globe = new GlobeRenderer(canvas, {
     grid,
     maximumZoom,
+    initialDistance,
     tileUrl: (tile) => legacyRasterTileUrl(tileBase, tile),
     onStateChange: (state) => {
       const signedLongitude = state.longitude > 180
@@ -21,7 +32,10 @@ try {
       status.textContent = [
         `${state.latitude.toFixed(1)}° lat`,
         `${signedLongitude.toFixed(1)}° lon`,
-        `tile z${state.zoom}`,
+        state.minimumRenderedZoom === state.maximumRenderedZoom
+          ? `tile z${state.zoom}`
+          : `front z${state.zoom} · visible z${state.minimumRenderedZoom}–${state.maximumRenderedZoom}`,
+        `${state.frontTilePixels.toFixed(0)} px/tile`,
         `${state.readyTiles}/${state.visibleTiles} loaded`
       ].join(' · ');
     }
@@ -33,4 +47,3 @@ try {
   errorPanel.textContent = `Unable to start the globe: ${error.message}`;
   throw error;
 }
-

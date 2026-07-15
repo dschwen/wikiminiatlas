@@ -1,7 +1,14 @@
 import { PlateCarreeGrid, lonLatToUnitSphere } from './plate-carree-grid.mjs';
+import {
+  distanceAfterWheel,
+  rotationDegreesPerPixel,
+  selectTileZoom
+} from './lod.mjs';
 import { lookAt, multiply, perspective } from './mat4.mjs';
 
 const DEG_TO_RAD = Math.PI / 180;
+const FIELD_OF_VIEW_RADIANS = 42 * DEG_TO_RAD;
+const TARGET_SCREEN_PIXELS_PER_TEXEL = 1.05;
 
 const VERTEX_SHADER = `
   attribute vec2 a_uv;
@@ -45,6 +52,23 @@ const FRAGMENT_SHADER = `
 
 function clamp(value, minimum, maximum) {
   return Math.max(minimum, Math.min(maximum, value));
+}
+
+function dot(a, b) {
+  return a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
+}
+
+function cross(a, b) {
+  return [
+    a[1] * b[2] - a[2] * b[1],
+    a[2] * b[0] - a[0] * b[2],
+    a[0] * b[1] - a[1] * b[0]
+  ];
+}
+
+function normalize(vector) {
+  const length = Math.hypot(vector[0], vector[1], vector[2]);
+  return vector.map((component) => component / length);
 }
 
 function compileShader(gl, type, source) {
@@ -139,8 +163,9 @@ export class GlobeRenderer {
   constructor(canvas, {
     grid = new PlateCarreeGrid(),
     tileUrl,
-    maximumZoom = 3,
+    maximumZoom = 15,
     patchSegments = 12,
+    initialDistance = 3.1,
     onStateChange = () => {}
   } = {}) {
     if (!(canvas instanceof HTMLCanvasElement)) {
@@ -148,6 +173,9 @@ export class GlobeRenderer {
     }
     if (typeof tileUrl !== 'function') {
       throw new TypeError('tileUrl must be a function');
+    }
+    if (!Number.isInteger(maximumZoom) || maximumZoom < 0 || maximumZoom > 30) {
+      throw new RangeError('maximumZoom must be an integer between 0 and 30');
     }
 
     this.canvas = canvas;
@@ -157,7 +185,9 @@ export class GlobeRenderer {
     this.onStateChange = onStateChange;
     this.longitude = -112;
     this.latitude = 35;
-    this.distance = 3.1;
+    this.distance = Number.isFinite(initialDistance)
+      ? clamp(initialDistance, 1.0005, 51)
+      : 3.1;
     this.textureCache = new Map();
     this.frame = null;
     this.destroyed = false;
@@ -212,7 +242,11 @@ export class GlobeRenderer {
       if (!drag || drag.pointerId !== event.pointerId) {
         return;
       }
-      const degreesPerPixel = 0.22 * Math.max(0.55, this.distance - 0.65);
+      const degreesPerPixel = rotationDegreesPerPixel({
+        viewportHeight: Math.max(1, this.canvas.clientHeight),
+        distance: this.distance,
+        fieldOfViewRadians: FIELD_OF_VIEW_RADIANS
+      });
       this.longitude = drag.longitude - (event.clientX - drag.x) * degreesPerPixel;
       this.latitude = clamp(
         drag.latitude + (event.clientY - drag.y) * degreesPerPixel,
@@ -233,7 +267,10 @@ export class GlobeRenderer {
 
     this.onWheel = (event) => {
       event.preventDefault();
-      this.distance = clamp(this.distance * Math.exp(event.deltaY * 0.001), 1.12, 6);
+      this.distance = distanceAfterWheel({
+        distance: this.distance,
+        deltaY: event.deltaY
+      });
       this.requestRender();
     };
 
@@ -244,35 +281,116 @@ export class GlobeRenderer {
     this.canvas.addEventListener('wheel', this.onWheel, { passive: false });
   }
 
-  zoomForDistance() {
-    const altitude = Math.max(0.001, this.distance - 1);
-    return clamp(Math.floor(1 - Math.log2(altitude)), 0, this.maximumZoom);
+  tileZoom() {
+    return selectTileZoom({
+      viewportHeight: this.canvas.height,
+      distance: this.distance,
+      fieldOfViewRadians: FIELD_OF_VIEW_RADIANS,
+      baseTileDegrees: this.grid.angularTileSize(0),
+      tileSize: this.grid.tileSize,
+      maximumZoom: this.maximumZoom,
+      targetScreenPixelsPerTexel: TARGET_SCREEN_PIXELS_PER_TEXEL
+    });
   }
 
   visibleTiles(zoom, eyeDirection) {
-    const { columns, rows } = this.grid.dimensions(zoom);
-    const span = this.grid.angularTileSize(zoom);
-    const patchRadius = span * DEG_TO_RAD * Math.SQRT2 * 0.55;
     const horizonAngle = Math.acos(1 / this.distance);
     const tiles = [];
+    const aspect = this.canvas.width / this.canvas.height;
+    const tangent = Math.tan(FIELD_OF_VIEW_RADIANS / 2);
+    const right = normalize(cross([0, 1, 0], eyeDirection));
+    const up = cross(eyeDirection, right);
+    const eye = eyeDirection.map((component) => component * this.distance);
+    const near = Math.max(0.00005, (this.distance - 1) * 0.1);
+    const far = this.distance + 1.1;
+    const desiredTilePixels = this.grid.tileSize * TARGET_SCREEN_PIXELS_PER_TEXEL;
 
-    for (let y = 0; y < rows; y += 1) {
-      for (let x = 0; x < columns; x += 1) {
-        const bounds = this.grid.tileBounds(x, y, zoom);
-        const center = lonLatToUnitSphere(
-          (bounds.west + bounds.east) / 2,
-          (bounds.south + bounds.north) / 2
-        );
-        const dot = clamp(
-          center[0] * eyeDirection[0] +
-          center[1] * eyeDirection[1] +
-          center[2] * eyeDirection[2],
-          -1,
-          1
-        );
-        if (Math.acos(dot) <= horizonAngle + patchRadius) {
-          tiles.push({ x, y, z: zoom, bounds });
+    const projectedTileSize = (bounds) => {
+      const longitudes = [bounds.west, (bounds.west + bounds.east) / 2, bounds.east];
+      const latitudes = [bounds.south, (bounds.south + bounds.north) / 2, bounds.north];
+      let minimumX = Infinity;
+      let maximumX = -Infinity;
+      let minimumY = Infinity;
+      let maximumY = -Infinity;
+
+      for (const longitude of longitudes) {
+        for (const latitude of latitudes) {
+          const point = lonLatToUnitSphere(longitude, latitude);
+          const relative = [
+            point[0] - eye[0],
+            point[1] - eye[1],
+            point[2] - eye[2]
+          ];
+          const depth = -dot(relative, eyeDirection);
+          if (depth <= 0) {
+            continue;
+          }
+          const screenX = dot(relative, right) / (depth * tangent * aspect) *
+            this.canvas.width / 2;
+          const screenY = dot(relative, up) / (depth * tangent) *
+            this.canvas.height / 2;
+          minimumX = Math.min(minimumX, screenX);
+          maximumX = Math.max(maximumX, screenX);
+          minimumY = Math.min(minimumY, screenY);
+          maximumY = Math.max(maximumY, screenY);
         }
+      }
+
+      return Math.max(maximumX - minimumX, maximumY - minimumY);
+    };
+
+    const visit = (x, y, z) => {
+      const bounds = this.grid.tileBounds(x, y, z);
+      const center = lonLatToUnitSphere(
+        (bounds.west + bounds.east) / 2,
+        (bounds.south + bounds.north) / 2
+      );
+      const angularRadius = Math.min(
+        Math.PI,
+        this.grid.angularTileSize(z) * DEG_TO_RAD * Math.SQRT2 * 0.55
+      );
+      const centerAngle = Math.acos(clamp(dot(center, eyeDirection), -1, 1));
+      if (centerAngle > horizonAngle + angularRadius) {
+        return;
+      }
+
+      const boundingRadius = 2 * Math.sin(angularRadius / 2);
+      const relative = [
+        center[0] - eye[0],
+        center[1] - eye[1],
+        center[2] - eye[2]
+      ];
+      const cameraX = dot(relative, right);
+      const cameraY = dot(relative, up);
+      const depth = -dot(relative, eyeDirection);
+      const halfHeight = depth * tangent;
+      const halfWidth = halfHeight * aspect;
+      if (
+        depth + boundingRadius < near ||
+        depth - boundingRadius > far ||
+        Math.abs(cameraX) > halfWidth + boundingRadius ||
+        Math.abs(cameraY) > halfHeight + boundingRadius
+      ) {
+        return;
+      }
+
+      if (z === zoom || projectedTileSize(bounds) <= desiredTilePixels) {
+        tiles.push({ x, y, z, bounds });
+        return;
+      }
+
+      const childX = x * 2;
+      const childY = y * 2;
+      visit(childX, childY, z + 1);
+      visit(childX + 1, childY, z + 1);
+      visit(childX, childY + 1, z + 1);
+      visit(childX + 1, childY + 1, z + 1);
+    };
+
+    const root = this.grid.dimensions(0);
+    for (let y = 0; y < root.rows; y += 1) {
+      for (let x = 0; x < root.columns; x += 1) {
+        visit(x, y, 0);
       }
     }
     return tiles;
@@ -360,15 +478,17 @@ export class GlobeRenderer {
     const eyeDirection = lonLatToUnitSphere(this.longitude, this.latitude);
     const eye = eyeDirection.map((component) => component * this.distance);
     const projection = perspective(
-      42 * DEG_TO_RAD,
+      FIELD_OF_VIEW_RADIANS,
       this.canvas.width / this.canvas.height,
-      Math.max(0.01, this.distance - 1.05),
-      this.distance + 1.2
+      Math.max(0.00005, (this.distance - 1) * 0.1),
+      this.distance + 1.1
     );
     const view = lookAt(eye, [0, 0, 0], [0, 1, 0]);
     const viewProjection = multiply(projection, view);
-    const zoom = this.zoomForDistance();
+    const tileZoom = this.tileZoom();
+    const zoom = tileZoom.zoom;
     const tiles = this.visibleTiles(zoom, eyeDirection);
+    const renderedZooms = tiles.map((tile) => tile.z);
 
     gl.viewport(0, 0, this.canvas.width, this.canvas.height);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
@@ -403,6 +523,9 @@ export class GlobeRenderer {
       longitude: this.grid.normalizeLongitude(this.longitude),
       distance: this.distance,
       zoom,
+      minimumRenderedZoom: Math.min(...renderedZooms),
+      maximumRenderedZoom: Math.max(...renderedZooms),
+      frontTilePixels: tileZoom.frontTilePixels,
       visibleTiles: tiles.length,
       readyTiles: readyCount
     });

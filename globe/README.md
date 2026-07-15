@@ -7,7 +7,7 @@ Implemented so far:
 - the exact 6-by-3 zoom-zero plate carrée grid used by WikiMiniAtlas;
 - conversion between render rows and the label service's south-to-north rows;
 - raster tiles rendered as independently textured spherical patches;
-- horizon culling and camera-distance-based tile zoom selection;
+- hierarchical horizon/frustum culling and front-surface pixel-density tile selection;
 - pointer orbit and wheel zoom controls; and
 - procedural placeholders when raster tiles are unavailable.
 
@@ -22,7 +22,14 @@ Then open `http://localhost:8000/globe/`.
 By default the demo requests the existing relative `tiles/mapnik` hierarchy. A different compatible tile base and maximum prototype zoom can be supplied without changing code:
 
 ```text
-http://localhost:8000/globe/?tileBase=https://example.org/tiles&maxZoom=3
+http://localhost:8000/globe/?tileBase=https://example.org/tiles&maxZoom=15
+```
+
+For camera-range testing, the initial center distance can also be specified;
+`1.01` is close to the surface and `20` shows a distant planet:
+
+```text
+http://localhost:8000/globe/?distance=1.01
 ```
 
 The tile base must permit WebGL texture use from the demo origin when it is cross-origin. Failed requests retain a coordinate-labelled placeholder, making the geometry and level-of-detail behavior testable without a complete tile checkout.
@@ -30,8 +37,11 @@ The tile base must permit WebGL texture use from the demo origin when it is cros
 Run the coordinate tests with:
 
 ```sh
-node --test globe/plate-carree-grid.test.mjs
+node --test globe/*.test.mjs
 ```
 
-The next slice will add label candidate loading and globe-to-screen projection while keeping the labels as accessible HTML links.
+The default maximum tile level is 15 and can be raised to 20 through `maxZoom`.
+Wheel zoom scales altitude above the surface from 0.0005 to 50 planet radii;
+pointer sensitivity decreases with the visible surface footprint at close range.
 
+The next slice will add parent-tile fallback, followed by label candidate loading and globe-to-screen projection while keeping the labels as accessible HTML links.
