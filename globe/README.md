@@ -117,7 +117,9 @@ separately from its 32 MiB texture budget. Eviction, map/body switching, and
 renderer teardown delete the associated GPU buffers; there is no append-only
 global building buffer. The per-tile cap is sized so all 256 possible visible
 leaf tiles fit inside the building budget; older off-screen meshes are therefore
-discarded before a current mesh, avoiding budget-driven flicker.
+discarded before a current mesh, avoiding budget-driven flicker. The building
+pass also restores its WebGL vertex-attribute state before those buffers can be
+evicted, keeping subsequent surface-only frames valid while zooming out.
 
 The default maximum detail is now zoom 17 for the JSON-capable full basemap.
 The existing `maxZoom` URL parameter can request up to zoom 20. Other map sets

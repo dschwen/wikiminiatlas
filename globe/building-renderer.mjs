@@ -107,6 +107,13 @@ export class BuildingRenderer {
       gl.vertexAttribPointer(this.locations.normal, 3, gl.FLOAT, false, 0, 0);
       gl.drawArrays(gl.TRIANGLES, 0, resource.vertexCount);
     }
+    // Attribute enable state is global in WebGL 1, not program-local. Leaving
+    // these arrays enabled makes later globe draws invalid after their tile-
+    // owned building buffers are evicted.
+    gl.disableVertexAttribArray(this.locations.position);
+    if (this.locations.normal !== this.locations.position) {
+      gl.disableVertexAttribArray(this.locations.normal);
+    }
     gl.disable(gl.BLEND);
   }
 

@@ -30,12 +30,13 @@ function fakeGl() {
     getProgramParameter: () => true,
     getProgramInfoLog: () => '',
     deleteProgram() {},
-    getAttribLocation: () => 0,
+    getAttribLocation: (program, name) => name === 'a_position' ? 0 : 1,
     getUniformLocation: () => ({}),
     useProgram() {},
     uniformMatrix4fv() {},
     enable: (value) => calls.push(['enable', value]),
     disable: (value) => calls.push(['disable', value]),
+    disableVertexAttribArray: (value) => calls.push(['disableAttribute', value]),
     blendFunc: (...values) => calls.push(['blendFunc', ...values]),
     enableVertexAttribArray() {},
     bindBuffer() {},
@@ -57,4 +58,8 @@ test('draws buildings with conventional alpha blending', () => {
     call[1] === gl.SRC_ALPHA && call[2] === gl.ONE_MINUS_SRC_ALPHA
   ));
   assert.ok(gl.calls.some((call) => call[0] === 'disable' && call[1] === gl.BLEND));
+  assert.equal(
+    gl.calls.filter((call) => call[0] === 'disableAttribute').length,
+    2
+  );
 });
