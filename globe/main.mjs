@@ -6,7 +6,10 @@ import {
   tileSourceById
 } from './catalog.mjs';
 import { GlobeArticlePreview } from './article-preview.mjs';
-import { GlobeRenderer } from './globe-renderer.mjs';
+import {
+  DEFAULT_LIGHT_DIRECTION,
+  GlobeRenderer
+} from './globe-renderer.mjs';
 import { GlobeLabelLayer } from './label-layer.mjs';
 import {
   createHybridJsonTileProducer,
@@ -15,6 +18,7 @@ import {
 import { PlateCarreeGrid } from './plate-carree-grid.mjs';
 import { scaleBarsForCenter } from './scale-bar.mjs';
 import { readCameraState, writeCameraState } from './session-state.mjs';
+import { sunDirectionAt } from './solar-position.mjs';
 import { parseGlobeUrl } from './url-compat.mjs';
 
 const canvas = document.querySelector('#globe');
@@ -280,6 +284,17 @@ try {
       updateStatus();
     }
   });
+  const updateLightDirection = () => {
+    globe.setLightDirection(
+      celestialBody.id === 'earth'
+        ? sunDirectionAt(new Date())
+        : DEFAULT_LIGHT_DIRECTION
+    );
+  };
+  updateLightDirection();
+  const lightDirectionTimer = setInterval(() => {
+    if (celestialBody.id === 'earth') updateLightDirection();
+  }, 60000);
 
   const setControlsOpen = (open) => {
     controls.hidden = !open;
@@ -338,6 +353,7 @@ try {
     celestialBody = celestialBodyById(bodySetControl.value);
     populateTileSets(null);
     applyTileSource();
+    updateLightDirection();
     labelLayer.setGlobe(celestialBody.labelDataset);
     updateLocationParameters({
       globe: celestialBody.id === CELESTIAL_BODIES[0].id ? null : celestialBody.id,
@@ -386,6 +402,7 @@ try {
       clearTimeout(cameraStoreTimer);
       cameraStoreTimer = null;
     }
+    clearInterval(lightDirectionTimer);
     globe.destroy();
     labelLayer.destroy();
     articlePreview.destroy();
@@ -413,6 +430,7 @@ try {
   });
   window.addEventListener('pageshow', (event) => {
     if (event.persisted && !destroyed) {
+      updateLightDirection();
       globe.requestRender();
     }
   });

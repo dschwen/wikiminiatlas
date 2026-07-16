@@ -18,6 +18,7 @@ import { selectVisibleTiles } from './tile-selection.mjs';
 const DEG_TO_RAD = Math.PI / 180;
 const FIELD_OF_VIEW_RADIANS = 42 * DEG_TO_RAD;
 const TARGET_SCREEN_PIXELS_PER_TEXEL = 1.05;
+export const DEFAULT_LIGHT_DIRECTION = Object.freeze([0.8, 0.55, 1.0]);
 
 const VERTEX_SHADER = `
   attribute vec2 a_uv;
@@ -26,6 +27,7 @@ const VERTEX_SHADER = `
   uniform vec4 u_bounds;
   uniform vec2 u_uvOffset;
   uniform vec2 u_uvScale;
+  uniform vec3 u_lightDirection;
 
   varying vec2 v_uv;
   varying float v_light;
@@ -40,8 +42,7 @@ const VERTEX_SHADER = `
       -cosLatitude * sin(longitude)
     );
 
-    vec3 lightDirection = normalize(vec3(0.8, 0.55, 1.0));
-    v_light = 0.72 + 0.28 * max(dot(position, lightDirection), 0.0);
+    v_light = 0.72 + 0.28 * max(dot(position, u_lightDirection), 0.0);
     v_uv = u_uvOffset + a_uv * u_uvScale;
     gl_Position = u_viewProjection * vec4(position, 1.0);
   }
@@ -63,6 +64,20 @@ const FRAGMENT_SHADER = `
 
 function clamp(value, minimum, maximum) {
   return Math.max(minimum, Math.min(maximum, value));
+}
+
+export function normalizeLightDirection(direction) {
+  if (!Array.isArray(direction) && !ArrayBuffer.isView(direction)) {
+    throw new TypeError('light direction must be a three-component vector');
+  }
+  if (direction.length !== 3 || ![...direction].every(Number.isFinite)) {
+    throw new TypeError('light direction must contain three finite components');
+  }
+  const length = Math.hypot(...direction);
+  if (length === 0) {
+    throw new RangeError('light direction cannot be zero');
+  }
+  return [...direction].map((component) => component / length);
 }
 
 function compileShader(gl, type, source) {
@@ -218,6 +233,7 @@ export class GlobeRenderer {
     initialDistance = 3.1,
     initialLongitude = -112,
     initialLatitude = 35,
+    lightDirection = DEFAULT_LIGHT_DIRECTION,
     onStateChange = () => {}
   } = {}) {
     if (!(canvas instanceof HTMLCanvasElement)) {
@@ -252,6 +268,7 @@ export class GlobeRenderer {
     this.distance = Number.isFinite(initialDistance)
       ? clamp(initialDistance, 1.0005, 51)
       : 3.1;
+    this.lightDirection = normalizeLightDirection(lightDirection);
     this.frame = null;
     this.refinementTimer = null;
     this.refinementBlocked = false;
@@ -281,6 +298,7 @@ export class GlobeRenderer {
       bounds: gl.getUniformLocation(this.program, 'u_bounds'),
       uvOffset: gl.getUniformLocation(this.program, 'u_uvOffset'),
       uvScale: gl.getUniformLocation(this.program, 'u_uvScale'),
+      lightDirection: gl.getUniformLocation(this.program, 'u_lightDirection'),
       texture: gl.getUniformLocation(this.program, 'u_texture')
     };
     this.resourceOptions = {
@@ -336,6 +354,11 @@ export class GlobeRenderer {
     this.resources = this.createResourceManager(tileUrl, tileProducer);
     previousResources.destroy();
     this.deferRefinement();
+    this.requestRender();
+  }
+
+  setLightDirection(direction) {
+    this.lightDirection = normalizeLightDirection(direction);
     this.requestRender();
   }
 
@@ -698,6 +721,7 @@ export class GlobeRenderer {
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
     gl.useProgram(this.program);
     gl.uniformMatrix4fv(this.locations.viewProjection, false, viewProjection);
+    gl.uniform3fv(this.locations.lightDirection, this.lightDirection);
     gl.uniform1i(this.locations.texture, 0);
 
     let activeMesh = null;
@@ -726,7 +750,11 @@ export class GlobeRenderer {
       gl.uniform2f(this.locations.uvScale, transform.scaleX, transform.scaleY);
       gl.drawElements(gl.TRIANGLES, mesh.indexCount, gl.UNSIGNED_SHORT, 0);
     }
-    this.buildingRenderer.draw(buildingResources, viewProjection);
+    this.buildingRenderer.draw(
+      buildingResources,
+      viewProjection,
+      this.lightDirection
+    );
     this.resources.endFrame();
     const resourceStats = this.resources.stats();
 

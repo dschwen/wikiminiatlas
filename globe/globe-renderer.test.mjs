@@ -1,7 +1,16 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
-import { collectBuildingResources } from './globe-renderer.mjs';
+import {
+  collectBuildingResources,
+  normalizeLightDirection
+} from './globe-renderer.mjs';
+
+test('normalizes and validates world-space light directions', () => {
+  assert.deepEqual(normalizeLightDirection([0, 3, 4]), [0, 0.6, 0.8]);
+  assert.throws(() => normalizeLightDirection([0, 0, 0]), /cannot be zero/);
+  assert.throws(() => normalizeLightDirection([1, 2]), /three finite/);
+});
 
 test('retains and deduplicates ancestor buildings during tile refinement', () => {
   const parentBuildings = { buildingCount: 4 };

@@ -46,6 +46,10 @@ loads, 384 resident textures, 32 MiB of estimated RGBA texture data, and a hard
 requests only the next missing level in its ancestry. Consequently, coarse imagery
 appears first and progressively sharpens without displaying an uninitialized tile.
 
+Earth lighting follows the current UTC subsolar direction and refreshes once
+per minute. Other bodies intentionally retain fixed lighting until their
+body-specific rotational orientation and solar ephemerides are implemented.
+
 ### 3. Labels — in progress
 
 - Extend the label response to include explicit `lat`, `lon`, and a stable ID. (Complete, backward-compatible.)

@@ -16,6 +16,7 @@ Implemented so far:
 - all legacy Earth, Moon, Mars, Venus, Mercury, Io, and Titan imagery and label datasets;
 - client-rendered JSON surface tiles for the Earth full basemap above zoom 12;
 - height-bearing OSM buildings extruded radially from JSON tiles at zoom 14+;
+- real-time Earth lighting from the current UTC subsolar position;
 - the legacy 18-pixel zoom, recenter, fullscreen, and settings button layout;
 - independent metric and imperial scale bars based on center-frame surface resolution;
 - one-finger orbit, two-finger pan/pinch, and wheel zoom controls, including gestures that begin on labels;
@@ -124,6 +125,12 @@ evicted, keeping subsequent surface-only frames valid while zooming out.
 The default maximum detail is now zoom 17 for the JSON-capable full basemap.
 The existing `maxZoom` URL parameter can request up to zoom 20. Other map sets
 remain constrained by their catalog maximums.
+
+Earth's surface and buildings share a world-space directional light aimed at
+the current subsolar point. The direction is computed locally from UTC and
+updated once per minute; it requires no network ephemeris. Other celestial
+bodies retain the original fixed light until body-specific rotation and solar
+ephemerides are implemented.
 
 Run the coordinate tests with:
 

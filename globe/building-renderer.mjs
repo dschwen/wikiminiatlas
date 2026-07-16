@@ -2,11 +2,11 @@ const VERTEX_SHADER = `
   attribute vec3 a_position;
   attribute vec3 a_normal;
   uniform mat4 u_viewProjection;
+  uniform vec3 u_lightDirection;
   varying float v_light;
 
   void main() {
-    vec3 lightDirection = normalize(vec3(0.8, 0.55, 1.0));
-    v_light = 0.62 + 0.38 * max(dot(normalize(a_normal), lightDirection), 0.0);
+    v_light = 0.62 + 0.38 * max(dot(normalize(a_normal), u_lightDirection), 0.0);
     gl_Position = u_viewProjection * vec4(a_position, 1.0);
   }
 `;
@@ -57,7 +57,8 @@ export class BuildingRenderer {
     this.locations = {
       position: gl.getAttribLocation(this.program, 'a_position'),
       normal: gl.getAttribLocation(this.program, 'a_normal'),
-      viewProjection: gl.getUniformLocation(this.program, 'u_viewProjection')
+      viewProjection: gl.getUniformLocation(this.program, 'u_viewProjection'),
+      lightDirection: gl.getUniformLocation(this.program, 'u_lightDirection')
     };
   }
 
@@ -91,13 +92,14 @@ export class BuildingRenderer {
     this.gl.deleteBuffer(resource.normalBuffer);
   }
 
-  draw(resources, viewProjection) {
+  draw(resources, viewProjection, lightDirection) {
     if (resources.length === 0) return;
     const gl = this.gl;
     gl.useProgram(this.program);
     gl.enable(gl.BLEND);
     gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
     gl.uniformMatrix4fv(this.locations.viewProjection, false, viewProjection);
+    gl.uniform3fv(this.locations.lightDirection, lightDirection);
     gl.enableVertexAttribArray(this.locations.position);
     gl.enableVertexAttribArray(this.locations.normal);
     for (const resource of resources) {
