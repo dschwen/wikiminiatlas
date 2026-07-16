@@ -66,9 +66,13 @@ Labels use `../label.php`, English Wikipedia, and the Earth dataset by default.
 These settings can be changed independently, or labels can be disabled:
 
 ```text
-http://localhost:8000/globe/?labelBase=https://example.org/label.php&lang=de&globe=earth
+http://localhost:8000/globe/?labelBase=https://example.org/label.php&labelLang=de&globe=earth
 http://localhost:8000/globe/?labels=0
 ```
+
+`labelLang` is intentionally distinct from legacy `lang`: existing 2D iframe
+URLs use `lang` for the host article/WIWOSM language and carry the label
+language in the `wma` coordinate payload.
 
 The label selector can change languages or disable labels without reloading the
 viewer. Changing the celestial body replaces the tile source and the `g`
@@ -99,6 +103,10 @@ out, and moving their midpoint orbits the globe.
 The pointer gesture surface includes projected label links. A clean label tap
 still follows the link, while motion beyond the drag threshold or participation
 in a pinch suppresses that navigation and controls the globe instead.
+Label hover inverts the configured foreground/glow contrast without drawing a
+background box. Holding Ctrl (or Command on macOS) while hovering a Wikipedia
+label opens a cached article-summary preview; obsolete summary requests are
+aborted when the hovered article changes.
 
 The scale occupies the 2D map's lower-left position. It uses the angular ground
 resolution at the center of the rendered sphere, where distortion is lowest,
@@ -108,6 +116,14 @@ rows independently select the largest 1/2/5 × 10ⁿ distance that fits within
 with an awkward bar length. Metric values below one kilometre are shown in
 metres. The calculation is isolated in `scale-bar.mjs` so a future unit setting
 can hide either row without changing renderer math.
+
+The globe accepts the `wma=lat_lon_width_height_site_zoom_uiLanguage` payload
+emitted by `wikiminiatlas.js`, including its optional center latitude/longitude
+suffix and the older unnamed coordinate-query form. Legacy numeric zoom is
+converted to camera altitude by matching the 2D map's center angular resolution.
+The remaining contracts required before replacing `iframe.html` are tracked in
+`docs/3D_GLOBE_PLAN.md`, including markers, WIWOSM overlays, host messaging,
+Commons previews, and UI localization.
 
 The renderer enforces a 256-visible-patch ceiling. It keeps at most 384 raster
 textures or 32 MiB of estimated RGBA texture data, whichever limit is reached

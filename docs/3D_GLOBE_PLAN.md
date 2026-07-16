@@ -59,18 +59,92 @@ appears first and progressively sharpens without displaying an uninitialized til
 
 ### 4. Vector geography and buildings
 
-- Convert vector tile coordinates to spherical positions.
-- Subdivide long edges so lines follow the surface.
-- Render buildings in a tile-local east/north/up frame with radial height.
+- Add a bounded `/tiles/jsontile.php` client for Earth/full-basemap tiles above
+  zoom 12. Responses retain the legacy `{x,y,z,v,data,idx,f}` contract.
+- Extract the Canvas 2D style and geometry pass from `wmajt.js` into an ES
+  module. Do not import the legacy singleton: it assumes jQuery tile objects,
+  mutable globals, append-only building buffers, and an unbounded cache.
+- Render each JSON response into a 128- or 256-pixel canvas and upload that
+  canvas through the existing WebGL tile texture path. A canvas is a valid
+  `TexImageSource`, so the sphere mesh, UVs, culling, and draw loop do not need
+  a second vector rendering pipeline.
+- Generalize `TileResourceManager` from `Image` loading to an asynchronous tile
+  producer returning `{source, width, height}`. Raster sources return decoded
+  images; JSON sources return rendered canvases or `ImageBitmap`s.
+- Mark source capability in `catalog.mjs` (`jsonFromZoom: 13`) rather than
+  checking an Earth tileset index. Other bodies remain raster-only.
+- Keep raster zoom 12 and rendered JSON ancestors in the same hierarchy. While
+  a detailed JSON tile is loading, the existing ancestor UV transform continues
+  showing initialized lower-resolution imagery.
+- Bound raw JSON, rendered canvases, GPU textures, metadata, and concurrent
+  requests separately. Abort requests that leave the desired tile generation.
+- Preserve legacy response compatibility by generating `idx` when `v < 2` or
+  the server omits it. Validate coordinates, feature count, geometry depth, and
+  response size before drawing.
+- First slice: 2D surface styling only. Follow with polygon holes and correct
+  layer/bridge/tunnel ordering, then bounded feature picking.
+- Later building slice: render buildings in a tile-local east/north/up frame
+  with radial height and GPU ownership tied to visible tiles. Do not port the
+  append-only global buffers.
 - Preserve article and size-comparison overlays as globe-surface geometry.
+
+Acceptance criteria for the JSON-texture slice:
+
+- zoom 13 switches only Earth/full-basemap leaves to `jsontile.php`;
+- a missing, slow, malformed, or failed JSON tile retains a raster/vector
+  ancestor without a blank flash;
+- fixed GeoJSON fixtures produce expected canvas pixels and uploaded textures;
+- long zoom/pan sessions remain inside explicit CPU and GPU budgets; and
+- switching body or map layer cancels obsolete JSON work and cannot mix sources.
 
 ### 5. Legacy integration
 
 - Port markers, layer/body selection, synopsis, Commons previews, and host messaging.
+- Article synopsis on Ctrl/Cmd hover. (Complete for Wikipedia text labels.)
 - Define camera altitude compatibility for existing numeric zoom commands.
+  (Complete for initial legacy `wma` URLs.)
 - Preserve camera and renderer state across back/forward navigation. (Complete in prototype.)
 - Add explicit lifecycle and error states.
 - Switch the primary entry point only after side-by-side behavior tests pass.
+
+#### URL compatibility matrix
+
+The globe parser now accepts both legacy entry forms:
+
+```text
+?wma=lat_lon_width_height_site_zoom_uiLanguage&globe=Earth&lang=en&page=Title&awt=0
+?lat_lon_width_height_site_zoom_uiLanguage_centerLat_centerLon&globe=Earth
+```
+
+Implemented mappings:
+
+| Legacy field | Globe behavior |
+| --- | --- |
+| `wma[0:2]` | marker/recenter latitude and longitude |
+| `wma[2:4]` | parsed for compatibility; iframe viewport remains authoritative, matching current 2D behavior |
+| `wma[4]` | label language |
+| `wma[5]` | converted to camera altitude by matching center radians per pixel |
+| `wma[6]` | retained as UI-language metadata; UI localization remains to port |
+| `wma[7:9]` | optional independent initial camera center |
+| `globe` | case-insensitive celestial body selection |
+| `lang` / `page` | reserved for host article language/title, as in 2D |
+| `awt` | parsed; legacy tooltip policy remains to port |
+
+The new explicit label override is `labelLang`; `lang` must not be reused for
+labels because doing so breaks existing Wikipedia iframe URLs.
+
+Remaining requirements before `/globe/` can replace `/iframe.html` without a
+host-script change:
+
+- display the primary marker and extra markers;
+- port WIWOSM article geometry for `lang` + `page`;
+- implement the accepted and emitted `postMessage` contracts (`coords`,
+  `ways/areas`, `getcoords`, `moveto`, highlight/scroll);
+- decide whether `awt=1` opens summaries without a modifier;
+- add UI localization from `wma[6]`;
+- cover Commons labels/previews; and
+- deploy an `iframe.html` compatibility entry or change the embedder only after
+  side-by-side tests confirm equivalent behavior.
 
 ## First-slice acceptance criteria
 

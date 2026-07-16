@@ -5,11 +5,13 @@ import {
   legacyTileSourceUrl,
   tileSourceById
 } from './catalog.mjs';
+import { GlobeArticlePreview } from './article-preview.mjs';
 import { GlobeRenderer } from './globe-renderer.mjs';
 import { GlobeLabelLayer } from './label-layer.mjs';
 import { PlateCarreeGrid } from './plate-carree-grid.mjs';
 import { scaleBarsForCenter } from './scale-bar.mjs';
 import { readCameraState, writeCameraState } from './session-state.mjs';
+import { parseGlobeUrl } from './url-compat.mjs';
 
 const canvas = document.querySelector('#globe');
 const viewport = document.querySelector('#viewport');
@@ -25,6 +27,7 @@ const tileSetControl = document.querySelector('#tile-set');
 const labelSetControl = document.querySelector('#label-set');
 const status = document.querySelector('#status');
 const credit = document.querySelector('#credit');
+const articlePreviewContainer = document.querySelector('#article-preview');
 const scaleBox = document.querySelector('#scalebox');
 const metricScaleBar = document.querySelector('#scale-metric-bar');
 const metricScaleLabel = document.querySelector('#scale-metric-label');
@@ -32,40 +35,33 @@ const imperialScaleBar = document.querySelector('#scale-imperial-bar');
 const imperialScaleLabel = document.querySelector('#scale-imperial-label');
 const errorPanel = document.querySelector('#error');
 const parameters = new URLSearchParams(window.location.search);
+const urlConfiguration = parseGlobeUrl(window.location.href, {
+  viewportHeight: Math.max(1, window.innerHeight)
+});
 const tileBase = parameters.get('tileBase') || '../tiles';
 const requestedMaximumZoom = Number(parameters.get('maxZoom'));
 const configuredMaximumZoom = parameters.has('maxZoom') && Number.isInteger(requestedMaximumZoom)
   ? Math.max(0, Math.min(20, requestedMaximumZoom))
   : 15;
 const restoredCamera = readCameraState(window.history.state);
-const requestedDistance = Number(parameters.get('distance'));
-const distanceSource = parameters.has('distance') &&
-  Number.isFinite(requestedDistance) && requestedDistance > 1
-  ? requestedDistance
-  : restoredCamera ? restoredCamera.distance : 3.1;
+const distanceSource = restoredCamera ? restoredCamera.distance : urlConfiguration.distance;
 const initialDistance = Math.max(
   1.0005,
   Math.min(51, distanceSource)
 );
-const requestedTargetLongitude = parameters.has('lon')
-  ? Number(parameters.get('lon'))
-  : Number.NaN;
-const requestedTargetLatitude = parameters.has('lat')
-  ? Number(parameters.get('lat'))
-  : Number.NaN;
-const targetLongitude = Number.isFinite(requestedTargetLongitude)
-  ? requestedTargetLongitude
-  : -112;
-const targetLatitude = Number.isFinite(requestedTargetLatitude)
-  ? Math.max(-89, Math.min(89, requestedTargetLatitude))
-  : 35;
-const initialLongitude = restoredCamera ? restoredCamera.longitude : targetLongitude;
-const initialLatitude = restoredCamera ? restoredCamera.latitude : targetLatitude;
-let labelsEnabled = parameters.get('labels') !== '0';
+const targetLongitude = urlConfiguration.marker.longitude;
+const targetLatitude = Math.max(-89, Math.min(89, urlConfiguration.marker.latitude));
+const initialLongitude = restoredCamera
+  ? restoredCamera.longitude
+  : urlConfiguration.center.longitude;
+const initialLatitude = restoredCamera
+  ? restoredCamera.latitude
+  : urlConfiguration.center.latitude;
+let labelsEnabled = urlConfiguration.labelsEnabled;
 const labelBase = parameters.get('labelBase') || '../label.php';
-let labelLanguage = parameters.get('lang') || 'en';
-let celestialBody = celestialBodyById(parameters.get('globe'));
-let tileSource = tileSourceById(parameters.get('tileSet'), celestialBody);
+let labelLanguage = urlConfiguration.labelLanguage;
+let celestialBody = celestialBodyById(urlConfiguration.globe);
+let tileSource = tileSourceById(urlConfiguration.tileSet, celestialBody);
 
 for (const body of CELESTIAL_BODIES) {
   bodySetControl.add(new Option(body.label, body.id));
@@ -81,7 +77,7 @@ function populateTileSets(selectedSource) {
   tileSetControl.value = tileSource.id;
 }
 
-populateTileSets(parameters.get('tileSet'));
+populateTileSets(urlConfiguration.tileSet);
 
 labelSetControl.add(new Option('Off', ''));
 for (const [code, name] of LABEL_LANGUAGES) {
@@ -111,6 +107,17 @@ function updateLocationParameters(changes) {
 function updateSourcePresentation() {
   labelContainer.style.setProperty('--globe-label-color', tileSource.labelColor);
   labelContainer.style.setProperty('--globe-label-shadow', tileSource.labelTextShadow);
+  const labelsAreLight = tileSource.labelColor === 'white';
+  labelContainer.style.setProperty(
+    '--globe-label-hover-color',
+    labelsAreLight ? '#111' : 'white'
+  );
+  labelContainer.style.setProperty(
+    '--globe-label-hover-shadow',
+    labelsAreLight
+      ? '0 0 2px white, 0 0 4px white'
+      : '0 0 2px black, 0 0 4px black'
+  );
   viewport.dataset.equatorialCircumferenceKm =
     String(celestialBody.equatorialCircumferenceKm);
   canvas.setAttribute(
@@ -240,6 +247,9 @@ try {
       updateStatus();
     }
   });
+  const articlePreview = new GlobeArticlePreview(articlePreviewContainer, {
+    interactionElement: viewport
+  });
   const globe = new GlobeRenderer(canvas, {
     grid,
     interactionElement: viewport,
@@ -339,7 +349,9 @@ try {
     labelLayer.setEnabled(labelsEnabled);
     updateLocationParameters({
       labels: labelsEnabled ? null : '0',
-      lang: labelsEnabled && labelLanguage !== 'en' ? labelLanguage : null
+      labelLang: labelsEnabled && labelLanguage !== urlConfiguration.labelLanguage
+        ? labelLanguage
+        : null
     });
     updateStatus();
     setControlsOpen(false);
@@ -360,6 +372,7 @@ try {
     }
     globe.destroy();
     labelLayer.destroy();
+    articlePreview.destroy();
     zoomInButton.removeEventListener('click', zoomIn);
     zoomOutButton.removeEventListener('click', zoomOut);
     targetButton.removeEventListener('click', centerOnTarget);
