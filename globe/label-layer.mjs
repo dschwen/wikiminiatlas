@@ -39,6 +39,7 @@ export class GlobeLabelLayer {
     maximumCachedTiles = 256,
     maximumVisibleLabels = 80,
     retryDelayMilliseconds = 30000,
+    enabled = true,
     onStateChange = () => {}
   } = {}) {
     if (!(container instanceof HTMLElement)) {
@@ -54,6 +55,7 @@ export class GlobeLabelLayer {
     this.maximumCachedTiles = maximumCachedTiles;
     this.maximumVisibleLabels = maximumVisibleLabels;
     this.retryDelayMilliseconds = retryDelayMilliseconds;
+    this.enabled = enabled;
     this.onStateChange = onStateChange;
     this.entries = new Map();
     this.queue = new Set();
@@ -63,7 +65,56 @@ export class GlobeLabelLayer {
     this.activeLabels = new Map();
     this.frame = 0;
     this.frameState = null;
+    this.sourceGeneration = 0;
     this.destroyed = false;
+  }
+
+  resetResources() {
+    this.sourceGeneration += 1;
+    for (const load of this.loads) {
+      load.controller.abort();
+    }
+    this.loads.clear();
+    this.queue.clear();
+    this.entries.clear();
+    this.desiredKeys.clear();
+    this.activeLabels.clear();
+    this.nodes.clear();
+    this.container.replaceChildren();
+  }
+
+  setLanguage(language) {
+    if (typeof language !== 'string' || language.length === 0) {
+      throw new TypeError('language must be a non-empty string');
+    }
+    if (language === this.language) {
+      return;
+    }
+    this.resetResources();
+    this.language = language;
+    if (this.enabled && this.frameState) {
+      this.update(this.frameState);
+    }
+  }
+
+  setEnabled(enabled) {
+    const nextEnabled = Boolean(enabled);
+    if (nextEnabled === this.enabled) {
+      return;
+    }
+    this.enabled = nextEnabled;
+    if (!nextEnabled) {
+      this.resetResources();
+      this.onStateChange({
+        candidates: 0,
+        visible: 0,
+        cachedTiles: 0,
+        queuedBatches: 0,
+        inFlightBatches: 0
+      });
+    } else if (this.frameState) {
+      this.update(this.frameState);
+    }
   }
 
   entryFor(tile) {
@@ -94,8 +145,11 @@ export class GlobeLabelLayer {
     if (this.destroyed) {
       return;
     }
-    this.frame += 1;
     this.frameState = frameState;
+    if (!this.enabled) {
+      return;
+    }
+    this.frame += 1;
     if (frameState.refinementBlocked) {
       this.render();
       return;
@@ -177,7 +231,8 @@ export class GlobeLabelLayer {
 
   async load(entries) {
     const controller = new AbortController();
-    const load = { controller, entries };
+    const generation = this.sourceGeneration;
+    const load = { controller, entries, generation };
     this.loads.add(load);
     for (const entry of entries) {
       entry.status = 'loading';
@@ -200,6 +255,9 @@ export class GlobeLabelLayer {
         throw new Error(`Label request failed with HTTP ${response.status}`);
       }
       const payload = await response.json();
+      if (generation !== this.sourceGeneration || this.destroyed) {
+        return;
+      }
       const zoom = entries[0].tile.z;
       const labelsByTile = new Map(entries.map((entry) => [entry.key, []]));
       for (const item of payload.label || []) {
@@ -234,6 +292,9 @@ export class GlobeLabelLayer {
         entry.retryAt = 0;
       }
     } catch (error) {
+      if (generation !== this.sourceGeneration || this.destroyed) {
+        return;
+      }
       const aborted = error && error.name === 'AbortError';
       for (const entry of entries) {
         entry.status = aborted ? 'idle' : 'error';
@@ -242,7 +303,7 @@ export class GlobeLabelLayer {
       }
     } finally {
       this.loads.delete(load);
-      if (!this.destroyed) {
+      if (!this.destroyed && generation === this.sourceGeneration) {
         this.evict();
         this.promoteReadyGeneration();
         this.pump();
@@ -352,6 +413,7 @@ export class GlobeLabelLayer {
         node.className = `globe-label globe-label-${label.style}`;
         node.textContent = label.name;
         node.target = '_top';
+        node.draggable = false;
         node.dir = /^(ar|fa|he|ur)(-|$)/.test(label.language) ? 'rtl' : 'ltr';
         if (/^[a-z][a-z0-9-]*$/i.test(label.language) && label.page) {
           node.href = `https://${label.language}.wikipedia.org/wiki/${label.page}`;
@@ -379,15 +441,6 @@ export class GlobeLabelLayer {
 
   destroy() {
     this.destroyed = true;
-    for (const load of this.loads) {
-      load.controller.abort();
-    }
-    this.loads.clear();
-    this.queue.clear();
-    this.entries.clear();
-    this.desiredKeys.clear();
-    this.activeLabels.clear();
-    this.nodes.clear();
-    this.container.replaceChildren();
+    this.resetResources();
   }
 }

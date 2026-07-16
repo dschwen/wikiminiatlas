@@ -12,7 +12,9 @@ Implemented so far:
 - bounded texture memory, metadata, and concurrent image requests;
 - batched legacy label loading with globe projection and horizon culling;
 - legacy label symbol styling, weight-ordered collision filtering, and accessible Wikipedia links;
-- one-finger orbit, two-finger pan/pinch, and wheel zoom controls; and
+- in-place selectors for all six legacy Earth tile sets and legacy label languages;
+- one-finger orbit, two-finger pan/pinch, and wheel zoom controls, including gestures that begin on labels;
+- a realistic popup-sized iframe host page; and
 - a shared procedural placeholder before any ancestor imagery is available.
 
 Run a static server from the repository root:
@@ -23,11 +25,22 @@ python3 -m http.server 8000
 
 Then open `http://localhost:8000/globe/`.
 
+For the intended embedded presentation, open
+`http://localhost:8000/globe/landing.html`. It hosts the same viewer in a
+responsive 680-by-440-pixel popup frame. Query parameters on the landing page
+are forwarded to both the frame and its full-window link.
+
 By default the demo requests the existing relative `tiles/mapnik` hierarchy. A different compatible tile base and maximum prototype zoom can be supplied without changing code:
 
 ```text
 http://localhost:8000/globe/?tileBase=https://example.org/tiles&maxZoom=15
 ```
+
+The map selector switches between the legacy full basemap, physical,
+satellite, coastline, Blue Marble, and night imagery without moving the
+camera. The current selection is reflected in the `tileSet` query parameter;
+for example, `?tileSet=night`. Each layer caps detail at the maximum available
+in its legacy hierarchy.
 
 Labels use `../label.php`, English Wikipedia, and the Earth dataset by default.
 These settings can be changed independently, or labels can be disabled:
@@ -36,6 +49,10 @@ These settings can be changed independently, or labels can be disabled:
 http://localhost:8000/globe/?labelBase=https://example.org/label.php&lang=de&globe=earth
 http://localhost:8000/globe/?labels=0
 ```
+
+The label selector can change languages or disable labels without reloading the
+viewer. Changing either selector updates the iframe URL, so a non-BFCache Back
+navigation can restore the same display choices along with the camera state.
 
 For camera-range testing, the initial center distance can also be specified;
 `1.01` is close to the surface and `20` shows a distant planet:
@@ -57,6 +74,9 @@ Wheel zoom scales altitude above the surface from 0.0005 to 50 planet radii;
 pointer sensitivity decreases with the visible surface footprint at close range.
 On touch screens, moving two fingers apart zooms in, moving them together zooms
 out, and moving their midpoint orbits the globe.
+The pointer gesture surface includes projected label links. A clean label tap
+still follows the link, while motion beyond the drag threshold or participation
+in a pinch suppresses that navigation and controls the globe instead.
 
 The renderer enforces a 256-visible-patch ceiling. It keeps at most 384 raster
 textures or 32 MiB of estimated RGBA texture data, whichever limit is reached

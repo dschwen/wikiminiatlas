@@ -1,16 +1,20 @@
-import { GlobeRenderer, legacyRasterTileUrl } from './globe-renderer.mjs';
+import { LABEL_LANGUAGES, legacyTileSourceUrl, TILE_SOURCES, tileSourceById } from './catalog.mjs';
+import { GlobeRenderer } from './globe-renderer.mjs';
 import { GlobeLabelLayer } from './label-layer.mjs';
 import { PlateCarreeGrid } from './plate-carree-grid.mjs';
 import { readCameraState, writeCameraState } from './session-state.mjs';
 
 const canvas = document.querySelector('#globe');
+const viewport = document.querySelector('#viewport');
 const labelContainer = document.querySelector('#labels');
+const tileSetControl = document.querySelector('#tile-set');
+const labelSetControl = document.querySelector('#label-set');
 const status = document.querySelector('#status');
 const errorPanel = document.querySelector('#error');
 const parameters = new URLSearchParams(window.location.search);
 const tileBase = parameters.get('tileBase') || '../tiles';
 const requestedMaximumZoom = Number(parameters.get('maxZoom'));
-const maximumZoom = parameters.has('maxZoom') && Number.isInteger(requestedMaximumZoom)
+const configuredMaximumZoom = parameters.has('maxZoom') && Number.isInteger(requestedMaximumZoom)
   ? Math.max(0, Math.min(20, requestedMaximumZoom))
   : 15;
 const restoredCamera = readCameraState(window.history.state);
@@ -25,10 +29,41 @@ const initialDistance = Math.max(
 );
 const initialLongitude = restoredCamera ? restoredCamera.longitude : -112;
 const initialLatitude = restoredCamera ? restoredCamera.latitude : 35;
-const labelsEnabled = parameters.get('labels') !== '0';
+let labelsEnabled = parameters.get('labels') !== '0';
 const labelBase = parameters.get('labelBase') || '../label.php';
-const labelLanguage = parameters.get('lang') || 'en';
+let labelLanguage = parameters.get('lang') || 'en';
 const globeName = parameters.get('globe') || 'earth';
+let tileSource = tileSourceById(parameters.get('tileSet'));
+
+for (const source of TILE_SOURCES) {
+  tileSetControl.add(new Option(source.label, source.id));
+}
+tileSetControl.value = tileSource.id;
+
+labelSetControl.add(new Option('Off', ''));
+for (const [code, name] of LABEL_LANGUAGES) {
+  labelSetControl.add(new Option(name, code));
+}
+if (labelsEnabled && ![...labelSetControl.options].some((option) => option.value === labelLanguage)) {
+  labelSetControl.add(new Option(labelLanguage, labelLanguage));
+}
+labelSetControl.value = labelsEnabled ? labelLanguage : '';
+
+function updateLocationParameters(changes) {
+  const url = new URL(window.location.href);
+  for (const [name, value] of Object.entries(changes)) {
+    if (value === null) {
+      url.searchParams.delete(name);
+    } else {
+      url.searchParams.set(name, value);
+    }
+  }
+  try {
+    window.history.replaceState(window.history.state, '', url);
+  } catch (error) {
+    // URL persistence is optional when an embedding host restricts History API writes.
+  }
+}
 
 try {
   const grid = new PlateCarreeGrid();
@@ -77,7 +112,8 @@ try {
       ? state.longitude - 360
       : state.longitude;
     const residentMiB = state.residentBytes / (1024 * 1024);
-    status.textContent = [
+    const compact = canvas.clientWidth < 700 || canvas.clientHeight < 480;
+    const summary = [
       `${state.latitude.toFixed(1)}° lat`,
       `${signedLongitude.toFixed(1)}° lon`,
       state.minimumRenderedZoom === state.maximumRenderedZoom
@@ -88,36 +124,65 @@ try {
       `${state.residentTextures} textures (${residentMiB.toFixed(1)} MiB)`,
       `${state.inFlight} loading${state.tileBudgetLimited ? ' · tile budget reached' : ''}`,
       labelsEnabled ? `${labelStats.visible} labels` : 'labels off'
-    ].join(' · ');
+    ];
+    status.textContent = compact
+      ? [summary[0], summary[1], `tile z${state.zoom}`, summary[7]].join(' · ')
+      : summary.join(' · ');
   };
-  const labelLayer = labelsEnabled
-    ? new GlobeLabelLayer(labelContainer, {
-      grid,
-      labelBase,
-      language: labelLanguage,
-      globe: globeName,
-      onStateChange: (state) => {
-        labelStats = state;
-        updateStatus();
-      }
-    })
-    : null;
+  const labelLayer = new GlobeLabelLayer(labelContainer, {
+    grid,
+    labelBase,
+    language: labelLanguage,
+    globe: globeName,
+    enabled: labelsEnabled,
+    onStateChange: (state) => {
+      labelStats = state;
+      updateStatus();
+    }
+  });
   const globe = new GlobeRenderer(canvas, {
     grid,
-    maximumZoom,
+    interactionElement: viewport,
+    maximumZoom: Math.min(configuredMaximumZoom, tileSource.maximumZoom),
     initialDistance,
     initialLongitude,
     initialLatitude,
-    tileUrl: (tile) => legacyRasterTileUrl(tileBase, tile),
+    tileUrl: (tile) => legacyTileSourceUrl(tileBase, tileSource, tile),
     onStateChange: (state) => {
       globeState = state;
-      if (labelLayer) {
-        labelLayer.update(state);
-      }
+      labelLayer.update(state);
       scheduleCameraStateStore();
       updateStatus();
     }
   });
+
+  const changeTileSet = () => {
+    tileSource = tileSourceById(tileSetControl.value);
+    globe.setTileSource({
+      tileUrl: (tile) => legacyTileSourceUrl(tileBase, tileSource, tile),
+      maximumZoom: Math.min(configuredMaximumZoom, tileSource.maximumZoom)
+    });
+    updateLocationParameters({
+      tileSet: tileSource.id === TILE_SOURCES[0].id ? null : tileSource.id
+    });
+    updateStatus();
+  };
+  const changeLabelSet = () => {
+    const selectedLanguage = labelSetControl.value;
+    labelsEnabled = selectedLanguage !== '';
+    if (labelsEnabled) {
+      labelLanguage = selectedLanguage;
+      labelLayer.setLanguage(labelLanguage);
+    }
+    labelLayer.setEnabled(labelsEnabled);
+    updateLocationParameters({
+      labels: labelsEnabled ? null : '0',
+      lang: labelsEnabled && labelLanguage !== 'en' ? labelLanguage : null
+    });
+    updateStatus();
+  };
+  tileSetControl.addEventListener('change', changeTileSet);
+  labelSetControl.addEventListener('change', changeLabelSet);
 
   let destroyed = false;
   const destroy = () => {
@@ -130,9 +195,9 @@ try {
       cameraStoreTimer = null;
     }
     globe.destroy();
-    if (labelLayer) {
-      labelLayer.destroy();
-    }
+    labelLayer.destroy();
+    tileSetControl.removeEventListener('change', changeTileSet);
+    labelSetControl.removeEventListener('change', changeLabelSet);
   };
   window.addEventListener('pagehide', (event) => {
     if (cameraStoreTimer !== null) {

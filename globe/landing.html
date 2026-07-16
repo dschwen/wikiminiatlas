@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>WikiMiniAtlas embedded globe</title>
+  <link rel="stylesheet" href="landing.css">
+</head>
+<body>
+  <main>
+    <article>
+      <p class="eyebrow">WikiMiniAtlas</p>
+      <h1>A globe designed for the space it will actually use</h1>
+      <p>
+        This host page exercises the map at popup size. The globe remains an
+        independent document, as it would when embedded into another website.
+      </p>
+      <p>
+        Drag across the map or a label to orbit. Pinch or scroll to zoom, and
+        use the controls inside the frame to change imagery or label language.
+      </p>
+      <a id="open-globe" href="./">Open the globe in a full window</a>
+    </article>
+
+    <section class="popup" aria-labelledby="popup-title">
+      <header>
+        <h2 id="popup-title">Interactive globe</h2>
+        <span aria-hidden="true">Embedded view</span>
+      </header>
+      <iframe
+        id="globe-frame"
+        src="./"
+        title="Interactive WikiMiniAtlas globe"
+        allowfullscreen
+      ></iframe>
+    </section>
+  </main>
+  <script type="module" src="landing.mjs"></script>
+</body>
+</html>

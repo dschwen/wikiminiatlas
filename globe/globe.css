@@ -25,6 +25,14 @@ main {
     #040713;
 }
 
+#viewport {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  touch-action: none;
+  user-select: none;
+}
+
 #globe {
   display: block;
   width: 100%;
@@ -135,6 +143,7 @@ main {
 }
 
 .title,
+#controls,
 #status,
 #help,
 #error {
@@ -146,6 +155,39 @@ main {
   background: rgba(6, 12, 28, 0.76);
   box-shadow: 0 8px 30px rgba(0, 0, 0, 0.22);
   backdrop-filter: blur(10px);
+}
+
+#controls {
+  top: 18px;
+  right: 18px;
+  display: grid;
+  gap: 7px;
+  padding: 9px 10px;
+  font-size: 11px;
+}
+
+#controls label {
+  display: grid;
+  grid-template-columns: 42px minmax(112px, 150px);
+  align-items: center;
+  gap: 7px;
+  color: #bac9e3;
+}
+
+#controls select {
+  width: 100%;
+  min-width: 0;
+  padding: 3px 22px 3px 6px;
+  border: 1px solid rgba(185, 205, 239, 0.28);
+  border-radius: 5px;
+  color: #f4f7ff;
+  background: #111a2d;
+  font: inherit;
+}
+
+#controls select:focus-visible {
+  outline: 2px solid #86b9ff;
+  outline-offset: 2px;
 }
 
 .title {
@@ -185,6 +227,24 @@ main {
 }
 
 @media (max-width: 720px) {
+  .title {
+    top: 12px;
+    left: 12px;
+    padding: 8px 10px;
+    font-size: 13px;
+  }
+
+  .title-detail {
+    display: none;
+  }
+
+  #controls {
+    top: 12px;
+    right: 12px;
+    gap: 5px;
+    padding: 7px 8px;
+  }
+
   #status {
     right: 12px;
     bottom: 12px;
@@ -194,5 +254,20 @@ main {
 
   #help {
     display: none;
+  }
+}
+
+@media (max-width: 440px) {
+  #controls label {
+    grid-template-columns: 1fr;
+    gap: 2px;
+  }
+
+  #controls label span {
+    display: none;
+  }
+
+  #controls select {
+    width: 128px;
   }
 }

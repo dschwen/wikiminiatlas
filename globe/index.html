@@ -8,9 +8,21 @@
 </head>
 <body>
   <main>
-    <h1 class="title">WikiMiniAtlas · tiled globe prototype</h1>
-    <canvas id="globe" aria-label="Interactive three-dimensional globe. Drag to orbit and pinch to zoom."></canvas>
-    <nav id="labels" aria-label="Geographic labels"></nav>
+    <div id="viewport">
+      <canvas id="globe" aria-label="Interactive three-dimensional globe. Drag to orbit and pinch to zoom."></canvas>
+      <nav id="labels" aria-label="Geographic labels"></nav>
+    </div>
+    <h1 class="title">WikiMiniAtlas<span class="title-detail"> · tiled globe prototype</span></h1>
+    <form id="controls" aria-label="Map display settings">
+      <label>
+        <span>Map</span>
+        <select id="tile-set" aria-label="Tile set"></select>
+      </label>
+      <label>
+        <span>Labels</span>
+        <select id="label-set" aria-label="Label language"></select>
+      </label>
+    </form>
     <p id="help">Drag to orbit · pinch or scroll to zoom</p>
     <p id="status" role="status">Starting WebGL…</p>
     <p id="error" role="alert" hidden></p>

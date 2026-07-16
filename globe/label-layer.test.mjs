@@ -150,3 +150,44 @@ test('retains the active label snapshot through gestures and replacement loading
   assert.equal(container.children[0].textContent, 'Replacement');
   layer.destroy();
 });
+
+test('switches label languages in place and discards the previous cache', async () => {
+  const container = new FakeElement();
+  const urls = [];
+  const layer = new GlobeLabelLayer(container, {
+    grid,
+    fetchImpl: async (url) => {
+      urls.push(url);
+      return { ok: true, json: async () => ({ label: [] }) };
+    }
+  });
+  const state = frameState([{ x: 16, y: 3, z: 2 }]);
+  layer.update(state);
+  await new Promise((resolve) => setImmediate(resolve));
+
+  layer.setLanguage('de');
+  await new Promise((resolve) => setImmediate(resolve));
+
+  assert.equal(new URL(urls[0], 'https://example.test').searchParams.get('l'), 'en');
+  assert.equal(new URL(urls[1], 'https://example.test').searchParams.get('l'), 'de');
+  assert.equal(layer.language, 'de');
+  layer.destroy();
+});
+
+test('can turn label loading off and back on without losing the current frame', async () => {
+  let requests = 0;
+  const layer = new GlobeLabelLayer(new FakeElement(), {
+    grid,
+    enabled: false,
+    fetchImpl: async () => {
+      requests += 1;
+      return { ok: true, json: async () => ({ label: [] }) };
+    }
+  });
+  layer.update(frameState([{ x: 16, y: 3, z: 2 }]));
+  assert.equal(requests, 0);
+
+  layer.setEnabled(true);
+  assert.equal(requests, 1);
+  layer.destroy();
+});

@@ -177,6 +177,7 @@ export class GlobeRenderer {
   constructor(canvas, {
     grid = new PlateCarreeGrid(),
     tileUrl,
+    interactionElement = canvas,
     maximumZoom = 15,
     patchSegments = 12,
     maximumVisibleTiles = 256,
@@ -197,16 +198,21 @@ export class GlobeRenderer {
     if (typeof tileUrl !== 'function') {
       throw new TypeError('tileUrl must be a function');
     }
+    if (!(interactionElement instanceof HTMLElement)) {
+      throw new TypeError('interactionElement must be an HTML element');
+    }
     if (!Number.isInteger(maximumZoom) || maximumZoom < 0 || maximumZoom > 30) {
       throw new RangeError('maximumZoom must be an integer between 0 and 30');
     }
 
     this.canvas = canvas;
+    this.interactionElement = interactionElement;
     this.grid = grid;
     this.tileUrl = tileUrl;
     this.maximumZoom = maximumZoom;
     this.maximumVisibleTiles = maximumVisibleTiles;
-    this.maximumLabelZoom = Math.min(maximumZoom, maximumLabelZoom);
+    this.configuredMaximumLabelZoom = maximumLabelZoom;
+    this.maximumLabelZoom = Math.min(maximumZoom, this.configuredMaximumLabelZoom);
     this.maximumLabelTiles = maximumLabelTiles;
     this.refinementDelayMilliseconds = refinementDelayMilliseconds;
     this.onStateChange = onStateChange;
@@ -247,16 +253,16 @@ export class GlobeRenderer {
       uvScale: gl.getUniformLocation(this.program, 'u_uvScale'),
       texture: gl.getUniformLocation(this.program, 'u_texture')
     };
-    this.resources = new TileResourceManager({
+    this.resourceOptions = {
       gl,
       tileKey: (x, y, z) => grid.tileKey(x, y, z),
-      tileUrl,
       tileSize: grid.tileSize,
       onChange: () => this.requestRender(),
       maximumConcurrentRequests,
       maximumResidentTextures,
       maximumTextureBytes
-    });
+    };
+    this.resources = this.createResourceManager(tileUrl);
 
     gl.clearColor(0.015, 0.025, 0.055, 1);
     gl.enable(gl.DEPTH_TEST);
@@ -270,9 +276,35 @@ export class GlobeRenderer {
     this.requestRender();
   }
 
+  createResourceManager(tileUrl) {
+    return new TileResourceManager({
+      ...this.resourceOptions,
+      tileUrl
+    });
+  }
+
+  setTileSource({ tileUrl, maximumZoom = this.maximumZoom }) {
+    if (typeof tileUrl !== 'function') {
+      throw new TypeError('tileUrl must be a function');
+    }
+    if (!Number.isInteger(maximumZoom) || maximumZoom < 0 || maximumZoom > 30) {
+      throw new RangeError('maximumZoom must be an integer between 0 and 30');
+    }
+    const previousResources = this.resources;
+    this.tileUrl = tileUrl;
+    this.maximumZoom = maximumZoom;
+    this.maximumLabelZoom = Math.min(maximumZoom, this.configuredMaximumLabelZoom);
+    this.resources = this.createResourceManager(tileUrl);
+    previousResources.destroy();
+    this.deferRefinement();
+    this.requestRender();
+  }
+
   installControls() {
     const pointers = new Map();
     let gesture = null;
+    let gestureMoved = false;
+    let suppressLabelClicksUntil = -Infinity;
 
     const midpoint = (first, second) => ({
       x: (first.x + second.x) / 2,
@@ -313,15 +345,34 @@ export class GlobeRenderer {
         latitude: this.latitude,
         distance: this.distance
       };
+      gestureMoved = true;
     };
 
     this.onPointerDown = (event) => {
       if (event.pointerType === 'mouse' && event.button !== 0) {
         return;
       }
-      event.preventDefault();
-      pointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
-      this.canvas.setPointerCapture(event.pointerId);
+      if (pointers.size === 0) {
+        gestureMoved = false;
+      }
+      const captureElement = event.target && event.target.setPointerCapture
+        ? event.target
+        : this.interactionElement;
+      pointers.set(event.pointerId, {
+        x: event.clientX,
+        y: event.clientY,
+        startX: event.clientX,
+        startY: event.clientY,
+        captureElement,
+        label: event.target && event.target.closest
+          ? event.target.closest('.globe-label')
+          : null
+      });
+      try {
+        captureElement.setPointerCapture(event.pointerId);
+      } catch (error) {
+        // Pointer capture can fail when a browser retires the pointer immediately.
+      }
       startGesture();
       this.deferRefinement();
     };
@@ -331,7 +382,16 @@ export class GlobeRenderer {
         return;
       }
       event.preventDefault();
-      pointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
+      const previous = pointers.get(event.pointerId);
+      const point = {
+        ...previous,
+        x: event.clientX,
+        y: event.clientY
+      };
+      pointers.set(event.pointerId, point);
+      if (Math.hypot(point.x - point.startX, point.y - point.startY) > 6) {
+        gestureMoved = true;
+      }
       this.deferRefinement();
 
       if (gesture.mode === 'pinch') {
@@ -371,7 +431,6 @@ export class GlobeRenderer {
       if (gesture.pointerId !== event.pointerId) {
         return;
       }
-      const point = pointers.get(event.pointerId);
       const degreesPerPixel = rotationDegreesPerPixel({
         viewportHeight: Math.max(1, this.canvas.clientHeight),
         distance: gesture.distance,
@@ -391,13 +450,26 @@ export class GlobeRenderer {
       if (!pointers.has(event.pointerId)) {
         return;
       }
-      event.preventDefault();
+      const pointer = pointers.get(event.pointerId);
+      if (gestureMoved && pointer.label) {
+        suppressLabelClicksUntil = performance.now() + 500;
+      }
       pointers.delete(event.pointerId);
-      if (this.canvas.hasPointerCapture(event.pointerId)) {
-        this.canvas.releasePointerCapture(event.pointerId);
+      if (pointer.captureElement.hasPointerCapture(event.pointerId)) {
+        pointer.captureElement.releasePointerCapture(event.pointerId);
       }
       startGesture();
       this.deferRefinement();
+    };
+
+    this.onClick = (event) => {
+      const label = event.target && event.target.closest
+        ? event.target.closest('.globe-label')
+        : null;
+      if (label && performance.now() <= suppressLabelClicksUntil) {
+        event.preventDefault();
+        event.stopPropagation();
+      }
     };
 
     this.onWheel = (event) => {
@@ -410,11 +482,12 @@ export class GlobeRenderer {
       this.requestRender();
     };
 
-    this.canvas.addEventListener('pointerdown', this.onPointerDown);
-    this.canvas.addEventListener('pointermove', this.onPointerMove);
-    this.canvas.addEventListener('pointerup', this.onPointerUp);
-    this.canvas.addEventListener('pointercancel', this.onPointerUp);
-    this.canvas.addEventListener('wheel', this.onWheel, { passive: false });
+    this.interactionElement.addEventListener('pointerdown', this.onPointerDown);
+    this.interactionElement.addEventListener('pointermove', this.onPointerMove);
+    this.interactionElement.addEventListener('pointerup', this.onPointerUp);
+    this.interactionElement.addEventListener('pointercancel', this.onPointerUp);
+    this.interactionElement.addEventListener('click', this.onClick, true);
+    this.interactionElement.addEventListener('wheel', this.onWheel, { passive: false });
   }
 
   tileZoom() {
@@ -632,11 +705,12 @@ export class GlobeRenderer {
       clearTimeout(this.refinementTimer);
     }
     this.resizeObserver.disconnect();
-    this.canvas.removeEventListener('pointerdown', this.onPointerDown);
-    this.canvas.removeEventListener('pointermove', this.onPointerMove);
-    this.canvas.removeEventListener('pointerup', this.onPointerUp);
-    this.canvas.removeEventListener('pointercancel', this.onPointerUp);
-    this.canvas.removeEventListener('wheel', this.onWheel);
+    this.interactionElement.removeEventListener('pointerdown', this.onPointerDown);
+    this.interactionElement.removeEventListener('pointermove', this.onPointerMove);
+    this.interactionElement.removeEventListener('pointerup', this.onPointerUp);
+    this.interactionElement.removeEventListener('pointercancel', this.onPointerUp);
+    this.interactionElement.removeEventListener('click', this.onClick, true);
+    this.interactionElement.removeEventListener('wheel', this.onWheel);
 
     const gl = this.gl;
     this.resources.destroy();
