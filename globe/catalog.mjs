@@ -11,6 +11,7 @@ const EARTH_TILE_SOURCES = [
     id: 'physical',
     label: 'Physical',
     maximumZoom: 4,
+    halfWorldLongitudeOffset: true,
     path: ({ x, y, z }) => `relief.new/${z + 3}/${y}/${x}.jpg`
   },
   {
@@ -29,12 +30,14 @@ const EARTH_TILE_SOURCES = [
     id: 'blue-marble',
     label: 'Blue Marble',
     maximumZoom: 6,
+    halfWorldLongitudeOffset: true,
     path: ({ x, y, z }) => `blue_marble/${z + 3}/${y}/${x}.jpg`
   },
   {
     id: 'night',
     label: 'Night on Earth',
     maximumZoom: 6,
+    halfWorldLongitudeOffset: true,
     path: ({ x, y, z }) => `black_marble/${z + 3}/${y}/${x}.jpg`
   }
 ];
@@ -78,6 +81,7 @@ export function tileSourceById(id) {
 export function legacyTileSourceUrl(tileBase, source, tile) {
   const base = tileBase.replace(/\/$/, '');
   const columns = 6 * 2 ** tile.z;
-  const x = ((tile.x % columns) + columns) % columns;
+  const offset = source.halfWorldLongitudeOffset ? columns / 2 : 0;
+  const x = (((tile.x + offset) % columns) + columns) % columns;
   return `${base}/${source.path({ ...tile, x })}`;
 }

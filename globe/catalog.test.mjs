@@ -26,11 +26,31 @@ test('builds each legacy tile hierarchy and wraps plate carree columns', () => {
   );
   assert.equal(
     legacyTileSourceUrl('/tiles', tileSourceById('physical'), { x: 2, y: 1, z: 3 }),
-    '/tiles/relief.new/6/1/2.jpg'
+    '/tiles/relief.new/6/1/26.jpg'
   );
   assert.equal(
     legacyTileSourceUrl('/tiles', tileSourceById('satellite'), { x: 2, y: 1, z: 3 }),
     '/tiles/mapnik/sat/3/1/1_2.png'
+  );
+});
+
+test('applies the legacy 180 degree offset only to shifted raster sources', () => {
+  const tile = { x: 1, y: 2, z: 0 };
+  assert.equal(
+    legacyTileSourceUrl('/tiles', tileSourceById('physical'), tile),
+    '/tiles/relief.new/3/2/4.jpg'
+  );
+  assert.equal(
+    legacyTileSourceUrl('/tiles', tileSourceById('blue-marble'), tile),
+    '/tiles/blue_marble/3/2/4.jpg'
+  );
+  assert.equal(
+    legacyTileSourceUrl('/tiles', tileSourceById('night'), tile),
+    '/tiles/black_marble/3/2/4.jpg'
+  );
+  assert.equal(
+    legacyTileSourceUrl('/tiles', tileSourceById('coastline'), tile),
+    '/tiles/plain/0/tile_2_1.png'
   );
 });
 
