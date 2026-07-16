@@ -2,7 +2,9 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 
 import {
+  centerSurfaceRadiansPerPixel,
   distanceAfterPinch,
+  distanceAfterZoomSteps,
   distanceAfterWheel,
   rotationDegreesPerPixel,
   selectTileZoom
@@ -65,6 +67,29 @@ test('reduces rotation sensitivity in proportion to close-up altitude', () => {
   });
   assert.ok(close < far / 100);
   assert.ok(close > 0);
+});
+
+test('reports center surface resolution in CSS pixels', () => {
+  const resolution = centerSurfaceRadiansPerPixel({
+    viewportHeight: 800,
+    distance: 3,
+    fieldOfViewRadians: baseLod.fieldOfViewRadians
+  });
+  assert.ok(Math.abs(
+    resolution - 4 * Math.tan(baseLod.fieldOfViewRadians / 2) / 800
+  ) < 1e-15);
+  assert.equal(centerSurfaceRadiansPerPixel({
+    viewportHeight: 1600,
+    distance: 3,
+    fieldOfViewRadians: baseLod.fieldOfViewRadians
+  }), resolution / 2);
+});
+
+test('button zoom steps halve or double altitude', () => {
+  assert.equal(distanceAfterZoomSteps({ distance: 3, steps: 1 }), 2);
+  assert.equal(distanceAfterZoomSteps({ distance: 3, steps: -1 }), 5);
+  assert.equal(distanceAfterZoomSteps({ distance: 1.0005, steps: 1 }), 1.0005);
+  assert.equal(distanceAfterZoomSteps({ distance: 51, steps: -1 }), 51);
 });
 
 test('zooms exponentially by altitude and supports a wide range', () => {

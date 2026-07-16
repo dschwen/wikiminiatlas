@@ -140,48 +140,82 @@ main {
   opacity: 1;
 }
 
-.title,
-#status,
-#help,
-#error {
-  position: absolute;
-  z-index: 3;
-  margin: 0;
-  border: 1px solid rgba(185, 205, 239, 0.18);
-  border-radius: 8px;
-  background: rgba(6, 12, 28, 0.76);
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.22);
-  backdrop-filter: blur(10px);
+.visually-hidden {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
 }
 
-#controls-toggle {
+.map-button {
   position: absolute;
-  z-index: 4;
-  top: 8px;
-  right: 8px;
+  z-index: 30;
   width: 18px;
   height: 18px;
   padding: 0;
   border: 0;
+  appearance: none;
   background-color: transparent;
   background-image: url('../tiles/button_sprites.png');
-  background-position: -140px 0;
+  background-repeat: no-repeat;
   cursor: pointer;
 }
 
-#controls-toggle:hover,
-#controls-toggle:focus-visible,
-#controls-toggle[aria-expanded="true"] {
+.map-button:hover,
+.map-button:focus-visible {
   outline: 1px solid #86b9ff;
   outline-offset: 1px;
   background-color: rgba(255, 255, 255, 0.18);
 }
 
+#button_plus {
+  top: 10px;
+  left: 10px;
+  background-position: -60px 0;
+}
+
+#button_minus {
+  top: 32px;
+  left: 10px;
+  background-position: -80px 0;
+}
+
+#button_target {
+  top: 54px;
+  left: 10px;
+  background-position: -20px 0;
+}
+
+#button_menu {
+  z-index: 50;
+  top: 8px;
+  right: 40px;
+  background-position: -140px 0;
+}
+
+#button_menu[aria-expanded="true"] {
+  outline: 1px solid #86b9ff;
+  outline-offset: 1px;
+  background-color: rgba(255, 255, 255, 0.18);
+}
+
+#button_fs {
+  z-index: 50;
+  top: 8px;
+  right: 62px;
+  background-position: 0 0;
+}
+
 #controls {
   position: absolute;
-  z-index: 4;
-  top: 30px;
-  right: 8px;
+  z-index: 50;
+  top: 26px;
+  right: 40px;
   display: grid;
   gap: 1px;
   min-width: 142px;
@@ -225,14 +259,53 @@ main {
   outline-offset: 0;
 }
 
+#scalebox {
+  position: absolute;
+  z-index: 30;
+  left: 20px;
+  bottom: 5px;
+  width: 90px;
+  height: 30px;
+  pointer-events: none;
+  font-family: sans-serif;
+}
+
+.scale-entry {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  height: 15px;
+}
+
+.scale-label {
+  height: 9px;
+  color: white;
+  font-size: 8px;
+  line-height: 9px;
+  text-shadow: 0 1px 2px black, 0 0 2px black;
+  white-space: nowrap;
+}
+
+.scale-bar {
+  display: block;
+  width: 50px;
+  height: 5px;
+  border: 1px solid black;
+  background: white;
+}
+
+.scale-imperial {
+  flex-direction: column-reverse;
+}
+
 #credit {
   position: absolute;
   z-index: 3;
-  right: 12px;
-  bottom: 2px;
+  right: 10px;
+  bottom: 3px;
   margin: 0;
   color: #c9d5e8;
-  font-size: 9px;
+  font-size: 7pt;
   line-height: 10px;
   text-shadow: 0 1px 2px #000;
 }
@@ -241,62 +314,19 @@ main {
   color: inherit;
 }
 
-.title {
-  top: 18px;
-  left: 18px;
-  padding: 10px 13px;
-  font-size: 15px;
-  font-weight: 650;
-  letter-spacing: 0.02em;
-}
-
-#status {
-  right: 18px;
-  bottom: 18px;
-  padding: 8px 11px;
-  color: #d8e4f8;
-  font-size: 12px;
-  font-variant-numeric: tabular-nums;
-}
-
-#help {
-  left: 18px;
-  bottom: 18px;
-  padding: 8px 11px;
-  color: #bac9e3;
-  font-size: 12px;
-}
-
 #error {
+  position: absolute;
+  z-index: 60;
   top: 50%;
   left: 50%;
   width: min(90vw, 520px);
+  margin: 0;
   padding: 18px;
+  border: 1px solid rgba(255, 108, 108, 0.45);
+  border-radius: 8px;
+  background: rgba(6, 12, 28, 0.88);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.22);
   border-color: rgba(255, 108, 108, 0.45);
   color: #ffd7d7;
   transform: translate(-50%, -50%);
-}
-
-@media (max-width: 720px) {
-  .title {
-    top: 12px;
-    left: 12px;
-    padding: 8px 10px;
-    font-size: 13px;
-  }
-
-  .title-detail {
-    display: none;
-  }
-
-  #status {
-    right: 12px;
-    bottom: 12px;
-    left: 12px;
-    text-align: center;
-  }
-
-  #help {
-    display: none;
-  }
 }

@@ -8,18 +8,28 @@ import {
 import { GlobeRenderer } from './globe-renderer.mjs';
 import { GlobeLabelLayer } from './label-layer.mjs';
 import { PlateCarreeGrid } from './plate-carree-grid.mjs';
+import { scaleBarsForCenter } from './scale-bar.mjs';
 import { readCameraState, writeCameraState } from './session-state.mjs';
 
 const canvas = document.querySelector('#globe');
 const viewport = document.querySelector('#viewport');
 const labelContainer = document.querySelector('#labels');
 const controls = document.querySelector('#controls');
-const controlsToggle = document.querySelector('#controls-toggle');
+const controlsToggle = document.querySelector('#button_menu');
+const zoomInButton = document.querySelector('#button_plus');
+const zoomOutButton = document.querySelector('#button_minus');
+const targetButton = document.querySelector('#button_target');
+const fullscreenButton = document.querySelector('#button_fs');
 const bodySetControl = document.querySelector('#body-set');
 const tileSetControl = document.querySelector('#tile-set');
 const labelSetControl = document.querySelector('#label-set');
 const status = document.querySelector('#status');
 const credit = document.querySelector('#credit');
+const scaleBox = document.querySelector('#scalebox');
+const metricScaleBar = document.querySelector('#scale-metric-bar');
+const metricScaleLabel = document.querySelector('#scale-metric-label');
+const imperialScaleBar = document.querySelector('#scale-imperial-bar');
+const imperialScaleLabel = document.querySelector('#scale-imperial-label');
 const errorPanel = document.querySelector('#error');
 const parameters = new URLSearchParams(window.location.search);
 const tileBase = parameters.get('tileBase') || '../tiles';
@@ -37,8 +47,20 @@ const initialDistance = Math.max(
   1.0005,
   Math.min(51, distanceSource)
 );
-const initialLongitude = restoredCamera ? restoredCamera.longitude : -112;
-const initialLatitude = restoredCamera ? restoredCamera.latitude : 35;
+const requestedTargetLongitude = parameters.has('lon')
+  ? Number(parameters.get('lon'))
+  : Number.NaN;
+const requestedTargetLatitude = parameters.has('lat')
+  ? Number(parameters.get('lat'))
+  : Number.NaN;
+const targetLongitude = Number.isFinite(requestedTargetLongitude)
+  ? requestedTargetLongitude
+  : -112;
+const targetLatitude = Number.isFinite(requestedTargetLatitude)
+  ? Math.max(-89, Math.min(89, requestedTargetLatitude))
+  : 35;
+const initialLongitude = restoredCamera ? restoredCamera.longitude : targetLongitude;
+const initialLatitude = restoredCamera ? restoredCamera.latitude : targetLatitude;
 let labelsEnabled = parameters.get('labels') !== '0';
 const labelBase = parameters.get('labelBase') || '../label.php';
 let labelLanguage = parameters.get('lang') || 'en';
@@ -153,6 +175,23 @@ try {
       storeCameraState();
     }, 200);
   };
+  const updateScaleBar = () => {
+    if (!globeState) {
+      return;
+    }
+    const scales = scaleBarsForCenter({
+      centerRadiansPerPixel: globeState.centerRadiansPerCssPixel,
+      equatorialCircumferenceKm: celestialBody.equatorialCircumferenceKm
+    });
+    metricScaleBar.style.width = `${scales.metric.pixels.toFixed(2)}px`;
+    metricScaleLabel.textContent = scales.metric.label;
+    imperialScaleBar.style.width = `${scales.imperial.pixels.toFixed(2)}px`;
+    imperialScaleLabel.textContent = scales.imperial.label;
+    scaleBox.setAttribute(
+      'aria-label',
+      `Map scale: ${scales.metric.label}; ${scales.imperial.label}`
+    );
+  };
   const updateStatus = () => {
     if (!globeState) {
       return;
@@ -181,6 +220,14 @@ try {
     status.textContent = compact
       ? [celestialBody.label, summary[1], summary[2], `tile z${state.zoom}`, labelSummary].join(' · ')
       : summary.join(' · ');
+    const longitudeDelta = Math.abs(
+      ((state.longitude - targetLongitude + 540) % 360) - 180
+    );
+    const centeredOnTarget = longitudeDelta < 0.001 &&
+      Math.abs(state.latitude - targetLatitude) < 0.001;
+    targetButton.style.backgroundPosition = centeredOnTarget ? '-20px 0' : '-40px 0';
+    targetButton.setAttribute('aria-pressed', String(centeredOnTarget));
+    updateScaleBar();
   };
   const labelLayer = new GlobeLabelLayer(labelContainer, {
     grid,
@@ -226,6 +273,28 @@ try {
     }
   };
   const preventControlSubmit = (event) => event.preventDefault();
+  const zoomIn = () => globe.zoomBySteps(1);
+  const zoomOut = () => globe.zoomBySteps(-1);
+  const centerOnTarget = () => globe.centerOn(targetLongitude, targetLatitude);
+  const enterFullscreen = () => {
+    if (document.fullscreenElement) {
+      document.exitFullscreen();
+      return;
+    }
+    if (document.documentElement.requestFullscreen) {
+      document.documentElement.requestFullscreen().catch(() => {});
+      return;
+    }
+    window.open(
+      window.location.href,
+      'showwin',
+      `left=0,top=0,width=${screen.width},height=${screen.height},toolbar=0,resizable=1`
+    );
+  };
+  zoomInButton.addEventListener('click', zoomIn);
+  zoomOutButton.addEventListener('click', zoomOut);
+  targetButton.addEventListener('click', centerOnTarget);
+  fullscreenButton.addEventListener('click', enterFullscreen);
   controlsToggle.addEventListener('click', toggleControls);
   controls.addEventListener('submit', preventControlSubmit);
   document.addEventListener('pointerdown', closeControlsFromOutside);
@@ -291,6 +360,10 @@ try {
     }
     globe.destroy();
     labelLayer.destroy();
+    zoomInButton.removeEventListener('click', zoomIn);
+    zoomOutButton.removeEventListener('click', zoomOut);
+    targetButton.removeEventListener('click', centerOnTarget);
+    fullscreenButton.removeEventListener('click', enterFullscreen);
     controlsToggle.removeEventListener('click', toggleControls);
     controls.removeEventListener('submit', preventControlSubmit);
     document.removeEventListener('pointerdown', closeControlsFromOutside);

@@ -1,6 +1,8 @@
 import { PlateCarreeGrid, lonLatToUnitSphere } from './plate-carree-grid.mjs';
 import {
+  centerSurfaceRadiansPerPixel,
   distanceAfterPinch,
+  distanceAfterZoomSteps,
   distanceAfterWheel,
   rotationDegreesPerPixel,
   selectTileZoom
@@ -296,6 +298,25 @@ export class GlobeRenderer {
     this.maximumLabelZoom = Math.min(maximumZoom, this.configuredMaximumLabelZoom);
     this.resources = this.createResourceManager(tileUrl);
     previousResources.destroy();
+    this.deferRefinement();
+    this.requestRender();
+  }
+
+  zoomBySteps(steps) {
+    this.distance = distanceAfterZoomSteps({
+      distance: this.distance,
+      steps
+    });
+    this.deferRefinement();
+    this.requestRender();
+  }
+
+  centerOn(longitude, latitude) {
+    if (!Number.isFinite(longitude) || !Number.isFinite(latitude)) {
+      throw new TypeError('center coordinates must be finite numbers');
+    }
+    this.longitude = longitude;
+    this.latitude = clamp(latitude, -89, 89);
     this.deferRefinement();
     this.requestRender();
   }
@@ -689,6 +710,11 @@ export class GlobeRenderer {
       viewProjection,
       viewportWidth: Math.max(1, this.canvas.clientWidth),
       viewportHeight: Math.max(1, this.canvas.clientHeight),
+      centerRadiansPerCssPixel: centerSurfaceRadiansPerPixel({
+        viewportHeight: Math.max(1, this.canvas.clientHeight),
+        distance: this.distance,
+        fieldOfViewRadians: FIELD_OF_VIEW_RADIANS
+      }),
       ...resourceStats
     });
   }

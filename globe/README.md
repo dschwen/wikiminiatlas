@@ -14,6 +14,8 @@ Implemented so far:
 - legacy label symbol styling, weight-ordered collision filtering, and accessible Wikipedia links;
 - a compact legacy-style menu for celestial body, body-specific tile set, and label language;
 - all legacy Earth, Moon, Mars, Venus, Mercury, Io, and Titan imagery and label datasets;
+- the legacy 18-pixel zoom, recenter, fullscreen, and settings button layout;
+- independent metric and imperial scale bars based on center-frame surface resolution;
 - one-finger orbit, two-finger pan/pinch, and wheel zoom controls, including gestures that begin on labels;
 - a realistic popup-sized iframe host page; and
 - a shared procedural placeholder before any ancestor imagery is available.
@@ -49,6 +51,16 @@ circumference, maximum zoom, label contrast, attribution, filename convention,
 and longitude offset. The Moon, Mars, Mercury, and Io sources that use shifted
 imagery apply their legacy 180-degree column transform before requesting tiles.
 Mercury also retains its zoom- and column-dependent directory hierarchy.
+
+The remaining controls occupy the same coordinates and sprite cells as the 2D
+map: zoom in/out and recenter are stacked at the upper left, while fullscreen
+and settings sit at the upper right. Each zoom-button step halves or doubles
+camera altitude, corresponding to one level of center-surface raster detail.
+The recenter target defaults to `35,-112` and can be set with `lat` and `lon`:
+
+```text
+http://localhost:8000/globe/?lat=43.615&lon=-116.2023
+```
 
 Labels use `../label.php`, English Wikipedia, and the Earth dataset by default.
 These settings can be changed independently, or labels can be disabled:
@@ -87,6 +99,15 @@ out, and moving their midpoint orbits the globe.
 The pointer gesture surface includes projected label links. A clean label tap
 still follows the link, while motion beyond the drag threshold or participation
 in a pinch suppresses that navigation and controls the globe instead.
+
+The scale occupies the 2D map's lower-left position. It uses the angular ground
+resolution at the center of the rendered sphere, where distortion is lowest,
+and multiplies it by the selected body's equatorial radius. Kilometre and mile
+rows independently select the largest 1/2/5 × 10ⁿ distance that fits within
+50 CSS pixels, so both remain useful rather than displaying a converted value
+with an awkward bar length. Metric values below one kilometre are shown in
+metres. The calculation is isolated in `scale-bar.mjs` so a future unit setting
+can hide either row without changing renderer math.
 
 The renderer enforces a 256-visible-patch ceiling. It keeps at most 384 raster
 textures or 32 MiB of estimated RGBA texture data, whichever limit is reached

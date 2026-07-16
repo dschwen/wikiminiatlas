@@ -72,6 +72,43 @@ export function rotationDegreesPerPixel({
 }
 
 /**
+ * Angular ground distance represented by one CSS pixel at the point directly
+ * below the camera. This is the center-of-frame tangent resolution.
+ */
+export function centerSurfaceRadiansPerPixel({
+  viewportHeight,
+  distance,
+  fieldOfViewRadians
+}) {
+  assertPositive(viewportHeight, 'viewportHeight');
+  assertPositive(distance - 1, 'camera altitude');
+  assertPositive(fieldOfViewRadians, 'fieldOfViewRadians');
+  return 2 * Math.tan(fieldOfViewRadians / 2) * (distance - 1) / viewportHeight;
+}
+
+export function distanceAfterZoomSteps({
+  distance,
+  steps,
+  minimumAltitude = 0.0005,
+  maximumAltitude = 50
+}) {
+  assertPositive(distance - 1, 'camera altitude');
+  if (!Number.isFinite(steps)) {
+    throw new TypeError('steps must be a finite number');
+  }
+  assertPositive(minimumAltitude, 'minimumAltitude');
+  assertPositive(maximumAltitude, 'maximumAltitude');
+  if (maximumAltitude < minimumAltitude) {
+    throw new RangeError('maximumAltitude must not be less than minimumAltitude');
+  }
+  return 1 + clamp(
+    (distance - 1) * 2 ** (-steps),
+    minimumAltitude,
+    maximumAltitude
+  );
+}
+
+/**
  * Wheel zoom is exponential in altitude above the surface. Scaling distance
  * from the planet center would become uncontrollable as distance approaches 1.
  */
