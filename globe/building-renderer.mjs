@@ -17,7 +17,7 @@ const FRAGMENT_SHADER = `
 
   void main() {
     vec3 color = vec3(0.78, 0.74, 0.70) * v_light;
-    gl_FragColor = vec4(color, 1.0);
+    gl_FragColor = vec4(color, 0.82);
   }
 `;
 
@@ -95,6 +95,8 @@ export class BuildingRenderer {
     if (resources.length === 0) return;
     const gl = this.gl;
     gl.useProgram(this.program);
+    gl.enable(gl.BLEND);
+    gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
     gl.uniformMatrix4fv(this.locations.viewProjection, false, viewProjection);
     gl.enableVertexAttribArray(this.locations.position);
     gl.enableVertexAttribArray(this.locations.normal);
@@ -105,6 +107,7 @@ export class BuildingRenderer {
       gl.vertexAttribPointer(this.locations.normal, 3, gl.FLOAT, false, 0, 0);
       gl.drawArrays(gl.TRIANGLES, 0, resource.vertexCount);
     }
+    gl.disable(gl.BLEND);
   }
 
   destroy() {

@@ -176,6 +176,29 @@ export function legacyRasterTileUrl(tileBase, { x, y, z }) {
   return `${base}/mapnik/${z}/tile_${y}_${x}.png`;
 }
 
+export function collectBuildingResources(draws) {
+  const entries = new Map();
+  for (const { resolved } of draws) {
+    if (resolved && resolved.entry.auxiliary) {
+      entries.set(resolved.entry.key, resolved.entry);
+    }
+  }
+  const selected = [];
+  const ordered = [...entries.values()].sort(
+    (first, second) => first.tile.z - second.tile.z
+  );
+  for (const entry of ordered) {
+    const coveredByAncestor = selected.some((ancestor) => {
+      if (ancestor.tile.z >= entry.tile.z) return false;
+      const divisor = 2 ** (entry.tile.z - ancestor.tile.z);
+      return Math.floor(entry.tile.x / divisor) === ancestor.tile.x &&
+        Math.floor(entry.tile.y / divisor) === ancestor.tile.y;
+    });
+    if (!coveredByAncestor) selected.push(entry);
+  }
+  return selected.map((entry) => entry.auxiliary);
+}
+
 export class GlobeRenderer {
   constructor(canvas, {
     grid = new PlateCarreeGrid(),
@@ -188,7 +211,7 @@ export class GlobeRenderer {
     maximumConcurrentRequests = 12,
     maximumResidentTextures = 384,
     maximumTextureBytes = 32 * 1024 * 1024,
-    maximumBuildingBytes = 16 * 1024 * 1024,
+    maximumBuildingBytes = 32 * 1024 * 1024,
     maximumLabelZoom = 13,
     maximumLabelTiles = 128,
     refinementDelayMilliseconds = 120,
@@ -638,7 +661,6 @@ export class GlobeRenderer {
     let readyCount = 0;
     let fallbackCount = 0;
     let placeholderCount = 0;
-    const buildingResources = new Map();
     for (const tile of tiles) {
       let resolved = this.resources.resolve(tile);
       const ancestry = ancestorsFromRoot(tile);
@@ -665,12 +687,12 @@ export class GlobeRenderer {
         fallbackCount += 1;
       } else {
         readyCount += 1;
-        if (resolved.entry.auxiliary) {
-          buildingResources.set(resolved.entry.key, resolved.entry.auxiliary);
-        }
       }
       draws.push({ tile, resolved });
     }
+    // Keep the closest ready building mesh visible while a more detailed
+    // surface tile is loading, just as we do for its texture.
+    const buildingResources = collectBuildingResources(draws);
 
     gl.viewport(0, 0, this.canvas.width, this.canvas.height);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
@@ -704,7 +726,7 @@ export class GlobeRenderer {
       gl.uniform2f(this.locations.uvScale, transform.scaleX, transform.scaleY);
       gl.drawElements(gl.TRIANGLES, mesh.indexCount, gl.UNSIGNED_SHORT, 0);
     }
-    this.buildingRenderer.draw([...buildingResources.values()], viewProjection);
+    this.buildingRenderer.draw(buildingResources, viewProjection);
     this.resources.endFrame();
     const resourceStats = this.resources.stats();
 
@@ -721,8 +743,8 @@ export class GlobeRenderer {
       fallbackTiles: fallbackCount,
       placeholderTiles: placeholderCount,
       drawCalls: draws.length,
-      buildingDrawCalls: buildingResources.size,
-      visibleBuildings: [...buildingResources.values()].reduce(
+      buildingDrawCalls: buildingResources.length,
+      visibleBuildings: buildingResources.reduce(
         (total, resource) => total + resource.buildingCount,
         0
       ),

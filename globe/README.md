@@ -107,14 +107,17 @@ index receive one client-side. While a JSON tile loads or fails validation, the
 existing nearest-ancestor texture remains visible.
 
 JSON building polygons with `height` or `building:levels` are rendered as
-tile-owned WebGL geometry. Meter, foot/inch, minimum-height, flat, pyramidal,
+tile-owned WebGL geometry and are excluded from the Canvas 2D surface texture.
+Meter, foot/inch, minimum-height, flat, pyramidal,
 and rectangular gabled-roof metadata follow the legacy renderer. Buildings are
 assigned to the tile containing their centroid so padded server responses do
-not duplicate geometry at tile boundaries. Each tile is capped at 4,000
-building triangles and the globe enforces a hard 16 MiB building-buffer budget
+not duplicate geometry at tile boundaries. Each tile is capped at 1,600
+building triangles and the globe enforces a hard 32 MiB building-buffer budget
 separately from its 32 MiB texture budget. Eviction, map/body switching, and
 renderer teardown delete the associated GPU buffers; there is no append-only
-global building buffer.
+global building buffer. The per-tile cap is sized so all 256 possible visible
+leaf tiles fit inside the building budget; older off-screen meshes are therefore
+discarded before a current mesh, avoiding budget-driven flicker.
 
 The default maximum detail is now zoom 17 for the JSON-capable full basemap.
 The existing `maxZoom` URL parameter can request up to zoom 20. Other map sets

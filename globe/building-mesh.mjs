@@ -1,7 +1,7 @@
 import { lonLatToUnitSphere } from './plate-carree-grid.mjs';
 
 const EARTH_RADIUS_METERS = 6378137;
-const DEFAULT_MAXIMUM_TRIANGLES = 4000;
+const DEFAULT_MAXIMUM_TRIANGLES = 1600;
 
 function parseNumber(value) {
   const number = Number(value);

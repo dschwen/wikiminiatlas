@@ -5,21 +5,19 @@ const DEFAULT_MAXIMUM_FEATURES = 20000;
 const DEFAULT_MAXIMUM_COORDINATES = 500000;
 
 const POLYGON_RULES = [
-  [['natural', 'land_polygons'], { fill: '#fafad0' }],
-  [['landuse', ['industrial', 'retail', 'commercial', 'residential']], { fill: '#d0d0d0' }],
-  [['landuse', ['reservoir']], { fill: '#9ec7f3' }],
-  [['landuse', ['military', 'railway']], { fill: '#e0c8c8' }],
-  [['landuse', ['cemetery', 'recreation_ground', 'grass']], { fill: '#bed6be' }],
-  [['leisure', ['park', 'garden', 'meadow', 'village_green', 'golf_course', 'pitch']], { fill: '#c8e0c8' }],
-  [['leisure', ['swimming_pool']], { fill: '#c8c8e0' }],
-  [['natural', ['water', 'bay', 'wetland', 'mud']], { fill: '#9ec7f3', stroke: '#9ec7f3' }],
-  [['natural', ['wood', 'scrub']], { fill: '#96d696' }],
-  [['natural', ['beach', 'sand']], { fill: '#faf2af' }],
-  [['natural', ['glacier']], { fill: '#e6f5ff', stroke: '#fff' }],
-  [['amenity', ['parking']], { fill: '#f0ebc1' }],
-  [['aeroway', ['terminal']], { fill: '#bed2be', stroke: '#7f897f' }],
-  [['building', true], { fill: '#d9d0c8', stroke: '#aaa09a' }],
-  [['building:part', true], { fill: '#d9d0c8', stroke: '#aaa09a' }]
+  [['natural', 'land_polygons'], { order: 0, fill: '#fafad0' }],
+  [['natural', ['water', 'bay', 'wetland', 'mud']], { order: 10, fill: '#9ec7f3', stroke: '#9ec7f3' }],
+  [['natural', ['wood', 'scrub']], { order: 20, fill: '#96d696' }],
+  [['natural', ['beach', 'sand']], { order: 20, fill: '#faf2af' }],
+  [['natural', ['glacier']], { order: 20, fill: '#e6f5ff', stroke: '#fff' }],
+  [['landuse', ['industrial', 'retail', 'commercial', 'residential']], { order: 30, fill: '#d0d0d0' }],
+  [['landuse', ['reservoir']], { order: 30, fill: '#9ec7f3' }],
+  [['landuse', ['military', 'railway']], { order: 30, fill: '#e0c8c8' }],
+  [['landuse', ['cemetery', 'recreation_ground', 'grass']], { order: 30, fill: '#bed6be' }],
+  [['leisure', ['park', 'garden', 'meadow', 'village_green', 'golf_course', 'pitch']], { order: 40, fill: '#c8e0c8' }],
+  [['leisure', ['swimming_pool']], { order: 40, fill: '#c8c8e0' }],
+  [['amenity', ['parking']], { order: 50, fill: '#f0ebc1' }],
+  [['aeroway', ['terminal']], { order: 50, fill: '#bed2be', stroke: '#7f897f' }]
 ];
 
 const LINE_RULES = [
@@ -209,24 +207,37 @@ export function renderJsonTile(tileData, {
     if (close) context.closePath();
   };
 
+  const polygonDraws = [];
   for (const feature of tileData.data) {
+    // Buildings are an independent 3D resource. Keeping their footprints out
+    // of the canvas avoids duplicating them and lets the surface imagery below
+    // remain visible through translucent building geometry.
+    if ('building' in feature.tags || 'building:part' in feature.tags) continue;
     const polygonStyle = matchingStyle(feature.tags, POLYGON_RULES);
     if (polygonStyle) {
       for (const polygon of geometryParts(feature.geo, 'polygon')) {
-        context.beginPath();
-        for (const ring of polygon) traceLine(ring, true);
-        if (polygonStyle.fill) {
-          context.fillStyle = polygonStyle.fill;
-          context.fill('evenodd');
-        }
-        if (polygonStyle.stroke) {
-          context.strokeStyle = polygonStyle.stroke;
-          context.lineWidth = lineWidthMultiplier;
-          context.stroke();
-        }
+        polygonDraws.push({ polygon, style: polygonStyle });
       }
     }
+  }
+  polygonDraws.sort((first, second) => first.style.order - second.style.order);
+  for (const { polygon, style } of polygonDraws) {
+    context.beginPath();
+    for (const ring of polygon) traceLine(ring, true);
+    if (style.fill) {
+      context.fillStyle = style.fill;
+      context.fill('evenodd');
+    }
+    if (style.stroke) {
+      context.strokeStyle = style.stroke;
+      context.lineWidth = lineWidthMultiplier;
+      context.stroke();
+    }
+  }
 
+  // Roads, rails, waterways, and barriers always paint above polygon fills.
+  // The server does not promise feature ordering, so this must be a separate pass.
+  for (const feature of tileData.data) {
     const lineStyle = matchingStyle(feature.tags, LINE_RULES);
     if (lineStyle) {
       context.beginPath();
@@ -247,7 +258,7 @@ export function createJsonTileProducer({
   tileSize = 128,
   createCanvas,
   buildingFromZoom = 14,
-  maximumBuildingTriangles = 4000,
+  maximumBuildingTriangles = 1600,
   maximumResponseBytes = DEFAULT_MAXIMUM_RESPONSE_BYTES
 } = {}) {
   return async (tile, url, signal) => {

@@ -55,7 +55,7 @@ export class TileResourceManager {
     maximumConcurrentRequests = 12,
     maximumResidentTextures = 384,
     maximumTextureBytes = 32 * 1024 * 1024,
-    maximumAuxiliaryBytes = 16 * 1024 * 1024,
+    maximumAuxiliaryBytes = 32 * 1024 * 1024,
     maximumEntries = 1536,
     cancellationGraceFrames = 2,
     retryDelayMilliseconds = 30000

@@ -72,7 +72,7 @@ test('renders GeoJSON into a canvas texture source', () => {
   });
   const canvas = { width: 0, height: 0, getContext: () => context };
   const data = validateJsonTile(payload([
-    polygonFeature(),
+    polygonFeature({ natural: 'water' }),
     {
       tags: { highway: 'primary' },
       geo: { type: 'LineString', coordinates: [[180, 45], [180.005, 44.995]] }
@@ -86,6 +86,66 @@ test('renders GeoJSON into a canvas texture source', () => {
   assert.ok(calls.some(([name, rule]) => name === 'fill' && rule === 'evenodd'));
   assert.ok(calls.some(([name]) => name === 'stroke'));
   assert.ok(calls.some(([name]) => name === 'lineTo'));
+});
+
+test('renders streets after land polygons regardless of server feature order', () => {
+  const calls = [];
+  const context = new Proxy({}, {
+    get(target, property) {
+      if (!(property in target)) {
+        target[property] = (...args) => calls.push([property, ...args]);
+      }
+      return target[property];
+    },
+    set(target, property, value) {
+      calls.push([`set:${property}`, value]);
+      target[property] = value;
+      return true;
+    }
+  });
+  const canvas = { width: 0, height: 0, getContext: () => context };
+  const data = validateJsonTile(payload([
+    {
+      tags: { highway: 'primary' },
+      geo: { type: 'LineString', coordinates: [[180, 45], [180.005, 44.995]] }
+    },
+    polygonFeature({ natural: 'land_polygons' })
+  ]), requestedTile);
+  renderJsonTile(data, { createCanvas: () => canvas });
+
+  const landFill = calls.findIndex(([name, value]) =>
+    name === 'set:fillStyle' && value === '#fafad0'
+  );
+  const roadStroke = calls.findIndex(([name, value]) =>
+    name === 'set:strokeStyle' && value === '#e5ad75'
+  );
+  assert.ok(landFill >= 0);
+  assert.ok(roadStroke > landFill);
+});
+
+test('keeps building features out of the JSON canvas texture', () => {
+  const calls = [];
+  const context = new Proxy({}, {
+    get(target, property) {
+      if (!(property in target)) {
+        target[property] = (...args) => calls.push([property, ...args]);
+      }
+      return target[property];
+    },
+    set(target, property, value) {
+      calls.push([`set:${property}`, value]);
+      target[property] = value;
+      return true;
+    }
+  });
+  const canvas = { width: 0, height: 0, getContext: () => context };
+  const data = validateJsonTile(payload([
+    polygonFeature({ building: 'yes', height: '12' })
+  ]), requestedTile);
+  renderJsonTile(data, { createCanvas: () => canvas });
+
+  assert.equal(calls.filter(([name]) => name === 'fill').length, 0);
+  assert.equal(calls.filter(([name]) => name === 'stroke').length, 0);
 });
 
 test('fetches, validates, and renders through a cancellable producer', async () => {

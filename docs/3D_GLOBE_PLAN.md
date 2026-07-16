@@ -42,7 +42,7 @@ Plate carrée is a data parameterization and spatial index in the new system. Th
 
 The current safety limits are 256 visible leaf patches, 12 concurrent tile
 loads, 384 resident textures, 32 MiB of estimated RGBA texture data, and a hard
-16 MiB of building buffers. A leaf
+32 MiB of building buffers. A leaf
 requests only the next missing level in its ancestry. Consequently, coarse imagery
 appears first and progressively sharpens without displaying an uninitialized tile.
 
@@ -89,10 +89,12 @@ appears first and progressively sharpens without displaying an uninitialized til
   layer/bridge/tunnel ordering, then bounded feature picking.
 - Render height-bearing buildings with radial height and GPU ownership tied to
   their JSON tile. (Initial flat, pyramidal, and rectangular gabled-roof slice
-  complete.) The centroid-owning tile removes duplicates caused by padded JSON
+  complete.) Building features are excluded from the Canvas 2D texture so the
+  WebGL mesh is their only rendering path. The centroid-owning tile removes duplicates caused by padded JSON
   responses. Tile eviction, source switching, and teardown delete its buffers;
-  a 4,000-triangle per-tile cap and hard 16 MiB global building budget prevent
-  the legacy append-only memory growth.
+  a 1,600-triangle per-tile cap and hard 32 MiB global building budget prevent
+  the legacy append-only memory growth. The caps guarantee that every possible
+  visible leaf can retain its mesh, avoiding eviction churn while moving.
 - Preserve article and size-comparison overlays as globe-surface geometry.
 
 Acceptance criteria for the JSON-texture slice:
