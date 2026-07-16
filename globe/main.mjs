@@ -47,7 +47,7 @@ const jsonTileBase = parameters.get('jsonTileBase') || '../tiles/jsontile.php';
 const requestedMaximumZoom = Number(parameters.get('maxZoom'));
 const configuredMaximumZoom = parameters.has('maxZoom') && Number.isInteger(requestedMaximumZoom)
   ? Math.max(0, Math.min(20, requestedMaximumZoom))
-  : 15;
+  : 17;
 const restoredCamera = readCameraState(window.history.state);
 const distanceSource = restoredCamera ? restoredCamera.distance : urlConfiguration.distance;
 const initialDistance = Math.max(
@@ -232,7 +232,9 @@ try {
       tileSummary,
       `${state.frontTilePixels.toFixed(0)} px/tile`,
       `${state.readyTiles} exact + ${state.fallbackTiles} parent + ${state.placeholderTiles} blank`,
-      `${state.residentTextures} textures (${residentMiB.toFixed(1)} MiB)`,
+      `${state.residentTextures} textures + ${state.residentAuxiliary} building meshes ` +
+        `(${residentMiB.toFixed(1)} MiB)`,
+      `${state.visibleBuildings} buildings`,
       `${state.inFlight} loading${state.tileBudgetLimited ? ' · tile budget reached' : ''}`,
       labelSummary
     ];

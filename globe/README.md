@@ -15,6 +15,7 @@ Implemented so far:
 - a compact legacy-style menu for celestial body, body-specific tile set, and label language;
 - all legacy Earth, Moon, Mars, Venus, Mercury, Io, and Titan imagery and label datasets;
 - client-rendered JSON surface tiles for the Earth full basemap above zoom 12;
+- height-bearing OSM buildings extruded radially from JSON tiles at zoom 14+;
 - the legacy 18-pixel zoom, recenter, fullscreen, and settings button layout;
 - independent metric and imperial scale bars based on center-frame surface resolution;
 - one-finger orbit, two-finger pan/pinch, and wheel zoom controls, including gestures that begin on labels;
@@ -104,6 +105,20 @@ leaves the desired tile generation. Responses are capped at 2 MiB, 20,000
 features, and 500,000 coordinates. Older responses without a server-side tag
 index receive one client-side. While a JSON tile loads or fails validation, the
 existing nearest-ancestor texture remains visible.
+
+JSON building polygons with `height` or `building:levels` are rendered as
+tile-owned WebGL geometry. Meter, foot/inch, minimum-height, flat, pyramidal,
+and rectangular gabled-roof metadata follow the legacy renderer. Buildings are
+assigned to the tile containing their centroid so padded server responses do
+not duplicate geometry at tile boundaries. Each tile is capped at 4,000
+building triangles and the globe enforces a hard 16 MiB building-buffer budget
+separately from its 32 MiB texture budget. Eviction, map/body switching, and
+renderer teardown delete the associated GPU buffers; there is no append-only
+global building buffer.
+
+The default maximum detail is now zoom 17 for the JSON-capable full basemap.
+The existing `maxZoom` URL parameter can request up to zoom 20. Other map sets
+remain constrained by their catalog maximums.
 
 Run the coordinate tests with:
 

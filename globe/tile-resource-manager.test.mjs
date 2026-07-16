@@ -188,3 +188,54 @@ test('aborts asynchronous producers that leave the desired generation', async ()
   assert.equal(manager.stats().inFlight, 0);
   assert.equal(manager.entries.get('0/0/0').status, 'idle');
 });
+
+test('accounts for and deletes tile-owned auxiliary GPU resources', async () => {
+  const deleted = [];
+  const { manager } = makeHarness({
+    maximumResidentTextures: 1,
+    maximumTextureBytes: Infinity,
+    tileProducer: async () => ({
+      source: { width: 128, height: 128 },
+      auxiliary: { vertexCount: 30 }
+    }),
+    uploadAuxiliary: (mesh) => ({ ...mesh, bytes: 720 }),
+    deleteAuxiliary: (resource) => deleted.push(resource)
+  });
+
+  manager.beginFrame();
+  manager.demand({ x: 0, y: 0, z: 0 });
+  manager.demand({ x: 1, y: 0, z: 0 });
+  manager.endFrame();
+  await new Promise((resolve) => setImmediate(resolve));
+
+  assert.equal(manager.stats().residentTextures, 1);
+  assert.equal(manager.stats().residentAuxiliary, 1);
+  assert.equal(manager.stats().residentAuxiliaryBytes, 720);
+  assert.equal(deleted.length, 1);
+
+  manager.destroy();
+  assert.equal(deleted.length, 2);
+});
+
+test('enforces the auxiliary budget even for currently pinned surface tiles', async () => {
+  const deleted = [];
+  const { gl, manager } = makeHarness({
+    maximumAuxiliaryBytes: 1000,
+    tileProducer: async () => ({
+      source: { width: 128, height: 128 },
+      auxiliary: { vertexCount: 30 }
+    }),
+    uploadAuxiliary: (mesh) => ({ ...mesh, bytes: 720 }),
+    deleteAuxiliary: (resource) => deleted.push(resource)
+  });
+  manager.beginFrame();
+  manager.demand({ x: 0, y: 0, z: 0 }, { pin: true });
+  manager.demand({ x: 1, y: 0, z: 0 }, { pin: true });
+  manager.endFrame();
+  await new Promise((resolve) => setImmediate(resolve));
+
+  assert.ok(manager.stats().residentAuxiliaryBytes <= 1000);
+  assert.equal(manager.stats().residentTextures, 2);
+  assert.equal(gl.deleted.length, 0);
+  assert.equal(deleted.length, 1);
+});

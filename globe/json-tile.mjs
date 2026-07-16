@@ -1,3 +1,5 @@
+import { buildBuildingMesh } from './building-mesh.mjs';
+
 const DEFAULT_MAXIMUM_RESPONSE_BYTES = 2 * 1024 * 1024;
 const DEFAULT_MAXIMUM_FEATURES = 20000;
 const DEFAULT_MAXIMUM_COORDINATES = 500000;
@@ -244,6 +246,8 @@ export function createJsonTileProducer({
   fetchImpl = (...args) => fetch(...args),
   tileSize = 128,
   createCanvas,
+  buildingFromZoom = 14,
+  maximumBuildingTriangles = 4000,
   maximumResponseBytes = DEFAULT_MAXIMUM_RESPONSE_BYTES
 } = {}) {
   return async (tile, url, signal) => {
@@ -264,7 +268,15 @@ export function createJsonTileProducer({
       throw new RangeError('JSON tile response is too large');
     }
     const data = validateJsonTile(JSON.parse(text), tile);
-    return renderJsonTile(data, { tileSize, createCanvas });
+    const source = renderJsonTile(data, { tileSize, createCanvas });
+    return tile.z >= buildingFromZoom
+      ? {
+          source,
+          auxiliary: buildBuildingMesh(data, {
+            maximumTriangles: maximumBuildingTriangles
+          })
+        }
+      : source;
   };
 }
 

@@ -40,8 +40,9 @@ Plate carrée is a data parameterization and spatial index in the new system. Th
 - Eliminate mixed-level z-fighting by drawing each leaf once with an ancestor UV transform. (Complete.)
 - Remove any remaining subpixel cracks between differently tessellated neighboring levels.
 
-The current safety limits are 256 visible leaf patches, 12 concurrent image
-loads, 384 resident textures, and 32 MiB of estimated RGBA texture data. A leaf
+The current safety limits are 256 visible leaf patches, 12 concurrent tile
+loads, 384 resident textures, 32 MiB of estimated RGBA texture data, and a hard
+16 MiB of building buffers. A leaf
 requests only the next missing level in its ancestry. Consequently, coarse imagery
 appears first and progressively sharpens without displaying an uninitialized tile.
 
@@ -86,9 +87,12 @@ appears first and progressively sharpens without displaying an uninitialized til
   response size before drawing. (Complete for the initial contract.)
 - First slice: 2D surface styling only. Follow with polygon holes and correct
   layer/bridge/tunnel ordering, then bounded feature picking.
-- Later building slice: render buildings in a tile-local east/north/up frame
-  with radial height and GPU ownership tied to visible tiles. Do not port the
-  append-only global buffers.
+- Render height-bearing buildings with radial height and GPU ownership tied to
+  their JSON tile. (Initial flat, pyramidal, and rectangular gabled-roof slice
+  complete.) The centroid-owning tile removes duplicates caused by padded JSON
+  responses. Tile eviction, source switching, and teardown delete its buffers;
+  a 4,000-triangle per-tile cap and hard 16 MiB global building budget prevent
+  the legacy append-only memory growth.
 - Preserve article and size-comparison overlays as globe-surface geometry.
 
 Acceptance criteria for the JSON-texture slice:
@@ -103,7 +107,9 @@ Acceptance criteria for the JSON-texture slice:
 The current slice passes these pipeline criteria with fixture and browser tests.
 The style set covers the principal land, water, land-use, building, road,
 railway, aeroway, and barrier categories. Exact style parity, interactive vector
-feature picking, buildings, and geometry overlays remain follow-up work.
+feature picking, richer roof shapes/materials, and geometry overlays remain
+follow-up work. The JSON-capable basemap now defaults to zoom 17, while legacy
+raster sources retain their catalog limits.
 
 ### 5. Legacy integration
 

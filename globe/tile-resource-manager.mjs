@@ -46,6 +46,8 @@ export class TileResourceManager {
     tileKey,
     tileUrl,
     tileProducer = null,
+    uploadAuxiliary = () => null,
+    deleteAuxiliary = () => {},
     tileSize = 128,
     createImage = () => new Image(),
     now = () => performance.now(),
@@ -53,6 +55,7 @@ export class TileResourceManager {
     maximumConcurrentRequests = 12,
     maximumResidentTextures = 384,
     maximumTextureBytes = 32 * 1024 * 1024,
+    maximumAuxiliaryBytes = 16 * 1024 * 1024,
     maximumEntries = 1536,
     cancellationGraceFrames = 2,
     retryDelayMilliseconds = 30000
@@ -61,6 +64,8 @@ export class TileResourceManager {
     this.tileKey = tileKey;
     this.tileUrl = tileUrl;
     this.tileProducer = tileProducer;
+    this.uploadAuxiliary = uploadAuxiliary;
+    this.deleteAuxiliary = deleteAuxiliary;
     this.tileSize = tileSize;
     this.createImage = createImage;
     this.now = now;
@@ -68,6 +73,7 @@ export class TileResourceManager {
     this.maximumConcurrentRequests = maximumConcurrentRequests;
     this.maximumResidentTextures = maximumResidentTextures;
     this.maximumTextureBytes = maximumTextureBytes;
+    this.maximumAuxiliaryBytes = maximumAuxiliaryBytes;
     this.maximumEntries = maximumEntries;
     this.cancellationGraceFrames = cancellationGraceFrames;
     this.retryDelayMilliseconds = retryDelayMilliseconds;
@@ -94,6 +100,9 @@ export class TileResourceManager {
         texture: null,
         image: null,
         controller: null,
+        auxiliary: null,
+        auxiliaryBytes: 0,
+        textureBytes: 0,
         bytes: 0,
         priority: -Infinity,
         lastDemandFrame: -Infinity,
@@ -235,11 +244,13 @@ export class TileResourceManager {
 
     Promise.resolve()
       .then(() => this.tileProducer(entry.tile, entry.url, controller.signal))
-      .then((source) => this.finishProduced(entry, source, token, controller))
+      .then((result) => this.finishProduced(entry, result, token, controller))
       .catch((error) => this.failProduced(entry, error, token, controller));
   }
 
-  finishProduced(entry, source, token, controller) {
+  finishProduced(entry, result, token, controller) {
+    const source = result && result.source ? result.source : result;
+    const auxiliary = result && result.source ? result.auxiliary : null;
     if (
       this.destroyed || entry.token !== token ||
       entry.controller !== controller || controller.signal.aborted
@@ -249,7 +260,7 @@ export class TileResourceManager {
       }
       return;
     }
-    this.uploadSource(entry, source);
+    this.uploadSource(entry, source, auxiliary);
     entry.controller = null;
     this.inFlight -= 1;
     if (source && typeof source.close === 'function') {
@@ -289,7 +300,7 @@ export class TileResourceManager {
     this.pump();
   }
 
-  uploadSource(entry, source) {
+  uploadSource(entry, source, auxiliary = null) {
     if (!source) {
       throw new TypeError('tile producer returned no texture source');
     }
@@ -305,8 +316,13 @@ export class TileResourceManager {
       gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false);
       gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, source);
       entry.texture = texture;
-      entry.bytes = (source.naturalWidth || source.width || this.tileSize) *
+      entry.textureBytes = (source.naturalWidth || source.width || this.tileSize) *
         (source.naturalHeight || source.height || this.tileSize) * 4;
+      entry.auxiliary = auxiliary ? this.uploadAuxiliary(auxiliary, entry.tile) : null;
+      entry.auxiliaryBytes = entry.auxiliary && Number.isFinite(entry.auxiliary.bytes)
+        ? entry.auxiliary.bytes
+        : 0;
+      entry.bytes = entry.textureBytes + entry.auxiliaryBytes;
       entry.status = 'ready';
       entry.error = null;
       entry.lastUsedFrame = this.frame;
@@ -314,6 +330,14 @@ export class TileResourceManager {
       if (texture) {
         gl.deleteTexture(texture);
       }
+      entry.texture = null;
+      if (entry.auxiliary) {
+        this.deleteAuxiliary(entry.auxiliary);
+        entry.auxiliary = null;
+      }
+      entry.textureBytes = 0;
+      entry.auxiliaryBytes = 0;
+      entry.bytes = 0;
       entry.status = 'error';
       entry.error = error;
       entry.retryAt = this.now() + this.retryDelayMilliseconds;
@@ -370,29 +394,36 @@ export class TileResourceManager {
 
   enforceBudget() {
     let resident = [...this.entries.values()].filter((entry) => entry.status === 'ready');
-    let bytes = resident.reduce((total, entry) => total + entry.bytes, 0);
+    let bytes = resident.reduce((total, entry) => total + entry.textureBytes, 0);
     if (
-      resident.length <= this.maximumResidentTextures &&
-      bytes <= this.maximumTextureBytes
+      resident.length > this.maximumResidentTextures ||
+      bytes > this.maximumTextureBytes
     ) {
-      return;
+      resident = resident
+        .filter((entry) => entry.pinnedFrame !== this.frame)
+        .sort((a, b) => a.lastUsedFrame - b.lastUsedFrame);
+      for (const entry of resident) {
+        if (
+          this.residentTextureCount() <= this.maximumResidentTextures &&
+          this.residentTextureBytes() <= this.maximumTextureBytes
+        ) {
+          break;
+        }
+        this.releaseResident(entry);
+      }
     }
 
-    resident = resident
-      .filter((entry) => entry.pinnedFrame !== this.frame)
-      .sort((a, b) => a.lastUsedFrame - b.lastUsedFrame);
-    for (const entry of resident) {
-      if (
-        this.residentTextureCount() <= this.maximumResidentTextures &&
-        this.residentTextureBytes() <= this.maximumTextureBytes
-      ) {
-        break;
-      }
-      this.gl.deleteTexture(entry.texture);
-      entry.texture = null;
-      entry.bytes = 0;
-      entry.status = 'idle';
-      entry.priority = -Infinity;
+    if (this.residentAuxiliaryBytes() <= this.maximumAuxiliaryBytes) return;
+    const auxiliaryEntries = [...this.entries.values()]
+      .filter((entry) => entry.status === 'ready' && entry.auxiliary)
+      .sort((first, second) => {
+        const firstPinned = first.pinnedFrame === this.frame ? 1 : 0;
+        const secondPinned = second.pinnedFrame === this.frame ? 1 : 0;
+        return firstPinned - secondPinned || first.lastUsedFrame - second.lastUsedFrame;
+      });
+    for (const entry of auxiliaryEntries) {
+      if (this.residentAuxiliaryBytes() <= this.maximumAuxiliaryBytes) break;
+      this.releaseAuxiliary(entry);
     }
   }
 
@@ -430,10 +461,43 @@ export class TileResourceManager {
     let bytes = 0;
     for (const entry of this.entries.values()) {
       if (entry.status === 'ready') {
-        bytes += entry.bytes;
+        bytes += entry.textureBytes;
       }
     }
     return bytes;
+  }
+
+  residentAuxiliaryCount() {
+    let count = 0;
+    for (const entry of this.entries.values()) {
+      if (entry.status === 'ready' && entry.auxiliary) count += 1;
+    }
+    return count;
+  }
+
+  residentAuxiliaryBytes() {
+    let bytes = 0;
+    for (const entry of this.entries.values()) {
+      if (entry.status === 'ready') bytes += entry.auxiliaryBytes;
+    }
+    return bytes;
+  }
+
+  releaseResident(entry) {
+    if (entry.texture) this.gl.deleteTexture(entry.texture);
+    this.releaseAuxiliary(entry);
+    entry.texture = null;
+    entry.textureBytes = 0;
+    entry.bytes = 0;
+    entry.status = 'idle';
+    entry.priority = -Infinity;
+  }
+
+  releaseAuxiliary(entry) {
+    if (entry.auxiliary) this.deleteAuxiliary(entry.auxiliary);
+    entry.auxiliary = null;
+    entry.bytes -= entry.auxiliaryBytes;
+    entry.auxiliaryBytes = 0;
   }
 
   stats() {
@@ -442,7 +506,9 @@ export class TileResourceManager {
       queued: this.queue.size,
       inFlight: this.inFlight,
       residentTextures: this.residentTextureCount(),
-      residentBytes: this.residentTextureBytes()
+      residentBytes: this.residentTextureBytes() + this.residentAuxiliaryBytes(),
+      residentAuxiliary: this.residentAuxiliaryCount(),
+      residentAuxiliaryBytes: this.residentAuxiliaryBytes()
     };
   }
 
@@ -452,9 +518,7 @@ export class TileResourceManager {
       if (entry.status === 'loading') {
         this.cancelLoading(entry);
       }
-      if (entry.texture) {
-        this.gl.deleteTexture(entry.texture);
-      }
+      if (entry.texture || entry.auxiliary) this.releaseResident(entry);
     }
     this.queue.clear();
     this.entries.clear();

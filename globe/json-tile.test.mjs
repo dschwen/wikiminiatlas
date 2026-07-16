@@ -120,6 +120,46 @@ test('fetches, validates, and renders through a cancellable producer', async () 
   assert.equal(requests[0].options.credentials, 'same-origin');
 });
 
+test('returns bounded building geometry with detailed JSON textures', async () => {
+  const detailedTile = { x: 2730, y: 10922, z: 14 };
+  const detailedPayload = {
+    x: detailedTile.x,
+    y: detailedTile.y,
+    z: detailedTile.z,
+    v: 2,
+    idx: { building: [0], height: [0] },
+    data: [{
+      tags: { building: 'yes', height: '12' },
+      geo: {
+        type: 'Polygon',
+        coordinates: [[
+          [10.0005, 49.9995], [10.001, 49.9995],
+          [10.001, 49.999], [10.0005, 49.9995]
+        ]]
+      }
+    }]
+  };
+  const canvas = {
+    width: 0,
+    height: 0,
+    getContext: () => ({
+      fillRect() {}, beginPath() {}, moveTo() {}, lineTo() {}, closePath() {},
+      fill() {}, stroke() {}, setLineDash() {}
+    })
+  };
+  const producer = createJsonTileProducer({
+    fetchImpl: async () => ({
+      ok: true,
+      headers: { get: () => null },
+      text: async () => JSON.stringify(detailedPayload)
+    }),
+    createCanvas: () => canvas
+  });
+  const result = await producer(detailedTile, '/json', new AbortController().signal);
+  assert.equal(result.source, canvas);
+  assert.ok(result.auxiliary.vertexCount > 0);
+});
+
 test('builds JSON service URLs without string concatenation', () => {
   assert.equal(
     jsonTileUrl('/tiles/jsontile.php', { x: 4, y: 5, z: 13 }),

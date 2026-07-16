@@ -1,4 +1,5 @@
 import { PlateCarreeGrid, lonLatToUnitSphere } from './plate-carree-grid.mjs';
+import { BuildingRenderer } from './building-renderer.mjs';
 import {
   centerSurfaceRadiansPerPixel,
   distanceAfterPinch,
@@ -187,6 +188,7 @@ export class GlobeRenderer {
     maximumConcurrentRequests = 12,
     maximumResidentTextures = 384,
     maximumTextureBytes = 32 * 1024 * 1024,
+    maximumBuildingBytes = 16 * 1024 * 1024,
     maximumLabelZoom = 13,
     maximumLabelTiles = 128,
     refinementDelayMilliseconds = 120,
@@ -243,6 +245,7 @@ export class GlobeRenderer {
     }
     this.gl = gl;
     this.program = createProgram(gl);
+    this.buildingRenderer = new BuildingRenderer(gl);
     this.meshes = [
       { maximumZoom: 1, mesh: createPatchMesh(gl, patchSegments) },
       { maximumZoom: 4, mesh: createPatchMesh(gl, Math.min(6, patchSegments)) },
@@ -262,9 +265,12 @@ export class GlobeRenderer {
       tileKey: (x, y, z) => grid.tileKey(x, y, z),
       tileSize: grid.tileSize,
       onChange: () => this.requestRender(),
+      uploadAuxiliary: (mesh) => this.buildingRenderer.upload(mesh),
+      deleteAuxiliary: (resource) => this.buildingRenderer.delete(resource),
       maximumConcurrentRequests,
       maximumResidentTextures,
-      maximumTextureBytes
+      maximumTextureBytes,
+      maximumAuxiliaryBytes: maximumBuildingBytes
     };
     this.resources = this.createResourceManager(tileUrl, tileProducer);
 
@@ -632,6 +638,7 @@ export class GlobeRenderer {
     let readyCount = 0;
     let fallbackCount = 0;
     let placeholderCount = 0;
+    const buildingResources = new Map();
     for (const tile of tiles) {
       let resolved = this.resources.resolve(tile);
       const ancestry = ancestorsFromRoot(tile);
@@ -658,6 +665,9 @@ export class GlobeRenderer {
         fallbackCount += 1;
       } else {
         readyCount += 1;
+        if (resolved.entry.auxiliary) {
+          buildingResources.set(resolved.entry.key, resolved.entry.auxiliary);
+        }
       }
       draws.push({ tile, resolved });
     }
@@ -694,6 +704,7 @@ export class GlobeRenderer {
       gl.uniform2f(this.locations.uvScale, transform.scaleX, transform.scaleY);
       gl.drawElements(gl.TRIANGLES, mesh.indexCount, gl.UNSIGNED_SHORT, 0);
     }
+    this.buildingRenderer.draw([...buildingResources.values()], viewProjection);
     this.resources.endFrame();
     const resourceStats = this.resources.stats();
 
@@ -710,6 +721,11 @@ export class GlobeRenderer {
       fallbackTiles: fallbackCount,
       placeholderTiles: placeholderCount,
       drawCalls: draws.length,
+      buildingDrawCalls: buildingResources.size,
+      visibleBuildings: [...buildingResources.values()].reduce(
+        (total, resource) => total + resource.buildingCount,
+        0
+      ),
       visitedTileNodes: selection.visitedNodes,
       tileBudgetLimited: selection.budgetLimited,
       refinementBlocked: this.refinementBlocked,
@@ -748,6 +764,7 @@ export class GlobeRenderer {
 
     const gl = this.gl;
     this.resources.destroy();
+    this.buildingRenderer.destroy();
     gl.deleteTexture(this.placeholderTexture);
     for (const { mesh } of this.meshes) {
       gl.deleteBuffer(mesh.vertexBuffer);
