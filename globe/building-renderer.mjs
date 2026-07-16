@@ -2,21 +2,31 @@ const VERTEX_SHADER = `
   attribute vec3 a_position;
   attribute vec3 a_normal;
   uniform mat4 u_viewProjection;
-  uniform vec3 u_lightDirection;
-  varying float v_light;
+  uniform mediump vec3 u_lightDirection;
+  varying vec3 v_normal;
+  varying float v_legacyLight;
 
   void main() {
-    v_light = 0.62 + 0.38 * max(dot(normalize(a_normal), u_lightDirection), 0.0);
+    v_normal = a_normal;
+    v_legacyLight = 0.62 + 0.38 * max(dot(normalize(a_normal), u_lightDirection), 0.0);
     gl_Position = u_viewProjection * vec4(a_position, 1.0);
   }
 `;
 
 const FRAGMENT_SHADER = `
   precision mediump float;
-  varying float v_light;
+  uniform mediump vec3 u_lightDirection;
+  uniform float u_realisticLighting;
+  varying vec3 v_normal;
+  varying float v_legacyLight;
 
   void main() {
-    vec3 color = vec3(0.78, 0.74, 0.70) * v_light;
+    float incidence = dot(normalize(v_normal), u_lightDirection);
+    float sunVisible = smoothstep(-0.006, 0.006, incidence);
+    float dayLight = pow(max(incidence, 0.0), 0.85) * sunVisible;
+    float realisticLight = 0.06 + 0.94 * dayLight;
+    float light = mix(v_legacyLight, realisticLight, u_realisticLighting);
+    vec3 color = vec3(0.78, 0.74, 0.70) * light;
     gl_FragColor = vec4(color, 0.82);
   }
 `;
@@ -58,7 +68,8 @@ export class BuildingRenderer {
       position: gl.getAttribLocation(this.program, 'a_position'),
       normal: gl.getAttribLocation(this.program, 'a_normal'),
       viewProjection: gl.getUniformLocation(this.program, 'u_viewProjection'),
-      lightDirection: gl.getUniformLocation(this.program, 'u_lightDirection')
+      lightDirection: gl.getUniformLocation(this.program, 'u_lightDirection'),
+      realisticLighting: gl.getUniformLocation(this.program, 'u_realisticLighting')
     };
   }
 
@@ -92,7 +103,7 @@ export class BuildingRenderer {
     this.gl.deleteBuffer(resource.normalBuffer);
   }
 
-  draw(resources, viewProjection, lightDirection) {
+  draw(resources, viewProjection, lightDirection, realisticLighting = false) {
     if (resources.length === 0) return;
     const gl = this.gl;
     gl.useProgram(this.program);
@@ -100,6 +111,7 @@ export class BuildingRenderer {
     gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
     gl.uniformMatrix4fv(this.locations.viewProjection, false, viewProjection);
     gl.uniform3fv(this.locations.lightDirection, lightDirection);
+    gl.uniform1f(this.locations.realisticLighting, realisticLighting ? 1 : 0);
     gl.enableVertexAttribArray(this.locations.position);
     gl.enableVertexAttribArray(this.locations.normal);
     for (const resource of resources) {

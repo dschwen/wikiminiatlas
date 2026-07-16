@@ -259,6 +259,26 @@ main {
   outline-offset: 0;
 }
 
+#controls .checkbox-option {
+  display: flex;
+  align-items: center;
+  min-height: 19px;
+  gap: 3px;
+  white-space: nowrap;
+}
+
+#controls input[type="checkbox"] {
+  width: 12px;
+  height: 12px;
+  margin: 0;
+  accent-color: #2255aa;
+}
+
+#controls input[type="checkbox"]:focus-visible {
+  outline: 1px solid #2255aa;
+  outline-offset: 1px;
+}
+
 #scalebox {
   position: absolute;
   z-index: 30;

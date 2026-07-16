@@ -18,7 +18,7 @@ import {
 import { PlateCarreeGrid } from './plate-carree-grid.mjs';
 import { scaleBarsForCenter } from './scale-bar.mjs';
 import { readCameraState, writeCameraState } from './session-state.mjs';
-import { sunDirectionAt } from './solar-position.mjs';
+import { sunDirectionForBody } from './body-solar-position.mjs';
 import { parseGlobeUrl } from './url-compat.mjs';
 
 const canvas = document.querySelector('#globe');
@@ -33,6 +33,7 @@ const fullscreenButton = document.querySelector('#button_fs');
 const bodySetControl = document.querySelector('#body-set');
 const tileSetControl = document.querySelector('#tile-set');
 const labelSetControl = document.querySelector('#label-set');
+const realisticLightingControl = document.querySelector('#realistic-lighting');
 const status = document.querySelector('#status');
 const credit = document.querySelector('#credit');
 const articlePreviewContainer = document.querySelector('#article-preview');
@@ -67,6 +68,7 @@ const initialLatitude = restoredCamera
   ? restoredCamera.latitude
   : urlConfiguration.center.latitude;
 let labelsEnabled = urlConfiguration.labelsEnabled;
+let realisticLighting = urlConfiguration.realisticLighting;
 const labelBase = parameters.get('labelBase') || '../label.php';
 let labelLanguage = urlConfiguration.labelLanguage;
 let celestialBody = celestialBodyById(urlConfiguration.globe);
@@ -96,6 +98,7 @@ if (labelsEnabled && ![...labelSetControl.options].some((option) => option.value
   labelSetControl.add(new Option(labelLanguage, labelLanguage));
 }
 labelSetControl.value = labelsEnabled ? labelLanguage : '';
+realisticLightingControl.checked = realisticLighting;
 
 function updateLocationParameters(changes) {
   const url = new URL(window.location.href);
@@ -275,6 +278,7 @@ try {
     initialDistance,
     initialLongitude,
     initialLatitude,
+    realisticLighting,
     tileUrl: (tile) => tileUrlForSource(tileSource, tile),
     tileProducer: tileProducerForSource(tileSource),
     onStateChange: (state) => {
@@ -284,17 +288,18 @@ try {
       updateStatus();
     }
   });
+  let lastLightDirection = DEFAULT_LIGHT_DIRECTION;
   const updateLightDirection = () => {
-    globe.setLightDirection(
-      celestialBody.id === 'earth'
-        ? sunDirectionAt(new Date())
-        : DEFAULT_LIGHT_DIRECTION
-    );
+    try {
+      lastLightDirection = sunDirectionForBody(celestialBody.id, new Date());
+    } catch (error) {
+      // A clock/date failure should not make the globe unusable. Preserve the
+      // most recent valid direction (or the initial neutral direction).
+    }
+    globe.setLightDirection(lastLightDirection);
   };
   updateLightDirection();
-  const lightDirectionTimer = setInterval(() => {
-    if (celestialBody.id === 'earth') updateLightDirection();
-  }, 60000);
+  const lightDirectionTimer = setInterval(updateLightDirection, 60000);
 
   const setControlsOpen = (open) => {
     controls.hidden = !open;
@@ -388,9 +393,21 @@ try {
     updateStatus();
     setControlsOpen(false);
   };
+  const changeRealisticLighting = () => {
+    realisticLighting = realisticLightingControl.checked;
+    globe.setRealisticLighting(realisticLighting);
+    updateLocationParameters({
+      lighting: realisticLighting ? 'realistic' : null
+    });
+  };
+  const refreshLightAfterVisibilityChange = () => {
+    if (document.visibilityState === 'visible') updateLightDirection();
+  };
   bodySetControl.addEventListener('change', changeBody);
   tileSetControl.addEventListener('change', changeTileSet);
   labelSetControl.addEventListener('change', changeLabelSet);
+  realisticLightingControl.addEventListener('change', changeRealisticLighting);
+  document.addEventListener('visibilitychange', refreshLightAfterVisibilityChange);
 
   let destroyed = false;
   const destroy = () => {
@@ -417,6 +434,8 @@ try {
     bodySetControl.removeEventListener('change', changeBody);
     tileSetControl.removeEventListener('change', changeTileSet);
     labelSetControl.removeEventListener('change', changeLabelSet);
+    realisticLightingControl.removeEventListener('change', changeRealisticLighting);
+    document.removeEventListener('visibilitychange', refreshLightAfterVisibilityChange);
   };
   window.addEventListener('pagehide', (event) => {
     if (cameraStoreTimer !== null) {

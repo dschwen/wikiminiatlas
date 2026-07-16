@@ -36,7 +36,8 @@ test('accepts the old raw coordinate query and explicit map center', () => {
 
 test('keeps modern parameters while separating article and label languages', () => {
   const state = parseGlobeUrl(
-    'https://wma.test/globe/?lat=1&lon=2&distance=1.25&lang=de&labelLang=fr&labels=0'
+    'https://wma.test/globe/?lat=1&lon=2&distance=1.25&lang=de&labelLang=fr&labels=0' +
+      '&lighting=realistic'
   );
   assert.equal(state.legacy, false);
   assert.deepEqual(state.marker, { latitude: 1, longitude: 2 });
@@ -44,12 +45,14 @@ test('keeps modern parameters while separating article and label languages', () 
   assert.equal(state.articleLanguage, 'de');
   assert.equal(state.labelLanguage, 'fr');
   assert.equal(state.labelsEnabled, false);
+  assert.equal(state.realisticLighting, true);
 });
 
 test('does not interpret missing modern coordinates as zero', () => {
   const state = parseGlobeUrl('https://wma.test/globe/?labels=0');
   assert.deepEqual(state.marker, { latitude: 35, longitude: -112 });
   assert.deepEqual(state.center, state.marker);
+  assert.equal(state.realisticLighting, false);
 });
 
 test('matches legacy zoom resolution to the globe center', () => {

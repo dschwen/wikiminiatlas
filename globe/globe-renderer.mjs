@@ -27,10 +27,10 @@ const VERTEX_SHADER = `
   uniform vec4 u_bounds;
   uniform vec2 u_uvOffset;
   uniform vec2 u_uvScale;
-  uniform vec3 u_lightDirection;
-
+  uniform mediump vec3 u_lightDirection;
   varying vec2 v_uv;
-  varying float v_light;
+  varying vec3 v_surfaceNormal;
+  varying float v_legacyLight;
 
   void main() {
     float longitude = mix(u_bounds.x, u_bounds.z, a_uv.x);
@@ -42,7 +42,8 @@ const VERTEX_SHADER = `
       -cosLatitude * sin(longitude)
     );
 
-    v_light = 0.72 + 0.28 * max(dot(position, u_lightDirection), 0.0);
+    v_surfaceNormal = position;
+    v_legacyLight = 0.72 + 0.28 * max(dot(position, u_lightDirection), 0.0);
     v_uv = u_uvOffset + a_uv * u_uvScale;
     gl_Position = u_viewProjection * vec4(position, 1.0);
   }
@@ -52,13 +53,21 @@ const FRAGMENT_SHADER = `
   precision mediump float;
 
   uniform sampler2D u_texture;
+  uniform mediump vec3 u_lightDirection;
+  uniform float u_realisticLighting;
 
   varying vec2 v_uv;
-  varying float v_light;
+  varying vec3 v_surfaceNormal;
+  varying float v_legacyLight;
 
   void main() {
     vec4 color = texture2D(u_texture, v_uv);
-    gl_FragColor = vec4(color.rgb * v_light, color.a);
+    float incidence = dot(normalize(v_surfaceNormal), u_lightDirection);
+    float sunVisible = smoothstep(-0.006, 0.006, incidence);
+    float dayLight = pow(max(incidence, 0.0), 0.85) * sunVisible;
+    float realisticLight = 0.045 + 0.955 * dayLight;
+    float light = mix(v_legacyLight, realisticLight, u_realisticLighting);
+    gl_FragColor = vec4(color.rgb * light, color.a);
   }
 `;
 
@@ -234,6 +243,7 @@ export class GlobeRenderer {
     initialLongitude = -112,
     initialLatitude = 35,
     lightDirection = DEFAULT_LIGHT_DIRECTION,
+    realisticLighting = false,
     onStateChange = () => {}
   } = {}) {
     if (!(canvas instanceof HTMLCanvasElement)) {
@@ -269,6 +279,7 @@ export class GlobeRenderer {
       ? clamp(initialDistance, 1.0005, 51)
       : 3.1;
     this.lightDirection = normalizeLightDirection(lightDirection);
+    this.realisticLighting = Boolean(realisticLighting);
     this.frame = null;
     this.refinementTimer = null;
     this.refinementBlocked = false;
@@ -299,6 +310,7 @@ export class GlobeRenderer {
       uvOffset: gl.getUniformLocation(this.program, 'u_uvOffset'),
       uvScale: gl.getUniformLocation(this.program, 'u_uvScale'),
       lightDirection: gl.getUniformLocation(this.program, 'u_lightDirection'),
+      realisticLighting: gl.getUniformLocation(this.program, 'u_realisticLighting'),
       texture: gl.getUniformLocation(this.program, 'u_texture')
     };
     this.resourceOptions = {
@@ -359,6 +371,11 @@ export class GlobeRenderer {
 
   setLightDirection(direction) {
     this.lightDirection = normalizeLightDirection(direction);
+    this.requestRender();
+  }
+
+  setRealisticLighting(enabled) {
+    this.realisticLighting = Boolean(enabled);
     this.requestRender();
   }
 
@@ -722,6 +739,7 @@ export class GlobeRenderer {
     gl.useProgram(this.program);
     gl.uniformMatrix4fv(this.locations.viewProjection, false, viewProjection);
     gl.uniform3fv(this.locations.lightDirection, this.lightDirection);
+    gl.uniform1f(this.locations.realisticLighting, this.realisticLighting ? 1 : 0);
     gl.uniform1i(this.locations.texture, 0);
 
     let activeMesh = null;
@@ -753,7 +771,8 @@ export class GlobeRenderer {
     this.buildingRenderer.draw(
       buildingResources,
       viewProjection,
-      this.lightDirection
+      this.lightDirection,
+      this.realisticLighting
     );
     this.resources.endFrame();
     const resourceStats = this.resources.stats();

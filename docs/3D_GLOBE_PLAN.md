@@ -46,9 +46,20 @@ loads, 384 resident textures, 32 MiB of estimated RGBA texture data, and a hard
 requests only the next missing level in its ancestry. Consequently, coarse imagery
 appears first and progressively sharpens without displaying an uninitialized tile.
 
-Earth lighting follows the current UTC subsolar direction and refreshes once
-per minute. Other bodies intentionally retain fixed lighting until their
-body-specific rotational orientation and solar ephemerides are implemented.
+Earth, Moon, Mars, Venus, Mercury, Io, and Titan lighting follows each body's
+current UTC subsolar direction and refreshes once per minute. The browser ships
+only compact analytical coefficients: JPL fitted Keplerian elements provide
+the heliocentric direction, and IAU/NAIF pole, prime-meridian, and periodic
+orientation terms rotate it into the selected body's cartographic frame. The
+rough lunar orbit corrects the Earth-Moon displacement; Io and Titan use their
+primary planet's solar direction because the omitted parallax is below the
+visual lighting requirement. Fixed Horizons reference cases bound errors to
+0.5° or less without a runtime ephemeris request or large kernel download.
+
+The menu's optional `lighting=realistic` mode reduces night-side ambient light
+and applies a fragment-level Lambert-style incidence curve with a narrow,
+anti-aliased terminator to both terrain and buildings. It is off by default so
+legacy URLs retain the previous bright presentation.
 
 ### 3. Labels — in progress
 
@@ -149,6 +160,7 @@ Implemented mappings:
 | `globe` | case-insensitive celestial body selection |
 | `lang` / `page` | reserved for host article language/title, as in 2D |
 | `awt` | parsed; legacy tooltip policy remains to port |
+| `lighting=realistic` | opt-in dark night side and physical terminator; omitted preserves legacy lighting |
 
 The new explicit label override is `labelLang`; `lang` must not be reused for
 labels because doing so breaks existing Wikipedia iframe URLs.

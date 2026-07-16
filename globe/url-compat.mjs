@@ -81,6 +81,7 @@ export function parseGlobeUrl(input, { viewportHeight = 400 } = {}) {
     globe: parameters.get('globe') || 'earth',
     tileSet: parameters.get('tileSet'),
     labelsEnabled: parameters.get('labels') !== '0',
+    realisticLighting: parameters.get('lighting') === 'realistic',
     articleLanguage: parameters.get('lang') || (legacy && fields[4] ? fields[4] : 'en'),
     articlePage: parameters.get('page') || '',
     alwaysTooltips: parameters.get('awt') === '1'

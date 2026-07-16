@@ -35,6 +35,7 @@ function fakeGl() {
     useProgram() {},
     uniformMatrix4fv() {},
     uniform3fv: (...values) => calls.push(['uniform3fv', ...values]),
+    uniform1f: (...values) => calls.push(['uniform1f', ...values]),
     enable: (value) => calls.push(['enable', value]),
     disable: (value) => calls.push(['disable', value]),
     disableVertexAttribArray: (value) => calls.push(['disableAttribute', value]),
@@ -52,7 +53,7 @@ test('draws buildings with conventional alpha blending', () => {
   const lightDirection = [1, 0, 0];
   renderer.draw([{
     positionBuffer: {}, normalBuffer: {}, vertexCount: 3
-  }], new Float32Array(16), lightDirection);
+  }], new Float32Array(16), lightDirection, true);
 
   assert.ok(gl.calls.some((call) => call[0] === 'enable' && call[1] === gl.BLEND));
   assert.ok(gl.calls.some((call) =>
@@ -62,6 +63,9 @@ test('draws buildings with conventional alpha blending', () => {
   assert.ok(gl.calls.some((call) => call[0] === 'disable' && call[1] === gl.BLEND));
   assert.ok(gl.calls.some((call) =>
     call[0] === 'uniform3fv' && call[2] === lightDirection
+  ));
+  assert.ok(gl.calls.some((call) =>
+    call[0] === 'uniform1f' && call[2] === 1
   ));
   assert.equal(
     gl.calls.filter((call) => call[0] === 'disableAttribute').length,
