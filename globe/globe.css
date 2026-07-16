@@ -60,7 +60,7 @@ main {
   left: 0;
   max-width: 210px;
   overflow: hidden;
-  color: #f7fbff;
+  color: var(--globe-label-color, #f7fbff);
   background-image: url('../symbols/label_corner_ul.png');
   background-repeat: no-repeat;
   font-size: 11px;
@@ -69,9 +69,7 @@ main {
   padding-left: 5px;
   text-decoration: none;
   text-overflow: ellipsis;
-  text-shadow:
-    0 1px 2px #000,
-    0 0 4px #000;
+  text-shadow: var(--globe-label-shadow, 0 1px 2px #000, 0 0 4px #000);
   white-space: nowrap;
   translate: 0 0;
   pointer-events: auto;
@@ -143,7 +141,6 @@ main {
 }
 
 .title,
-#controls,
 #status,
 #help,
 #error {
@@ -157,37 +154,91 @@ main {
   backdrop-filter: blur(10px);
 }
 
+#controls-toggle {
+  position: absolute;
+  z-index: 4;
+  top: 8px;
+  right: 8px;
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  border: 0;
+  background-color: transparent;
+  background-image: url('../tiles/button_sprites.png');
+  background-position: -140px 0;
+  cursor: pointer;
+}
+
+#controls-toggle:hover,
+#controls-toggle:focus-visible,
+#controls-toggle[aria-expanded="true"] {
+  outline: 1px solid #86b9ff;
+  outline-offset: 1px;
+  background-color: rgba(255, 255, 255, 0.18);
+}
+
 #controls {
-  top: 18px;
-  right: 18px;
+  position: absolute;
+  z-index: 4;
+  top: 30px;
+  right: 8px;
   display: grid;
-  gap: 7px;
-  padding: 9px 10px;
-  font-size: 11px;
+  gap: 1px;
+  min-width: 142px;
+  margin: 0;
+  padding: 2px;
+  border: 1px solid #111;
+  color: #111;
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
+  font-family: sans-serif;
+  font-size: 10px;
+}
+
+#controls[hidden] {
+  display: none;
 }
 
 #controls label {
   display: grid;
-  grid-template-columns: 42px minmax(112px, 150px);
+  grid-template-columns: 38px minmax(92px, 126px);
   align-items: center;
-  gap: 7px;
-  color: #bac9e3;
+  gap: 3px;
+  padding: 2px 3px;
+  color: #111;
 }
 
 #controls select {
   width: 100%;
   min-width: 0;
-  padding: 3px 22px 3px 6px;
-  border: 1px solid rgba(185, 205, 239, 0.28);
-  border-radius: 5px;
-  color: #f4f7ff;
-  background: #111a2d;
+  height: 19px;
+  padding: 0 1px;
+  border: 1px solid lightgray;
+  border-radius: 0;
+  color: #111;
+  background: #fff;
   font: inherit;
 }
 
 #controls select:focus-visible {
-  outline: 2px solid #86b9ff;
-  outline-offset: 2px;
+  outline: 1px solid #2255aa;
+  outline-offset: 0;
+}
+
+#credit {
+  position: absolute;
+  z-index: 3;
+  right: 12px;
+  bottom: 2px;
+  margin: 0;
+  color: #c9d5e8;
+  font-size: 9px;
+  line-height: 10px;
+  text-shadow: 0 1px 2px #000;
+}
+
+#credit a {
+  color: inherit;
 }
 
 .title {
@@ -238,13 +289,6 @@ main {
     display: none;
   }
 
-  #controls {
-    top: 12px;
-    right: 12px;
-    gap: 5px;
-    padding: 7px 8px;
-  }
-
   #status {
     right: 12px;
     bottom: 12px;
@@ -254,20 +298,5 @@ main {
 
   #help {
     display: none;
-  }
-}
-
-@media (max-width: 440px) {
-  #controls label {
-    grid-template-columns: 1fr;
-    gap: 2px;
-  }
-
-  #controls label span {
-    display: none;
-  }
-
-  #controls select {
-    width: 128px;
   }
 }

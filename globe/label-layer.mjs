@@ -97,6 +97,20 @@ export class GlobeLabelLayer {
     }
   }
 
+  setGlobe(globe) {
+    if (typeof globe !== 'string' || globe.length === 0) {
+      throw new TypeError('globe must be a non-empty string');
+    }
+    if (globe === this.globe) {
+      return;
+    }
+    this.resetResources();
+    this.globe = globe;
+    if (this.enabled && this.frameState) {
+      this.update(this.frameState);
+    }
+  }
+
   setEnabled(enabled) {
     const nextEnabled = Boolean(enabled);
     if (nextEnabled === this.enabled) {

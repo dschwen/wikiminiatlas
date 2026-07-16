@@ -2,6 +2,8 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 
 import {
+  CELESTIAL_BODIES,
+  celestialBodyById,
   LABEL_LANGUAGES,
   legacyTileSourceUrl,
   TILE_SOURCES,
@@ -13,6 +15,18 @@ test('catalog retains the six legacy Earth raster layers', () => {
     'mapnik', 'physical', 'satellite', 'coastline', 'blue-marble', 'night'
   ]);
   assert.equal(tileSourceById('missing').id, 'mapnik');
+});
+
+test('catalog retains every legacy celestial body and its physical metadata', () => {
+  assert.deepEqual(CELESTIAL_BODIES.map((body) => body.id), [
+    'earth', 'moon', 'mars', 'venus', 'mercury', 'io', 'titan'
+  ]);
+  assert.equal(celestialBodyById('MOON').equatorialCircumferenceKm, 10940.475);
+  assert.equal(celestialBodyById('mars').labelDataset, 'mars');
+  assert.equal(celestialBodyById('missing').id, 'earth');
+  assert.deepEqual(celestialBodyById('moon').sources.map((source) => source.id), [
+    'lro', 'satellite'
+  ]);
 });
 
 test('builds each legacy tile hierarchy and wraps plate carree columns', () => {
@@ -51,6 +65,42 @@ test('applies the legacy 180 degree offset only to shifted raster sources', () =
   assert.equal(
     legacyTileSourceUrl('/tiles', tileSourceById('coastline'), tile),
     '/tiles/plain/0/tile_2_1.png'
+  );
+});
+
+test('builds legacy celestial-body paths with their body-specific offsets', () => {
+  const url = (bodyId, sourceId, tile) => legacyTileSourceUrl(
+    '/tiles',
+    tileSourceById(sourceId, celestialBodyById(bodyId)),
+    tile
+  );
+  assert.equal(
+    url('moon', 'lro', { x: 1, y: 2, z: 0 }),
+    '/tiles/lro_moon/lromoon_005_001_002.png'
+  );
+  assert.equal(
+    url('moon', 'satellite', { x: 1, y: 2, z: 0 }),
+    '/tiles/moon.new/3/2/4.jpg'
+  );
+  assert.equal(
+    url('mars', 'satellite', { x: 1, y: 2, z: 0 }),
+    '/tiles/mars/mars_005_004_002.png'
+  );
+  assert.equal(
+    url('venus', 'physical', { x: 1, y: 2, z: 0 }),
+    '/tiles/venus/venus_003_001_002.png'
+  );
+  assert.equal(
+    url('mercury', 'satellite', { x: 15, y: 10, z: 6 }),
+    '/tiles/mercury/0/2/merc_000_207_010.png'
+  );
+  assert.equal(
+    url('io', 'satellite', { x: 1, y: 2, z: 0 }),
+    '/tiles/io/io_004_004_002.png'
+  );
+  assert.equal(
+    url('titan', 'satellite', { x: 1, y: 2, z: 0 }),
+    '/tiles/titan/titan_003_001_002.png'
   );
 });
 

@@ -12,7 +12,8 @@ Implemented so far:
 - bounded texture memory, metadata, and concurrent image requests;
 - batched legacy label loading with globe projection and horizon culling;
 - legacy label symbol styling, weight-ordered collision filtering, and accessible Wikipedia links;
-- in-place selectors for all six legacy Earth tile sets and legacy label languages;
+- a compact legacy-style menu for celestial body, body-specific tile set, and label language;
+- all legacy Earth, Moon, Mars, Venus, Mercury, Io, and Titan imagery and label datasets;
 - one-finger orbit, two-finger pan/pinch, and wheel zoom controls, including gestures that begin on labels;
 - a realistic popup-sized iframe host page; and
 - a shared procedural placeholder before any ancestor imagery is available.
@@ -36,11 +37,18 @@ By default the demo requests the existing relative `tiles/mapnik` hierarchy. A d
 http://localhost:8000/globe/?tileBase=https://example.org/tiles&maxZoom=15
 ```
 
-The map selector switches between the legacy full basemap, physical,
-satellite, coastline, Blue Marble, and night imagery without moving the
-camera. The current selection is reflected in the `tileSet` query parameter;
-for example, `?tileSet=night`. Each layer caps detail at the maximum available
-in its legacy hierarchy.
+The 18-by-18-pixel settings button follows the legacy 2D widget and opens a
+compact menu. Its body selector switches between Earth, Moon, Mars, Venus,
+Mercury, Io, and Titan without moving the camera. The map selector is populated
+with the layers available for that body; Earth has six layers and the Moon has
+two. The selection is reflected in the `globe` and `tileSet` query parameters,
+for example `?globe=moon&tileSet=satellite`.
+
+Each body definition carries over the 2D map's label dataset, equatorial
+circumference, maximum zoom, label contrast, attribution, filename convention,
+and longitude offset. The Moon, Mars, Mercury, and Io sources that use shifted
+imagery apply their legacy 180-degree column transform before requesting tiles.
+Mercury also retains its zoom- and column-dependent directory hierarchy.
 
 Labels use `../label.php`, English Wikipedia, and the Earth dataset by default.
 These settings can be changed independently, or labels can be disabled:
@@ -51,8 +59,10 @@ http://localhost:8000/globe/?labels=0
 ```
 
 The label selector can change languages or disable labels without reloading the
-viewer. Changing either selector updates the iframe URL, so a non-BFCache Back
-navigation can restore the same display choices along with the camera state.
+viewer. Changing the celestial body replaces the tile source and the `g`
+dataset sent to `label.php` together. All selectors update the iframe URL, so a
+non-BFCache Back navigation can restore the same display choices along with the
+camera state.
 
 For camera-range testing, the initial center distance can also be specified;
 `1.01` is close to the surface and `20` shows a distant planet:

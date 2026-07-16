@@ -13,7 +13,19 @@
       <nav id="labels" aria-label="Geographic labels"></nav>
     </div>
     <h1 class="title">WikiMiniAtlas<span class="title-detail"> · tiled globe prototype</span></h1>
-    <form id="controls" aria-label="Map display settings">
+    <button
+      id="controls-toggle"
+      type="button"
+      aria-controls="controls"
+      aria-expanded="false"
+      aria-label="Map display settings"
+      title="Map display settings"
+    ></button>
+    <form id="controls" aria-label="Map display settings" hidden>
+      <label>
+        <span>Body</span>
+        <select id="body-set" aria-label="Celestial body"></select>
+      </label>
       <label>
         <span>Map</span>
         <select id="tile-set" aria-label="Tile set"></select>
@@ -25,6 +37,7 @@
     </form>
     <p id="help">Drag to orbit · pinch or scroll to zoom</p>
     <p id="status" role="status">Starting WebGL…</p>
+    <p id="credit" hidden></p>
     <p id="error" role="alert" hidden></p>
   </main>
   <script type="module" src="main.mjs"></script>

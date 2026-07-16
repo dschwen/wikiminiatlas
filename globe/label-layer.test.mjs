@@ -174,6 +174,27 @@ test('switches label languages in place and discards the previous cache', async 
   layer.destroy();
 });
 
+test('switches celestial label datasets in place', async () => {
+  const urls = [];
+  const layer = new GlobeLabelLayer(new FakeElement(), {
+    grid,
+    fetchImpl: async (url) => {
+      urls.push(url);
+      return { ok: true, json: async () => ({ label: [] }) };
+    }
+  });
+  layer.update(frameState([{ x: 16, y: 3, z: 2 }]));
+  await new Promise((resolve) => setImmediate(resolve));
+
+  layer.setGlobe('mars');
+  await new Promise((resolve) => setImmediate(resolve));
+
+  assert.equal(new URL(urls[0], 'https://example.test').searchParams.get('g'), 'earth');
+  assert.equal(new URL(urls[1], 'https://example.test').searchParams.get('g'), 'mars');
+  assert.equal(layer.globe, 'mars');
+  layer.destroy();
+});
+
 test('can turn label loading off and back on without losing the current frame', async () => {
   let requests = 0;
   const layer = new GlobeLabelLayer(new FakeElement(), {
