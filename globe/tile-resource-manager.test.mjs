@@ -146,3 +146,45 @@ test('cancels stale in-flight requests after the configured grace period', () =>
   assert.equal(images[0].src, '');
   assert.equal(manager.entries.get('0/0/0').status, 'idle');
 });
+
+test('uploads asynchronous canvas producers through the same texture cache', async () => {
+  const produced = [];
+  const { manager } = makeHarness({
+    tileProducer: async (tile, url, signal) => {
+      produced.push({ tile, url, signal });
+      return { width: 256, height: 128 };
+    }
+  });
+  manager.beginFrame();
+  manager.demand({ x: 3, y: 2, z: 4 });
+  manager.endFrame();
+  await new Promise((resolve) => setImmediate(resolve));
+
+  assert.equal(produced.length, 1);
+  assert.equal(produced[0].url, '/tiles/4/3/2.png');
+  assert.equal(manager.entries.get('4/3/2').status, 'ready');
+  assert.equal(manager.entries.get('4/3/2').bytes, 256 * 128 * 4);
+  assert.equal(manager.stats().inFlight, 0);
+});
+
+test('aborts asynchronous producers that leave the desired generation', async () => {
+  let signal;
+  const { manager } = makeHarness({
+    cancellationGraceFrames: 0,
+    tileProducer: (tile, url, producerSignal) => {
+      signal = producerSignal;
+      return new Promise(() => {});
+    }
+  });
+  manager.beginFrame();
+  manager.demand({ x: 0, y: 0, z: 0 });
+  manager.endFrame();
+  await Promise.resolve();
+  assert.equal(manager.stats().inFlight, 1);
+
+  manager.beginFrame();
+  manager.endFrame();
+  assert.equal(signal.aborted, true);
+  assert.equal(manager.stats().inFlight, 0);
+  assert.equal(manager.entries.get('0/0/0').status, 'idle');
+});

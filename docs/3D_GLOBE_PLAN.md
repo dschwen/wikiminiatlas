@@ -61,18 +61,21 @@ appears first and progressively sharpens without displaying an uninitialized til
 
 - Add a bounded `/tiles/jsontile.php` client for Earth/full-basemap tiles above
   zoom 12. Responses retain the legacy `{x,y,z,v,data,idx,f}` contract.
+  (Initial surface-rendering slice complete.)
 - Extract the Canvas 2D style and geometry pass from `wmajt.js` into an ES
   module. Do not import the legacy singleton: it assumes jQuery tile objects,
   mutable globals, append-only building buffers, and an unbounded cache.
+  (Initial declarative surface style and GeoJSON pass complete.)
 - Render each JSON response into a 128- or 256-pixel canvas and upload that
   canvas through the existing WebGL tile texture path. A canvas is a valid
   `TexImageSource`, so the sphere mesh, UVs, culling, and draw loop do not need
-  a second vector rendering pipeline.
+  a second vector rendering pipeline. (Complete at 128 pixels.)
 - Generalize `TileResourceManager` from `Image` loading to an asynchronous tile
   producer returning `{source, width, height}`. Raster sources return decoded
-  images; JSON sources return rendered canvases or `ImageBitmap`s.
+  images; JSON sources return rendered canvases or `ImageBitmap`s. (Complete;
+  the producer currently returns the `TexImageSource` directly.)
 - Mark source capability in `catalog.mjs` (`jsonFromZoom: 13`) rather than
-  checking an Earth tileset index. Other bodies remain raster-only.
+  checking an Earth tileset index. Other bodies remain raster-only. (Complete.)
 - Keep raster zoom 12 and rendered JSON ancestors in the same hierarchy. While
   a detailed JSON tile is loading, the existing ancestor UV transform continues
   showing initialized lower-resolution imagery.
@@ -80,7 +83,7 @@ appears first and progressively sharpens without displaying an uninitialized til
   requests separately. Abort requests that leave the desired tile generation.
 - Preserve legacy response compatibility by generating `idx` when `v < 2` or
   the server omits it. Validate coordinates, feature count, geometry depth, and
-  response size before drawing.
+  response size before drawing. (Complete for the initial contract.)
 - First slice: 2D surface styling only. Follow with polygon holes and correct
   layer/bridge/tunnel ordering, then bounded feature picking.
 - Later building slice: render buildings in a tile-local east/north/up frame
@@ -96,6 +99,11 @@ Acceptance criteria for the JSON-texture slice:
 - fixed GeoJSON fixtures produce expected canvas pixels and uploaded textures;
 - long zoom/pan sessions remain inside explicit CPU and GPU budgets; and
 - switching body or map layer cancels obsolete JSON work and cannot mix sources.
+
+The current slice passes these pipeline criteria with fixture and browser tests.
+The style set covers the principal land, water, land-use, building, road,
+railway, aeroway, and barrier categories. Exact style parity, interactive vector
+feature picking, buildings, and geometry overlays remain follow-up work.
 
 ### 5. Legacy integration
 

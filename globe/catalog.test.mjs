@@ -14,6 +14,8 @@ test('catalog retains the six legacy Earth raster layers', () => {
   assert.deepEqual(TILE_SOURCES.map((source) => source.id), [
     'mapnik', 'physical', 'satellite', 'coastline', 'blue-marble', 'night'
   ]);
+  assert.equal(tileSourceById('mapnik').jsonFromZoom, 13);
+  assert.equal(tileSourceById('physical').jsonFromZoom, undefined);
   assert.equal(tileSourceById('missing').id, 'mapnik');
 });
 

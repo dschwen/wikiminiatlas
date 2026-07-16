@@ -179,6 +179,7 @@ export class GlobeRenderer {
   constructor(canvas, {
     grid = new PlateCarreeGrid(),
     tileUrl,
+    tileProducer = null,
     interactionElement = canvas,
     maximumZoom = 15,
     patchSegments = 12,
@@ -211,6 +212,7 @@ export class GlobeRenderer {
     this.interactionElement = interactionElement;
     this.grid = grid;
     this.tileUrl = tileUrl;
+    this.tileProducer = tileProducer;
     this.maximumZoom = maximumZoom;
     this.maximumVisibleTiles = maximumVisibleTiles;
     this.configuredMaximumLabelZoom = maximumLabelZoom;
@@ -264,7 +266,7 @@ export class GlobeRenderer {
       maximumResidentTextures,
       maximumTextureBytes
     };
-    this.resources = this.createResourceManager(tileUrl);
+    this.resources = this.createResourceManager(tileUrl, tileProducer);
 
     gl.clearColor(0.015, 0.025, 0.055, 1);
     gl.enable(gl.DEPTH_TEST);
@@ -278,14 +280,19 @@ export class GlobeRenderer {
     this.requestRender();
   }
 
-  createResourceManager(tileUrl) {
+  createResourceManager(tileUrl, tileProducer = null) {
     return new TileResourceManager({
       ...this.resourceOptions,
-      tileUrl
+      tileUrl,
+      tileProducer
     });
   }
 
-  setTileSource({ tileUrl, maximumZoom = this.maximumZoom }) {
+  setTileSource({
+    tileUrl,
+    tileProducer = null,
+    maximumZoom = this.maximumZoom
+  }) {
     if (typeof tileUrl !== 'function') {
       throw new TypeError('tileUrl must be a function');
     }
@@ -294,9 +301,10 @@ export class GlobeRenderer {
     }
     const previousResources = this.resources;
     this.tileUrl = tileUrl;
+    this.tileProducer = tileProducer;
     this.maximumZoom = maximumZoom;
     this.maximumLabelZoom = Math.min(maximumZoom, this.configuredMaximumLabelZoom);
-    this.resources = this.createResourceManager(tileUrl);
+    this.resources = this.createResourceManager(tileUrl, tileProducer);
     previousResources.destroy();
     this.deferRefinement();
     this.requestRender();

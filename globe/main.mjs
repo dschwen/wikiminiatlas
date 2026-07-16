@@ -8,6 +8,10 @@ import {
 import { GlobeArticlePreview } from './article-preview.mjs';
 import { GlobeRenderer } from './globe-renderer.mjs';
 import { GlobeLabelLayer } from './label-layer.mjs';
+import {
+  createHybridJsonTileProducer,
+  jsonTileUrl
+} from './json-tile.mjs';
 import { PlateCarreeGrid } from './plate-carree-grid.mjs';
 import { scaleBarsForCenter } from './scale-bar.mjs';
 import { readCameraState, writeCameraState } from './session-state.mjs';
@@ -39,6 +43,7 @@ const urlConfiguration = parseGlobeUrl(window.location.href, {
   viewportHeight: Math.max(1, window.innerHeight)
 });
 const tileBase = parameters.get('tileBase') || '../tiles';
+const jsonTileBase = parameters.get('jsonTileBase') || '../tiles/jsontile.php';
 const requestedMaximumZoom = Number(parameters.get('maxZoom'));
 const configuredMaximumZoom = parameters.has('maxZoom') && Number.isInteger(requestedMaximumZoom)
   ? Math.max(0, Math.min(20, requestedMaximumZoom))
@@ -146,6 +151,13 @@ updateSourcePresentation();
 
 try {
   const grid = new PlateCarreeGrid();
+  const tileUrlForSource = (source, tile) =>
+    source.jsonFromZoom && tile.z >= source.jsonFromZoom
+      ? jsonTileUrl(jsonTileBase, tile)
+      : legacyTileSourceUrl(tileBase, source, tile);
+  const tileProducerForSource = (source) => source.jsonFromZoom
+    ? createHybridJsonTileProducer({ jsonFromZoom: source.jsonFromZoom })
+    : null;
   let labelStats = { visible: 0 };
   let globeState = null;
   let storedCameraSignature = '';
@@ -257,7 +269,8 @@ try {
     initialDistance,
     initialLongitude,
     initialLatitude,
-    tileUrl: (tile) => legacyTileSourceUrl(tileBase, tileSource, tile),
+    tileUrl: (tile) => tileUrlForSource(tileSource, tile),
+    tileProducer: tileProducerForSource(tileSource),
     onStateChange: (state) => {
       globeState = state;
       labelLayer.update(state);
@@ -313,7 +326,8 @@ try {
   const applyTileSource = () => {
     const selectedSource = tileSource;
     globe.setTileSource({
-      tileUrl: (tile) => legacyTileSourceUrl(tileBase, selectedSource, tile),
+      tileUrl: (tile) => tileUrlForSource(selectedSource, tile),
+      tileProducer: tileProducerForSource(selectedSource),
       maximumZoom: Math.min(configuredMaximumZoom, selectedSource.maximumZoom)
     });
     updateSourcePresentation();

@@ -31,7 +31,8 @@ const BODY_DEFINITIONS = [
     equatorialCircumferenceKm: 40075.0,
     sources: [
       {
-        id: 'mapnik', label: 'Full basemap', maximumZoom: 20, ...BLUE_LABELS,
+        id: 'mapnik', label: 'Full basemap', maximumZoom: 20,
+        jsonFromZoom: 13, ...BLUE_LABELS,
         attribution: [
           { label: 'Map data © OpenStreetMap contributors', href: 'https://www.openstreetmap.org/' },
           { label: 'ODbL', href: 'https://opendatacommons.org/licenses/odbl/' }

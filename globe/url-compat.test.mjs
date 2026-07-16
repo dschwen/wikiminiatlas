@@ -46,6 +46,12 @@ test('keeps modern parameters while separating article and label languages', () 
   assert.equal(state.labelsEnabled, false);
 });
 
+test('does not interpret missing modern coordinates as zero', () => {
+  const state = parseGlobeUrl('https://wma.test/globe/?labels=0');
+  assert.deepEqual(state.marker, { latitude: 35, longitude: -112 });
+  assert.deepEqual(state.center, state.marker);
+});
+
 test('matches legacy zoom resolution to the globe center', () => {
   const distance = legacyCameraDistance({ zoom: 8, viewportHeight: 400 });
   const radiansPerPixel = 2 * Math.tan(42 * Math.PI / 360) * (distance - 1) / 400;

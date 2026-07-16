@@ -14,6 +14,7 @@ Implemented so far:
 - legacy label symbol styling, weight-ordered collision filtering, and accessible Wikipedia links;
 - a compact legacy-style menu for celestial body, body-specific tile set, and label language;
 - all legacy Earth, Moon, Mars, Venus, Mercury, Io, and Titan imagery and label datasets;
+- client-rendered JSON surface tiles for the Earth full basemap above zoom 12;
 - the legacy 18-pixel zoom, recenter, fullscreen, and settings button layout;
 - independent metric and imperial scale bars based on center-frame surface resolution;
 - one-finger orbit, two-finger pan/pinch, and wheel zoom controls, including gestures that begin on labels;
@@ -88,6 +89,21 @@ http://localhost:8000/globe/?distance=1.01
 ```
 
 The tile base must permit WebGL texture use from the demo origin when it is cross-origin. Failed requests retain the nearest loaded parent image, or a shared neutral placeholder if no ancestor is available, making the geometry and level-of-detail behavior testable without a complete tile checkout.
+
+For the Earth full basemap, zoom levels 13 and above request the legacy
+`../tiles/jsontile.php` service instead of raster PNGs. The response is validated,
+drawn into a 128-pixel Canvas 2D tile, and uploaded as a texture through the same
+bounded resource manager as raster imagery. A custom endpoint can be supplied:
+
+```text
+http://localhost:8000/globe/?jsonTileBase=https://example.org/tiles/jsontile.php
+```
+
+JSON work shares the 12-request concurrency ceiling and is aborted when it
+leaves the desired tile generation. Responses are capped at 2 MiB, 20,000
+features, and 500,000 coordinates. Older responses without a server-side tag
+index receive one client-side. While a JSON tile loads or fails validation, the
+existing nearest-ancestor texture remains visible.
 
 Run the coordinate tests with:
 

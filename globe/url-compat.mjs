@@ -1,6 +1,9 @@
 const FIELD_OF_VIEW_RADIANS = 42 * Math.PI / 180;
 
 function finiteNumber(value) {
+  if (value === null || value === undefined || value === '') {
+    return null;
+  }
   const number = Number(value);
   return Number.isFinite(number) ? number : null;
 }

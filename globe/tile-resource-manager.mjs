@@ -45,6 +45,7 @@ export class TileResourceManager {
     gl,
     tileKey,
     tileUrl,
+    tileProducer = null,
     tileSize = 128,
     createImage = () => new Image(),
     now = () => performance.now(),
@@ -59,6 +60,7 @@ export class TileResourceManager {
     this.gl = gl;
     this.tileKey = tileKey;
     this.tileUrl = tileUrl;
+    this.tileProducer = tileProducer;
     this.tileSize = tileSize;
     this.createImage = createImage;
     this.now = now;
@@ -91,6 +93,7 @@ export class TileResourceManager {
         status: 'idle',
         texture: null,
         image: null,
+        controller: null,
         bytes: 0,
         priority: -Infinity,
         lastDemandFrame: -Infinity,
@@ -200,6 +203,10 @@ export class TileResourceManager {
   }
 
   startLoading(entry) {
+    if (this.tileProducer) {
+      this.startProducing(entry);
+      return;
+    }
     const image = this.createImage();
     const token = entry.token + 1;
     entry.token = token;
@@ -218,11 +225,74 @@ export class TileResourceManager {
     image.src = entry.url;
   }
 
+  startProducing(entry) {
+    const token = entry.token + 1;
+    const controller = new AbortController();
+    entry.token = token;
+    entry.controller = controller;
+    entry.status = 'loading';
+    this.inFlight += 1;
+
+    Promise.resolve()
+      .then(() => this.tileProducer(entry.tile, entry.url, controller.signal))
+      .then((source) => this.finishProduced(entry, source, token, controller))
+      .catch((error) => this.failProduced(entry, error, token, controller));
+  }
+
+  finishProduced(entry, source, token, controller) {
+    if (
+      this.destroyed || entry.token !== token ||
+      entry.controller !== controller || controller.signal.aborted
+    ) {
+      if (source && typeof source.close === 'function') {
+        source.close();
+      }
+      return;
+    }
+    this.uploadSource(entry, source);
+    entry.controller = null;
+    this.inFlight -= 1;
+    if (source && typeof source.close === 'function') {
+      source.close();
+    }
+    this.enforceBudget();
+    this.onChange();
+    this.pump();
+  }
+
+  failProduced(entry, error, token, controller) {
+    if (this.destroyed || entry.token !== token || entry.controller !== controller) {
+      return;
+    }
+    const aborted = controller.signal.aborted || (error && error.name === 'AbortError');
+    entry.controller = null;
+    entry.status = aborted ? 'idle' : 'error';
+    entry.error = aborted ? null : error;
+    entry.retryAt = aborted ? 0 : this.now() + this.retryDelayMilliseconds;
+    entry.priority = -Infinity;
+    this.inFlight -= 1;
+    this.onChange();
+    this.pump();
+  }
+
   finishLoading(entry, image, token) {
     if (this.destroyed || entry.token !== token || entry.image !== image) {
       return;
     }
 
+    this.uploadSource(entry, image);
+
+    this.releaseImage(entry, image);
+    this.inFlight -= 1;
+    this.enforceBudget();
+    this.onChange();
+    this.pump();
+  }
+
+  uploadSource(entry, source) {
+    if (!source) {
+      throw new TypeError('tile producer returned no texture source');
+    }
     const gl = this.gl;
     let texture = null;
     try {
@@ -233,10 +303,10 @@ export class TileResourceManager {
       gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
       gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
       gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false);
-      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
+      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, source);
       entry.texture = texture;
-      entry.bytes = (image.naturalWidth || image.width || this.tileSize) *
-        (image.naturalHeight || image.height || this.tileSize) * 4;
+      entry.bytes = (source.naturalWidth || source.width || this.tileSize) *
+        (source.naturalHeight || source.height || this.tileSize) * 4;
       entry.status = 'ready';
       entry.error = null;
       entry.lastUsedFrame = this.frame;
@@ -248,12 +318,6 @@ export class TileResourceManager {
       entry.error = error;
       entry.retryAt = this.now() + this.retryDelayMilliseconds;
     }
-
-    this.releaseImage(entry, image);
-    this.inFlight -= 1;
-    this.enforceBudget();
-    this.onChange();
-    this.pump();
   }
 
   failLoading(entry, image, token) {
@@ -278,6 +342,15 @@ export class TileResourceManager {
   }
 
   cancelLoading(entry) {
+    if (entry.controller) {
+      entry.token += 1;
+      entry.controller.abort();
+      entry.controller = null;
+      entry.status = 'idle';
+      entry.priority = -Infinity;
+      this.inFlight -= 1;
+      return;
+    }
     const image = entry.image;
     entry.token += 1;
     if (image) {
