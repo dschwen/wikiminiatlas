@@ -1,82 +1,78 @@
-<!DOCTYPE html>
-<html>
+<!doctype html>
+<html lang="en">
 <head>
-<!--
-	WikiMiniAtlas external version, IFrame file
-        2008 by Daniel Schwen, licensed under GFDL
--->
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-<link rel="stylesheet" href="wikiminiatlas.css" type="text/css">
-<script id="shader-fs" type="x-shader/x-fragment">
-  precision mediump float;
-
-  varying vec2 vTextureCoord;
-  varying vec3 vLightWeighting;
-
-  uniform sampler2D uSampler;
-
-  void main(void) {
-    vec4 textureColor = texture2D(uSampler, vec2(vTextureCoord.s, vTextureCoord.t));
-    gl_FragColor = vec4(textureColor.rgb * vLightWeighting, textureColor.a);
-  }
-</script>
-<script id="shader-vs" type="x-shader/x-vertex">
-  attribute vec3 aVertexPosition;
-  attribute vec3 aVertexNormal;
-  attribute vec2 aTextureCoord;
-
-  uniform mat4 uMVMatrix;
-  uniform mat4 uPMatrix;
-  uniform mat3 uNMatrix;
-
-  uniform vec3 uAmbientColor;
-
-  uniform vec3 uLightingDirection;
-  uniform vec3 uDirectionalColor;
-
-  varying vec2 vTextureCoord;
-  varying vec3 vLightWeighting;
-
-  void main(void) {
-    gl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1.0);
-    vTextureCoord = aTextureCoord;
-
-    vec3 transformedNormal = uNMatrix * aVertexNormal;
-    float directionalLightWeighting = max(dot(transformedNormal, uLightingDirection), 0.0);
-    vLightWeighting = uAmbientColor + uDirectionalColor * directionalLightWeighting;
-  }
-</script>
-<script id="bldg-vs" type="x-shader/x-vertex">
-  attribute vec3 pos;
-  attribute vec3 norm;
-  uniform vec3 u_resolution;
-  uniform vec3 u_centerdeg;
-  uniform vec3 u_lightdir;
-  varying float light;
-  void main() {
-    vec3 proj = (pos-u_centerdeg)/u_resolution;
-    proj *= vec3(1.0+1.5*proj[2],1.0+1.5*proj[2],-1.0);
-    gl_Position = vec4(proj,1.0);
-    light = dot(norm,u_lightdir)*0.25+0.75;
-  }
-</script>
-<script id="bldg-fs" type="x-shader/x-fragment">
-  precision mediump float;
-  varying float light;
-  void main() {
-    gl_FragColor = vec4(light, light, light, 1.0);
-  }
-</script>
-<script src="wikiminiatlas_extern.php" type="text/javascript"></script>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>WikiMiniAtlas</title>
+  <link rel="stylesheet" href="min/wma-globe.min.css">
 </head>
-<body style="padding:0px;" onselectstart="return false">
-  <div id="wma_widget">
-    <img id="wmaspinner" src="//upload.wikimedia.org/wikipedia/commons/4/42/Loading.gif">
-  </div>
-<script>
-  $(function(){
-    wikiminiatlasInstall($('#wma_widget'));
-  });
-</script>
+<body>
+  <main>
+    <div id="viewport">
+      <canvas id="globe" aria-label="Interactive three-dimensional globe. Drag to orbit and pinch to zoom."></canvas>
+      <canvas id="geometry-overlay" aria-hidden="true"></canvas>
+      <nav id="labels" aria-label="Geographic labels"></nav>
+    </div>
+    <h1 class="visually-hidden">WikiMiniAtlas tiled globe</h1>
+    <button class="map-button" id="button_plus" type="button" aria-label="Zoom in" title="Zoom in"></button>
+    <button class="map-button" id="button_minus" type="button" aria-label="Zoom out" title="Zoom out"></button>
+    <button class="map-button" id="button_target" type="button" aria-label="Center map" title="Center map"></button>
+    <button
+      class="map-button"
+      id="button_kml"
+      type="button"
+      aria-label="Toggle geographic overlay"
+      aria-pressed="true"
+      title="Toggle geographic overlay"
+      hidden
+    ></button>
+    <button class="map-button" id="button_fs" type="button" aria-label="Fullscreen" title="Fullscreen"></button>
+    <button
+      class="map-button"
+      id="button_menu"
+      type="button"
+      aria-controls="controls"
+      aria-expanded="false"
+      aria-label="Map display settings"
+      title="Map display settings"
+    ></button>
+    <form id="controls" aria-label="Map display settings" hidden>
+      <label>
+        <span>Body</span>
+        <select id="body-set" aria-label="Celestial body"></select>
+      </label>
+      <label>
+        <span>Map</span>
+        <select id="tile-set" aria-label="Tile set"></select>
+      </label>
+      <label>
+        <span>Labels</span>
+        <select id="label-set" aria-label="Label language"></select>
+      </label>
+      <label title="Use a dark night side and a physical day/night terminator">
+        <span>Light</span>
+        <span class="checkbox-option">
+          <input id="realistic-lighting" type="checkbox">
+          Day/night
+        </span>
+      </label>
+    </form>
+    <div id="scalebox" role="img" aria-label="Map scale">
+      <div class="scale-entry scale-metric">
+        <span id="scale-metric-label" class="scale-label">— km</span>
+        <span id="scale-metric-bar" class="scale-bar"></span>
+      </div>
+      <div class="scale-entry scale-imperial">
+        <span id="scale-imperial-bar" class="scale-bar"></span>
+        <span id="scale-imperial-label" class="scale-label">— mi</span>
+      </div>
+    </div>
+    <p id="help" class="visually-hidden">Drag to orbit; pinch, scroll, or use the zoom buttons to zoom.</p>
+    <p id="status" class="visually-hidden" role="status">Starting WebGL…</p>
+    <p id="credit" hidden></p>
+    <aside id="article-preview" aria-live="polite" hidden></aside>
+    <p id="error" role="alert" hidden></p>
+  </main>
+  <script src="min/wma-globe.min.js"></script>
 </body>
 </html>

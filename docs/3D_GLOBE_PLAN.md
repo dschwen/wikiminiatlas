@@ -146,6 +146,7 @@ at twice the visible-leaf budget so the remaining LRU cache stays available.
 - Preserve camera and renderer state across back/forward navigation. (Complete in prototype.)
 - Add explicit lifecycle and error states.
 - Switch the primary entry point only after side-by-side behavior tests pass.
+  (Complete for the root `index.html` and deployed `iframe.html` endpoint.)
 
 #### URL compatibility matrix
 
@@ -174,8 +175,8 @@ Implemented mappings:
 The new explicit label override is `labelLang`; `lang` must not be reused for
 labels because doing so breaks existing Wikipedia iframe URLs.
 
-Remaining requirements before `/globe/` can replace `/iframe.html` without a
-host-script change:
+Known compatibility gaps after replacing `/iframe.html` without a host-script
+change:
 
 - display the primary marker and extra markers;
 - implement the remaining accepted and emitted `postMessage` contracts
@@ -184,8 +185,7 @@ host-script change:
 - decide whether `awt=1` opens summaries without a modifier;
 - add UI localization from `wma[6]`;
 - cover Commons labels/previews; and
-- deploy an `iframe.html` compatibility entry or change the embedder only after
-  side-by-side tests confirm equivalent behavior.
+- continue side-by-side testing of the deployed iframe integration.
 
 ## First-slice acceptance criteria
 
@@ -194,4 +194,6 @@ host-script change:
 - Available legacy raster tiles follow the sphere without stitching them into a global texture.
 - Dragging orbits the camera and scrolling changes both altitude and tile detail.
 - Tiles wholly beyond the geometric horizon are not submitted.
-- The prototype does not alter the existing application entry points.
+- The production globe replaces both the legacy root demo page and
+  `iframe.html`; the latter retains the existing URL and implemented
+  request/attached-KML parent contract.

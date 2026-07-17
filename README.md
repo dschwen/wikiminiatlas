@@ -34,3 +34,7 @@ The build bundles the globe modules and Poly2Tri into
 `min/wmaglobe3d.min.js` overview component is a separate program and remains
 unchanged. `make globe` invokes the same production build after dependencies
 have been installed.
+
+The root `index.html` and the deployed Wikipedia endpoint `iframe.html` are
+production 3D globe entries that load these two generated assets.
+`globe/index.html` remains the unbundled development entry.

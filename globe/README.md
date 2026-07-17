@@ -1,6 +1,9 @@
-# Tiled globe prototype
+# Tiled globe
 
-This directory contains the first vertical slice of the WikiMiniAtlas globe overhaul. It deliberately runs alongside the legacy application rather than changing its entry point.
+This directory contains the readable development sources for the WikiMiniAtlas
+globe overhaul. The repository root now serves the production bundle, while
+this directory retains the unbundled development entry and tests. The deployed
+`iframe.html` endpoint serves the same production globe bundle.
 
 Implemented so far:
 
@@ -208,7 +211,8 @@ This produces `min/wma-globe.min.js` (all globe modules plus Poly2Tri) and
 `min/wma-globe.min.css`, with source maps. The files in this directory remain
 the readable development sources. The production entry page can therefore load
 one ordinary JavaScript file instead of the module graph and separate
-`poly2tri.min.js` script.
+`poly2tri.min.js` script. The root `index.html` and deployed `iframe.html`
+endpoint are the production entries.
 
 The default maximum tile level is 20 for Earth's JSON-capable full basemap.
 Wheel zoom scales altitude above the surface from 0.0000625 to 50 Earth radii

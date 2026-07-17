@@ -1,80 +1,78 @@
-<html>
-
+<!doctype html>
+<html lang="en">
 <head>
-  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-  <style type="text/css">
-    @media (min-width: 842px) {
-      #content {
-        width: 800px;
-        /*height: 100%;*/
-        position: absolute;
-        left: 50%;
-        margin-left: -420px;
-        border: 1px solid gray;
-        border-top: none;
-      }
-
-      body {
-        background-color: #eeeeee;
-      }
-    }
-
-    #content {
-      padding: 20px;
-      background-color: white;
-    }
-
-    body {
-      margin: 0;
-    }
-
-    h1 {
-      font-family: sans-serif;
-    }
-
-    p {
-      margin-top: 2em;
-    }
-  </style>
-  <script type="text/javascript" src="min/jquery.min.js"></script>
-  <script>
-    function wmaMessageHub(e) {
-      e = e.originalEvent;
-      if (e.data == 'request') {
-        //e.source.postMessage(JSON.stringify( {coords: poi} ), '*');
-        //ps = e.source;
-      }
-      if (e.data == 'kml') {
-        e.source.postMessage('1,1', '*');
-      }
-    }
-    $(window).on('message', wmaMessageHub);
-  </script>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>WikiMiniAtlas</title>
+  <link rel="stylesheet" href="min/wma-globe.min.css">
 </head>
-
 <body>
-  <div id="content">
-    <h1>WikiMiniAtlas</h1>
-    <!--<iframe scrolling="no" frameborder="0" width="800" height="600" src="iframe.html?40.7833_-73.966_800_600_en_13_en" style="width:800px; height:600px; border: 1px solid gray; padding: 0px; margin: 0px; resize: both">-->
-    <iframe id="map" scrolling="no" frameborder="0" width="800" height="600"
-      src="iframe_dev.html?wma=0.0_0.0_800_600_commons_1_en&globe=Earth&lang=en"
-      style="width:800px; height:600px; border: 1px solid gray; padding: 0px; margin: 0px; resize: both">
-      You need a browser that supports iframes
-    </iframe>
-
-    <p><b>WikiMiniAtlas</b> is a JavaScript plugin to display a draggable, zoomable, and clickable worldmap (as well as
-      Moon, Mars, Venus, Mercury, Io and Titan imagery) in geocoded Wikipedia articles. The map contains links to all
-      other geocoded articles in Wikipedia and can be magnified down to streetlevel. 3D building models are displayed in
-      modern browsers.</p>
-    <a href="https://meta.wikimedia.org/wiki/WikiMiniAtlas">More...</a>
-  </div>
-  <script>
-    var hash = document.location.hash;
-    if (hash) {
-      var lang = hash.substr(1);
-      $('#map').attr('src', 'iframe_dev.html?wma=40.572795868,0_-74.040813_800_600_' + lang + '_13_' + lang + '&globe=Earth&lang=' + lang);
-    }
-  </script>
+  <main>
+    <div id="viewport">
+      <canvas id="globe" aria-label="Interactive three-dimensional globe. Drag to orbit and pinch to zoom."></canvas>
+      <canvas id="geometry-overlay" aria-hidden="true"></canvas>
+      <nav id="labels" aria-label="Geographic labels"></nav>
+    </div>
+    <h1 class="visually-hidden">WikiMiniAtlas tiled globe</h1>
+    <button class="map-button" id="button_plus" type="button" aria-label="Zoom in" title="Zoom in"></button>
+    <button class="map-button" id="button_minus" type="button" aria-label="Zoom out" title="Zoom out"></button>
+    <button class="map-button" id="button_target" type="button" aria-label="Center map" title="Center map"></button>
+    <button
+      class="map-button"
+      id="button_kml"
+      type="button"
+      aria-label="Toggle geographic overlay"
+      aria-pressed="true"
+      title="Toggle geographic overlay"
+      hidden
+    ></button>
+    <button class="map-button" id="button_fs" type="button" aria-label="Fullscreen" title="Fullscreen"></button>
+    <button
+      class="map-button"
+      id="button_menu"
+      type="button"
+      aria-controls="controls"
+      aria-expanded="false"
+      aria-label="Map display settings"
+      title="Map display settings"
+    ></button>
+    <form id="controls" aria-label="Map display settings" hidden>
+      <label>
+        <span>Body</span>
+        <select id="body-set" aria-label="Celestial body"></select>
+      </label>
+      <label>
+        <span>Map</span>
+        <select id="tile-set" aria-label="Tile set"></select>
+      </label>
+      <label>
+        <span>Labels</span>
+        <select id="label-set" aria-label="Label language"></select>
+      </label>
+      <label title="Use a dark night side and a physical day/night terminator">
+        <span>Light</span>
+        <span class="checkbox-option">
+          <input id="realistic-lighting" type="checkbox">
+          Day/night
+        </span>
+      </label>
+    </form>
+    <div id="scalebox" role="img" aria-label="Map scale">
+      <div class="scale-entry scale-metric">
+        <span id="scale-metric-label" class="scale-label">— km</span>
+        <span id="scale-metric-bar" class="scale-bar"></span>
+      </div>
+      <div class="scale-entry scale-imperial">
+        <span id="scale-imperial-bar" class="scale-bar"></span>
+        <span id="scale-imperial-label" class="scale-label">— mi</span>
+      </div>
+    </div>
+    <p id="help" class="visually-hidden">Drag to orbit; pinch, scroll, or use the zoom buttons to zoom.</p>
+    <p id="status" class="visually-hidden" role="status">Starting WebGL…</p>
+    <p id="credit" hidden></p>
+    <aside id="article-preview" aria-live="polite" hidden></aside>
+    <p id="error" role="alert" hidden></p>
+  </main>
+  <script src="min/wma-globe.min.js"></script>
 </body>
-
 </html>
