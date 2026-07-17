@@ -3,7 +3,8 @@ import assert from 'node:assert/strict';
 
 import {
   collectBuildingResources,
-  normalizeLightDirection
+  normalizeLightDirection,
+  tileDemandsFor
 } from './globe-renderer.mjs';
 
 test('normalizes and validates world-space light directions', () => {
@@ -57,4 +58,25 @@ test('retains and deduplicates ancestor buildings during tile refinement', () =>
   ]);
 
   assert.deepEqual(resources, [parentBuildings, unrelatedBuildings]);
+});
+
+test('requests direct leaves while retaining only a coarse coverage demand', () => {
+  const tile = { x: 19, y: 10, z: 4, projectedPixels: 350 };
+
+  assert.deepEqual(tileDemandsFor(tile, null), [
+    { tile: { x: 1, y: 0, z: 0 }, priority: 200350, pin: true },
+    { tile: { x: 19, y: 10, z: 4 }, priority: 100350, pin: true }
+  ]);
+  assert.deepEqual(tileDemandsFor(tile, { fallbackLevels: 3 }), [
+    { tile: { x: 19, y: 10, z: 4 }, priority: 100350, pin: true }
+  ]);
+  assert.deepEqual(tileDemandsFor(tile, { fallbackLevels: 0 }), []);
+});
+
+test('does not start detailed work while refinement is blocked', () => {
+  const tile = { x: 19, y: 10, z: 4, projectedPixels: 350 };
+  assert.deepEqual(tileDemandsFor(tile, null, true), [
+    { tile: { x: 1, y: 0, z: 0 }, priority: 200350, pin: true }
+  ]);
+  assert.deepEqual(tileDemandsFor(tile, { fallbackLevels: 3 }, true), []);
 });

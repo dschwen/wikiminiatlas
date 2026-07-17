@@ -123,6 +123,53 @@ test('renders streets after land polygons regardless of server feature order', (
   assert.ok(roadStroke > landFill);
 });
 
+test('renders all inland water polygons after land areas and before roads', () => {
+  const calls = [];
+  const context = new Proxy({}, {
+    get(target, property) {
+      if (!(property in target)) {
+        target[property] = (...args) => calls.push([property, ...args]);
+      }
+      return target[property];
+    },
+    set(target, property, value) {
+      calls.push([`set:${property}`, value]);
+      target[property] = value;
+      return true;
+    }
+  });
+  const canvas = { width: 0, height: 0, getContext: () => context };
+  const data = validateJsonTile(payload([
+    {
+      tags: { highway: 'primary' },
+      geo: { type: 'LineString', coordinates: [[180, 45], [180.005, 44.995]] }
+    },
+    polygonFeature({ natural: 'water' }),
+    polygonFeature({ natural: 'land_polygons' }),
+    polygonFeature({ landuse: 'reservoir' }),
+    polygonFeature({ leisure: 'park' }),
+    polygonFeature({ waterway: 'riverbank' })
+  ]), requestedTile);
+  renderJsonTile(data, { createCanvas: () => canvas });
+
+  const landFill = calls.findIndex(([name, value]) =>
+    name === 'set:fillStyle' && value === '#fafad0'
+  );
+  const areaFill = calls.findIndex(([name, value]) =>
+    name === 'set:fillStyle' && value === '#c8e0c8'
+  );
+  const roadStroke = calls.findIndex(([name, value]) =>
+    name === 'set:strokeStyle' && value === '#e5ad75'
+  );
+  const waterFills = calls
+    .map(([name, value], index) => name === 'set:fillStyle' && value === '#9ec7f3' ? index : -1)
+    .filter((index) => index > landFill);
+
+  assert.equal(waterFills.length, 3);
+  assert.ok(areaFill > landFill);
+  assert.ok(waterFills.every((index) => index > areaFill && index < roadStroke));
+});
+
 test('keeps building features out of the JSON canvas texture', () => {
   const calls = [];
   const context = new Proxy({}, {
@@ -178,6 +225,28 @@ test('fetches, validates, and renders through a cancellable producer', async () 
   assert.equal(result, canvas);
   assert.equal(requests[0].options.signal, controller.signal);
   assert.equal(requests[0].options.credentials, 'same-origin');
+});
+
+test('marks permanent HTTP failures so the resource cache will not retry them', async () => {
+  const producer = createJsonTileProducer({
+    fetchImpl: async () => ({ ok: false, status: 404 })
+  });
+  await assert.rejects(
+    producer(requestedTile, '/missing', new AbortController().signal),
+    (error) => error.status === 404 && error.retryable === false
+  );
+});
+
+test('keeps throttling and server HTTP failures retryable', async () => {
+  for (const status of [429, 503]) {
+    const producer = createJsonTileProducer({
+      fetchImpl: async () => ({ ok: false, status })
+    });
+    await assert.rejects(
+      producer(requestedTile, '/retry', new AbortController().signal),
+      (error) => error.status === status && error.retryable === true
+    );
+  }
 });
 
 test('returns bounded building geometry with detailed JSON textures', async () => {

@@ -223,6 +223,38 @@ export function collectBuildingResources(draws) {
   return selected.map((entry) => entry.auxiliary);
 }
 
+export function tileDemandsFor(tile, resolved, refinementBlocked = false) {
+  const ancestry = ancestorsFromRoot(tile);
+  const root = ancestry[0];
+  const demands = [];
+
+  // Establish coverage first so a direct high-zoom link never exposes the
+  // procedural placeholder longer than necessary.
+  if (!resolved) {
+    demands.push({
+      tile: root,
+      priority: 200000 + tile.projectedPixels,
+      pin: true
+    });
+  }
+
+  // Once interaction settles, skip disposable intermediate generations and
+  // request the selected leaf directly. The closest resident ancestor remains
+  // visible until this resource is ready.
+  if (!refinementBlocked && (!resolved || resolved.fallbackLevels > 0)) {
+    const rootIsLeaf = root.x === tile.x && root.y === tile.y && root.z === tile.z;
+    if (!rootIsLeaf || resolved) {
+      demands.push({
+        tile: { x: tile.x, y: tile.y, z: tile.z },
+        priority: 100000 + tile.projectedPixels,
+        pin: true
+      });
+    }
+  }
+
+  return demands;
+}
+
 export class GlobeRenderer {
   constructor(canvas, {
     grid = new PlateCarreeGrid(),
@@ -233,8 +265,8 @@ export class GlobeRenderer {
     patchSegments = 12,
     maximumVisibleTiles = 256,
     maximumConcurrentRequests = 12,
-    maximumResidentTextures = 384,
-    maximumTextureBytes = 32 * 1024 * 1024,
+    maximumResidentTextures = 768,
+    maximumTextureBytes = 64 * 1024 * 1024,
     maximumBuildingBytes = 32 * 1024 * 1024,
     maximumLabelZoom = 13,
     maximumLabelTiles = 128,
@@ -703,21 +735,9 @@ export class GlobeRenderer {
     let placeholderCount = 0;
     for (const tile of tiles) {
       let resolved = this.resources.resolve(tile);
-      const ancestry = ancestorsFromRoot(tile);
 
-      if (!this.refinementBlocked) {
-        const nextZoom = resolved ? resolved.entry.tile.z + 1 : 0;
-        if (nextZoom <= tile.z) {
-          this.resources.demand(ancestry[nextZoom], {
-            priority: 100000 - nextZoom * 1000 + tile.projectedPixels,
-            pin: nextZoom === 0
-          });
-        }
-      } else if (!resolved) {
-        this.resources.demand(ancestry[0], {
-          priority: 100000 + tile.projectedPixels,
-          pin: true
-        });
+      for (const demand of tileDemandsFor(tile, resolved, this.refinementBlocked)) {
+        this.resources.demand(demand.tile, demand);
       }
 
       resolved = this.resources.resolve(tile);

@@ -4,24 +4,35 @@ const DEFAULT_MAXIMUM_RESPONSE_BYTES = 2 * 1024 * 1024;
 const DEFAULT_MAXIMUM_FEATURES = 20000;
 const DEFAULT_MAXIMUM_COORDINATES = 500000;
 
-const POLYGON_RULES = [
-  [['natural', 'land_polygons'], { order: 0, fill: '#fafad0' }],
-  [['natural', ['water', 'bay', 'wetland', 'mud']], { order: 10, fill: '#9ec7f3', stroke: '#9ec7f3' }],
-  [['natural', ['wood', 'scrub']], { order: 20, fill: '#96d696' }],
-  [['natural', ['beach', 'sand']], { order: 20, fill: '#faf2af' }],
-  [['natural', ['glacier']], { order: 20, fill: '#e6f5ff', stroke: '#fff' }],
-  [['landuse', ['industrial', 'retail', 'commercial', 'residential']], { order: 30, fill: '#d0d0d0' }],
-  [['landuse', ['reservoir']], { order: 30, fill: '#9ec7f3' }],
-  [['landuse', ['military', 'railway']], { order: 30, fill: '#e0c8c8' }],
-  [['landuse', ['cemetery', 'recreation_ground', 'grass']], { order: 30, fill: '#bed6be' }],
-  [['leisure', ['park', 'garden', 'meadow', 'village_green', 'golf_course', 'pitch']], { order: 40, fill: '#c8e0c8' }],
-  [['leisure', ['swimming_pool']], { order: 40, fill: '#c8c8e0' }],
-  [['amenity', ['parking']], { order: 50, fill: '#f0ebc1' }],
-  [['aeroway', ['terminal']], { order: 50, fill: '#bed2be', stroke: '#7f897f' }]
+const LAND_POLYGON_RULES = [
+  [['natural', 'land_polygons'], { fill: '#fafad0' }]
 ];
 
-const LINE_RULES = [
-  [['waterway', true], { stroke: '#6b9ed6', width: 1.5 }],
+const AREA_POLYGON_RULES = [
+  [['natural', ['wetland', 'mud']], { fill: '#c8dae0' }],
+  [['natural', ['wood', 'scrub']], { fill: '#96d696' }],
+  [['natural', ['beach', 'sand']], { fill: '#faf2af' }],
+  [['natural', ['glacier']], { fill: '#e6f5ff', stroke: '#fff' }],
+  [['landuse', ['industrial', 'retail', 'commercial', 'residential']], { fill: '#d0d0d0' }],
+  [['landuse', ['military', 'railway']], { fill: '#e0c8c8' }],
+  [['landuse', ['cemetery', 'recreation_ground', 'grass']], { fill: '#bed6be' }],
+  [['leisure', ['park', 'garden', 'meadow', 'village_green', 'golf_course', 'pitch']], { fill: '#c8e0c8' }],
+  [['amenity', ['parking']], { fill: '#f0ebc1' }],
+  [['aeroway', ['terminal']], { fill: '#bed2be', stroke: '#7f897f' }]
+];
+
+const WATER_POLYGON_RULES = [
+  [['natural', ['water', 'bay']], { fill: '#9ec7f3', stroke: '#9ec7f3' }],
+  [['landuse', 'reservoir'], { fill: '#9ec7f3', stroke: '#9ec7f3' }],
+  [['waterway', ['riverbank', 'dock']], { fill: '#9ec7f3', stroke: '#9ec7f3' }],
+  [['leisure', 'swimming_pool'], { fill: '#c8c8e0' }]
+];
+
+const WATER_LINE_RULES = [
+  [['waterway', true], { stroke: '#6b9ed6', width: 1.5 }]
+];
+
+const TRANSPORT_LINE_RULES = [
   [['railway', true], { stroke: '#777', width: 1, dash: [3, 2] }],
   [['aeroway', ['runway']], { stroke: '#aaa', width: 3 }],
   [['aeroway', ['taxiway']], { stroke: '#bbb', width: 1.5 }],
@@ -32,6 +43,15 @@ const LINE_RULES = [
   [['highway', ['footway', 'path', 'cycleway', 'track']], { stroke: '#b98d75', width: 1, dash: [2, 2] }],
   [['barrier', true], { stroke: '#777', width: 1 }]
 ];
+
+export class TileRequestError extends Error {
+  constructor(message, { status = null, retryable = true } = {}) {
+    super(message);
+    this.name = 'TileRequestError';
+    this.status = status;
+    this.retryable = retryable;
+  }
+}
 
 function finiteCoordinate(value) {
   return typeof value === 'number' && Number.isFinite(value);
@@ -207,48 +227,52 @@ export function renderJsonTile(tileData, {
     if (close) context.closePath();
   };
 
-  const polygonDraws = [];
-  for (const feature of tileData.data) {
-    // Buildings are an independent 3D resource. Keeping their footprints out
-    // of the canvas avoids duplicating them and lets the surface imagery below
-    // remain visible through translucent building geometry.
-    if ('building' in feature.tags || 'building:part' in feature.tags) continue;
-    const polygonStyle = matchingStyle(feature.tags, POLYGON_RULES);
-    if (polygonStyle) {
+  const drawPolygons = (rules) => {
+    for (const feature of tileData.data) {
+      // Buildings are an independent 3D resource. Keeping their footprints out
+      // of the canvas avoids duplicating them and lets the surface imagery below
+      // remain visible through translucent building geometry.
+      if ('building' in feature.tags || 'building:part' in feature.tags) continue;
+      const style = matchingStyle(feature.tags, rules);
+      if (!style) continue;
       for (const polygon of geometryParts(feature.geo, 'polygon')) {
-        polygonDraws.push({ polygon, style: polygonStyle });
+        context.beginPath();
+        for (const ring of polygon) traceLine(ring, true);
+        if (style.fill) {
+          context.fillStyle = style.fill;
+          context.fill('evenodd');
+        }
+        if (style.stroke) {
+          context.strokeStyle = style.stroke;
+          context.lineWidth = lineWidthMultiplier;
+          context.stroke();
+        }
       }
     }
-  }
-  polygonDraws.sort((first, second) => first.style.order - second.style.order);
-  for (const { polygon, style } of polygonDraws) {
-    context.beginPath();
-    for (const ring of polygon) traceLine(ring, true);
-    if (style.fill) {
-      context.fillStyle = style.fill;
-      context.fill('evenodd');
-    }
-    if (style.stroke) {
-      context.strokeStyle = style.stroke;
-      context.lineWidth = lineWidthMultiplier;
-      context.stroke();
-    }
-  }
+  };
 
-  // Roads, rails, waterways, and barriers always paint above polygon fills.
-  // The server does not promise feature ordering, so this must be a separate pass.
-  for (const feature of tileData.data) {
-    const lineStyle = matchingStyle(feature.tags, LINE_RULES);
-    if (lineStyle) {
+  const drawLines = (rules) => {
+    for (const feature of tileData.data) {
+      const style = matchingStyle(feature.tags, rules);
+      if (!style) continue;
+      const lines = geometryParts(feature.geo, 'line');
+      if (lines.length === 0) continue;
       context.beginPath();
-      for (const line of geometryParts(feature.geo, 'line')) traceLine(line);
-      context.strokeStyle = lineStyle.stroke;
-      context.lineWidth = lineStyle.width * lineWidthMultiplier;
-      context.setLineDash(lineStyle.dash || []);
+      for (const line of lines) traceLine(line);
+      context.strokeStyle = style.stroke;
+      context.lineWidth = style.width * lineWidthMultiplier;
+      context.setLineDash(style.dash || []);
       context.stroke();
       context.setLineDash([]);
     }
-  }
+  };
+
+  // Keep the cartographic stack independent of arbitrary server feature order.
+  drawPolygons(LAND_POLYGON_RULES);
+  drawPolygons(AREA_POLYGON_RULES);
+  drawPolygons(WATER_POLYGON_RULES);
+  drawLines(WATER_LINE_RULES);
+  drawLines(TRANSPORT_LINE_RULES);
   return canvas;
 }
 
@@ -268,7 +292,13 @@ export function createJsonTileProducer({
       credentials: 'same-origin'
     });
     if (!response.ok) {
-      throw new Error(`JSON tile request failed with HTTP ${response.status}`);
+      const status = Number(response.status);
+      const retryable = !Number.isFinite(status) ||
+        status === 408 || status === 429 || status >= 500;
+      throw new TileRequestError(`JSON tile request failed with HTTP ${response.status}`, {
+        status: Number.isFinite(status) ? status : null,
+        retryable
+      });
     }
     const declaredLength = Number(response.headers && response.headers.get('content-length'));
     if (Number.isFinite(declaredLength) && declaredLength > maximumResponseBytes) {

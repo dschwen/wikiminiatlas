@@ -53,10 +53,10 @@ export class TileResourceManager {
     now = () => performance.now(),
     onChange = () => {},
     maximumConcurrentRequests = 12,
-    maximumResidentTextures = 384,
-    maximumTextureBytes = 32 * 1024 * 1024,
+    maximumResidentTextures = 768,
+    maximumTextureBytes = 64 * 1024 * 1024,
     maximumAuxiliaryBytes = 32 * 1024 * 1024,
-    maximumEntries = 1536,
+    maximumEntries = 3072,
     cancellationGraceFrames = 2,
     retryDelayMilliseconds = 30000
   }) {
@@ -279,7 +279,11 @@ export class TileResourceManager {
     entry.controller = null;
     entry.status = aborted ? 'idle' : 'error';
     entry.error = aborted ? null : error;
-    entry.retryAt = aborted ? 0 : this.now() + this.retryDelayMilliseconds;
+    entry.retryAt = aborted
+      ? 0
+      : error && error.retryable === false
+        ? Infinity
+        : this.now() + this.retryDelayMilliseconds;
     entry.priority = -Infinity;
     this.inFlight -= 1;
     this.onChange();

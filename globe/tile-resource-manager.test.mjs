@@ -189,6 +189,35 @@ test('aborts asynchronous producers that leave the desired generation', async ()
   assert.equal(manager.entries.get('0/0/0').status, 'idle');
 });
 
+test('does not retry producer errors marked as permanent', async () => {
+  let attempts = 0;
+  let currentTime = 0;
+  const error = Object.assign(new Error('missing tile'), { retryable: false });
+  const { manager } = makeHarness({
+    now: () => currentTime,
+    retryDelayMilliseconds: 10,
+    tileProducer: async () => {
+      attempts += 1;
+      throw error;
+    }
+  });
+  const tile = { x: 0, y: 0, z: 0 };
+
+  manager.beginFrame();
+  manager.demand(tile);
+  manager.endFrame();
+  await new Promise((resolve) => setImmediate(resolve));
+  assert.equal(attempts, 1);
+  assert.equal(manager.entryFor(tile).retryAt, Infinity);
+
+  currentTime = 100000;
+  manager.beginFrame();
+  manager.demand(tile);
+  manager.endFrame();
+  await new Promise((resolve) => setImmediate(resolve));
+  assert.equal(attempts, 1);
+});
+
 test('accounts for and deletes tile-owned auxiliary GPU resources', async () => {
   const deleted = [];
   const { manager } = makeHarness({

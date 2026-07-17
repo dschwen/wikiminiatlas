@@ -8,7 +8,7 @@ Implemented so far:
 - conversion between render rows and the label service's south-to-north rows;
 - raster tiles rendered as independently textured spherical patches;
 - hierarchical horizon/frustum culling and budgeted front-surface tile selection;
-- progressive parent-tile fallback while detailed imagery loads;
+- direct leaf-tile refinement over the nearest loaded parent fallback;
 - bounded texture memory, metadata, and concurrent image requests;
 - batched legacy label loading with globe projection and horizon culling;
 - legacy label symbol styling, weight-ordered collision filtering, and accessible Wikipedia links;
@@ -103,7 +103,10 @@ http://localhost:8000/globe/?jsonTileBase=https://example.org/tiles/jsontile.php
 ```
 
 JSON work shares the 12-request concurrency ceiling and is aborted when it
-leaves the desired tile generation. Responses are capped at 2 MiB, 20,000
+leaves the desired tile generation. Detailed leaves are requested directly
+over one coarse or previously loaded ancestor, so disposable intermediate JSON
+tiles and their building meshes are never produced. Permanent JSON HTTP errors
+are not retried. Responses are capped at 2 MiB, 20,000
 features, and 500,000 coordinates. Older responses without a server-side tag
 index receive one client-side. While a JSON tile loads or fails validation, the
 existing nearest-ancestor texture remains visible.
@@ -115,7 +118,7 @@ and rectangular gabled-roof metadata follow the legacy renderer. Buildings are
 assigned to the tile containing their centroid so padded server responses do
 not duplicate geometry at tile boundaries. Each tile is capped at 1,600
 building triangles and the globe enforces a hard 32 MiB building-buffer budget
-separately from its 32 MiB texture budget. Eviction, map/body switching, and
+separately from its 64 MiB texture budget. Eviction, map/body switching, and
 renderer teardown delete the associated GPU buffers; there is no append-only
 global building buffer. The per-tile cap is sized so all 256 possible visible
 leaf tiles fit inside the building budget; older off-screen meshes are therefore
