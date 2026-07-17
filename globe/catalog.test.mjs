@@ -15,6 +15,8 @@ test('catalog retains the six legacy Earth raster layers', () => {
     'mapnik', 'physical', 'satellite', 'coastline', 'blue-marble', 'night'
   ]);
   assert.equal(tileSourceById('mapnik').jsonFromZoom, 13);
+  assert.equal(tileSourceById('mapnik').maximumZoom, 20);
+  assert.equal(tileSourceById('mapnik').minimumCameraAltitude, 0.0000625);
   assert.equal(tileSourceById('physical').jsonFromZoom, undefined);
   assert.equal(tileSourceById('missing').id, 'mapnik');
 });

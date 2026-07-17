@@ -48,6 +48,13 @@ test('keeps modern parameters while separating article and label languages', () 
   assert.equal(state.realisticLighting, true);
 });
 
+test('preserves an explicit distance within the extended Earth zoom range', () => {
+  const state = parseGlobeUrl(
+    'https://wma.test/globe/?distance=1.0000625'
+  );
+  assert.equal(state.distance, 1.0000625);
+});
+
 test('does not interpret missing modern coordinates as zero', () => {
   const state = parseGlobeUrl('https://wma.test/globe/?labels=0');
   assert.deepEqual(state.marker, { latitude: 35, longitude: -112 });

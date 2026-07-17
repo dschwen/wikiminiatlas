@@ -32,7 +32,7 @@ const BODY_DEFINITIONS = [
     sources: [
       {
         id: 'mapnik', label: 'Full basemap', maximumZoom: 20,
-        jsonFromZoom: 13, ...BLUE_LABELS,
+        jsonFromZoom: 13, minimumCameraAltitude: 0.0000625, ...BLUE_LABELS,
         attribution: [
           { label: 'Map data © OpenStreetMap contributors', href: 'https://www.openstreetmap.org/' },
           { label: 'ODbL', href: 'https://opendatacommons.org/licenses/odbl/' }

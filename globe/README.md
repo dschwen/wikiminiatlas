@@ -158,9 +158,11 @@ discarded before a current mesh, avoiding budget-driven flicker. The building
 pass also restores its WebGL vertex-attribute state before those buffers can be
 evicted, keeping subsequent surface-only frames valid while zooming out.
 
-The default maximum detail is now zoom 17 for the JSON-capable full basemap.
-The existing `maxZoom` URL parameter can request up to zoom 20. Other map sets
-remain constrained by their catalog maximums.
+The JSON-capable Earth full basemap defaults to zoom 20 and permits the camera
+to approach eight times closer than the legacy raster layers, exposing three
+additional detail levels. The existing `maxZoom` URL parameter can lower the
+limit. Other map sets remain constrained by their catalog maximums and the
+original camera altitude floor.
 
 Each body's surface and buildings share a world-space directional light aimed
 at its current subsolar point. The direction is computed locally from UTC and
@@ -185,8 +187,9 @@ Run the coordinate tests with:
 node --test globe/*.test.mjs
 ```
 
-The default maximum tile level is 17 and can be raised to 20 through `maxZoom`.
-Wheel zoom scales altitude above the surface from 0.0005 to 50 planet radii;
+The default maximum tile level is 20 for Earth's JSON-capable full basemap.
+Wheel zoom scales altitude above the surface from 0.0000625 to 50 Earth radii
+there, and from 0.0005 to 50 planet radii on the legacy raster layers;
 pointer sensitivity decreases with the visible surface footprint at close range.
 On touch screens, moving two fingers apart zooms in, moving them together zooms
 out, and moving their midpoint orbits the globe.

@@ -97,7 +97,8 @@ export function distanceForAngularRadius({
   viewportWidth,
   viewportHeight,
   fieldOfViewRadians = FIELD_OF_VIEW_RADIANS,
-  padding = 0.18
+  padding = 0.18,
+  minimumAltitude = 0.0005
 }) {
   if (!Number.isFinite(angularRadius) || angularRadius < 0) {
     throw new RangeError('angular radius must be a non-negative finite number');
@@ -105,6 +106,9 @@ export function distanceForAngularRadius({
   if (!Number.isFinite(viewportWidth) || viewportWidth <= 0 ||
       !Number.isFinite(viewportHeight) || viewportHeight <= 0) {
     throw new RangeError('viewport dimensions must be positive');
+  }
+  if (!Number.isFinite(minimumAltitude) || minimumAltitude <= 0) {
+    throw new RangeError('minimumAltitude must be a positive finite number');
   }
   const verticalHalfAngle = fieldOfViewRadians / 2;
   const horizontalHalfAngle = Math.atan(
@@ -115,7 +119,7 @@ export function distanceForAngularRadius({
   const radius = Math.min(angularRadius, Math.PI / 2 - 0.001);
   return clamp(
     Math.cos(radius) + Math.sin(radius) / Math.tan(availableHalfAngle),
-    1.0005,
+    1 + minimumAltitude,
     51
   );
 }
@@ -293,6 +297,7 @@ export class GlobeRenderer {
     tileProducer = null,
     interactionElement = canvas,
     maximumZoom = 15,
+    minimumCameraAltitude = 0.0005,
     patchSegments = 12,
     maximumVisibleTiles = 256,
     maximumConcurrentRequests = 12,
@@ -321,6 +326,9 @@ export class GlobeRenderer {
     if (!Number.isInteger(maximumZoom) || maximumZoom < 0 || maximumZoom > 30) {
       throw new RangeError('maximumZoom must be an integer between 0 and 30');
     }
+    if (!Number.isFinite(minimumCameraAltitude) || minimumCameraAltitude <= 0) {
+      throw new RangeError('minimumCameraAltitude must be a positive finite number');
+    }
 
     this.canvas = canvas;
     this.interactionElement = interactionElement;
@@ -328,6 +336,7 @@ export class GlobeRenderer {
     this.tileUrl = tileUrl;
     this.tileProducer = tileProducer;
     this.maximumZoom = maximumZoom;
+    this.minimumCameraAltitude = minimumCameraAltitude;
     this.maximumVisibleTiles = maximumVisibleTiles;
     this.configuredMaximumLabelZoom = maximumLabelZoom;
     this.maximumLabelZoom = Math.min(maximumZoom, this.configuredMaximumLabelZoom);
@@ -339,7 +348,7 @@ export class GlobeRenderer {
       ? clamp(initialLatitude, -89, 89)
       : 35;
     this.distance = Number.isFinite(initialDistance)
-      ? clamp(initialDistance, 1.0005, 51)
+      ? clamp(initialDistance, 1 + this.minimumCameraAltitude, 51)
       : 3.1;
     this.lightDirection = normalizeLightDirection(lightDirection);
     this.realisticLighting = Boolean(realisticLighting);
@@ -413,7 +422,8 @@ export class GlobeRenderer {
   setTileSource({
     tileUrl,
     tileProducer = null,
-    maximumZoom = this.maximumZoom
+    maximumZoom = this.maximumZoom,
+    minimumCameraAltitude = this.minimumCameraAltitude
   }) {
     if (typeof tileUrl !== 'function') {
       throw new TypeError('tileUrl must be a function');
@@ -421,10 +431,15 @@ export class GlobeRenderer {
     if (!Number.isInteger(maximumZoom) || maximumZoom < 0 || maximumZoom > 30) {
       throw new RangeError('maximumZoom must be an integer between 0 and 30');
     }
+    if (!Number.isFinite(minimumCameraAltitude) || minimumCameraAltitude <= 0) {
+      throw new RangeError('minimumCameraAltitude must be a positive finite number');
+    }
     const previousResources = this.resources;
     this.tileUrl = tileUrl;
     this.tileProducer = tileProducer;
     this.maximumZoom = maximumZoom;
+    this.minimumCameraAltitude = minimumCameraAltitude;
+    this.distance = Math.max(this.distance, 1 + this.minimumCameraAltitude);
     this.maximumLabelZoom = Math.min(maximumZoom, this.configuredMaximumLabelZoom);
     this.resources = this.createResourceManager(tileUrl, tileProducer);
     previousResources.destroy();
@@ -445,7 +460,8 @@ export class GlobeRenderer {
   zoomBySteps(steps) {
     this.distance = distanceAfterZoomSteps({
       distance: this.distance,
-      steps
+      steps,
+      minimumAltitude: this.minimumCameraAltitude
     });
     this.deferRefinement();
     this.requestRender();
@@ -471,6 +487,7 @@ export class GlobeRenderer {
       angularRadius,
       viewportWidth: Math.max(1, this.canvas.clientWidth),
       viewportHeight: Math.max(1, this.canvas.clientHeight),
+      minimumAltitude: this.minimumCameraAltitude,
       ...options
     });
     this.deferRefinement();
@@ -592,7 +609,8 @@ export class GlobeRenderer {
         this.distance = distanceAfterPinch({
           distance: gesture.distance,
           startSpan: gesture.span,
-          currentSpan
+          currentSpan,
+          minimumAltitude: this.minimumCameraAltitude
         });
         this.longitude = gesture.longitude -
           (currentCenter.x - gesture.center.x) * degreesPerPixel;
@@ -653,7 +671,8 @@ export class GlobeRenderer {
       event.preventDefault();
       this.distance = distanceAfterWheel({
         distance: this.distance,
-        deltaY: event.deltaY
+        deltaY: event.deltaY,
+        minimumAltitude: this.minimumCameraAltitude
       });
       this.deferRefinement();
       this.requestRender();
@@ -753,7 +772,7 @@ export class GlobeRenderer {
     const projection = perspective(
       FIELD_OF_VIEW_RADIANS,
       this.canvas.width / this.canvas.height,
-      Math.max(0.00005, (this.distance - 1) * 0.1),
+      Math.max(0.000005, (this.distance - 1) * 0.1),
       this.distance + 1.1
     );
     const view = lookAt(eye, [0, 0, 0], [0, 1, 0]);

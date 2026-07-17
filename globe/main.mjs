@@ -63,11 +63,20 @@ const wiwosmBase = parameters.get('wiwosmBase') ||
 const requestedMaximumZoom = Number(parameters.get('maxZoom'));
 const configuredMaximumZoom = parameters.has('maxZoom') && Number.isInteger(requestedMaximumZoom)
   ? Math.max(0, Math.min(20, requestedMaximumZoom))
-  : 17;
+  : 20;
+const defaultMinimumCameraAltitude = 0.0005;
+const minimumCameraAltitudeForSource = (source) =>
+  source.minimumCameraAltitude ?? defaultMinimumCameraAltitude;
+const minimumSupportedCameraAltitude = Math.min(
+  defaultMinimumCameraAltitude,
+  ...CELESTIAL_BODIES.flatMap((body) =>
+    body.sources.map(minimumCameraAltitudeForSource)
+  )
+);
 const restoredCamera = readCameraState(window.history.state);
 const distanceSource = restoredCamera ? restoredCamera.distance : urlConfiguration.distance;
 const initialDistance = Math.max(
-  1.0005,
+  1 + minimumSupportedCameraAltitude,
   Math.min(51, distanceSource)
 );
 const targetLongitude = urlConfiguration.marker.longitude;
@@ -303,6 +312,7 @@ try {
     grid,
     interactionElement: viewport,
     maximumZoom: Math.min(configuredMaximumZoom, tileSource.maximumZoom),
+    minimumCameraAltitude: minimumCameraAltitudeForSource(tileSource),
     initialDistance,
     initialLongitude,
     initialLatitude,
@@ -450,7 +460,8 @@ try {
     globe.setTileSource({
       tileUrl: (tile) => tileUrlForSource(selectedSource, tile),
       tileProducer: tileProducerForSource(selectedSource),
-      maximumZoom: Math.min(configuredMaximumZoom, selectedSource.maximumZoom)
+      maximumZoom: Math.min(configuredMaximumZoom, selectedSource.maximumZoom),
+      minimumCameraAltitude: minimumCameraAltitudeForSource(selectedSource)
     });
     updateSourcePresentation();
   };

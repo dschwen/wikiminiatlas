@@ -1,4 +1,5 @@
 const FIELD_OF_VIEW_RADIANS = 42 * Math.PI / 180;
+const MINIMUM_SUPPORTED_ALTITUDE = 0.0000625;
 
 function finiteNumber(value) {
   if (value === null || value === undefined || value === '') {
@@ -26,7 +27,7 @@ export function legacyCameraDistance({
   const radiansPerPixel = 2 * Math.PI / worldPixels;
   const altitude = radiansPerPixel * viewportHeight /
     (2 * Math.tan(fieldOfViewRadians / 2));
-  return Math.max(1.0005, Math.min(51, 1 + altitude));
+  return Math.max(1 + MINIMUM_SUPPORTED_ALTITUDE, Math.min(51, 1 + altitude));
 }
 
 function coordinateString(url, parameters) {
@@ -69,7 +70,7 @@ export function parseGlobeUrl(input, { viewportHeight = 400 } = {}) {
       longitude: explicitCenter ? Number(fields[8]) : markerLongitude ?? -112
     },
     distance: explicitDistance !== null && explicitDistance > 1
-      ? Math.max(1.0005, Math.min(51, explicitDistance))
+      ? Math.max(1 + MINIMUM_SUPPORTED_ALTITUDE, Math.min(51, explicitDistance))
       : legacyZoom !== null
         ? legacyCameraDistance({ zoom: legacyZoom, viewportHeight })
         : 3.1,

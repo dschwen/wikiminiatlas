@@ -101,6 +101,11 @@ test('button zoom steps halve or double altitude', () => {
   assert.equal(distanceAfterZoomSteps({ distance: 3, steps: -1 }), 5);
   assert.equal(distanceAfterZoomSteps({ distance: 1.0005, steps: 1 }), 1.0005);
   assert.equal(distanceAfterZoomSteps({ distance: 51, steps: -1 }), 51);
+  assert.equal(distanceAfterZoomSteps({
+    distance: 1.000125,
+    steps: 1,
+    minimumAltitude: 0.0000625
+  }), 1.0000625);
 });
 
 test('zooms exponentially by altitude and supports a wide range', () => {
@@ -116,6 +121,14 @@ test('zooms exponentially by altitude and supports a wide range', () => {
   assert.equal(
     distanceAfterWheel({ distance: 51, deltaY: 1000 }),
     51
+  );
+  assert.equal(
+    distanceAfterWheel({
+      distance: 1.000125,
+      deltaY: -1000,
+      minimumAltitude: 0.0000625
+    }),
+    1.0000625
   );
 });
 
@@ -144,6 +157,12 @@ test('pinch zoom honors camera limits and rejects zero-length spans', () => {
     startSpan: 10000,
     currentSpan: 1
   }), 51);
+  assert.equal(distanceAfterPinch({
+    distance: 1.001,
+    startSpan: 1,
+    currentSpan: 10000,
+    minimumAltitude: 0.0000625
+  }), 1.0000625);
   assert.throws(() => distanceAfterPinch({
     distance: 2,
     startSpan: 0,

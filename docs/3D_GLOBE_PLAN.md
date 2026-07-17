@@ -127,8 +127,9 @@ The current slice passes these pipeline criteria with fixture and browser tests.
 The style set covers the principal land, water, land-use, building, road,
 railway, aeroway, and barrier categories. Exact style parity, interactive vector
 feature picking, and richer roof shapes/materials remain follow-up work. The
-JSON-capable basemap now defaults to zoom 17, while legacy raster sources retain
-their catalog limits.
+The JSON-capable Earth basemap now defaults to zoom 20 and uses an eight-times
+closer camera floor, while legacy raster sources retain their catalog and camera
+limits.
 
 ### 5. Legacy integration
 
