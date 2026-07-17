@@ -95,6 +95,28 @@ main {
   text-shadow: var(--globe-label-hover-shadow, 0 0 2px white, 0 0 4px white);
 }
 
+.globe-label.globe-commons-thumbnail {
+  max-width: none;
+  padding: 3px 0 0 3px;
+  translate: -6px -6px;
+}
+
+.globe-commons-thumbnail img {
+  display: block;
+  box-sizing: content-box;
+  padding: 2px;
+  border: 0;
+  border-right: 1px solid gray;
+  border-bottom: 1px solid gray;
+  background: white;
+  opacity: 0.8;
+}
+
+.globe-commons-thumbnail:hover img,
+.globe-commons-thumbnail:focus-visible img {
+  opacity: 1;
+}
+
 .globe-label-2 {
   background-image: url('../symbols/label_summit.png');
   padding-left: 13px;

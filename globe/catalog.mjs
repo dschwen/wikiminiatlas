@@ -163,6 +163,7 @@ export const CELESTIAL_BODIES = Object.freeze(BODY_DEFINITIONS.map((body) => Obj
 export const TILE_SOURCES = CELESTIAL_BODIES[0].sources;
 
 export const LABEL_LANGUAGES = Object.freeze([
+  ['commons', 'Commons'],
   ['af', 'Afrikaans'], ['als', 'Alemannisch'], ['ar', 'العربية'],
   ['ast', 'Asturianu'], ['be', 'Беларуская'], ['bg', 'Български'],
   ['bh', 'भोजपुरी'], ['bn', 'বাংলা'], ['bpy', 'বিষ্ণুপ্রিয়া মণিপুরী'],

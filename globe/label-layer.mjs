@@ -16,6 +16,16 @@ function rectanglesOverlap(a, b, padding) {
 }
 
 function labelRectangle(label, projection) {
+  if (label.thumbnail) {
+    const left = projection.x - 6;
+    const top = projection.y - 6;
+    return {
+      left,
+      top,
+      right: left + label.thumbnail.width + 7,
+      bottom: top + label.thumbnail.height + 7
+    };
+  }
   const offsets = [
     [0, 0], [0, 0], [5, 8], [0, 0], [0, 0], [2, 2],
     [3, 3], [4, 4], [5, 5], [6, 6], [6, 6]
@@ -425,11 +435,31 @@ export class GlobeLabelLayer {
       if (!node) {
         node = document.createElement('a');
         node.className = `globe-label globe-label-${label.style}`;
-        node.textContent = label.name;
         node.target = '_top';
         node.draggable = false;
-        node.dir = /^(ar|fa|he|ur)(-|$)/.test(label.language) ? 'rtl' : 'ltr';
-        if (/^[a-z][a-z0-9-]*$/i.test(label.language) && label.page) {
+        if (label.thumbnail) {
+          node.className += ' globe-commons-thumbnail';
+          node.href = label.thumbnail.fileUrl;
+          let accessibleName = label.thumbnail.filename;
+          try {
+            accessibleName = decodeURIComponent(accessibleName.replace(/\+/g, ' '));
+          } catch (error) {
+            // Keep malformed legacy names usable instead of dropping the layer.
+          }
+          node.setAttribute('aria-label', accessibleName);
+          const image = document.createElement('img');
+          image.src = label.thumbnail.url;
+          image.alt = '';
+          image.width = label.thumbnail.width;
+          image.height = label.thumbnail.height;
+          image.draggable = false;
+          node.append(image);
+        } else {
+          node.textContent = label.name;
+          node.dir = /^(ar|fa|he|ur)(-|$)/.test(label.language) ? 'rtl' : 'ltr';
+        }
+        if (!label.thumbnail &&
+            /^[a-z][a-z0-9-]*$/i.test(label.language) && label.page) {
           node.href = `https://${label.language}.wikipedia.org/wiki/${label.page}`;
         }
         this.container.append(node);

@@ -24,7 +24,10 @@ import {
 import { PlateCarreeGrid } from './plate-carree-grid.mjs';
 import { scaleBarsForCenter } from './scale-bar.mjs';
 import { readCameraState, writeCameraState } from './session-state.mjs';
-import { sunDirectionForBody } from './body-solar-position.mjs';
+import {
+  subEarthPointOnMoon,
+  sunDirectionForBody
+} from './body-solar-position.mjs';
 import { parseGlobeUrl } from './url-compat.mjs';
 import { fetchWiwosmGeoJson } from './wiwosm-client.mjs';
 
@@ -470,6 +473,11 @@ try {
     populateTileSets(null);
     applyTileSource();
     updateLightDirection();
+    if (celestialBody.id === 'moon') {
+      const earthView = subEarthPointOnMoon(new Date());
+      globe.centerOn(earthView.longitude, earthView.latitude);
+      cameraWasModified = true;
+    }
     labelLayer.setGlobe(celestialBody.labelDataset);
     applyOverlayGeometry();
     loadArticleOverlay();

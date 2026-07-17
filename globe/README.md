@@ -17,10 +17,12 @@ Implemented so far:
 - legacy label symbol styling, weight-ordered collision filtering, and accessible Wikipedia links;
 - a compact legacy-style menu for celestial body, body-specific tile set, and label language;
 - all legacy Earth, Moon, Mars, Venus, Mercury, Io, and Titan imagery and label datasets;
+- georeferenced Wikimedia Commons image thumbnails in the label selector;
 - client-rendered JSON surface tiles for the Earth full basemap above zoom 12;
 - height-bearing OSM buildings extruded radially from JSON tiles at zoom 14+;
 - WIWOSM article shapes and legacy parent-supplied KML projected over the globe;
 - real-time body-fixed solar lighting for every available celestial body;
+- an Earth-facing, libration-aware camera direction when selecting the Moon;
 - an optional realistic day/night terminator shared by terrain and buildings;
 - the legacy 18-pixel zoom, recenter, fullscreen, and settings button layout;
 - independent metric and imperial scale bars based on center-frame surface resolution;

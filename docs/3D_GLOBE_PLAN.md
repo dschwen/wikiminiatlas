@@ -55,6 +55,8 @@ rough lunar orbit corrects the Earth-Moon displacement; Io and Titan use their
 primary planet's solar direction because the omitted parallax is below the
 visual lighting requirement. Fixed Horizons reference cases bound errors to
 0.5° or less without a runtime ephemeris request or large kernel download.
+Selecting the Moon also centers the camera on its current sub-Earth point,
+including lunar libration, so realistic lighting presents the current phase.
 
 The menu's optional `lighting=realistic` mode reduces night-side ambient light
 and applies a fragment-level Lambert-style incidence curve with a narrow,
@@ -71,7 +73,8 @@ legacy URLs retain the previous bright presentation.
 - Render text labels as accessible Wikipedia links above the WebGL canvas. (Complete.)
 - Reuse the legacy per-style label symbols and anchor offsets. (Complete.)
 - Replace estimated text bounds with measured collision boxes and avoid UI chrome.
-- Add the legacy Commons thumbnail-label behavior.
+- The label selector includes the legacy Commons dataset and renders its
+  georeferenced records as compact image thumbnails linking to Commons.
 
 ### 4. Vector geography and buildings
 
@@ -184,7 +187,7 @@ change:
   `ways/areas` input is complete;
 - decide whether `awt=1` opens summaries without a modifier;
 - add UI localization from `wma[6]`;
-- cover Commons labels/previews; and
+- restore the large in-map Commons image preview opened from a thumbnail; and
 - continue side-by-side testing of the deployed iframe integration.
 
 ## First-slice acceptance criteria

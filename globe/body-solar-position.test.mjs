@@ -2,9 +2,11 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 
 import {
+  subEarthPointOnMoon,
   subsolarPointForBody,
   sunDirectionForBody
 } from './body-solar-position.mjs';
+import { lonLatToUnitSphere } from './plate-carree-grid.mjs';
 
 function longitudeDifference(first, second) {
   return Math.abs(((first - second + 540) % 360) - 180);
@@ -46,6 +48,27 @@ test('returns finite unit vectors for every globe body', () => {
     assert.ok(direction.every(Number.isFinite));
     assert.ok(Math.abs(Math.hypot(...direction) - 1) < 1e-12);
   }
+});
+
+test('approximates the JPL Horizons sub-Earth point on the Moon', () => {
+  // Quantity 14, geocentric observer, at REFERENCE_DATE.
+  const point = subEarthPointOnMoon(REFERENCE_DATE);
+  assert.ok(longitudeDifference(point.longitude, 5.970045) < 0.5);
+  assert.ok(Math.abs(point.latitude - (-0.464505)) < 0.1);
+});
+
+test('puts the lit hemisphere behind and in front of the Earth view at lunar phases', () => {
+  const phaseAlignment = (date) => {
+    const earthPoint = subEarthPointOnMoon(date);
+    const earthDirection = lonLatToUnitSphere(earthPoint.longitude, earthPoint.latitude);
+    const sunDirection = sunDirectionForBody('moon', date);
+    return earthDirection.reduce(
+      (sum, component, index) => sum + component * sunDirection[index],
+      0
+    );
+  };
+  assert.ok(phaseAlignment(new Date('2024-04-08T18:00:00Z')) < -0.99);
+  assert.ok(phaseAlignment(new Date('2024-04-23T23:49:00Z')) > 0.99);
 });
 
 test('rejects unsupported bodies and invalid dates', () => {

@@ -5,6 +5,50 @@ function finiteNumber(value, fallback = 0) {
   return Number.isFinite(number) ? number : fallback;
 }
 
+const COMMONS_THUMBNAIL_WIDTHS = Object.freeze([
+  120, 150, 180, 200, 220, 250, 300, 400
+]);
+
+function commonsThumbnailRequestWidth(width) {
+  return COMMONS_THUMBNAIL_WIDTHS.find((preset) => width < preset) || width;
+}
+
+export function commonsThumbnailUrl(filename, width, hashPrefix = '') {
+  const requestedWidth = commonsThumbnailRequestWidth(Math.max(1, Math.ceil(width)));
+  const encodedFilename = String(filename);
+  const prefix = String(hashPrefix);
+  if (prefix.length >= 2) {
+    return 'https://upload.wikimedia.org/wikipedia/commons/thumb/' +
+      `${prefix[0]}/${prefix}/${encodedFilename}/${requestedWidth}px-${encodedFilename}`;
+  }
+  return 'https://commons.wikimedia.org/w/thumb.php?' + new URLSearchParams({
+    w: String(requestedWidth),
+    f: encodedFilename
+  });
+}
+
+export function commonsFileUrl(filename) {
+  return `https://commons.wikimedia.org/wiki/File:${String(filename)}`;
+}
+
+function commonsThumbnail(item) {
+  if (!item.img) return null;
+  const intrinsicWidth = Math.max(1, finiteNumber(item.w, 1));
+  const intrinsicHeight = Math.max(1, finiteNumber(item.h, 1));
+  const maximumSide = finiteNumber(item.style) === -2 ? 24 : 48;
+  const width = intrinsicWidth > intrinsicHeight
+    ? maximumSide
+    : Math.floor(maximumSide * intrinsicWidth / intrinsicHeight);
+  const height = Math.max(1, Math.floor(width / intrinsicWidth * intrinsicHeight));
+  return {
+    filename: String(item.img),
+    width: Math.max(1, width),
+    height,
+    url: commonsThumbnailUrl(item.img, maximumSide, item.m5),
+    fileUrl: commonsFileUrl(item.img)
+  };
+}
+
 export function legacyLabelBatchUrl(labelBase, {
   grid,
   tiles,
@@ -56,10 +100,12 @@ export function normalizeLabel(item, zoom, grid, defaultLanguage = 'en') {
     ? Number(item.lon)
     : legacyCoordinates.longitude;
   const language = item.lang || defaultLanguage;
-  const name = String(item.name || item.page || '');
+  const thumbnail = language === 'commons' ? commonsThumbnail(item) : null;
+  const name = String(item.name || item.page || item.img || '');
+  const page = item.page ? String(item.page) : (thumbnail ? thumbnail.filename : '');
   const stableId = item.id || [
     language,
-    item.page || name,
+    page || name,
     latitude.toFixed(6),
     longitude.toFixed(6)
   ].join(':');
@@ -67,12 +113,13 @@ export function normalizeLabel(item, zoom, grid, defaultLanguage = 'en') {
   return {
     id: String(stableId),
     name,
-    page: item.page ? String(item.page) : '',
+    page,
     language,
     latitude,
     longitude: grid.normalizeLongitude(longitude),
     style: Math.max(0, Math.min(10, Math.trunc(finiteNumber(item.style)))),
     weight: Math.trunc(finiteNumber(item.wg)),
+    thumbnail,
     source: item
   };
 }

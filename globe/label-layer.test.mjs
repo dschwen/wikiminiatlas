@@ -20,6 +20,10 @@ class FakeElement {
     this.children = [];
   }
 
+  setAttribute(name, value) {
+    this[name] = String(value);
+  }
+
   remove() {
     if (this.parent) {
       this.parent.children = this.parent.children.filter((node) => node !== this);
@@ -104,6 +108,46 @@ test('renders successful candidates as projected accessible links', async () => 
     'https://en.wikipedia.org/wiki/Boise%2C_Idaho'
   );
   assert.match(container.children[0].style.transform, /^translate3d\(/);
+  layer.destroy();
+});
+
+test('renders the Commons dataset as compact linked thumbnails', async () => {
+  const container = new FakeElement();
+  const layer = new GlobeLabelLayer(container, {
+    grid,
+    language: 'commons',
+    fetchImpl: async () => ({
+      ok: true,
+      json: async () => ({
+        label: [{
+          id: 'commons:7',
+          img: 'Boise%2C_Idaho.jpg',
+          w: 1600,
+          h: 1200,
+          m5: 'ab',
+          lat: 43.615,
+          lon: -116.2023,
+          dx: 16,
+          dy: 8,
+          style: 0,
+          wg: 100
+        }]
+      })
+    })
+  });
+  layer.update(frameState([{ x: 16, y: 3, z: 2 }]));
+  await new Promise((resolve) => setImmediate(resolve));
+
+  assert.equal(container.children.length, 1);
+  const link = container.children[0];
+  assert.match(link.className, /globe-commons-thumbnail/);
+  assert.equal(
+    link.href,
+    'https://commons.wikimedia.org/wiki/File:Boise%2C_Idaho.jpg'
+  );
+  assert.equal(link['aria-label'], 'Boise,_Idaho.jpg');
+  assert.equal(link.children[0].width, 48);
+  assert.match(link.children[0].src, /120px-Boise%2C_Idaho\.jpg$/);
   layer.destroy();
 });
 

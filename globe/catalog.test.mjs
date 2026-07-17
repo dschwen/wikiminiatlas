@@ -112,6 +112,7 @@ test('label catalog includes legacy languages and Chinese variants', () => {
   const languages = new Map(LABEL_LANGUAGES);
   assert.equal(languages.get('en'), 'English');
   assert.equal(languages.get('de'), 'Deutsch');
+  assert.equal(languages.get('commons'), 'Commons');
   assert.ok(languages.has('zh-hant'));
   assert.ok(LABEL_LANGUAGES.length > 80);
 });

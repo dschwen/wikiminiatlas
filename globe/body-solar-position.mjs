@@ -389,23 +389,36 @@ function inertialSunVectorForBody(bodyId, time) {
   return eclipticToEquatorial(target.map((component) => -component));
 }
 
-export function subsolarPointForBody(bodyId, date = new Date()) {
-  const normalizedBodyId = String(bodyId).toLowerCase();
-  if (normalizedBodyId === 'earth') return earthSubsolarPointAt(date);
-  const time = timeAt(date);
-  const inertial = inertialSunVectorForBody(normalizedBodyId, time);
+function bodyFixedPoint(vector, bodyId, time) {
   const bodyFixed = normalizeVector(
-    inertialToBodyFixed(inertial, orientationForBody(normalizedBodyId, time))
+    inertialToBodyFixed(vector, orientationForBody(bodyId, time))
   );
   const rightHandedLongitude = Math.atan2(bodyFixed[1], bodyFixed[0]) * RAD_TO_DEG;
   return {
     longitude: signedDegrees(
-      WEST_POSITIVE_BODIES.has(normalizedBodyId)
+      WEST_POSITIVE_BODIES.has(bodyId)
         ? -rightHandedLongitude
         : rightHandedLongitude
     ),
     latitude: Math.asin(bodyFixed[2]) * RAD_TO_DEG
   };
+}
+
+export function subsolarPointForBody(bodyId, date = new Date()) {
+  const normalizedBodyId = String(bodyId).toLowerCase();
+  if (normalizedBodyId === 'earth') return earthSubsolarPointAt(date);
+  const time = timeAt(date);
+  const inertial = inertialSunVectorForBody(normalizedBodyId, time);
+  return bodyFixedPoint(inertial, normalizedBodyId, time);
+}
+
+export function subEarthPointOnMoon(date = new Date()) {
+  const time = timeAt(date);
+  const earthToMoon = lunarGeocentricEclipticPosition(time.days, time.centuries);
+  const moonToEarth = eclipticToEquatorial(
+    earthToMoon.map((component) => -component)
+  );
+  return bodyFixedPoint(moonToEarth, 'moon', time);
 }
 
 export function sunDirectionForBody(bodyId, date = new Date()) {

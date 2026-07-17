@@ -2,6 +2,8 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 
 import {
+  commonsFileUrl,
+  commonsThumbnailUrl,
   legacyLabelBatchUrl,
   legacyLabelCoordinates,
   normalizeLabel,
@@ -52,6 +54,41 @@ test('prefers explicit coordinates and creates a stable compatibility id', () =>
   assert.ok(Math.abs(label.longitude - 243.7977) < 1e-10);
   assert.equal(label.weight, 42);
   assert.equal(label.id, 'en:Boise%2C_Idaho:43.615000:-116.202300');
+});
+
+test('normalizes legacy Commons records as compact image labels', () => {
+  const label = normalizeLabel({
+    id: 'commons:7',
+    img: 'Example.jpg',
+    w: '1600',
+    h: '1200',
+    m5: 'ab',
+    lat: '43.6',
+    lon: '-116.2',
+    wg: '42'
+  }, 5, grid, 'commons');
+  assert.equal(label.name, 'Example.jpg');
+  assert.equal(label.page, 'Example.jpg');
+  assert.deepEqual(label.thumbnail, {
+    filename: 'Example.jpg',
+    width: 48,
+    height: 36,
+    url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/ab/' +
+      'Example.jpg/120px-Example.jpg',
+    fileUrl: 'https://commons.wikimedia.org/wiki/File:Example.jpg'
+  });
+});
+
+test('builds Commons URLs with the legacy thumbnail size presets', () => {
+  assert.equal(
+    commonsThumbnailUrl('Example.jpg', 121, 'ab'),
+    'https://upload.wikimedia.org/wikipedia/commons/thumb/a/ab/' +
+      'Example.jpg/150px-Example.jpg'
+  );
+  assert.equal(
+    commonsFileUrl('Example.jpg'),
+    'https://commons.wikimedia.org/wiki/File:Example.jpg'
+  );
 });
 
 test('projects the front surface and rejects labels behind the horizon', () => {
