@@ -110,6 +110,39 @@ test('resolves a detailed leaf through its closest ready ancestor', () => {
   });
 });
 
+test('finds only recently used ready children for reverse zoom fallback', () => {
+  const { images, manager } = makeHarness({ maximumConcurrentRequests: 4 });
+  manager.beginFrame();
+  for (const child of [
+    { x: 18, y: 10, z: 4 },
+    { x: 19, y: 10, z: 4 },
+    { x: 18, y: 11, z: 4 },
+    { x: 19, y: 11, z: 4 }
+  ]) {
+    manager.demand(child);
+  }
+  manager.endFrame();
+  for (const image of images) image.onload();
+
+  manager.beginFrame();
+  assert.deepEqual(
+    manager.recentReadyChildren({ x: 9, y: 5, z: 3 })
+      .map(({ x, y, z }) => ({ x, y, z })),
+    [
+      { x: 18, y: 10, z: 4 },
+      { x: 19, y: 10, z: 4 },
+      { x: 18, y: 11, z: 4 },
+      { x: 19, y: 11, z: 4 }
+    ]
+  );
+  manager.beginFrame();
+  manager.beginFrame();
+  assert.deepEqual(
+    manager.recentReadyChildren({ x: 9, y: 5, z: 3 }),
+    []
+  );
+});
+
 test('evicts least-recently-used textures while preserving pinned entries', () => {
   const { gl, images, manager } = makeHarness({
     maximumConcurrentRequests: 3,

@@ -5,8 +5,11 @@ import {
   collectBuildingResources,
   distanceForAngularRadius,
   normalizeLightDirection,
+  parentPrefetchDemandFor,
+  transitionChildrenFor,
   tileDemandsFor
 } from './globe-renderer.mjs';
+import { PlateCarreeGrid } from './plate-carree-grid.mjs';
 
 test('normalizes and validates world-space light directions', () => {
   assert.deepEqual(normalizeLightDirection([0, 3, 4]), [0, 0.6, 0.8]);
@@ -95,4 +98,36 @@ test('does not start detailed work while refinement is blocked', () => {
     { tile: { x: 1, y: 0, z: 0 }, priority: 200350, pin: true }
   ]);
   assert.deepEqual(tileDemandsFor(tile, { fallbackLevels: 3 }, true), []);
+  assert.deepEqual(tileDemandsFor(tile, { fallbackLevels: 3 }, true, true), [
+    { tile: { x: 19, y: 10, z: 4 }, priority: 100350, pin: true }
+  ]);
+});
+
+test('prefetches one coarser level as a bounded zoom-out working set', () => {
+  const tile = { x: 19, y: 10, z: 4, projectedPixels: 350 };
+  assert.deepEqual(parentPrefetchDemandFor(tile), {
+    tile: { x: 9, y: 5, z: 3 },
+    priority: 50350,
+    pin: true
+  });
+  assert.equal(parentPrefetchDemandFor({ x: 1, y: 0, z: 0 }), null);
+});
+
+test('subdivides a coarse transition tile into a non-overlapping child cover', () => {
+  const grid = new PlateCarreeGrid();
+  const children = transitionChildrenFor({
+    x: 9,
+    y: 5,
+    z: 3,
+    projectedPixels: 400
+  }, grid);
+  assert.deepEqual(children.map(({ x, y, z }) => ({ x, y, z })), [
+    { x: 18, y: 10, z: 4 },
+    { x: 19, y: 10, z: 4 },
+    { x: 18, y: 11, z: 4 },
+    { x: 19, y: 11, z: 4 }
+  ]);
+  assert.ok(children.every((child) => child.projectedPixels === 200));
+  assert.equal(children[0].bounds.east, children[1].bounds.west);
+  assert.equal(children[0].bounds.south, children[2].bounds.north);
 });

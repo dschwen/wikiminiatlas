@@ -11,6 +11,7 @@ import {
 import { lookAt, multiply, perspective } from './mat4.mjs';
 import {
   ancestorsFromRoot,
+  parentTile,
   TileResourceManager
 } from './tile-resource-manager.mjs';
 import { selectVisibleTiles } from './tile-selection.mjs';
@@ -258,7 +259,12 @@ export function collectBuildingResources(draws) {
   return selected.map((entry) => entry.auxiliary);
 }
 
-export function tileDemandsFor(tile, resolved, refinementBlocked = false) {
+export function tileDemandsFor(
+  tile,
+  resolved,
+  refinementBlocked = false,
+  requestLeafDuringInteraction = false
+) {
   const ancestry = ancestorsFromRoot(tile);
   const root = ancestry[0];
   const demands = [];
@@ -276,7 +282,10 @@ export function tileDemandsFor(tile, resolved, refinementBlocked = false) {
   // Once interaction settles, skip disposable intermediate generations and
   // request the selected leaf directly. The closest resident ancestor remains
   // visible until this resource is ready.
-  if (!refinementBlocked && (!resolved || resolved.fallbackLevels > 0)) {
+  if (
+    (!refinementBlocked || requestLeafDuringInteraction) &&
+    (!resolved || resolved.fallbackLevels > 0)
+  ) {
     const rootIsLeaf = root.x === tile.x && root.y === tile.y && root.z === tile.z;
     if (!rootIsLeaf || resolved) {
       demands.push({
@@ -288,6 +297,33 @@ export function tileDemandsFor(tile, resolved, refinementBlocked = false) {
   }
 
   return demands;
+}
+
+export function parentPrefetchDemandFor(tile) {
+  const parent = parentTile(tile);
+  return parent
+    ? {
+        tile: parent,
+        priority: 50000 + tile.projectedPixels,
+        pin: true
+      }
+    : null;
+}
+
+export function transitionChildrenFor(tile, grid) {
+  const childZoom = tile.z + 1;
+  const childX = tile.x * 2;
+  const childY = tile.y * 2;
+  return [
+    { x: childX, y: childY, z: childZoom },
+    { x: childX + 1, y: childY, z: childZoom },
+    { x: childX, y: childY + 1, z: childZoom },
+    { x: childX + 1, y: childY + 1, z: childZoom }
+  ].map((child) => ({
+    ...child,
+    bounds: grid.tileBounds(child.x, child.y, child.z),
+    projectedPixels: tile.projectedPixels / 2
+  }));
 }
 
 export class GlobeRenderer {
@@ -338,6 +374,7 @@ export class GlobeRenderer {
     this.maximumZoom = maximumZoom;
     this.minimumCameraAltitude = minimumCameraAltitude;
     this.maximumVisibleTiles = maximumVisibleTiles;
+    this.maximumTransitionTiles = maximumVisibleTiles * 2;
     this.configuredMaximumLabelZoom = maximumLabelZoom;
     this.maximumLabelZoom = Math.min(maximumZoom, this.configuredMaximumLabelZoom);
     this.maximumLabelTiles = maximumLabelTiles;
@@ -355,6 +392,8 @@ export class GlobeRenderer {
     this.frame = null;
     this.refinementTimer = null;
     this.refinementBlocked = false;
+    this.lastTileZoom = null;
+    this.zoomTransitionDirection = 0;
     this.destroyed = false;
 
     const gl = canvas.getContext('webgl', {
@@ -442,6 +481,8 @@ export class GlobeRenderer {
     this.distance = Math.max(this.distance, 1 + this.minimumCameraAltitude);
     this.maximumLabelZoom = Math.min(maximumZoom, this.configuredMaximumLabelZoom);
     this.resources = this.createResourceManager(tileUrl, tileProducer);
+    this.lastTileZoom = null;
+    this.zoomTransitionDirection = 0;
     previousResources.destroy();
     this.deferRefinement();
     this.requestRender();
@@ -779,6 +820,15 @@ export class GlobeRenderer {
     const viewProjection = multiply(projection, view);
     const tileZoom = this.tileZoom();
     const zoom = tileZoom.zoom;
+    if (this.lastTileZoom !== null) {
+      if (zoom < this.lastTileZoom) {
+        this.zoomTransitionDirection = -1;
+      } else if (zoom > this.lastTileZoom) {
+        this.zoomTransitionDirection = 1;
+      }
+    }
+    this.lastTileZoom = zoom;
+    const zoomingOut = this.zoomTransitionDirection < 0;
     const selection = selectVisibleTiles({
       grid: this.grid,
       maximumZoom: zoom,
@@ -795,16 +845,23 @@ export class GlobeRenderer {
     const labelTiles = this.labelTilesFor(tiles);
 
     this.resources.beginFrame();
-    const draws = [];
+    const baseDraws = [];
     let readyCount = 0;
     let fallbackCount = 0;
     let placeholderCount = 0;
     for (const tile of tiles) {
       let resolved = this.resources.resolve(tile);
 
-      for (const demand of tileDemandsFor(tile, resolved, this.refinementBlocked)) {
+      for (const demand of tileDemandsFor(
+        tile,
+        resolved,
+        this.refinementBlocked,
+        zoomingOut
+      )) {
         this.resources.demand(demand.tile, demand);
       }
+      const parentDemand = parentPrefetchDemandFor(tile);
+      if (parentDemand) this.resources.demand(parentDemand.tile, parentDemand);
 
       resolved = this.resources.resolve(tile);
       if (!resolved) {
@@ -814,7 +871,35 @@ export class GlobeRenderer {
       } else {
         readyCount += 1;
       }
-      draws.push({ tile, resolved });
+      baseDraws.push({ tile, resolved });
+    }
+    const expandableKeys = new Set();
+    if (zoomingOut) {
+      let remainingTransitionSlots = this.maximumTransitionTiles - baseDraws.length;
+      const candidates = baseDraws
+        .filter(({ tile, resolved }) =>
+          (!resolved || resolved.fallbackLevels > 0) &&
+          this.resources.recentReadyChildren(tile).length > 0
+        )
+        .sort((first, second) =>
+          second.tile.projectedPixels - first.tile.projectedPixels
+        );
+      for (const { tile } of candidates) {
+        if (remainingTransitionSlots < 3) break;
+        expandableKeys.add(this.grid.tileKey(tile.x, tile.y, tile.z));
+        remainingTransitionSlots -= 3;
+      }
+    }
+    const draws = baseDraws.flatMap(({ tile, resolved }) => {
+      const key = this.grid.tileKey(tile.x, tile.y, tile.z);
+      if (!expandableKeys.has(key)) return [{ tile, resolved }];
+      return transitionChildrenFor(tile, this.grid).map((child) => ({
+        tile: child,
+        resolved: this.resources.resolve(child)
+      }));
+    });
+    if (zoomingOut && readyCount === tiles.length) {
+      this.zoomTransitionDirection = 0;
     }
     // Keep the closest ready building mesh visible while a more detailed
     // surface tile is loading, just as we do for its texture.

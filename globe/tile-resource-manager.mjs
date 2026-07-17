@@ -159,6 +159,28 @@ export class TileResourceManager {
     return null;
   }
 
+  recentReadyChildren(tile, { maximumAgeFrames = 2 } = {}) {
+    if (!Number.isInteger(maximumAgeFrames) || maximumAgeFrames < 0) {
+      throw new RangeError('maximumAgeFrames must be a non-negative integer');
+    }
+    if (tile.z >= 30) return [];
+
+    const childZoom = tile.z + 1;
+    const childX = tile.x * 2;
+    const childY = tile.y * 2;
+    const children = [
+      { x: childX, y: childY, z: childZoom },
+      { x: childX + 1, y: childY, z: childZoom },
+      { x: childX, y: childY + 1, z: childZoom },
+      { x: childX + 1, y: childY + 1, z: childZoom }
+    ];
+    return children.filter((child) => {
+      const entry = this.entries.get(this.tileKey(child.x, child.y, child.z));
+      return entry && entry.status === 'ready' &&
+        this.frame - entry.lastUsedFrame <= maximumAgeFrames;
+    });
+  }
+
   endFrame() {
     for (const key of [...this.queue]) {
       const entry = this.entries.get(key);

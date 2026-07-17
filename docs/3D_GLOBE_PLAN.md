@@ -131,6 +131,12 @@ The JSON-capable Earth basemap now defaults to zoom 20 and uses an eight-times
 closer camera floor, while legacy raster sources retain their catalog and camera
 limits.
 
+Zoom transitions retain a bounded neighborhood rather than the complete tile
+hierarchy. Visible leaves prefetch their immediate parents; zoom-out targets are
+requested during interaction, and recently used children can temporarily form a
+non-overlapping cover for a missing parent. The transition cover is hard-capped
+at twice the visible-leaf budget so the remaining LRU cache stays available.
+
 ### 5. Legacy integration
 
 - Port markers, layer/body selection, synopsis, Commons previews, and host messaging.

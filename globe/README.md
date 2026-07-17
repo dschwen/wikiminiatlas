@@ -158,6 +158,15 @@ discarded before a current mesh, avoiding budget-driven flicker. The building
 pass also restores its WebGL vertex-attribute state before those buffers can be
 evicted, keeping subsequent surface-only frames valid while zooming out.
 
+The texture cache keeps a bounded transition working set instead of pinning the
+entire tile ancestry. Each visible tile prefetches its immediate parent. While
+zooming out, the newly selected coarser tiles bypass the interaction debounce,
+and recently rendered children remain as a non-overlapping sharp cover until
+their parent is ready. Transition drawing is capped at twice the 256-leaf
+viewport budget, leaving room for parents and ordinary LRU entries inside the
+768-texture cache. Zooming in continues to use the current tile as its natural
+ancestor placeholder without speculatively requesting four children.
+
 The JSON-capable Earth full basemap defaults to zoom 20 and permits the camera
 to approach eight times closer than the legacy raster layers, exposing three
 additional detail levels. The existing `maxZoom` URL parameter can lower the
