@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 
 import {
   collectBuildingResources,
+  distanceForAngularRadius,
   normalizeLightDirection,
   tileDemandsFor
 } from './globe-renderer.mjs';
@@ -11,6 +12,21 @@ test('normalizes and validates world-space light directions', () => {
   assert.deepEqual(normalizeLightDirection([0, 3, 4]), [0, 0.6, 0.8]);
   assert.throws(() => normalizeLightDirection([0, 0, 0]), /cannot be zero/);
   assert.throws(() => normalizeLightDirection([1, 2]), /three finite/);
+});
+
+test('fits a spherical angular radius inside the limiting viewport dimension', () => {
+  const small = distanceForAngularRadius({
+    angularRadius: 1 * Math.PI / 180,
+    viewportWidth: 800,
+    viewportHeight: 600
+  });
+  const large = distanceForAngularRadius({
+    angularRadius: 20 * Math.PI / 180,
+    viewportWidth: 800,
+    viewportHeight: 600
+  });
+  assert.ok(small > 1);
+  assert.ok(large > small);
 });
 
 test('retains and deduplicates ancestor buildings during tile refinement', () => {

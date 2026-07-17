@@ -110,7 +110,9 @@ legacy URLs retain the previous bright presentation.
   a 1,600-triangle per-tile cap and hard 32 MiB global building budget prevent
   the legacy append-only memory growth. The caps guarantee that every possible
   visible leaf can retain its mesh, avoiding eviction churn while moving.
-- Preserve article and size-comparison overlays as globe-surface geometry.
+- Preserve article and size-comparison overlays through a dedicated projected
+  Canvas 2D layer. Screen-space drawing retains the legacy fixed-width styles
+  without coupling transient overlays to tile texture LOD or WebGL meshes.
 
 Acceptance criteria for the JSON-texture slice:
 
@@ -124,9 +126,9 @@ Acceptance criteria for the JSON-texture slice:
 The current slice passes these pipeline criteria with fixture and browser tests.
 The style set covers the principal land, water, land-use, building, road,
 railway, aeroway, and barrier categories. Exact style parity, interactive vector
-feature picking, richer roof shapes/materials, and geometry overlays remain
-follow-up work. The JSON-capable basemap now defaults to zoom 17, while legacy
-raster sources retain their catalog limits.
+feature picking, and richer roof shapes/materials remain follow-up work. The
+JSON-capable basemap now defaults to zoom 17, while legacy raster sources retain
+their catalog limits.
 
 ### 5. Legacy integration
 
@@ -158,7 +160,7 @@ Implemented mappings:
 | `wma[6]` | retained as UI-language metadata; UI localization remains to port |
 | `wma[7:9]` | optional independent initial camera center |
 | `globe` | case-insensitive celestial body selection |
-| `lang` / `page` | reserved for host article language/title, as in 2D |
+| `lang` / `page` | load Earth article geometry from WIWOSM and retain the host article identity |
 | `awt` | parsed; legacy tooltip policy remains to port |
 | `lighting=realistic` | opt-in dark night side and physical terminator; omitted preserves legacy lighting |
 
@@ -169,9 +171,9 @@ Remaining requirements before `/globe/` can replace `/iframe.html` without a
 host-script change:
 
 - display the primary marker and extra markers;
-- port WIWOSM article geometry for `lang` + `page`;
-- implement the accepted and emitted `postMessage` contracts (`coords`,
-  `ways/areas`, `getcoords`, `moveto`, highlight/scroll);
+- implement the remaining accepted and emitted `postMessage` contracts
+  (`coords`, `getcoords`, `moveto`, highlight/scroll); legacy attached-KML
+  `ways/areas` input is complete;
 - decide whether `awt=1` opens summaries without a modifier;
 - add UI localization from `wma[6]`;
 - cover Commons labels/previews; and

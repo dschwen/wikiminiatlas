@@ -16,6 +16,7 @@ Implemented so far:
 - all legacy Earth, Moon, Mars, Venus, Mercury, Io, and Titan imagery and label datasets;
 - client-rendered JSON surface tiles for the Earth full basemap above zoom 12;
 - height-bearing OSM buildings extruded radially from JSON tiles at zoom 14+;
+- WIWOSM article shapes and legacy parent-supplied KML projected over the globe;
 - real-time body-fixed solar lighting for every available celestial body;
 - an optional realistic day/night terminator shared by terrain and buildings;
 - the legacy 18-pixel zoom, recenter, fullscreen, and settings button layout;
@@ -93,6 +94,37 @@ http://localhost:8000/globe/?distance=1.01
 
 The tile base must permit WebGL texture use from the demo origin when it is cross-origin. Failed requests retain the nearest loaded parent image, or a shared neutral placeholder if no ancestor is available, making the geometry and level-of-detail behavior testable without a complete tile checkout.
 
+Surface LOD uses patches approximately twice the previous side length at the
+same camera distance. This keeps a 128-pixel source tile from collapsing to
+roughly 64 CSS pixels on common high-density displays and reduces visible-tile
+request and draw pressure by about a factor of four.
+
+On Earth, legacy `lang` and `page` parameters load article geometry from
+WIWOSM. The current Toolforge service is used by default and can be replaced
+for testing with `wiwosmBase`:
+
+```text
+http://localhost:8000/globe/?lang=de&page=Dresden
+http://localhost:8000/globe/?lang=de&page=Dresden&wiwosmBase=https://example.org/getGeoJSON.php
+```
+
+The client converts WIWOSM Web Mercator GeoJSON to geographic coordinates,
+handles line strings, polygons, multipolygons, collections, holes, and
+dateline-crossing bounds, and caps responses at 4 MiB and 250,000 coordinates.
+Point geometry is validated but intentionally left for the marker migration.
+The first successful article shape is fitted to the frame unless a camera state
+was restored or the user moved the globe while it loaded. Direct WIWOSM loading
+is Earth-only.
+
+When embedded, the globe also sends the legacy `request` message to its parent
+and accepts the existing `{ways, areas}` attached-KML payload. Messages must
+come from `window.parent`; the expected origin is taken from `document.referrer`
+or an explicit `parentOrigin` parameter. Both inputs share the same bounded
+geometry model and transparent screen-space renderer. The legacy fourth
+left-side button toggles red, black-outlined areas and blue ways without
+refetching. Geometry is clipped to the visible spherical cap so it cannot show
+through the rear of the globe.
+
 For the Earth full basemap, zoom levels 13 and above request the legacy
 `../tiles/jsontile.php` service instead of raster PNGs. The response is validated,
 drawn into a 128-pixel Canvas 2D tile, and uploaded as a texture through the same
@@ -153,7 +185,7 @@ Run the coordinate tests with:
 node --test globe/*.test.mjs
 ```
 
-The default maximum tile level is 15 and can be raised to 20 through `maxZoom`.
+The default maximum tile level is 17 and can be raised to 20 through `maxZoom`.
 Wheel zoom scales altitude above the surface from 0.0005 to 50 planet radii;
 pointer sensitivity decreases with the visible surface footprint at close range.
 On touch screens, moving two fingers apart zooms in, moving them together zooms
@@ -180,11 +212,11 @@ emitted by `wikiminiatlas.js`, including its optional center latitude/longitude
 suffix and the older unnamed coordinate-query form. Legacy numeric zoom is
 converted to camera altitude by matching the 2D map's center angular resolution.
 The remaining contracts required before replacing `iframe.html` are tracked in
-`docs/3D_GLOBE_PLAN.md`, including markers, WIWOSM overlays, host messaging,
-Commons previews, and UI localization.
+`docs/3D_GLOBE_PLAN.md`, including coordinate markers, the rest of host
+messaging, size-comparison overlays, Commons previews, and UI localization.
 
-The renderer enforces a 256-visible-patch ceiling. It keeps at most 384 raster
-textures or 32 MiB of estimated RGBA texture data, whichever limit is reached
+The renderer enforces a 256-visible-patch ceiling. It keeps at most 768 raster
+textures or 64 MiB of estimated RGBA texture data, whichever limit is reached
 first, and performs at most 12 image requests at once. During pointer and wheel
 gestures, new detail requests pause for 120 ms; already loaded imagery remains
 visible. High-detail patches use a reduced shared mesh because their curvature is

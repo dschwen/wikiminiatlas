@@ -10,12 +10,22 @@
   <main>
     <div id="viewport">
       <canvas id="globe" aria-label="Interactive three-dimensional globe. Drag to orbit and pinch to zoom."></canvas>
+      <canvas id="geometry-overlay" aria-hidden="true"></canvas>
       <nav id="labels" aria-label="Geographic labels"></nav>
     </div>
     <h1 class="visually-hidden">WikiMiniAtlas tiled globe</h1>
     <button class="map-button" id="button_plus" type="button" aria-label="Zoom in" title="Zoom in"></button>
     <button class="map-button" id="button_minus" type="button" aria-label="Zoom out" title="Zoom out"></button>
     <button class="map-button" id="button_target" type="button" aria-label="Center map" title="Center map"></button>
+    <button
+      class="map-button"
+      id="button_kml"
+      type="button"
+      aria-label="Toggle geographic overlay"
+      aria-pressed="true"
+      title="Toggle geographic overlay"
+      hidden
+    ></button>
     <button class="map-button" id="button_fs" type="button" aria-label="Fullscreen" title="Fullscreen"></button>
     <button
       class="map-button"

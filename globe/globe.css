@@ -46,9 +46,19 @@ main {
   cursor: grabbing;
 }
 
-#labels {
+#geometry-overlay {
   position: absolute;
   z-index: 1;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+#labels {
+  position: absolute;
+  z-index: 2;
   inset: 0;
   overflow: hidden;
   pointer-events: none;
@@ -189,6 +199,16 @@ main {
   top: 54px;
   left: 10px;
   background-position: -20px 0;
+}
+
+#button_kml {
+  top: 76px;
+  left: 10px;
+  background-position: -120px 0;
+}
+
+#button_kml[aria-pressed="false"] {
+  opacity: 0.55;
 }
 
 #button_menu {

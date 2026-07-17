@@ -16,14 +16,25 @@ const baseLod = {
   baseTileDegrees: 60,
   tileSize: 128,
   maximumZoom: 15,
-  targetScreenPixelsPerTexel: 1.05
+  targetScreenPixelsPerTexel: 2.1
 };
 
 test('selects detail from front-surface pixel density', () => {
   const result = selectTileZoom({ ...baseLod, distance: 3.1 });
-  assert.equal(result.zoom, 2);
-  assert.ok(result.frontTilePixels <= 128 * 1.05);
-  assert.ok(result.frontTilePixels > 128 * 1.05 / 2);
+  assert.equal(result.zoom, 1);
+  assert.ok(result.frontTilePixels <= 128 * 2.1);
+  assert.ok(result.frontTilePixels > 128 * 2.1 / 2);
+});
+
+test('uses patches twice the previous side length at the same camera distance', () => {
+  const previous = selectTileZoom({
+    ...baseLod,
+    distance: 3.1,
+    targetScreenPixelsPerTexel: 1.05
+  });
+  const calibrated = selectTileZoom({ ...baseLod, distance: 3.1 });
+  assert.equal(calibrated.zoom, previous.zoom - 1);
+  assert.equal(calibrated.frontTilePixels, previous.frontTilePixels * 2);
 });
 
 test('increases tile zoom monotonically as the camera approaches', () => {

@@ -17,7 +17,10 @@ import { selectVisibleTiles } from './tile-selection.mjs';
 
 const DEG_TO_RAD = Math.PI / 180;
 const FIELD_OF_VIEW_RADIANS = 42 * DEG_TO_RAD;
-const TARGET_SCREEN_PIXELS_PER_TEXEL = 1.05;
+// Keep selected patches roughly twice the previous side length. Besides
+// reducing request/draw pressure, this avoids 128px source tiles shrinking to
+// about 64 CSS pixels on common high-density displays.
+const TARGET_SCREEN_PIXELS_PER_TEXEL = 2.1;
 export const DEFAULT_LIGHT_DIRECTION = Object.freeze([0.8, 0.55, 1.0]);
 
 const VERTEX_SHADER = `
@@ -87,6 +90,34 @@ export function normalizeLightDirection(direction) {
     throw new RangeError('light direction cannot be zero');
   }
   return [...direction].map((component) => component / length);
+}
+
+export function distanceForAngularRadius({
+  angularRadius,
+  viewportWidth,
+  viewportHeight,
+  fieldOfViewRadians = FIELD_OF_VIEW_RADIANS,
+  padding = 0.18
+}) {
+  if (!Number.isFinite(angularRadius) || angularRadius < 0) {
+    throw new RangeError('angular radius must be a non-negative finite number');
+  }
+  if (!Number.isFinite(viewportWidth) || viewportWidth <= 0 ||
+      !Number.isFinite(viewportHeight) || viewportHeight <= 0) {
+    throw new RangeError('viewport dimensions must be positive');
+  }
+  const verticalHalfAngle = fieldOfViewRadians / 2;
+  const horizontalHalfAngle = Math.atan(
+    Math.tan(verticalHalfAngle) * viewportWidth / viewportHeight
+  );
+  const availableHalfAngle = Math.min(verticalHalfAngle, horizontalHalfAngle) *
+    (1 - clamp(padding, 0, 0.8));
+  const radius = Math.min(angularRadius, Math.PI / 2 - 0.001);
+  return clamp(
+    Math.cos(radius) + Math.sin(radius) / Math.tan(availableHalfAngle),
+    1.0005,
+    51
+  );
 }
 
 function compileShader(gl, type, source) {
@@ -426,6 +457,22 @@ export class GlobeRenderer {
     }
     this.longitude = longitude;
     this.latitude = clamp(latitude, -89, 89);
+    this.deferRefinement();
+    this.requestRender();
+  }
+
+  fitView({ longitude, latitude, angularRadius }, options = {}) {
+    if (![longitude, latitude, angularRadius].every(Number.isFinite)) {
+      throw new TypeError('fit view requires finite center coordinates and radius');
+    }
+    this.longitude = longitude;
+    this.latitude = clamp(latitude, -89, 89);
+    this.distance = distanceForAngularRadius({
+      angularRadius,
+      viewportWidth: Math.max(1, this.canvas.clientWidth),
+      viewportHeight: Math.max(1, this.canvas.clientHeight),
+      ...options
+    });
     this.deferRefinement();
     this.requestRender();
   }

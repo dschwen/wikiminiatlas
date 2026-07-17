@@ -10,7 +10,13 @@ import {
   DEFAULT_LIGHT_DIRECTION,
   GlobeRenderer
 } from './globe-renderer.mjs';
+import { GeometryOverlayLayer } from './geometry-overlay-layer.mjs';
+import { normalizeWiwosmGeoJson } from './geometry-overlay-model.mjs';
 import { GlobeLabelLayer } from './label-layer.mjs';
+import {
+  LegacyKmlBridge,
+  parentOriginFrom
+} from './legacy-kml-bridge.mjs';
 import {
   createHybridJsonTileProducer,
   jsonTileUrl
@@ -20,8 +26,10 @@ import { scaleBarsForCenter } from './scale-bar.mjs';
 import { readCameraState, writeCameraState } from './session-state.mjs';
 import { sunDirectionForBody } from './body-solar-position.mjs';
 import { parseGlobeUrl } from './url-compat.mjs';
+import { fetchWiwosmGeoJson } from './wiwosm-client.mjs';
 
 const canvas = document.querySelector('#globe');
+const geometryOverlayCanvas = document.querySelector('#geometry-overlay');
 const viewport = document.querySelector('#viewport');
 const labelContainer = document.querySelector('#labels');
 const controls = document.querySelector('#controls');
@@ -29,6 +37,7 @@ const controlsToggle = document.querySelector('#button_menu');
 const zoomInButton = document.querySelector('#button_plus');
 const zoomOutButton = document.querySelector('#button_minus');
 const targetButton = document.querySelector('#button_target');
+const kmlButton = document.querySelector('#button_kml');
 const fullscreenButton = document.querySelector('#button_fs');
 const bodySetControl = document.querySelector('#body-set');
 const tileSetControl = document.querySelector('#tile-set');
@@ -49,6 +58,8 @@ const urlConfiguration = parseGlobeUrl(window.location.href, {
 });
 const tileBase = parameters.get('tileBase') || '../tiles';
 const jsonTileBase = parameters.get('jsonTileBase') || '../tiles/jsontile.php';
+const wiwosmBase = parameters.get('wiwosmBase') ||
+  'https://wiwosm.toolforge.org/osmjson/getGeoJSON.php';
 const requestedMaximumZoom = Number(parameters.get('maxZoom'));
 const configuredMaximumZoom = parameters.has('maxZoom') && Number.isInteger(requestedMaximumZoom)
   ? Math.max(0, Math.min(20, requestedMaximumZoom))
@@ -158,6 +169,23 @@ updateSourcePresentation();
 
 try {
   const grid = new PlateCarreeGrid();
+  let overlayEnabled = true;
+  let directOverlayGeometry = null;
+  let hostOverlayGeometry = null;
+  let overlayRequestController = null;
+  let cameraWasModified = Boolean(restoredCamera);
+  let articleAutoFitApplied = false;
+  const overlayLayer = new GeometryOverlayLayer(geometryOverlayCanvas, {
+    onAvailabilityChange: (available) => {
+      kmlButton.hidden = !available;
+    }
+  });
+  const applyOverlayGeometry = () => {
+    const geometry = hostOverlayGeometry ||
+      (celestialBody.id === 'earth' ? directOverlayGeometry : null);
+    overlayLayer.setGeometry(geometry);
+    kmlButton.setAttribute('aria-pressed', String(overlayEnabled));
+  };
   const tileUrlForSource = (source, tile) =>
     source.jsonFromZoom && tile.z >= source.jsonFromZoom
       ? jsonTileUrl(jsonTileBase, tile)
@@ -283,11 +311,63 @@ try {
     tileProducer: tileProducerForSource(tileSource),
     onStateChange: (state) => {
       globeState = state;
+      overlayLayer.update(state);
       labelLayer.update(state);
       scheduleCameraStateStore();
       updateStatus();
     }
   });
+  const expectedParentOrigin = parentOriginFrom({
+    explicitOrigin: parameters.get('parentOrigin') || '',
+    referrer: document.referrer
+  });
+  const kmlBridge = new LegacyKmlBridge({
+    expectedOrigin: expectedParentOrigin,
+    onGeometry: (geometry) => {
+      hostOverlayGeometry = geometry.coordinateCount > 0 ? geometry : null;
+      applyOverlayGeometry();
+    }
+  });
+  const loadArticleOverlay = async () => {
+    if (overlayRequestController) {
+      overlayRequestController.abort();
+      overlayRequestController = null;
+    }
+    if (celestialBody.id !== 'earth' || !urlConfiguration.articlePage) {
+      applyOverlayGeometry();
+      return;
+    }
+    if (directOverlayGeometry) {
+      applyOverlayGeometry();
+      return;
+    }
+    const controller = new AbortController();
+    overlayRequestController = controller;
+    try {
+      const response = await fetchWiwosmGeoJson({
+        base: wiwosmBase,
+        language: urlConfiguration.articleLanguage,
+        article: urlConfiguration.articlePage,
+        signal: controller.signal
+      });
+      if (controller.signal.aborted || overlayRequestController !== controller) return;
+      directOverlayGeometry = response ? normalizeWiwosmGeoJson(response) : null;
+      applyOverlayGeometry();
+      if (directOverlayGeometry && !hostOverlayGeometry && !cameraWasModified &&
+          !articleAutoFitApplied && directOverlayGeometry.view) {
+        globe.fitView(directOverlayGeometry.view);
+        articleAutoFitApplied = true;
+      }
+    } catch (error) {
+      if (error && error.name !== 'AbortError') {
+        console.warn('Unable to load WIWOSM geometry', error);
+      }
+    } finally {
+      if (overlayRequestController === controller) overlayRequestController = null;
+    }
+  };
+  kmlBridge.requestGeometry();
+  loadArticleOverlay();
   let lastLightDirection = DEFAULT_LIGHT_DIRECTION;
   const updateLightDirection = () => {
     try {
@@ -318,9 +398,26 @@ try {
     }
   };
   const preventControlSubmit = (event) => event.preventDefault();
-  const zoomIn = () => globe.zoomBySteps(1);
-  const zoomOut = () => globe.zoomBySteps(-1);
-  const centerOnTarget = () => globe.centerOn(targetLongitude, targetLatitude);
+  const markCameraModified = () => {
+    cameraWasModified = true;
+  };
+  const zoomIn = () => {
+    markCameraModified();
+    globe.zoomBySteps(1);
+  };
+  const zoomOut = () => {
+    markCameraModified();
+    globe.zoomBySteps(-1);
+  };
+  const centerOnTarget = () => {
+    markCameraModified();
+    globe.centerOn(targetLongitude, targetLatitude);
+  };
+  const toggleOverlay = () => {
+    overlayEnabled = !overlayEnabled;
+    overlayLayer.setEnabled(overlayEnabled);
+    kmlButton.setAttribute('aria-pressed', String(overlayEnabled));
+  };
   const enterFullscreen = () => {
     if (document.fullscreenElement) {
       document.exitFullscreen();
@@ -339,11 +436,14 @@ try {
   zoomInButton.addEventListener('click', zoomIn);
   zoomOutButton.addEventListener('click', zoomOut);
   targetButton.addEventListener('click', centerOnTarget);
+  kmlButton.addEventListener('click', toggleOverlay);
   fullscreenButton.addEventListener('click', enterFullscreen);
   controlsToggle.addEventListener('click', toggleControls);
   controls.addEventListener('submit', preventControlSubmit);
   document.addEventListener('pointerdown', closeControlsFromOutside);
   document.addEventListener('keydown', closeControlsFromKeyboard);
+  viewport.addEventListener('pointerdown', markCameraModified, true);
+  viewport.addEventListener('wheel', markCameraModified, { capture: true, passive: true });
 
   const applyTileSource = () => {
     const selectedSource = tileSource;
@@ -360,6 +460,8 @@ try {
     applyTileSource();
     updateLightDirection();
     labelLayer.setGlobe(celestialBody.labelDataset);
+    applyOverlayGeometry();
+    loadArticleOverlay();
     updateLocationParameters({
       globe: celestialBody.id === CELESTIAL_BODIES[0].id ? null : celestialBody.id,
       tileSet: null
@@ -420,17 +522,26 @@ try {
       cameraStoreTimer = null;
     }
     clearInterval(lightDirectionTimer);
+    if (overlayRequestController) {
+      overlayRequestController.abort();
+      overlayRequestController = null;
+    }
     globe.destroy();
+    overlayLayer.destroy();
     labelLayer.destroy();
     articlePreview.destroy();
+    kmlBridge.destroy();
     zoomInButton.removeEventListener('click', zoomIn);
     zoomOutButton.removeEventListener('click', zoomOut);
     targetButton.removeEventListener('click', centerOnTarget);
+    kmlButton.removeEventListener('click', toggleOverlay);
     fullscreenButton.removeEventListener('click', enterFullscreen);
     controlsToggle.removeEventListener('click', toggleControls);
     controls.removeEventListener('submit', preventControlSubmit);
     document.removeEventListener('pointerdown', closeControlsFromOutside);
     document.removeEventListener('keydown', closeControlsFromKeyboard);
+    viewport.removeEventListener('pointerdown', markCameraModified, true);
+    viewport.removeEventListener('wheel', markCameraModified, true);
     bodySetControl.removeEventListener('change', changeBody);
     tileSetControl.removeEventListener('change', changeTileSet);
     labelSetControl.removeEventListener('change', changeLabelSet);
