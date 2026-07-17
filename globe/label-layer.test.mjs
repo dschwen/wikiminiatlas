@@ -148,6 +148,14 @@ test('renders the Commons dataset as compact linked thumbnails', async () => {
   assert.equal(link['aria-label'], 'Boise,_Idaho.jpg');
   assert.equal(link.children[0].width, 48);
   assert.match(link.children[0].src, /120px-Boise%2C_Idaho\.jpg$/);
+  link.children[0].onerror();
+  assert.equal(
+    link.children[0].src,
+    'https://commons.wikimedia.org/wiki/Special:Redirect/file/' +
+      'Boise%2C_Idaho.jpg?width=120'
+  );
+  link.children[0].onerror();
+  assert.equal(link.hidden, true);
   layer.destroy();
 });
 

@@ -453,6 +453,12 @@ export class GlobeLabelLayer {
           image.width = label.thumbnail.width;
           image.height = label.thumbnail.height;
           image.draggable = false;
+          image.onerror = () => {
+            image.onerror = () => {
+              node.hidden = true;
+            };
+            image.src = label.thumbnail.fallbackUrl;
+          };
           node.append(image);
         } else {
           node.textContent = label.name;

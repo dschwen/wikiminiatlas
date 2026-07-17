@@ -13,18 +13,32 @@ function commonsThumbnailRequestWidth(width) {
   return COMMONS_THUMBNAIL_WIDTHS.find((preset) => width < preset) || width;
 }
 
+function commonsThumbnailFilename(filename, width) {
+  if (/\.tiff?$/i.test(filename)) {
+    return `lossy-page1-${width}px-${filename}.jpg`;
+  }
+  return `${width}px-${filename}`;
+}
+
 export function commonsThumbnailUrl(filename, width, hashPrefix = '') {
   const requestedWidth = commonsThumbnailRequestWidth(Math.max(1, Math.ceil(width)));
   const encodedFilename = String(filename);
   const prefix = String(hashPrefix);
   if (prefix.length >= 2) {
     return 'https://upload.wikimedia.org/wikipedia/commons/thumb/' +
-      `${prefix[0]}/${prefix}/${encodedFilename}/${requestedWidth}px-${encodedFilename}`;
+      `${prefix[0]}/${prefix}/${encodedFilename}/` +
+      commonsThumbnailFilename(encodedFilename, requestedWidth);
   }
   return 'https://commons.wikimedia.org/w/thumb.php?' + new URLSearchParams({
     w: String(requestedWidth),
     f: encodedFilename
   });
+}
+
+export function commonsThumbnailFallbackUrl(filename, width) {
+  const requestedWidth = commonsThumbnailRequestWidth(Math.max(1, Math.ceil(width)));
+  return 'https://commons.wikimedia.org/wiki/Special:Redirect/file/' +
+    `${String(filename)}?width=${requestedWidth}`;
 }
 
 export function commonsFileUrl(filename) {
@@ -45,6 +59,7 @@ function commonsThumbnail(item) {
     width: Math.max(1, width),
     height,
     url: commonsThumbnailUrl(item.img, maximumSide, item.m5),
+    fallbackUrl: commonsThumbnailFallbackUrl(item.img, maximumSide),
     fileUrl: commonsFileUrl(item.img)
   };
 }

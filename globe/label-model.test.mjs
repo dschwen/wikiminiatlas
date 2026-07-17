@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 
 import {
   commonsFileUrl,
+  commonsThumbnailFallbackUrl,
   commonsThumbnailUrl,
   legacyLabelBatchUrl,
   legacyLabelCoordinates,
@@ -75,6 +76,8 @@ test('normalizes legacy Commons records as compact image labels', () => {
     height: 36,
     url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/ab/' +
       'Example.jpg/120px-Example.jpg',
+    fallbackUrl: 'https://commons.wikimedia.org/wiki/Special:Redirect/file/' +
+      'Example.jpg?width=120',
     fileUrl: 'https://commons.wikimedia.org/wiki/File:Example.jpg'
   });
 });
@@ -88,6 +91,20 @@ test('builds Commons URLs with the legacy thumbnail size presets', () => {
   assert.equal(
     commonsFileUrl('Example.jpg'),
     'https://commons.wikimedia.org/wiki/File:Example.jpg'
+  );
+});
+
+test('builds page-one JPEG derivatives for Commons TIFF thumbnails', () => {
+  const filename = 'Archival_scan%2C_Texas.tif';
+  assert.equal(
+    commonsThumbnailUrl(filename, 48, 'e1'),
+    'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e1/' +
+      `${filename}/lossy-page1-120px-${filename}.jpg`
+  );
+  assert.equal(
+    commonsThumbnailFallbackUrl(filename, 48),
+    'https://commons.wikimedia.org/wiki/Special:Redirect/file/' +
+      `${filename}?width=120`
   );
 });
 
