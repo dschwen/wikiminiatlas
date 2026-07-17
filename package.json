@@ -1,0 +1,15 @@
+{
+  "name": "wikiminiatlas",
+  "private": true,
+  "scripts": {
+    "build:globe": "node scripts/build-globe.mjs",
+    "test": "node --test globe/*.test.mjs",
+    "check": "npm test && npm run build:globe"
+  },
+  "devDependencies": {
+    "esbuild": "0.28.1"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

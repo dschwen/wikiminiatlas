@@ -196,6 +196,20 @@ Run the coordinate tests with:
 node --test globe/*.test.mjs
 ```
 
+For deployment, install the pinned build dependency and generate the production
+bundle from the repository root:
+
+```sh
+npm ci
+npm run build:globe
+```
+
+This produces `min/wma-globe.min.js` (all globe modules plus Poly2Tri) and
+`min/wma-globe.min.css`, with source maps. The files in this directory remain
+the readable development sources. The production entry page can therefore load
+one ordinary JavaScript file instead of the module graph and separate
+`poly2tri.min.js` script.
+
 The default maximum tile level is 20 for Earth's JSON-capable full basemap.
 Wheel zoom scales altitude above the surface from 0.0000625 to 50 Earth radii
 there, and from 0.0005 to 50 planet radii on the legacy raster layers;
