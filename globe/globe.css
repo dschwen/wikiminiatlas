@@ -64,6 +64,50 @@ main {
   pointer-events: none;
 }
 
+#markers {
+  position: absolute;
+  z-index: 3;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.globe-marker {
+  display: block;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 11px;
+  height: 11px;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background-color: transparent;
+  background-position: center;
+  background-repeat: no-repeat;
+  translate: -6px -6px;
+  will-change: transform;
+}
+
+.globe-marker-primary {
+  z-index: 2;
+  background-image: url('../tiles/red_dot.png');
+}
+
+.globe-marker-extra {
+  z-index: 1;
+  background-image: url('../tiles/blue_dot.png');
+  cursor: pointer;
+  pointer-events: auto;
+}
+
+.globe-marker-extra:hover,
+.globe-marker-extra:focus-visible {
+  z-index: 3;
+  outline: none;
+  background-image: url('../tiles/yellow_dot.png');
+}
+
 .globe-label {
   position: absolute;
   top: 0;

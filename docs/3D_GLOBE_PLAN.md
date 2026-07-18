@@ -75,6 +75,10 @@ legacy URLs retain the previous bright presentation.
 - Replace estimated text bounds with measured collision boxes and avoid UI chrome.
 - The label selector includes the legacy Commons dataset and renders its
   georeferenced records as compact image thumbnails linking to Commons.
+- Project the URL's primary coordinate as the legacy red marker and parent
+  `coords` entries as blue markers. Blue markers use the yellow marker while
+  hovered or keyboard-focused and preserve the legacy `highlight`,
+  `unhighlight`, and `scroll` postMessage commands. (Complete.)
 
 ### 4. Vector geography and buildings
 
@@ -181,10 +185,9 @@ labels because doing so breaks existing Wikipedia iframe URLs.
 Known compatibility gaps after replacing `/iframe.html` without a host-script
 change:
 
-- display the primary marker and extra markers;
 - implement the remaining accepted and emitted `postMessage` contracts
-  (`coords`, `getcoords`, `moveto`, highlight/scroll); legacy attached-KML
-  `ways/areas` input is complete;
+  (`getcoords`, `moveto`); coordinate markers, highlight/scroll events, and
+  legacy attached-KML `ways/areas` input are complete;
 - decide whether `awt=1` opens summaries without a modifier;
 - add UI localization from `wma[6]`;
 - restore the large in-map Commons image preview opened from a thumbnail; and

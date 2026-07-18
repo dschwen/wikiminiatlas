@@ -18,6 +18,8 @@ Implemented so far:
 - a compact legacy-style menu for celestial body, body-specific tile set, and label language;
 - all legacy Earth, Moon, Mars, Venus, Mercury, Io, and Titan imagery and label datasets;
 - georeferenced Wikimedia Commons image thumbnails in the label selector;
+- projected red primary and blue article-coordinate markers with yellow
+  hover/focus highlighting and legacy page-scroll messaging;
 - client-rendered JSON surface tiles for the Earth full basemap above zoom 12;
 - height-bearing OSM buildings extruded radially from JSON tiles at zoom 14+;
 - WIWOSM article shapes and legacy parent-supplied KML projected over the globe;
@@ -122,7 +124,13 @@ was restored or the user moved the globe while it loaded. Direct WIWOSM loading
 is Earth-only.
 
 When embedded, the globe also sends the legacy `request` message to its parent
-and accepts the existing `{ways, areas}` attached-KML payload. Messages must
+and accepts both the existing `{coords}` article-coordinate list and
+`{ways, areas}` attached-KML payload. The URL coordinate is displayed with
+`red_dot.png`; additional article coordinates use `blue_dot.png` and switch to
+`yellow_dot.png` while hovered or keyboard-focused. Their original array
+indexes are retained in the legacy `highlight, N`, `unhighlight, N`, and
+`scroll, N` messages so the embedding page can highlight or jump to the
+matching coordinate. Messages must
 come from `window.parent`; the expected origin is taken from `document.referrer`
 or an explicit `parentOrigin` parameter. Both inputs share the same bounded
 geometry model and transparent screen-space renderer. The legacy fourth

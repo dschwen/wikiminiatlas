@@ -539,7 +539,7 @@ export class GlobeRenderer {
     const pointers = new Map();
     let gesture = null;
     let gestureMoved = false;
-    let suppressLabelClicksUntil = -Infinity;
+    let suppressOverlayClicksUntil = -Infinity;
 
     const midpoint = (first, second) => ({
       x: (first.x + second.x) / 2,
@@ -599,8 +599,8 @@ export class GlobeRenderer {
         startX: event.clientX,
         startY: event.clientY,
         captureElement,
-        label: event.target && event.target.closest
-          ? event.target.closest('.globe-label')
+        interactiveOverlay: event.target && event.target.closest
+          ? event.target.closest('.globe-label, .globe-marker')
           : null
       });
       try {
@@ -687,8 +687,8 @@ export class GlobeRenderer {
         return;
       }
       const pointer = pointers.get(event.pointerId);
-      if (gestureMoved && pointer.label) {
-        suppressLabelClicksUntil = performance.now() + 500;
+      if (gestureMoved && pointer.interactiveOverlay) {
+        suppressOverlayClicksUntil = performance.now() + 500;
       }
       pointers.delete(event.pointerId);
       if (pointer.captureElement.hasPointerCapture(event.pointerId)) {
@@ -699,10 +699,10 @@ export class GlobeRenderer {
     };
 
     this.onClick = (event) => {
-      const label = event.target && event.target.closest
-        ? event.target.closest('.globe-label')
+      const interactiveOverlay = event.target && event.target.closest
+        ? event.target.closest('.globe-label, .globe-marker')
         : null;
-      if (label && performance.now() <= suppressLabelClicksUntil) {
+      if (interactiveOverlay && performance.now() <= suppressOverlayClicksUntil) {
         event.preventDefault();
         event.stopPropagation();
       }

@@ -17,6 +17,7 @@ import {
   LegacyKmlBridge,
   parentOriginFrom
 } from './legacy-kml-bridge.mjs';
+import { GlobeMarkerLayer } from './marker-layer.mjs';
 import {
   createHybridJsonTileProducer,
   jsonTileUrl
@@ -34,6 +35,7 @@ import { fetchWiwosmGeoJson } from './wiwosm-client.mjs';
 const canvas = document.querySelector('#globe');
 const geometryOverlayCanvas = document.querySelector('#geometry-overlay');
 const viewport = document.querySelector('#viewport');
+const markerContainer = document.querySelector('#markers');
 const labelContainer = document.querySelector('#labels');
 const controls = document.querySelector('#controls');
 const controlsToggle = document.querySelector('#button_menu');
@@ -308,6 +310,15 @@ try {
       updateStatus();
     }
   });
+  let kmlBridge = null;
+  const markerLayer = new GlobeMarkerLayer(markerContainer, {
+    primaryMarker: urlConfiguration.hasMarker
+      ? { longitude: targetLongitude, latitude: targetLatitude }
+      : null,
+    onMarkerEvent: (command, index) => {
+      kmlBridge?.postMarkerEvent(command, index);
+    }
+  });
   const articlePreview = new GlobeArticlePreview(articlePreviewContainer, {
     interactionElement: viewport
   });
@@ -326,6 +337,7 @@ try {
       globeState = state;
       overlayLayer.update(state);
       labelLayer.update(state);
+      markerLayer.update(state);
       scheduleCameraStateStore();
       updateStatus();
     }
@@ -334,12 +346,13 @@ try {
     explicitOrigin: parameters.get('parentOrigin') || '',
     referrer: document.referrer
   });
-  const kmlBridge = new LegacyKmlBridge({
+  kmlBridge = new LegacyKmlBridge({
     expectedOrigin: expectedParentOrigin,
     onGeometry: (geometry) => {
       hostOverlayGeometry = geometry.coordinateCount > 0 ? geometry : null;
       applyOverlayGeometry();
-    }
+    },
+    onCoordinates: (coordinates) => markerLayer.setExtraMarkers(coordinates)
   });
   const loadArticleOverlay = async () => {
     if (overlayRequestController) {
@@ -548,6 +561,7 @@ try {
     globe.destroy();
     overlayLayer.destroy();
     labelLayer.destroy();
+    markerLayer.destroy();
     articlePreview.destroy();
     kmlBridge.destroy();
     zoomInButton.removeEventListener('click', zoomIn);

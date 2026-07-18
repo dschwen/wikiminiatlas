@@ -50,6 +50,8 @@ export function parseGlobeUrl(input, { viewportHeight = 400 } = {}) {
 
   const markerLatitude = legacy ? finiteNumber(fields[0]) : finiteNumber(parameters.get('lat'));
   const markerLongitude = legacy ? finiteNumber(fields[1]) : finiteNumber(parameters.get('lon'));
+  const hasMarker = legacy ||
+    (markerLatitude !== null && markerLongitude !== null);
   const legacyZoom = legacy && fields.length >= 6 ? finiteNumber(fields[5]) : null;
   const explicitCenter = legacy && fields.length >= 9 &&
     finiteNumber(fields[7]) !== null && finiteNumber(fields[8]) !== null;
@@ -61,6 +63,7 @@ export function parseGlobeUrl(input, { viewportHeight = 400 } = {}) {
   return {
     legacy,
     legacyCoordinateString: legacyCoordinates,
+    hasMarker,
     marker: {
       latitude: markerLatitude ?? 35,
       longitude: markerLongitude ?? -112
