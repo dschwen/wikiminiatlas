@@ -27,6 +27,8 @@ Plate carrée is a data parameterization and spatial index in the new system. Th
 - Extract and test the tile-grid contract.
 - Render independently textured curved tile patches.
 - Add orbit controls, horizon culling, and pixel-density tile selection.
+- Recover touch gestures at iframe boundaries and rebase a remaining pinch
+  pointer as a one-finger orbit. (Complete.)
 - Retain visible placeholders for missing tiles.
 
 ### 2. Tile refinement — in progress

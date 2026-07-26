@@ -6,6 +6,7 @@ import {
   distanceForAngularRadius,
   normalizeLightDirection,
   parentPrefetchDemandFor,
+  pointerIsOutsideInteraction,
   transitionChildrenFor,
   tileDemandsFor
 } from './globe-renderer.mjs';
@@ -30,6 +31,26 @@ test('fits a spherical angular radius inside the limiting viewport dimension', (
   });
   assert.ok(small > 1);
   assert.ok(large > small);
+});
+
+test('detects touch pointers that leave an embedded interaction viewport', () => {
+  const element = {
+    getBoundingClientRect: () => ({
+      left: 10, top: 20, right: 210, bottom: 120
+    })
+  };
+  assert.equal(pointerIsOutsideInteraction({
+    pointerType: 'touch', clientX: 100, clientY: 80
+  }, element), false);
+  assert.equal(pointerIsOutsideInteraction({
+    pointerType: 'touch', clientX: 210, clientY: 80
+  }, element), true);
+  assert.equal(pointerIsOutsideInteraction({
+    pointerType: 'pen', clientX: 100, clientY: 121
+  }, element), true);
+  assert.equal(pointerIsOutsideInteraction({
+    pointerType: 'mouse', clientX: 500, clientY: 500
+  }, element), false);
 });
 
 test('retains and deduplicates ancestor buildings during tile refinement', () => {

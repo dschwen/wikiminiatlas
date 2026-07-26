@@ -125,6 +125,17 @@ export function distanceForAngularRadius({
   );
 }
 
+export function pointerIsOutsideInteraction(event, interactionElement) {
+  if (event.pointerType === 'mouse' ||
+      !interactionElement ||
+      typeof interactionElement.getBoundingClientRect !== 'function') {
+    return false;
+  }
+  const bounds = interactionElement.getBoundingClientRect();
+  return event.clientX < bounds.left || event.clientX >= bounds.right ||
+    event.clientY < bounds.top || event.clientY >= bounds.bottom;
+}
+
 function compileShader(gl, type, source) {
   const shader = gl.createShader(type);
   gl.shaderSource(shader, source);
@@ -583,6 +594,48 @@ export class GlobeRenderer {
       gestureMoved = true;
     };
 
+    const finishPointer = (event, { releaseCapture = true } = {}) => {
+      if (!pointers.has(event.pointerId)) {
+        return;
+      }
+      const pointer = pointers.get(event.pointerId);
+      if (gestureMoved && pointer.interactiveOverlay) {
+        suppressOverlayClicksUntil = performance.now() + 500;
+      }
+      pointers.delete(event.pointerId);
+      if (releaseCapture) {
+        try {
+          if (typeof this.interactionElement.hasPointerCapture === 'function' &&
+              this.interactionElement.hasPointerCapture(event.pointerId)) {
+            this.interactionElement.releasePointerCapture(event.pointerId);
+          }
+        } catch (error) {
+          // The browser may retire a captured pointer while the frame is leaving.
+        }
+      }
+      startGesture();
+      this.deferRefinement();
+    };
+
+    this.cancelActiveGesture = () => {
+      if (pointers.size === 0 && gesture === null) return;
+      const pointerIds = [...pointers.keys()];
+      pointers.clear();
+      gesture = null;
+      this.canvas.classList.remove('dragging');
+      for (const pointerId of pointerIds) {
+        try {
+          if (typeof this.interactionElement.hasPointerCapture === 'function' &&
+              this.interactionElement.hasPointerCapture(pointerId)) {
+            this.interactionElement.releasePointerCapture(pointerId);
+          }
+        } catch (error) {
+          // Lost frames can invalidate capture before cleanup reaches it.
+        }
+      }
+      if (!this.destroyed) this.deferRefinement();
+    };
+
     this.onPointerDown = (event) => {
       if (event.pointerType === 'mouse' && event.button !== 0) {
         return;
@@ -590,21 +643,17 @@ export class GlobeRenderer {
       if (pointers.size === 0) {
         gestureMoved = false;
       }
-      const captureElement = event.target && event.target.setPointerCapture
-        ? event.target
-        : this.interactionElement;
       pointers.set(event.pointerId, {
         x: event.clientX,
         y: event.clientY,
         startX: event.clientX,
         startY: event.clientY,
-        captureElement,
         interactiveOverlay: event.target && event.target.closest
           ? event.target.closest('.globe-label, .globe-marker')
           : null
       });
       try {
-        captureElement.setPointerCapture(event.pointerId);
+        this.interactionElement.setPointerCapture(event.pointerId);
       } catch (error) {
         // Pointer capture can fail when a browser retires the pointer immediately.
       }
@@ -614,6 +663,10 @@ export class GlobeRenderer {
 
     this.onPointerMove = (event) => {
       if (!pointers.has(event.pointerId) || gesture === null) {
+        return;
+      }
+      if (pointerIsOutsideInteraction(event, this.interactionElement)) {
+        finishPointer(event);
         return;
       }
       event.preventDefault();
@@ -683,19 +736,19 @@ export class GlobeRenderer {
     };
 
     this.onPointerUp = (event) => {
-      if (!pointers.has(event.pointerId)) {
+      finishPointer(event);
+    };
+
+    this.onLostPointerCapture = (event) => {
+      finishPointer(event, { releaseCapture: false });
+    };
+
+    this.onPointerOut = (event) => {
+      if (event.pointerType === 'mouse' || !pointers.has(event.pointerId)) return;
+      if (event.relatedTarget && this.interactionElement.contains(event.relatedTarget)) {
         return;
       }
-      const pointer = pointers.get(event.pointerId);
-      if (gestureMoved && pointer.interactiveOverlay) {
-        suppressOverlayClicksUntil = performance.now() + 500;
-      }
-      pointers.delete(event.pointerId);
-      if (pointer.captureElement.hasPointerCapture(event.pointerId)) {
-        pointer.captureElement.releasePointerCapture(event.pointerId);
-      }
-      startGesture();
-      this.deferRefinement();
+      finishPointer(event);
     };
 
     this.onClick = (event) => {
@@ -723,8 +776,15 @@ export class GlobeRenderer {
     this.interactionElement.addEventListener('pointermove', this.onPointerMove);
     this.interactionElement.addEventListener('pointerup', this.onPointerUp);
     this.interactionElement.addEventListener('pointercancel', this.onPointerUp);
+    this.interactionElement.addEventListener('lostpointercapture', this.onLostPointerCapture);
+    this.interactionElement.addEventListener('pointerout', this.onPointerOut);
+    this.interactionElement.addEventListener('pointerleave', this.onPointerOut);
+    this.interactionElement.addEventListener('touchcancel', this.cancelActiveGesture);
     this.interactionElement.addEventListener('click', this.onClick, true);
     this.interactionElement.addEventListener('wheel', this.onWheel, { passive: false });
+    window.addEventListener('blur', this.cancelActiveGesture);
+    window.addEventListener('pagehide', this.cancelActiveGesture);
+    document.addEventListener('visibilitychange', this.cancelActiveGesture);
   }
 
   tileZoom() {
@@ -999,8 +1059,19 @@ export class GlobeRenderer {
     this.interactionElement.removeEventListener('pointermove', this.onPointerMove);
     this.interactionElement.removeEventListener('pointerup', this.onPointerUp);
     this.interactionElement.removeEventListener('pointercancel', this.onPointerUp);
+    this.interactionElement.removeEventListener(
+      'lostpointercapture',
+      this.onLostPointerCapture
+    );
+    this.interactionElement.removeEventListener('pointerout', this.onPointerOut);
+    this.interactionElement.removeEventListener('pointerleave', this.onPointerOut);
+    this.interactionElement.removeEventListener('touchcancel', this.cancelActiveGesture);
     this.interactionElement.removeEventListener('click', this.onClick, true);
     this.interactionElement.removeEventListener('wheel', this.onWheel);
+    window.removeEventListener('blur', this.cancelActiveGesture);
+    window.removeEventListener('pagehide', this.cancelActiveGesture);
+    document.removeEventListener('visibilitychange', this.cancelActiveGesture);
+    this.cancelActiveGesture();
 
     const gl = this.gl;
     this.resources.destroy();

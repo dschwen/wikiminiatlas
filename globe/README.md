@@ -28,7 +28,7 @@ Implemented so far:
 - an optional realistic day/night terminator shared by terrain and buildings;
 - the legacy 18-pixel zoom, recenter, fullscreen, and settings button layout;
 - independent metric and imperial scale bars based on center-frame surface resolution;
-- one-finger orbit, two-finger pan/pinch, and wheel zoom controls, including gestures that begin on labels;
+- one-finger orbit, two-finger pan/pinch, and wheel zoom controls, including gestures that begin on labels and iframe-edge gesture recovery;
 - a realistic popup-sized iframe host page; and
 - a shared procedural placeholder before any ancestor imagery is available.
 
@@ -230,6 +230,10 @@ there, and from 0.0005 to 50 planet radii on the legacy raster layers;
 pointer sensitivity decreases with the visible surface footprint at close range.
 On touch screens, moving two fingers apart zooms in, moving them together zooms
 out, and moving their midpoint orbits the globe.
+Touch pointers are captured by the stable viewport rather than an individual
+label or marker. If a finger leaves an embedded iframe, loses capture, or the
+frame is hidden, the pointer is retired; a remaining finger is immediately
+rebased as a one-finger orbit instead of continuing a stale pinch.
 The pointer gesture surface includes projected label links. A clean label tap
 still follows the link, while motion beyond the drag threshold or participation
 in a pinch suppresses that navigation and controls the globe instead.
