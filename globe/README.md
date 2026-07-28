@@ -230,9 +230,10 @@ there, and from 0.0005 to 50 planet radii on the legacy raster layers;
 pointer sensitivity decreases with the visible surface footprint at close range.
 On touch screens, moving two fingers apart zooms in, moving them together zooms
 out, and moving their midpoint orbits the globe.
-Touch pointers are captured by the stable viewport rather than an individual
-label or marker. If a finger leaves an embedded iframe, loses capture, or the
-frame is hidden, the pointer is retired; a remaining finger is immediately
+Clean taps on labels and markers retain native browser click handling. Once
+their pointer crosses the drag threshold or joins a pinch, the stable viewport
+captures the gesture. If a finger leaves an embedded iframe, loses capture, or
+the frame is hidden, the pointer is retired; a remaining finger is immediately
 rebased as a one-finger orbit instead of continuing a stale pinch.
 The pointer gesture surface includes projected label links. A clean label tap
 still follows the link, while motion beyond the drag threshold or participation

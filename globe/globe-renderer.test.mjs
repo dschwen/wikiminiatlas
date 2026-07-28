@@ -7,6 +7,7 @@ import {
   normalizeLightDirection,
   parentPrefetchDemandFor,
   pointerIsOutsideInteraction,
+  pointerNeedsViewportCapture,
   transitionChildrenFor,
   tileDemandsFor
 } from './globe-renderer.mjs';
@@ -51,6 +52,23 @@ test('detects touch pointers that leave an embedded interaction viewport', () =>
   assert.equal(pointerIsOutsideInteraction({
     pointerType: 'mouse', clientX: 500, clientY: 500
   }, element), false);
+});
+
+test('leaves clean overlay taps uncaptured while capturing globe gestures', () => {
+  assert.equal(pointerNeedsViewportCapture({
+    interactiveOverlay: true
+  }), false);
+  assert.equal(pointerNeedsViewportCapture({
+    interactiveOverlay: false
+  }), true);
+  assert.equal(pointerNeedsViewportCapture({
+    interactiveOverlay: true,
+    moved: true
+  }), true);
+  assert.equal(pointerNeedsViewportCapture({
+    interactiveOverlay: true,
+    activePointerCount: 2
+  }), true);
 });
 
 test('retains and deduplicates ancestor buildings during tile refinement', () => {

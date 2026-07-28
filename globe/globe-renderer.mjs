@@ -136,6 +136,14 @@ export function pointerIsOutsideInteraction(event, interactionElement) {
     event.clientY < bounds.top || event.clientY >= bounds.bottom;
 }
 
+export function pointerNeedsViewportCapture({
+  interactiveOverlay = false,
+  activePointerCount = 1,
+  moved = false
+}) {
+  return !interactiveOverlay || activePointerCount > 1 || moved;
+}
+
 function compileShader(gl, type, source) {
   const shader = gl.createShader(type);
   gl.shaderSource(shader, source);
@@ -557,6 +565,17 @@ export class GlobeRenderer {
       y: (first.y + second.y) / 2
     });
 
+    const capturePointer = (pointerId) => {
+      try {
+        if (typeof this.interactionElement.hasPointerCapture !== 'function' ||
+            !this.interactionElement.hasPointerCapture(pointerId)) {
+          this.interactionElement.setPointerCapture(pointerId);
+        }
+      } catch (error) {
+        // Pointer capture can fail when a browser retires the pointer immediately.
+      }
+    };
+
     const startGesture = () => {
       const active = [...pointers.entries()];
       if (active.length === 0) {
@@ -580,6 +599,14 @@ export class GlobeRenderer {
       }
 
       const [firstEntry, secondEntry] = active;
+      for (const [pointerId] of active) {
+        if (pointerNeedsViewportCapture({
+          interactiveOverlay: pointers.get(pointerId).interactiveOverlay,
+          activePointerCount: active.length
+        })) {
+          capturePointer(pointerId);
+        }
+      }
       const [firstId, first] = firstEntry;
       const [secondId, second] = secondEntry;
       gesture = {
@@ -643,19 +670,21 @@ export class GlobeRenderer {
       if (pointers.size === 0) {
         gestureMoved = false;
       }
+      const interactiveOverlay = event.target && event.target.closest
+        ? event.target.closest('.globe-label, .globe-marker')
+        : null;
       pointers.set(event.pointerId, {
         x: event.clientX,
         y: event.clientY,
         startX: event.clientX,
         startY: event.clientY,
-        interactiveOverlay: event.target && event.target.closest
-          ? event.target.closest('.globe-label, .globe-marker')
-          : null
+        interactiveOverlay
       });
-      try {
-        this.interactionElement.setPointerCapture(event.pointerId);
-      } catch (error) {
-        // Pointer capture can fail when a browser retires the pointer immediately.
+      if (pointerNeedsViewportCapture({
+        interactiveOverlay,
+        activePointerCount: pointers.size
+      })) {
+        capturePointer(event.pointerId);
       }
       startGesture();
       this.deferRefinement();
@@ -677,8 +706,19 @@ export class GlobeRenderer {
         y: event.clientY
       };
       pointers.set(event.pointerId, point);
-      if (Math.hypot(point.x - point.startX, point.y - point.startY) > 6) {
+      const pointerMoved = Math.hypot(
+        point.x - point.startX,
+        point.y - point.startY
+      ) > 6;
+      if (pointerMoved) {
         gestureMoved = true;
+      }
+      if (pointerNeedsViewportCapture({
+        interactiveOverlay: point.interactiveOverlay,
+        activePointerCount: pointers.size,
+        moved: pointerMoved
+      })) {
+        capturePointer(event.pointerId);
       }
       this.deferRefinement();
 
