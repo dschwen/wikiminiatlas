@@ -144,6 +144,12 @@ export function pointerNeedsViewportCapture({
   return !interactiveOverlay || activePointerCount > 1 || moved;
 }
 
+export function lostPointerCaptureEndsGesture(event, interactionElement) {
+  return event.target === interactionElement ||
+    typeof interactionElement.hasPointerCapture !== 'function' ||
+    !interactionElement.hasPointerCapture(event.pointerId);
+}
+
 function compileShader(gl, type, source) {
   const shader = gl.createShader(type);
   gl.shaderSource(shader, source);
@@ -780,6 +786,9 @@ export class GlobeRenderer {
     };
 
     this.onLostPointerCapture = (event) => {
+      if (!lostPointerCaptureEndsGesture(event, this.interactionElement)) {
+        return;
+      }
       finishPointer(event, { releaseCapture: false });
     };
 

@@ -4,6 +4,7 @@ import assert from 'node:assert/strict';
 import {
   collectBuildingResources,
   distanceForAngularRadius,
+  lostPointerCaptureEndsGesture,
   normalizeLightDirection,
   parentPrefetchDemandFor,
   pointerIsOutsideInteraction,
@@ -69,6 +70,24 @@ test('leaves clean overlay taps uncaptured while capturing globe gestures', () =
     interactiveOverlay: true,
     activePointerCount: 2
   }), true);
+});
+
+test('keeps a touch active while implicit label capture transfers to the viewport', () => {
+  const viewport = {
+    hasPointerCapture: (pointerId) => pointerId === 7
+  };
+  assert.equal(lostPointerCaptureEndsGesture({
+    pointerId: 7,
+    target: { className: 'globe-label' }
+  }, viewport), false);
+  assert.equal(lostPointerCaptureEndsGesture({
+    pointerId: 7,
+    target: viewport
+  }, viewport), true);
+  assert.equal(lostPointerCaptureEndsGesture({
+    pointerId: 8,
+    target: { className: 'globe-label' }
+  }, viewport), true);
 });
 
 test('retains and deduplicates ancestor buildings during tile refinement', () => {
