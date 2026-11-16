@@ -20,8 +20,8 @@ jQuery(function ($) {
   alwaysTooltips: false,
   iframeurl : '//wma.wmcloud.org/iframe.html',
   imgbase   : '//wma.wmcloud.org/tiles/',
-  buttonImage: '//upload.wikimedia.org/wikipedia/commons/thumb/5/55/WMA_button2b.png/20px-WMA_button2b.png',
-  buttonImage2x: '//upload.wikimedia.org/wikipedia/commons/thumb/5/55/WMA_button2b.png/40px-WMA_button2b.png',
+  buttonImage: '//thumb.wikimedia.org/wikipedia/commons/thumb/5/55/WMA_button2b.png/20px-WMA_button2b.png',
+  buttonImage2x: '//thumb.wikimedia.org/wikipedia/commons/thumb/5/55/WMA_button2b.png/40px-WMA_button2b.png',
   buttonWidth: 17,
   buttonHeight: 17
  },
